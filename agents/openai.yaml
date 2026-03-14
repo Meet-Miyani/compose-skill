@@ -1,0 +1,4 @@
+interface:
+  display_name: "Jetpack Compose & Compose Multiplatform"
+  short_description: "Strict-MVI for Compose apps"
+  default_prompt: "Use $compose to build a Jetpack Compose or Compose Multiplatform screen with strict MVI architecture and clean state modeling."
