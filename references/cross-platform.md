@@ -143,7 +143,7 @@ Bad: reducer calling navigation controller directly, composable deciding destina
 
 ## Resources
 
-Use Compose Multiplatform shared resources for strings, images, fonts, localization, and environment qualifiers.
+Use Compose Multiplatform shared resources for strings, images, fonts, localization, and environment qualifiers. For the complete API reference — directory structure, Gradle setup, all resource type APIs (`Res.string`, `Res.drawable`, fonts, plurals, raw files), qualifiers, localization, and the Android `R` vs CMP `Res` comparison — see **[Multiplatform Resources](resources.md)**.
 
 ### Default rules
 

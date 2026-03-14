@@ -1,14 +1,20 @@
 ---
-name: compose
+name: compose-skill
 description: >
   Strict-MVI for Jetpack Compose and Compose Multiplatform (KMP/CMP). Triggered by Compose,
   KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
   NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
+  Res.string, Res.drawable, composeResources, multiplatform resources, stringResource,
+  painterResource, pluralStringResource, DataStore, Preferences, PreferenceDataStoreFactory,
+  SharedPreferences, preferencesDataStore,
   or questions like "my compose app is slow", "how do I paginate", "how do I navigate",
-  "StateFlow vs SharedFlow", "share code Android iOS". Covers: Kotlin coroutines and Flow
+  "StateFlow vs SharedFlow", "share code Android iOS", "how do I use resources in KMP",
+  "R.string vs Res.string", "how do I store settings", "DataStore vs SharedPreferences",
+  "how do I persist preferences KMP". Covers: Kotlin coroutines and Flow
   (operators, backpressure, exception handling), feature ViewModels, pure reducers, immutable
   state, dumb UI, state modeling, performance, Nav 3, Koin/Hilt DI, Ktor networking,
-  Paging 3, animations, cross-platform, testing, UI/UX, and code review.
+  Paging 3, DataStore, animations, multiplatform resources, cross-platform, testing, UI/UX,
+  and code review.
 ---
 
 # Jetpack Compose & Compose Multiplatform — Strict MVI
@@ -128,9 +134,10 @@ For calculator/form screens, split state into four buckets:
 | Side effects | `Effect` list returned from reducer for UI (navigate, snackbar); async work launched in `handleEvent()` |
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, re-enter reducer on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
-| Resource access | Semantic keys/enums in state; resolve strings/icons close to UI |
+| Resource access | Semantic keys/enums in state; resolve strings/icons close to UI. CMP uses `Res.string` / `Res.drawable` (not Android `R`). See [Resources](references/resources.md) |
 | Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs. Android-only: standard package structure with Hilt DI |
 | Navigation | ViewModel emits semantic navigation effect; route/navigation layer executes it |
+| Persistence (settings) | DataStore Preferences in `commonMain` for key-value settings; Typed DataStore (JSON) for structured settings objects; Room for relational/queried data. See [DataStore](references/datastore.md) |
 | Testing | Reducer/validator/calculator tests in `commonTest`; platform bindings tested per target |
 
 ## Do / Don't Quick Reference
@@ -183,7 +190,12 @@ Load these only when the task requires deeper guidance:
 - **[UI/UX Patterns](references/ui-ux.md)** — loading states, skeleton/shimmer, preserving content during refresh, inline validation, perceived performance
 - **[Testing Strategy](references/testing.md)** — Turbine for StateFlow testing, reducer/validation/UI tests, Macrobenchmark, lean test matrix by app scale
 
+### Data & Persistence
+- **[DataStore](references/datastore.md)** — KMP + Android setup, Preferences DataStore keys/read/write, Typed DataStore with JSON serialization, singleton enforcement, corruption handling, SharedPreferences migration, MVI integration, DI wiring, testing, anti-patterns
+- **[Room Database](references/room-database.md)** — Entity design, performance-oriented DAOs, indexes, relationships (`@Embedded`/`@Relation`/`@Junction`), TypeConverters, transactions, migrations, MVI integration, anti-patterns
+
 ### Networking, DI & Cross-Platform
 - **[Networking with Ktor](references/networking-ktor.md)** — HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration, anti-patterns
 - **[Dependency Injection (Koin)](references/dependency-injection.md)** — Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, **Koin + Nav 3** (`navigation<T>`, `koinEntryProvider`), scoped navigation, adaptive layouts, MVI ViewModel integration. For Android-only projects, Hilt/Dagger patterns apply with the same architectural principles.
 - **[Cross-Platform (KMP)](references/cross-platform.md)** — `commonMain` vs platform placement, interfaces vs `expect/actual`, lifecycle, state restoration, resources, accessibility
+- **[Multiplatform Resources](references/resources.md)** — Android `R` vs CMP `Res` comparison, `composeResources/` directory structure, Gradle setup, drawable/string/plural/font/raw-file APIs with code examples, qualifiers (language, theme, density), localization, generated resource maps, Android assets interop (`Res.getUri`), MVI integration (semantic keys in state, resolution in UI), do/don't
