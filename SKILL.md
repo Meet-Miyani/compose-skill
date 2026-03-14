@@ -36,25 +36,26 @@ The ViewModel has 4 type parameters: `MviViewModel<Event, Result, State, Effect>
 ```text
 UI gesture / lifecycle signal
     -> Event (via onEvent)
-    -> auto-dispatched to reducer
+    -> handleEvent(event) transforms Event into Result(s)
+    -> dispatch(result) feeds each Result into the reducer
     -> reduce(result, state) -> ReducerResult(newState, effects)
     -> state emitted to UI via StateFlow
     -> effects sent to UI via Channel
-    -> async work (if any) dispatches Result on completion
+    -> async work dispatches Result on completion
     -> reducer runs again
 ```
 
 ### The 4 MVI Types
 
-- **Event** — user actions from UI. Events extend Result so they auto-dispatch through the reducer
-- **Result** — everything that can change state: Events (user actions) + async completions (e.g., `SaveSuccess`, `LoadFailed`). The reducer's input
+- **Event** — user actions from UI. A separate type from Result — events never enter the reducer directly. Processed by `handleEvent()`, which maps them to one or more Results
+- **Result** — everything that can change state: mapped from Events + async completions (e.g., `SaveSuccess`, `LoadFailed`). The reducer's only input
 - **State** — immutable data class fully describing what the screen renders
 - **Effect** — one-off UI commands: navigate, snackbar, haptic, share. Sent via `Channel`, consumed once
 
 ### Pipeline Components
 
 - **Reducer** — pure `reduce(result, state) -> ReducerResult(state, effects)`. No repo calls, no platform APIs, no `launch`. Testable without ViewModel
-- **MviViewModel** — base class providing state/effect plumbing, `onEvent()`, `dispatch()`, `asyncAction()`. Features extend it and implement `reduce()` + optional `handleEvent()`
+- **MviViewModel** — base class providing state/effect plumbing, `onEvent()`, `dispatch()`, `asyncAction()`. Features extend it and implement `handleEvent()` + `reduce()`
 - **Route** — collects state, collects one-off UI effects, binds navigation/snackbar/platform APIs
 - **Screen** — dumb renderer from state, adapts callbacks for leaves
 - **Leaf composables** — render sub-state, emit callbacks, keep only tiny visual-local state
@@ -72,7 +73,7 @@ shared/src/commonMain/kotlin/feature/estimate/
   EstimateRepository.kt
 ```
 
-`EstimateContract.kt` defines all 4 types: `EstimateEvent`, `EstimateResult`, `EstimateState`, `EstimateEffect`. Events extend Result. `EstimateViewModel` extends `MviViewModel<Event, Result, State, Effect>()` and uses `viewModelScope` — this works in `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Use `koinViewModel()` for injection.
+`EstimateContract.kt` defines all 4 types: `EstimateEvent`, `EstimateResult`, `EstimateState`, `EstimateEffect`. Event and Result are separate sealed interfaces. `EstimateViewModel` extends `MviViewModel<Event, Result, State, Effect>()` and uses `viewModelScope` — this works in `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Use `koinViewModel()` for injection.
 
 **Android-only Jetpack Compose (same pattern, single source set):**
 
@@ -95,7 +96,7 @@ The architecture is identical — only the module structure and DI framework (Hi
 - UI-local state is acceptable only for ephemeral visual concerns: focus, scroll, animation progress, expansion toggles
 - Do not push animation-only flags into global screen state unless business logic depends on them
 - Pass the narrowest possible state to leaf composables
-- Extend `MviViewModel<Event, Result, State, Effect>` and implement `reduce()`. The base handles plumbing; features own the logic
+- Extend `MviViewModel<Event, Result, State, Effect>` and implement `handleEvent()` + `reduce()`. The base handles plumbing; features own the logic
 - Do not introduce a use case for every repository call
 - Cross-platform sharing prioritizes business logic and presentation state before platform behavior
 - Least recomposition is achieved by state shape and read boundaries first, Compose APIs second
@@ -126,8 +127,8 @@ For calculator/form screens, split state into four buckets:
 | ViewModel | One `MviViewModel<Event, Result, State, Effect>` per screen (`commonMain` for CMP, feature package for Android-only) |
 | State source of truth | `StateFlow<FeatureState>` owned by the ViewModel |
 | Reducer | Pure `reduce(result, state) -> ReducerResult(state, effects)`. Testable without ViewModel |
-| UI input model | `Event` from user/lifecycle (extends `Result`); async completions are additional `Result` types |
-| Side effects | `Effect` list returned from reducer for UI (navigate, snackbar); async work launched in `handleEvent()` |
+| UI input model | `Event` from user/lifecycle (separate from `Result`); `handleEvent()` maps events to `Result` types; async completions are additional `Result` types |
+| Side effects | `Effect` list returned from reducer for UI (navigate, snackbar); async work launched in `handleEvent()` via `dispatch()` |
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, re-enter reducer on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
 | Resource access | Semantic keys/enums in state; resolve strings/icons close to UI. CMP uses `Res.string` / `Res.drawable` (not Android `R`). See [Resources](references/resources.md) |
@@ -158,7 +159,7 @@ For calculator/form screens, split state into four buckets:
 - Encode snackbar/navigation as "consume once" booleans in state
 - Keep every minor visual toggle in the reducer
 - Pass entire state to every child composable
-- Add business logic helpers (`handleError`, `isLoading`, `retry`) to `MviViewModel`. It provides plumbing only — features own their logic in `reduce()` and `handleEvent()`
+- Add business logic helpers (`handleError`, `isLoading`, `retry`) to `MviViewModel`. It provides plumbing only — features own their logic in `handleEvent()` and `reduce()`
 - Wrap every repository call in a use case class
 - Wipe the screen with a full-screen spinner during refresh
 

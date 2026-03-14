@@ -119,9 +119,9 @@ interface Haptics {
     fun perform(type: HapticType)
 }
 
-sealed interface EstimateUiEffect {
-    data class TriggerHaptic(val type: HapticType) : EstimateUiEffect
-    data class ShareQuote(val text: String) : EstimateUiEffect
+sealed interface EstimateEffect {
+    data class TriggerHaptic(val type: HapticType) : EstimateEffect
+    data class ShareQuote(val text: String) : EstimateEffect
 }
 ```
 
@@ -137,7 +137,7 @@ interface ShareText {
 
 Reducers emit semantic navigation effects; the route/navigation layer executes them.
 
-Good: `UiEffect.NavigateBack`, `UiEffect.OpenEstimateDetails(id)`
+Good: `EstimateEffect.NavigateBack`, `EstimateEffect.OpenDetails(id)`
 
 Bad: reducer calling navigation controller directly, composable deciding destination rules ad hoc.
 

@@ -289,7 +289,9 @@ data class UserSettings(
 ```kotlin
 class SettingsViewModel(
     private val repository: SettingsRepository
-) : MviViewModel<Event, Result, State, Effect>() {
+) : MviViewModel<SettingsEvent, SettingsResult, SettingsState, SettingsEffect>(
+    initialState = SettingsState()
+) {
 
     init {
         collectSettings()
@@ -298,33 +300,42 @@ class SettingsViewModel(
     private fun collectSettings() {
         viewModelScope.launch {
             repository.settings
-                .catch { dispatch(Result.LoadFailed(it.message)) }
-                .collect { dispatch(Result.SettingsLoaded(it)) }
+                .catch { dispatch(SettingsResult.LoadFailed(it.message)) }
+                .collect { dispatch(SettingsResult.SettingsLoaded(it)) }
         }
     }
 
-    override fun reduce(result: Result, state: State): ReducerResult<State, Effect> =
+    override fun handleEvent(event: SettingsEvent) {
+        when (event) {
+            is SettingsEvent.ToggleDarkMode -> {
+                asyncAction(
+                    action = { repository.setDarkMode(!currentState.settings.darkMode); SettingsResult.DarkModeToggled },
+                    onError = { SettingsResult.LoadFailed(it.message) }
+                )
+            }
+            is SettingsEvent.ChangeLocale -> {
+                asyncAction(
+                    action = { repository.setLocale(event.locale); SettingsResult.LocaleChanged },
+                    onError = { SettingsResult.LoadFailed(it.message) }
+                )
+            }
+        }
+    }
+
+    override fun reduce(result: SettingsResult, state: SettingsState): ReducerResult<SettingsState, SettingsEffect> =
         when (result) {
-            is Result.SettingsLoaded -> state.copy(
+            is SettingsResult.SettingsLoaded -> state.copy(
                 settings = result.settings,
                 isLoading = false
             ) to emptyList()
 
-            is Result.LoadFailed -> state.copy(
+            is SettingsResult.LoadFailed -> state.copy(
                 error = result.message,
                 isLoading = false
             ) to emptyList()
 
-            is Event.ToggleDarkMode -> {
-                asyncAction { repository.setDarkMode(!state.settings.darkMode) }
+            SettingsResult.DarkModeToggled, SettingsResult.LocaleChanged ->
                 state to emptyList()
-            }
-
-            is Event.ChangeLocale -> {
-                asyncAction { repository.setLocale(result.locale) }
-                state to emptyList()
-            }
-            // ...
         }
 }
 ```

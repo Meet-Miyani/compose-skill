@@ -25,13 +25,13 @@ Generic architecture framework dominates feature code, feature code disappears b
 
 ## Decision Rules
 
-### When an Intent sealed class is enough
+### When an Event sealed class is enough
 
 Almost always. Use one sealed interface per feature.
 
-### When intent hierarchies become excessive
+### When event hierarchies become excessive
 
-When you see: `UserIntent`, `UiIntent`, `SystemIntent`, `InternalIntent`, `ViewIntent`, `ActionIntent` — three wrappers before any feature logic — child components that need to know root feature intents.
+When you see: `UserEvent`, `UiEvent`, `SystemEvent`, `InternalEvent`, `ViewEvent`, `ActionEvent` — three wrappers before any feature logic — child components that need to know root feature events.
 
 ### When to model effects separately
 
@@ -79,7 +79,7 @@ That is usually ceremony.
 
 | Area | Good architecture | Overengineering |
 |---|---|---|
-| ViewModel | `EstimateViewModel` | `BaseMviViewModel<State, Intent, Effect, Result>` |
+| ViewModel | `EstimateViewModel` with `handleEvent()` + `reduce()` | `BaseMviViewModel<State, Intent, Effect, Result>` |
 | Intents | one feature sealed interface | multi-layer intent taxonomy |
 | Reducer | feature-specific pure reducer | generic framework reducer DSL |
 | Effects | only for impure work | effects for trivial synchronous transitions |
@@ -88,7 +88,7 @@ That is usually ceremony.
 | Modules | feature-first | giant "domain/data/presentation" package islands |
 | Platform abstractions | introduced when needed | abstracted preemptively everywhere |
 | Navigation | semantic effect + route binding | global command bus + abstract navigator hierarchy |
-| Naming | `EstimateState`, `EstimateIntent` | `FeatureContract.State`, `FeatureContract.Action` |
+| Naming | `EstimateState`, `EstimateEvent` | `FeatureContract.State`, `FeatureContract.Action` |
 
 ## File Organization
 
@@ -204,37 +204,45 @@ Why: forces every feature into `reduce`/`mapIntent` shape with extra ceremony. `
 ### GOOD: MviViewModel — plumbing + pure reducer
 
 ```kotlin
-abstract class MviViewModel<Event : Result, Result, State : UiState, Effect : UiEffect>(
+abstract class MviViewModel<Event, Result, State, Effect>(
     initialState: State
 ) : ViewModel() {
     val state: StateFlow<State>       // auto-managed
     val effect: Flow<Effect>          // auto-managed
     protected val currentState: State
 
-    fun onEvent(event: Event)         // auto-dispatches through reducer + calls handleEvent
+    fun onEvent(event: Event)         // calls handleEvent(event)
 
     // Features implement these:
+    protected abstract fun handleEvent(event: Event)                     // transforms events into results via dispatch()
     protected abstract fun reduce(result: Result, state: State): ReducerResult<State, Effect>
-    protected open fun handleEvent(event: Event) {}  // override for async
 
-    protected fun dispatch(result: Result)                               // for dispatching async results
+    protected fun dispatch(result: Result)                               // sends result to reducer
     protected fun asyncAction(action: suspend () -> Result, onError: (Exception) -> Result) // coroutine helper
 }
 ```
 
+No marker interfaces (`UiState`, `UiEffect`, `UiEvent`) — plain generics are sufficient. Feature-specific sealed interfaces already provide strong typing; marker interfaces add ceremony without type safety. The generic parameter names (`Event`, `Result`, `State`, `Effect`) document each role.
+
 Why this works:
-- **4 type parameters**: `Event`, `Result`, `State`, `Effect`. Events extend Result, so no separate mapping
-- **Reducer is pure**: `reduce(result, state)` returns `ReducerResult(state, effects)`. Testable without ViewModel, coroutines, or mocks
-- **Async is separate**: `handleEvent()` is optional, only for screens with async work. Uses `asyncAction()` helper
+- **4 separate type parameters**: `Event`, `Result`, `State`, `Effect`. No inheritance between types — no markers, no casts, no hacks
+- **Explicit event-to-result mapping**: `handleEvent()` transforms every event into one or more results via `dispatch()`. One event can produce zero, one, or many results
+- **Reducer is pure**: `reduce(result, state)` returns `ReducerResult(state, effects)`. Reducer never sees raw UI events. Testable without ViewModel, coroutines, or mocks
 - **No scattered state mutations**: all state transitions in one `reduce()` function
 - **Base class handles all plumbing**: features only write business logic
 
-Simple screen (no async) — one function:
+Simple screen (no async) — two functions, both short:
 ```kotlin
 class CurrencyViewModel : MviViewModel<CurrencyEvent, CurrencyResult, CurrencyState, CurrencyEffect>(...) {
+    override fun handleEvent(event: CurrencyEvent) {
+        when (event) {
+            is CurrencyEvent.OnSelected -> dispatch(CurrencyResult.CurrencySelected(event.currency))
+        }
+    }
+
     override fun reduce(result: CurrencyResult, state: CurrencyState) = reduce(state) {
         when (result) {
-            is CurrencyResult.OnSelected -> {
+            is CurrencyResult.CurrencySelected -> {
                 effect(CurrencyEffect.NavigateBack(result.currency))
                 state(state.copy(selected = result.currency))
             }
@@ -243,13 +251,28 @@ class CurrencyViewModel : MviViewModel<CurrencyEvent, CurrencyResult, CurrencySt
 }
 ```
 
-Screen with async — two functions:
+Screen with async — handleEvent maps events and starts work, reducer handles results:
 ```kotlin
 class AddCategoryViewModel(...) : MviViewModel<AddCategoryEvent, AddCategoryResult, AddCategoryState, AddCategoryEffect>(...) {
+    override fun handleEvent(event: AddCategoryEvent) {
+        when (event) {
+            is AddCategoryEvent.OnNameChanged -> dispatch(AddCategoryResult.NameChanged(event.name))
+            AddCategoryEvent.OnSaveClick -> {
+                dispatch(AddCategoryResult.SaveRequested)
+                if (currentState.name.isNotBlank()) {
+                    asyncAction(
+                        action = { categoryRepository.insert(/*...*/); AddCategoryResult.CategorySaved },
+                        onError = { AddCategoryResult.SaveFailed(it.message ?: "Failed") }
+                    )
+                }
+            }
+        }
+    }
+
     override fun reduce(result: AddCategoryResult, state: AddCategoryState) = reduce(state) {
         when (result) {
-            is AddCategoryResult.OnNameChanged -> state(state.copy(name = result.name))
-            AddCategoryResult.OnSaveClick -> {
+            is AddCategoryResult.NameChanged -> state(state.copy(name = result.name))
+            AddCategoryResult.SaveRequested -> {
                 if (state.name.isBlank()) {
                     effect(AddCategoryEffect.ShowError("Name is required"))
                     state(state.copy(validationErrors = mapOf("name" to "Name is required")))
@@ -265,19 +288,6 @@ class AddCategoryViewModel(...) : MviViewModel<AddCategoryEvent, AddCategoryResu
                 effect(AddCategoryEffect.ShowError(result.error))
                 state(state.copy(isSaving = false))
             }
-            // ... other results
-        }
-    }
-
-    override fun handleEvent(event: AddCategoryEvent) {
-        when (event) {
-            AddCategoryEvent.OnSaveClick -> if (currentState.name.isNotBlank()) {
-                asyncAction(
-                    action = { categoryRepository.insert(/*...*/); AddCategoryResult.CategorySaved },
-                    onError = { AddCategoryResult.SaveFailed(it.message ?: "Failed") }
-                )
-            }
-            else -> {}
         }
     }
 }
@@ -286,7 +296,7 @@ class AddCategoryViewModel(...) : MviViewModel<AddCategoryEvent, AddCategoryResu
 Rules for `MviViewModel`:
 - Never add business logic helpers (`handleError`, `isLoading`, `retry`)
 - Never add cross-cutting concerns (analytics, logging, error tracking)
-- Features own their logic in `reduce()` and `handleEvent()` — the base class only provides plumbing and dispatch
+- Features own their logic in `handleEvent()` and `reduce()` — the base class only provides plumbing and dispatch
 
 ### BAD: one giant intent hierarchy
 
@@ -302,10 +312,10 @@ sealed interface AppIntent {
 ### GOOD: pragmatic event model
 
 ```kotlin
-sealed interface EstimateIntent {
-    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateIntent
-    data object SubmitClicked : EstimateIntent
-    data object RetryClicked : EstimateIntent
+sealed interface EstimateEvent {
+    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateEvent
+    data object SubmitClicked : EstimateEvent
+    data object RetryClicked : EstimateEvent
 }
 ```
 

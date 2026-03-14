@@ -228,12 +228,12 @@ fun EstimateResult(derived: EstimateDerived?) {
 
 ```kotlin
 @Composable
-fun EstimateScreen(state: EstimateState, onIntent: (EstimateIntent) -> Unit) {
+fun EstimateScreen(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
     Column {
-        Header(state, onIntent)
-        EstimateForm(state, onIntent)
-        ResultCard(state, onIntent)
-        HistoryList(state, onIntent)
+        Header(state, onEvent)
+        EstimateForm(state, onEvent)
+        ResultCard(state, onEvent)
+        HistoryList(state, onEvent)
     }
 }
 ```
@@ -242,14 +242,14 @@ fun EstimateScreen(state: EstimateState, onIntent: (EstimateIntent) -> Unit) {
 
 ```kotlin
 @Composable
-fun EstimateScreen(state: EstimateState, onIntent: (EstimateIntent) -> Unit) {
+fun EstimateScreen(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
     Header(title = "Estimator")
     EstimateForm(
         input = state.input,
         validation = state.validation,
         enabled = !state.isRefreshingQuote,
-        onAreaChanged = { onIntent(EstimateIntent.FieldChanged(EstimateField.Area, it)) },
-        onSubmit = { onIntent(EstimateIntent.SubmitClicked) },
+        onAreaChanged = { onEvent(EstimateEvent.FieldChanged(EstimateField.Area, it)) },
+        onSubmit = { onEvent(EstimateEvent.SubmitClicked) },
     )
     ResultCard(derived = state.derived, quote = state.quote, isRefreshing = state.isRefreshingQuote)
 }
@@ -335,10 +335,10 @@ Just write: `Text(if (canSubmit) "Submit" else "Fix errors")`
 
 ```kotlin
 @Composable
-fun AreaField(state: EstimateState, onIntent: (EstimateIntent) -> Unit) {
+fun AreaField(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
     OutlinedTextField(
         value = state.input.areaText,
-        onValueChange = { onIntent(EstimateIntent.FieldChanged(EstimateField.Area, it)) },
+        onValueChange = { onEvent(EstimateEvent.FieldChanged(EstimateField.Area, it)) },
         isError = state.validation.area != null,
     )
 }

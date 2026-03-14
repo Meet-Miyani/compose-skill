@@ -34,11 +34,11 @@ MviViewModel<Event, Result, State, Effect>
 
 ### Event
 
-User actions from UI: button clicks, field changes, lifecycle-start, retry, refresh. Events extend `Result` so they auto-dispatch through the reducer.
+User actions from UI: button clicks, field changes, lifecycle-start, retry, refresh. Event is a separate type from Result — events never enter the reducer directly. Processed by `handleEvent()`, which maps them to one or more Results via `dispatch()`.
 
 ### Result
 
-Everything that can change state — Events (user actions) + async completions (e.g., `DataLoaded`, `SaveFailed`). The reducer's input. Defined as a sealed interface in the feature contract.
+Everything that can change state — mapped from Events + async completions (e.g., `DataLoaded`, `SaveFailed`). The reducer's only input. Defined as a sealed interface in the feature contract, separate from Event.
 
 ### State
 
@@ -62,10 +62,10 @@ No repository calls. No navigation controller. No platform APIs. No `launch`. Re
 
 Base class that provides all plumbing. Features extend it and implement:
 
+- `handleEvent(event)` — transforms events into results via `dispatch()`, starts async work (mandatory)
 - `reduce(result, state)` — pure state transitions (mandatory)
-- `handleEvent(event)` — async work like repo calls (optional, only for screens with async)
 
-`MviViewModel` handles: `StateFlow`, effect `Channel`, `onEvent()` auto-dispatch, `dispatch()`, `asyncAction()` helper, `currentState`.
+`MviViewModel` handles: `StateFlow`, effect `Channel`, `onEvent()`, `dispatch()`, `asyncAction()` helper, `currentState`.
 
 ### Effect Delivery
 
@@ -167,7 +167,7 @@ Bad: `AmountField(state, dispatch)`
 
 ### Stable Callbacks vs Generic Event Dispatchers
 
-- `dispatch(Intent)` is fine at the route/screen boundary
+- `onEvent(Event)` is fine at the route/screen boundary
 - Leaf composables should prefer specific callbacks
 - Reusable components should not know your feature intent contract
 
@@ -258,13 +258,13 @@ data class LoanState(
 ```kotlin
 enum class EstimateField { Area, MaterialRate, LaborRate, TaxPercent, Notes }
 
-sealed interface EstimateIntent {
-    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateIntent
-    data class IncludeWasteChanged(val enabled: Boolean) : EstimateIntent
-    data object SubmitClicked : EstimateIntent
-    data object RetryClicked : EstimateIntent
-    data object ScreenShown : EstimateIntent
-    data object ClearClicked : EstimateIntent
+sealed interface EstimateEvent {
+    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateEvent
+    data class IncludeWasteChanged(val enabled: Boolean) : EstimateEvent
+    data object SubmitClicked : EstimateEvent
+    data object RetryClicked : EstimateEvent
+    data object ScreenShown : EstimateEvent
+    data object ClearClicked : EstimateEvent
 }
 ```
 
@@ -273,19 +273,25 @@ Pragmatic default for large forms: specific intent names for screen-level action
 ### GOOD: MviViewModel with pure reducer
 
 ```kotlin
-// Contract — defines all 4 types in one file
-sealed interface EstimateResult {
+// Contract — defines all 4 types in one file (Event and Result are separate)
+sealed interface EstimateEvent {
     data class FieldChanged(val field: EstimateField, val raw: String) : EstimateEvent
     data class IncludeWasteChanged(val enabled: Boolean) : EstimateEvent
     data object SubmitClicked : EstimateEvent
     data object RetryClicked : EstimateEvent
     data object ClearClicked : EstimateEvent
+}
+
+sealed interface EstimateResult {
+    data class FieldUpdated(val field: EstimateField, val raw: String) : EstimateResult
+    data class WasteToggled(val enabled: Boolean) : EstimateResult
+    data object SubmitRequested : EstimateResult
+    data object FormCleared : EstimateResult
     data class QuoteLoaded(val quote: QuoteUi) : EstimateResult
     data object QuoteFailed : EstimateResult
 }
-sealed interface EstimateEvent : EstimateResult, UiEvent
 
-// ViewModel — reducer is pure, async is separate
+// ViewModel — handleEvent bridges Event->Result, reducer is pure
 class EstimateViewModel(
     private val calculator: EstimateCalculator,
     private val requestQuote: suspend (EstimateDraft) -> QuoteUi,
@@ -293,15 +299,31 @@ class EstimateViewModel(
     initialState = EstimateState()
 ) {
 
+    override fun handleEvent(event: EstimateEvent) {
+        when (event) {
+            is EstimateEvent.FieldChanged -> dispatch(EstimateResult.FieldUpdated(event.field, event.raw))
+            is EstimateEvent.IncludeWasteChanged -> dispatch(EstimateResult.WasteToggled(event.enabled))
+            EstimateEvent.ClearClicked -> dispatch(EstimateResult.FormCleared)
+            EstimateEvent.SubmitClicked, EstimateEvent.RetryClicked -> {
+                dispatch(EstimateResult.SubmitRequested)
+                val draft = calculator.recompute(currentState.input).draft ?: return
+                asyncAction(
+                    action = { EstimateResult.QuoteLoaded(requestQuote(draft)) },
+                    onError = { EstimateResult.QuoteFailed }
+                )
+            }
+        }
+    }
+
     override fun reduce(result: EstimateResult, state: EstimateState) = reduce(state) {
         when (result) {
-            is EstimateResult.FieldChanged -> {
+            is EstimateResult.FieldUpdated -> {
                 val newInput = state.input.update(result.field, result.raw)
                 val recomputed = calculator.recompute(newInput)
                 state(state.copy(input = newInput, validation = recomputed.validation, derived = recomputed.derived, quoteError = null))
             }
-            is EstimateResult.IncludeWasteChanged -> state(state.copy(/* ... */))
-            EstimateResult.SubmitClicked, EstimateResult.RetryClicked -> {
+            is EstimateResult.WasteToggled -> state(state.copy(/* ... */))
+            EstimateResult.SubmitRequested -> {
                 val draft = calculator.recompute(state.input).draft
                 if (draft == null) {
                     effect(EstimateEffect.ShowMessage(UiMessageKey.FixErrors))
@@ -310,25 +332,12 @@ class EstimateViewModel(
                     state(state.copy(isRefreshingQuote = true, quoteError = null))
                 }
             }
-            EstimateResult.ClearClicked -> state(EstimateState())
+            EstimateResult.FormCleared -> state(EstimateState())
             is EstimateResult.QuoteLoaded -> state(state.copy(quote = result.quote, isRefreshingQuote = false, quoteError = null))
             EstimateResult.QuoteFailed -> {
                 effect(EstimateEffect.ShowMessage(UiMessageKey.NetworkFailure))
                 state(state.copy(isRefreshingQuote = false, quoteError = UiMessageKey.NetworkFailure))
             }
-        }
-    }
-
-    override fun handleEvent(event: EstimateEvent) {
-        when (event) {
-            EstimateEvent.SubmitClicked, EstimateEvent.RetryClicked -> {
-                val draft = calculator.recompute(currentState.input).draft ?: return
-                asyncAction(
-                    action = { EstimateResult.QuoteLoaded(requestQuote(draft)) },
-                    onError = { EstimateResult.QuoteFailed }
-                )
-            }
-            else -> {}
         }
     }
 }

@@ -213,7 +213,7 @@ fun EstimateRoute(viewModel: EstimateViewModel) {
         }
     }
 
-    EstimateScreen(state = state, onIntent = viewModel::dispatch)
+    EstimateScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 

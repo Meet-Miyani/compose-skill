@@ -791,11 +791,11 @@ Deep link registration lives in platform entry points: `AndroidManifest.xml` int
 The architectural rule: **ViewModels emit semantic effects; the route layer manipulates the back stack.**
 
 ```kotlin
-// ViewModel emits semantic effects (unchanged)
-sealed interface UiEffect {
-    data object NavigateBack : UiEffect
-    data class OpenDetails(val id: String) : UiEffect
-    data class OpenCamera : UiEffect
+// ViewModel emits semantic effects
+sealed interface EstimateEffect {
+    data object NavigateBack : EstimateEffect
+    data class OpenDetails(val id: String) : EstimateEffect
+    data object OpenCamera : EstimateEffect
 }
 
 // Route collects effects and manipulates back stack
@@ -803,20 +803,18 @@ sealed interface UiEffect {
 fun EstimateRoute(viewModel: EstimateViewModel, backStack: SnapshotStateList<NavKey>) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel) {
-        viewModel.uiEffects.collect { effect ->
-            when (effect) {
-                is UiEffect.NavigateBack -> backStack.removeLastOrNull()
-                is UiEffect.OpenDetails -> backStack.add(Details(effect.id))
-                is UiEffect.OpenCamera -> {
-                    backStack.removeAll { it is Camera }
-                    backStack.add(Camera)
-                }
+    CollectEffect(viewModel.effect) { effect ->
+        when (effect) {
+            is EstimateEffect.NavigateBack -> backStack.removeLastOrNull()
+            is EstimateEffect.OpenDetails -> backStack.add(Details(effect.id))
+            is EstimateEffect.OpenCamera -> {
+                backStack.removeAll { it is Camera }
+                backStack.add(Camera)
             }
         }
     }
 
-    EstimateScreen(state = state, onIntent = viewModel::dispatch)
+    EstimateScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 

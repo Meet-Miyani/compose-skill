@@ -237,7 +237,7 @@ fun EstimateRoute() {
     val viewModel = koinViewModel<EstimateViewModel>()
     val state by viewModel.state.collectAsState()
 
-    EstimateScreen(state = state, onIntent = viewModel::dispatch)
+    EstimateScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 
@@ -507,7 +507,7 @@ val appModule = module {
 
 ### ViewModel in Strict MVI
 
-The ViewModel extends `MviViewModel<Event, Result, State, Effect>` and implements `reduce()` for pure state transitions. This works in both Android-only and CMP `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Declare it with Koin and inject dependencies:
+The ViewModel extends `MviViewModel<Event, Result, State, Effect>` and implements `handleEvent()` + `reduce()`. This works in both Android-only and CMP `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Declare it with Koin and inject dependencies:
 
 ```kotlin
 class EstimateViewModel(
@@ -517,8 +517,8 @@ class EstimateViewModel(
 ) : MviViewModel<EstimateEvent, EstimateResult, EstimateState, EstimateEffect>(
     initialState = EstimateState()
 ) {
+    override fun handleEvent(event: EstimateEvent) { /* maps events to results via dispatch() */ }
     override fun reduce(result: EstimateResult, state: EstimateState) = reduce(state) { /* ... */ }
-    override fun handleEvent(event: EstimateEvent) { /* async work if needed */ }
 }
 
 // Module
@@ -540,15 +540,13 @@ fun EstimateRoute(
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, snackbarHostState) {
-        viewModel.uiEffects.collect { effect ->
-            when (effect) {
-                is EstimateUiEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-            }
+    CollectEffect(viewModel.effect) { effect ->
+        when (effect) {
+            is EstimateEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
         }
     }
 
-    EstimateScreen(state = state, onIntent = viewModel::dispatch)
+    EstimateScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 

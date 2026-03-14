@@ -16,18 +16,18 @@ Since `reduce()` is a pure function, test it directly — no ViewModel, no corou
 
 ```kotlin
 @Test
-fun `save with empty name shows validation error`() {
+fun `save requested with empty name shows validation error`() {
     val state = AddCategoryState(name = "")
-    val result = viewModel.reduce(AddCategoryResult.OnSaveClick, state)
+    val result = viewModel.reduce(AddCategoryResult.SaveRequested, state)
 
     assertEquals("Name is required", result.state.validationErrors["name"])
     assertTrue(result.effects.any { it is AddCategoryEffect.ShowError })
 }
 
 @Test
-fun `save with valid name sets saving flag`() {
+fun `save requested with valid name sets saving flag`() {
     val state = AddCategoryState(name = "Rings")
-    val result = viewModel.reduce(AddCategoryResult.OnSaveClick, state)
+    val result = viewModel.reduce(AddCategoryResult.SaveRequested, state)
 
     assertTrue(result.state.isSaving)
     assertTrue(result.state.validationErrors.isEmpty())

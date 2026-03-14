@@ -267,7 +267,7 @@ fun EstimateListRoute(viewModel: EstimateListViewModel = koinViewModel()) {
     EstimateListScreen(
         uiState = uiState,
         estimates = estimates,
-        onIntent = viewModel::dispatch,
+        onEvent = viewModel::dispatch,
     )
 }
 
@@ -275,7 +275,7 @@ fun EstimateListRoute(viewModel: EstimateListViewModel = koinViewModel()) {
 fun EstimateListScreen(
     uiState: EstimateListState,
     estimates: LazyPagingItems<EstimateUi>,
-    onIntent: (EstimateListIntent) -> Unit,
+    onEvent: (EstimateListIntent) -> Unit,
 ) {
     LazyColumn {
         items(
@@ -287,7 +287,7 @@ fun EstimateListScreen(
                 EstimateRow(
                     estimate = estimate,
                     isSelected = uiState.selectedIds.contains(estimate.id),
-                    onClick = { onIntent(EstimateListIntent.ItemClicked(estimate.id)) },
+                    onClick = { onEvent(EstimateListIntent.ItemClicked(estimate.id)) },
                 )
             }
         }
@@ -576,12 +576,12 @@ fun EstimateListRoute(viewModel: EstimateListViewModel = koinViewModel()) {
     EstimateListScreen(
         state = state,
         estimates = estimates,
-        onIntent = viewModel::dispatch,
+        onEvent = viewModel::dispatch,
     )
 }
 ```
 
-The screen composable is dumb — it receives `LazyPagingItems` and state as props, emits intents as callbacks.
+The screen composable is dumb — it receives `LazyPagingItems` and state as props, emits events as callbacks.
 
 ## Testing
 
