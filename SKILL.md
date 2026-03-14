@@ -1,5 +1,5 @@
 ---
-name: compose
+name: compose-skill
 description: >
   Strict-MVI for Jetpack Compose and Compose Multiplatform (KMP/CMP). Triggered by Compose,
   KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
