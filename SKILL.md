@@ -4,17 +4,13 @@ description: >
   Strict-MVI for Jetpack Compose and Compose Multiplatform (KMP/CMP). Triggered by Compose,
   KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
   NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
-  Res.string, Res.drawable, composeResources, multiplatform resources, stringResource,
-  painterResource, pluralStringResource, DataStore, Preferences, PreferenceDataStoreFactory,
-  SharedPreferences, preferencesDataStore,
-  or questions like "my compose app is slow", "how do I paginate", "how do I navigate",
-  "StateFlow vs SharedFlow", "share code Android iOS", "how do I use resources in KMP",
-  "R.string vs Res.string", "how do I store settings", "DataStore vs SharedPreferences",
-  "how do I persist preferences KMP". Covers: Kotlin coroutines and Flow
-  (operators, backpressure, exception handling), feature ViewModels, pure reducers, immutable
-  state, dumb UI, state modeling, performance, Nav 3, Koin/Hilt DI, Ktor networking,
-  Paging 3, DataStore, animations, multiplatform resources, cross-platform, testing, UI/UX,
-  and code review.
+  Res.string, Res.drawable, composeResources, stringResource, painterResource, DataStore,
+  Preferences, SharedPreferences, preferencesDataStore, or questions like "my compose app is
+  slow", "how do I paginate", "how do I navigate", "StateFlow vs SharedFlow", "share code
+  Android iOS", "how do I use resources in KMP", "how do I store settings", "DataStore vs
+  SharedPreferences". Covers: coroutines/Flow, ViewModels, reducers, state modeling,
+  performance, Nav 3, Koin/Hilt DI, Ktor, Paging 3, DataStore, animations, multiplatform
+  resources, cross-platform, testing, UI/UX, and code review.
 ---
 
 # Jetpack Compose & Compose Multiplatform — Strict MVI
