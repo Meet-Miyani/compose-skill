@@ -68,46 +68,18 @@ Define routes as `@Serializable` data classes/objects. Use a sealed interface to
 @Serializable data object Settings : NavKey
 ```
 
-### Sealed interface grouping (Androidify pattern)
+### Sealed interface grouping
 
-The sealed interface grouping works in both Android and CMP. This example uses Android `Uri`; for CMP, replace with `String` or your own multiplatform type.
-
-```kotlin
-sealed interface NavigationRoute
-
-@Serializable data object Home : NavigationRoute
-@Serializable data class Create(val fileName: Uri? = null) : NavigationRoute
-@Serializable data object Camera : NavigationRoute
-@Serializable data object About : NavigationRoute
-
-@Serializable
-data class Result(
-    @Serializable(with = UriSerializer::class) val resultImageUri: Uri,
-    @Serializable(with = UriSerializer::class) val originalImageUri: Uri? = null,
-    val prompt: String? = null,
-) : NavigationRoute
-
-@Serializable
-data class CustomizeExport(
-    @Serializable(with = UriSerializer::class) val resultImageUri: Uri,
-    @Serializable(with = UriSerializer::class) val originalImageUri: Uri?,
-) : NavigationRoute
-```
-
-### Custom serializers for platform types
-
-For Android-specific types like `Uri`, provide a custom serializer. In CMP, use `String` paths or `expect/actual` wrappers instead.
+Group related routes under a sealed interface for type safety across features:
 
 ```kotlin
-// Android — Uri serializer
-object UriSerializer : KSerializer<Uri> {
-    override val descriptor = PrimitiveSerialDescriptor("Uri", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Uri) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): Uri = decoder.decodeString().toUri()
-}
+@Serializable sealed interface AppRoute : NavKey
+@Serializable data object Home : AppRoute
+@Serializable data class Details(val id: String) : AppRoute
+@Serializable data object Camera : AppRoute
 ```
 
-Use `@Serializable(with = UriSerializer::class)` on properties that need custom serialization.
+For platform-specific types in route arguments (e.g., Android `Uri`), provide a custom `KSerializer` and annotate with `@Serializable(with = ...)`. In CMP, prefer `String` paths or `expect/actual` wrappers instead.
 
 ## Back Stack Creation and Persistence
 
@@ -119,7 +91,7 @@ Persists across config changes and process death. Keys must be `@Serializable` a
 val backStack = rememberNavBackStack(Home)
 ```
 
-### Custom saveable state list (Androidify pattern)
+### Custom saveable state list
 
 For non-`NavKey` routes (e.g., sealed interface without `NavKey`), use a custom saver with `rememberSaveable`:
 
@@ -131,11 +103,8 @@ fun <T : Any> rememberMutableStateListOf(vararg elements: T): SnapshotStateList<
     }
 }
 
-// Usage
-val backStack = rememberMutableStateListOf<NavigationRoute>(Home)
+val backStack = rememberMutableStateListOf<AppRoute>(Home)
 ```
-
-This uses an `UnsafePolymorphicSerializer` that encodes the class name + payload, allowing polymorphic deserialization without reflection.
 
 ### Simple mutableStateListOf (no persistence)
 
@@ -228,108 +197,27 @@ entryProvider = entryProvider {
 
 The DSL avoids manual `when` blocks. Each `entry<Key>` receives the typed key and returns composable content. Pass `metadata` to control scene placement and per-entry animations.
 
-### Complete example (Android — Hilt)
-
-This example uses Hilt (`hiltViewModel`), which is Android-only. For CMP, replace with `koinViewModel` — see the Koin example below.
-
-```kotlin
-@Composable
-fun MainNavigation() {
-    val backStack = rememberMutableStateListOf<NavigationRoute>(Home)
-    val motionScheme = MaterialTheme.motionScheme
-
-    NavDisplay(
-        backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator(),
-        ),
-        transitionSpec = {
-            ContentTransform(
-                fadeIn(motionScheme.defaultEffectsSpec()),
-                fadeOut(motionScheme.defaultEffectsSpec()),
-            )
-        },
-        popTransitionSpec = {
-            ContentTransform(
-                fadeIn(motionScheme.defaultEffectsSpec()),
-                scaleOut(targetScale = 0.7f),
-            )
-        },
-        entryProvider = entryProvider {
-            entry<Home> {
-                HomeScreen(
-                    onClickLetsGo = { backStack.add(Create(fileName = null)) },
-                    onAboutClicked = { backStack.add(About) },
-                )
-            }
-            entry<Create> { createKey ->
-                val viewModel = hiltViewModel<CreationViewModel, CreationViewModel.Factory>(
-                    creationCallback = { factory -> factory.create(createKey.fileName) },
-                )
-                CreationScreen(
-                    onImageCreated = { result, prompt, original ->
-                        backStack.removeAll { it is Result }
-                        backStack.add(Result(result, prompt, original))
-                    },
-                    creationViewModel = viewModel,
-                )
-            }
-            entry<Result> { resultKey ->
-                val viewModel = hiltViewModel<ResultsViewModel, ResultsViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(resultKey.resultImageUri, resultKey.originalImageUri, resultKey.prompt)
-                    },
-                )
-                ResultsScreen(viewModel = viewModel, onBackPress = { backStack.removeLastOrNull() })
-            }
-            entry<About> {
-                AboutScreen(onBackPressed = { backStack.removeLastOrNull() })
-            }
-        },
-    )
-}
-```
-
 ## Top-Level Tabs and Dashboard Navigation
 
-### Defining top-level navigation items (Now in Android pattern)
-
-This pattern works on all targets. The example below uses Android `@StringRes` for string resources; for CMP, use `org.jetbrains.compose.resources.StringResource` or plain `String` titles instead.
+### Defining top-level navigation items
 
 ```kotlin
 data class TopLevelNavItem(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val iconText: String,    // CMP: use String or StringResource
-    val titleText: String,   // Android: can use @StringRes Int instead
+    val label: String,
 )
 
-val FOR_YOU = TopLevelNavItem(
-    selectedIcon = Icons.Filled.Home,
-    unselectedIcon = Icons.Outlined.Home,
-    iconText = "For You",
-    titleText = "App Name",
-)
-
-val BOOKMARKS = TopLevelNavItem(
-    selectedIcon = Icons.Filled.Bookmarks,
-    unselectedIcon = Icons.Outlined.Bookmarks,
-    iconText = "Bookmarks",
-    titleText = "Bookmarks",
-)
-
-val TOP_LEVEL_NAV_ITEMS = mapOf(
-    ForYouNavKey to FOR_YOU,
-    BookmarksNavKey to BOOKMARKS,
-    InterestsNavKey(null) to INTERESTS,
+val TOP_LEVEL_ITEMS = mapOf(
+    Home to TopLevelNavItem(Icons.Filled.Home, Icons.Outlined.Home, "Home"),
+    Search to TopLevelNavItem(Icons.Filled.Search, Icons.Outlined.Search, "Search"),
+    Profile to TopLevelNavItem(Icons.Filled.Person, Icons.Outlined.Person, "Profile"),
 )
 ```
 
-### NavigationState abstraction
+### NavigationState and Navigator
 
-Track the current key, current top-level key, and the set of top-level keys:
+Wrap the back stack with a state holder that tracks the current key and top-level keys, and a navigator that encapsulates common operations:
 
 ```kotlin
 @Stable
@@ -341,102 +229,55 @@ class NavigationState(
     val currentTopLevelKey: NavKey? get() = backStack.lastOrNull { it in topLevelKeys }
 }
 
-@Composable
-fun rememberNavigationState(startKey: NavKey, topLevelKeys: Set<NavKey>): NavigationState {
-    val backStack = rememberNavBackStack(startKey)
-    return remember(backStack) { NavigationState(backStack, topLevelKeys) }
-}
-```
-
-### Navigator class
-
-Encapsulate back stack operations:
-
-```kotlin
 class Navigator(private val state: NavigationState) {
     fun navigate(key: NavKey) {
         if (key in state.topLevelKeys) {
-            // Top-level: pop to root, then navigate
             while (state.backStack.size > 1) state.backStack.removeLast()
-            if (state.backStack.lastOrNull() != key) {
-                state.backStack[0] = key
-            }
+            if (state.backStack.lastOrNull() != key) state.backStack[0] = key
         } else {
             state.backStack.add(key)
         }
     }
-
     fun goBack() { state.backStack.removeLastOrNull() }
 }
 ```
 
-### Building the navigation scaffold (Now in Android pattern)
+### Building the navigation scaffold
+
+Use `NavigationSuiteScaffold` (or a custom scaffold) to render top-level tabs with `NavDisplay`:
 
 ```kotlin
 @Composable
-fun AppShell(appState: AppState) {
-    val navigator = remember { Navigator(appState.navigationState) }
+fun AppShell(navState: NavigationState) {
+    val navigator = remember { Navigator(navState) }
 
-    NiaNavigationSuiteScaffold(
+    NavigationSuiteScaffold(
         navigationSuiteItems = {
-            TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
-                val selected = navKey == appState.navigationState.currentTopLevelKey
+            TOP_LEVEL_ITEMS.forEach { (key, item) ->
                 item(
-                    selected = selected,
-                    onClick = { navigator.navigate(navKey) },
-                    icon = { Icon(navItem.unselectedIcon, contentDescription = null) },
-                    selectedIcon = { Icon(navItem.selectedIcon, contentDescription = null) },
-                    label = { Text(stringResource(navItem.iconTextId)) },
+                    selected = key == navState.currentTopLevelKey,
+                    onClick = { navigator.navigate(key) },
+                    icon = { Icon(item.unselectedIcon, contentDescription = null) },
+                    selectedIcon = { Icon(item.selectedIcon, contentDescription = null) },
+                    label = { Text(item.label) },
                 )
             }
         },
     ) {
         Scaffold { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
-                // Show top app bar only on top-level destinations
-                val isTopLevel = appState.navigationState.currentKey in appState.navigationState.topLevelKeys
-                if (isTopLevel) {
-                    val destination = TOP_LEVEL_NAV_ITEMS[appState.navigationState.currentTopLevelKey]!!
-                    TopAppBar(titleRes = destination.titleTextId)
-                }
-
-                val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-                NavDisplay(
-                    entries = appState.navigationState.toEntries(entryProvider),
-                    sceneStrategy = listDetailStrategy,
-                    onBack = { navigator.goBack() },
-                )
-            }
+            NavDisplay(
+                backStack = navState.backStack,
+                onBack = { navigator.goBack() },
+                modifier = Modifier.padding(padding),
+                entryProvider = entryProvider {
+                    homeEntry(navigator)
+                    searchEntry(navigator)
+                    profileEntry(navigator)
+                },
+            )
         }
     }
 }
-```
-
-### Modular entry providers in the scaffold
-
-Each feature module contributes its entries via extension functions:
-
-```kotlin
-val entryProvider = entryProvider {
-    forYouEntry(navigator)
-    bookmarksEntry(navigator)
-    interestsEntry(navigator)
-    topicEntry(navigator)
-    searchEntry(navigator)
-}
-```
-
-### Unread indicators on tabs
-
-```kotlin
-val unreadNavKeys by appState.topLevelNavKeysWithUnreadResources.collectAsStateWithLifecycle()
-
-item(
-    modifier = Modifier.then(
-        if (unreadNavKeys.contains(navKey)) Modifier.notificationDot() else Modifier
-    ),
-    // ...
-)
 ```
 
 ## ViewModel Scoping
@@ -597,58 +438,23 @@ entry<ModalRoute>(
 ) { ModalScreen() }
 ```
 
-### Material motion scheme (Androidify pattern)
-
-```kotlin
-val motionScheme = MaterialTheme.motionScheme
-
-NavDisplay(
-    transitionSpec = {
-        ContentTransform(
-            fadeIn(motionScheme.defaultEffectsSpec()),
-            fadeOut(motionScheme.defaultEffectsSpec()),
-        )
-    },
-    popTransitionSpec = {
-        ContentTransform(
-            fadeIn(motionScheme.defaultEffectsSpec()),
-            scaleOut(targetScale = 0.7f),
-        )
-    },
-    // ...
-)
-```
 
 ## Back Stack Manipulation Patterns
 
 ```kotlin
-// Navigate forward
-backStack.add(Details(id = "123"))
+backStack.add(Details(id = "123"))                        // navigate forward
+backStack.removeLastOrNull()                              // navigate back
 
-// Navigate back
-backStack.removeLastOrNull()
+backStack.removeAll { it is Details }                     // prevent duplicate entries
+backStack.add(Details(newId))
 
-// Replace specific entries (prevent stacking duplicates — Androidify pattern)
-backStack.removeAll { it is Camera }
-backStack.add(Camera)
-
-// Replace current entry (e.g., selecting different detail item)
-backStack.removeAll { it is ConversationDetail }
-backStack.add(ConversationDetail(newId))
-
-// Navigate forward and clear previous of same type (Androidify)
-backStack.removeAll { it is Result }
-backStack.add(Result(resultImageUri, prompt, originalImageUri))
-
-// Deep link: synthetic back stack for correct Up behavior
-backStack.clear()
+backStack.clear()                                         // deep link: synthetic back stack
 backStack.addAll(listOf(Home, Details(deepLinkId)))
 
-// Conditional navigation (auth check)
-if (isAuthenticated) backStack.add(Dashboard) else backStack.add(Login)
+if (isAuthenticated) backStack.add(Dashboard)             // conditional navigation
+else backStack.add(Login)
 
-// Top-level tab switch (replace root)
-while (backStack.size > 1) backStack.removeLast()
+while (backStack.size > 1) backStack.removeLast()         // top-level tab switch
 backStack[0] = targetTopLevelKey
 ```
 
@@ -657,12 +463,12 @@ backStack[0] = targetTopLevelKey
 ### api / impl module split
 
 ```text
-feature-foryou/
+feature-home/
   api/
-    ForYouNavKey.kt           -- @Serializable data object ForYouNavKey : NavKey
+    HomeNavKey.kt             -- @Serializable data object HomeNavKey : NavKey
   impl/
-    ForYouScreen.kt           -- composable UI
-    ForYouEntryBuilder.kt     -- extension function on EntryProviderScope
+    HomeScreen.kt             -- composable UI
+    HomeEntryBuilder.kt       -- extension function on EntryProviderScope
 ```
 
 - **api** — contains only the `NavKey` route definitions. Other features depend on this.
@@ -670,27 +476,22 @@ feature-foryou/
 
 ### Entry builder extension functions
 
+Each feature exposes an extension function; the app module aggregates them:
+
 ```kotlin
-// feature-foryou/impl
-fun EntryProviderScope<NavKey>.forYouEntry(navigator: Navigator) {
-    entry<ForYouNavKey> {
-        ForYouScreen(
-            onTopicClick = { navigator.navigate(TopicNavKey(it)) },
-        )
+// feature-home/impl
+fun EntryProviderScope<NavKey>.homeEntry(navigator: Navigator) {
+    entry<HomeNavKey> {
+        HomeScreen(onItemClick = { navigator.navigate(DetailsNavKey(it)) })
     }
 }
-```
 
-Call from the app module:
-
-```kotlin
+// app module
 NavDisplay(
     entryProvider = entryProvider {
-        forYouEntry(navigator)
-        bookmarksEntry(navigator)
-        interestsEntry(navigator)
-        topicEntry(navigator)
+        homeEntry(navigator)
         searchEntry(navigator)
+        profileEntry(navigator)
     },
     // ...
 )
@@ -725,8 +526,8 @@ NavDisplay(
 ```kotlin
 // Feature module
 val featureModule = module {
-    navigation<ForYouNavKey> { ForYouScreen(viewModel = koinViewModel()) }
-    navigation<BookmarksNavKey> { BookmarksScreen(viewModel = koinViewModel()) }
+    navigation<HomeNavKey> { HomeScreen(viewModel = koinViewModel()) }
+    navigation<ProfileNavKey> { ProfileScreen(viewModel = koinViewModel()) }
 }
 
 // App module
@@ -841,20 +642,3 @@ Nav 3's user-owned back stack is more natural for MVI than Nav 2's `NavControlle
 | Missing entry decorators | ViewModels leak, saveable state lost | Always include both `rememberSaveableStateHolderNavEntryDecorator` and `rememberViewModelStoreNavEntryDecorator` |
 | Using Nav 2 `NavHost`/`NavController` | Deprecated approach, less Compose-native | Migrate to Nav 3 `NavDisplay` with user-owned back stack |
 
-## Nav 3 Recipes Quick Reference
-
-From [nav3-recipes](https://github.com/android/nav3-recipes) ([CMP fork](https://github.com/terrakok/nav3-recipes)):
-
-| Category | Recipes |
-|---|---|
-| **Basic** | Basic setup, saveable back stack, entry provider DSL |
-| **Scenes** | Dialog, BottomSheet, custom list-detail, two-pane, Material adaptive list-detail, supporting pane |
-| **Tabs** | Common navigation UI, multiple back stacks with state retention |
-| **Deep links** | Basic parsing, advanced synthetic back stack with Up behavior |
-| **ViewModels** | Basic, Hilt, Koin, shared ViewModel across screens |
-| **Architecture** | Hilt modularized, Koin modularized |
-| **Results** | Results as events, results as state |
-| **Retain** | Retain values while UI hidden on back stack |
-| **Interop** | Fragment and View interop (Android only) |
-| **Animations** | Default and per-destination overrides |
-| **Conditional** | Auth-based flow switching |

@@ -170,18 +170,18 @@ core/network/
   ApiResponse.kt               -- sealed Result wrapper
   NetworkExtensions.kt         -- safeRequest extension
 
-feature/estimate/
+feature/<name>/
   data/
     remote/
-      EstimateApi.kt            -- API service class
+      <Name>Api.kt              -- API service class
       dto/
-        EstimateDto.kt          -- @Serializable response DTOs
-        EstimateDtoMapper.kt    -- DTO -> Domain mapping
-    EstimateRepositoryImpl.kt   -- repository implementation
+        <Name>Dto.kt            -- @Serializable response DTOs
+        <Name>DtoMapper.kt      -- DTO -> Domain mapping
+    <Name>RepositoryImpl.kt     -- repository implementation
   domain/
     model/
-      Estimate.kt               -- domain model (no serialization annotations)
-    EstimateRepository.kt       -- repository interface
+      <Name>.kt                 -- domain model (no serialization annotations)
+    <Name>Repository.kt         -- repository interface
 ```
 
 Keep DTOs in the data layer. Domain models have no serialization annotations. Mappers live at the boundary between data and domain.
@@ -190,80 +190,48 @@ Keep DTOs in the data layer. Domain models have no serialization annotations. Ma
 
 ```kotlin
 @Serializable
-data class EstimateResponseDto(
-    val estimates: List<EstimateDto>,
+data class ItemListDto(
+    val items: List<ItemDto>,
     val total: Int,
     @SerialName("next_page") val nextPage: String? = null,
 )
 
 @Serializable
-data class EstimateDto(
+data class ItemDto(
     val id: String,
-    val title: String,
-    val amount: Double,
-    val status: EstimateStatusDto = EstimateStatusDto.DRAFT,
+    val name: String,
+    val status: StatusDto = StatusDto.ACTIVE,
     @SerialName("created_at") val createdAt: Long,
-    val metadata: MetadataDto? = null,
 )
 
 @Serializable
-data class MetadataDto(
-    val tags: List<String> = emptyList(),
-    @SerialName("assigned_to") val assignedTo: String? = null,
-)
-
-@Serializable
-enum class EstimateStatusDto {
-    @SerialName("draft") DRAFT,
-    @SerialName("sent") SENT,
-    @SerialName("accepted") ACCEPTED,
-    @SerialName("rejected") REJECTED,
+enum class StatusDto {
+    @SerialName("active") ACTIVE,
+    @SerialName("archived") ARCHIVED,
 }
 ```
 
-**Rules:**
-- Always use `@Serializable` on DTOs
-- Use `@SerialName` when JSON keys differ from Kotlin property names
-- Provide default values for optional/nullable fields
-- DTOs mirror the API contract exactly — do not add business logic
+**Rules:** always `@Serializable` on DTOs, `@SerialName` when JSON keys differ, default values for optional fields, DTOs mirror the API contract — no business logic.
 
 ## DTO-to-Domain Mappers
 
 Map at the repository boundary. Domain models are clean — no serialization annotations, no JSON naming quirks.
 
 ```kotlin
-// Domain model
-data class Estimate(
-    val id: String,
-    val title: String,
-    val amount: Double,
-    val status: EstimateStatus,
-    val createdAt: Long,
-    val tags: List<String>,
-)
+data class Item(val id: String, val name: String, val status: ItemStatus, val createdAt: Long)
+enum class ItemStatus { ACTIVE, ARCHIVED }
 
-enum class EstimateStatus { DRAFT, SENT, ACCEPTED, REJECTED }
-
-// Mapper — extension function pattern
-fun EstimateDto.toDomain(): Estimate = Estimate(
+fun ItemDto.toDomain() = Item(
     id = id,
-    title = title,
-    amount = amount,
-    status = when (status) {
-        EstimateStatusDto.DRAFT -> EstimateStatus.DRAFT
-        EstimateStatusDto.SENT -> EstimateStatus.SENT
-        EstimateStatusDto.ACCEPTED -> EstimateStatus.ACCEPTED
-        EstimateStatusDto.REJECTED -> EstimateStatus.REJECTED
-    },
+    name = name,
+    status = ItemStatus.valueOf(status.name),
     createdAt = createdAt,
-    tags = metadata?.tags.orEmpty(),
 )
 
-fun List<EstimateDto>.toDomain(): List<Estimate> = map { it.toDomain() }
+fun List<ItemDto>.toDomain() = map { it.toDomain() }
 ```
 
 **BAD:** using DTOs directly in UI state — couples UI to API contract, breaks when API changes.
-
 **GOOD:** mapping at the repository boundary — domain models are stable, testable, and decoupled.
 
 ## API Service Layer
@@ -271,51 +239,37 @@ fun List<EstimateDto>.toDomain(): List<Estimate> = map { it.toDomain() }
 Wrap `HttpClient` in a service class with typed methods:
 
 ```kotlin
-class EstimateApi(private val client: HttpClient) {
+class ItemApi(private val client: HttpClient) {
 
-    suspend fun getEstimates(page: Int = 1, limit: Int = 20): EstimateResponseDto {
-        return client.get("estimates") {
+    suspend fun getItems(page: Int = 1, limit: Int = 20): ItemListDto {
+        return client.get("items") {
             parameter("page", page)
             parameter("limit", limit)
         }.body()
     }
 
-    suspend fun getEstimate(id: String): EstimateDto {
-        return client.get("estimates/$id").body()
-    }
+    suspend fun getItem(id: String): ItemDto = client.get("items/$id").body()
 
-    suspend fun createEstimate(request: CreateEstimateRequest): EstimateDto {
-        return client.post("estimates") {
+    suspend fun createItem(request: CreateItemRequest): ItemDto {
+        return client.post("items") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
     }
 
-    suspend fun updateEstimate(id: String, request: UpdateEstimateRequest): EstimateDto {
-        return client.put("estimates/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
-    }
-
-    suspend fun deleteEstimate(id: String) {
-        client.delete("estimates/$id")
-    }
+    suspend fun deleteItem(id: String) { client.delete("items/$id") }
 }
 
 @Serializable
-data class CreateEstimateRequest(
-    val title: String,
-    val amount: Double,
-)
+data class CreateItemRequest(val name: String)
 ```
 
 ### Multipart file upload
 
 ```kotlin
-suspend fun uploadDocument(estimateId: String, fileName: String, fileBytes: ByteArray): DocumentDto {
+suspend fun uploadDocument(parentId: String, fileName: String, fileBytes: ByteArray): DocumentDto {
     return client.submitFormWithBinaryData(
-        url = "estimates/$estimateId/documents",
+        url = "items/$parentId/documents",
         formData = formData {
             append("file", fileBytes, Headers.build {
                 append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
@@ -397,9 +351,9 @@ suspend inline fun <reified T> HttpClient.safeRequest(
 Usage in API service:
 
 ```kotlin
-suspend fun getEstimateSafe(id: String): ApiResponse<EstimateDto> {
+suspend fun getItemSafe(id: String): ApiResponse<ItemDto> {
     return client.safeRequest {
-        url("estimates/$id")
+        url("items/$id")
         method = HttpMethod.Get
     }
 }
@@ -410,44 +364,27 @@ suspend fun getEstimateSafe(id: String): ApiResponse<EstimateDto> {
 ### Interface in domain layer
 
 ```kotlin
-interface EstimateRepository {
-    suspend fun getEstimates(): List<Estimate>
-    suspend fun getEstimate(id: String): Estimate
-    suspend fun createEstimate(title: String, amount: Double): Estimate
+interface ItemRepository {
+    suspend fun getItems(): ApiResponse<List<Item>>
+    suspend fun getItem(id: String): ApiResponse<Item>
 }
 ```
 
-### Implementation in data layer
+### Implementation with ApiResponse error handling
 
 ```kotlin
-class EstimateRepositoryImpl(
-    private val api: EstimateApi,
-) : EstimateRepository {
+class ItemRepositoryImpl(private val client: HttpClient) : ItemRepository {
 
-    override suspend fun getEstimates(): List<Estimate> {
-        return api.getEstimates().estimates.toDomain()
+    override suspend fun getItems(): ApiResponse<List<Item>> {
+        return when (val response = client.safeRequest<ItemListDto> { url("items") }) {
+            is ApiResponse.Success -> ApiResponse.Success(response.data.items.toDomain())
+            is ApiResponse.Error -> response
+        }
     }
 
-    override suspend fun getEstimate(id: String): Estimate {
-        return api.getEstimate(id).toDomain()
-    }
-
-    override suspend fun createEstimate(title: String, amount: Double): Estimate {
-        return api.createEstimate(CreateEstimateRequest(title, amount)).toDomain()
-    }
-}
-```
-
-### With ApiResponse error handling
-
-```kotlin
-class EstimateRepositoryImpl(
-    private val client: HttpClient,
-) : EstimateRepository {
-
-    override suspend fun getEstimates(): ApiResponse<List<Estimate>> {
-        return when (val response = client.safeRequest<EstimateResponseDto> { url("estimates") }) {
-            is ApiResponse.Success -> ApiResponse.Success(response.data.estimates.toDomain())
+    override suspend fun getItem(id: String): ApiResponse<Item> {
+        return when (val response = client.safeRequest<ItemDto> { url("items/$id") }) {
+            is ApiResponse.Success -> ApiResponse.Success(response.data.toDomain())
             is ApiResponse.Error -> response
         }
     }
@@ -456,24 +393,22 @@ class EstimateRepositoryImpl(
 
 ### Offline-first pattern
 
-```kotlin
-class OfflineFirstEstimateRepository(
-    private val api: EstimateApi,
-    private val dao: EstimateDao,
-) : EstimateRepository {
+Local DB is the single source of truth. Repository syncs remote data into local storage. UI observes the local `Flow`.
 
-    val estimates: Flow<List<Estimate>> = dao.observeAll().map { entities ->
-        entities.map { it.toDomain() }
-    }
+```kotlin
+class OfflineFirstItemRepository(
+    private val api: ItemApi,
+    private val dao: ItemDao,
+) : ItemRepository {
+
+    val items: Flow<List<Item>> = dao.observeAll().map { it.map { e -> e.toDomain() } }
 
     suspend fun refresh() {
-        val remote = api.getEstimates().estimates
+        val remote = api.getItems().items
         dao.replaceAll(remote.map { it.toEntity() })
     }
 }
 ```
-
-Local DB is the single source of truth. Repository syncs remote data into local storage. UI observes the local `Flow`.
 
 ## Authentication — Bearer Token
 
@@ -544,7 +479,7 @@ val client = HttpClient(engine) {
 
 // Connect and exchange messages
 client.webSocket("wss://api.example.com/ws") {
-    send(Frame.Text(Json.encodeToString(SubscribeMessage("estimates"))))
+    send(Frame.Text(Json.encodeToString(SubscribeMessage("items"))))
 
     for (frame in incoming) {
         when (frame) {
@@ -573,7 +508,7 @@ install(WebSockets) {
 }
 
 client.webSocket("wss://api.example.com/ws") {
-    sendSerialized(SubscribeMessage("estimates"))
+    sendSerialized(SubscribeMessage("items"))
     val message = receiveDeserialized<ServerMessage>()
 }
 ```
@@ -591,25 +526,20 @@ testImplementation("io.ktor:ktor-client-mock:$ktor_version")
 
 ```kotlin
 @Test
-fun `getEstimate returns mapped domain model`() = runTest {
+fun `getItem returns mapped domain model`() = runTest {
     val mockEngine = MockEngine { request ->
-        assertEquals("/estimates/123", request.url.encodedPath)
-
+        assertEquals("/items/123", request.url.encodedPath)
         respond(
-            content = """{"id":"123","title":"Test","amount":100.0,"status":"draft","created_at":1700000000}""",
+            content = """{"id":"123","name":"Test","status":"active","created_at":1700000000}""",
             status = HttpStatusCode.OK,
             headers = headersOf(HttpHeaders.ContentType, "application/json"),
         )
     }
 
     val client = createHttpClient(mockEngine, "https://api.example.com/")
-    val api = EstimateApi(client)
-    val repo = EstimateRepositoryImpl(api)
-
-    val estimate = repo.getEstimate("123")
-    assertEquals("123", estimate.id)
-    assertEquals("Test", estimate.title)
-    assertEquals(EstimateStatus.DRAFT, estimate.status)
+    val repo = ItemRepositoryImpl(client)
+    val result = repo.getItem("123")
+    assertTrue(result is ApiResponse.Success)
 }
 ```
 
@@ -617,47 +547,22 @@ fun `getEstimate returns mapped domain model`() = runTest {
 
 ```kotlin
 @Test
-fun `getEstimate returns HttpError on 404`() = runTest {
+fun `getItem returns HttpError on 404`() = runTest {
     val mockEngine = MockEngine {
         respond(content = """{"error":"not found"}""", status = HttpStatusCode.NotFound)
     }
-
-    val client = HttpClient(mockEngine) {
-        install(ContentNegotiation) { json() }
-    }
-
-    val result = client.safeRequest<EstimateDto> { url("estimates/999") }
+    val client = HttpClient(mockEngine) { install(ContentNegotiation) { json() } }
+    val result = client.safeRequest<ItemDto> { url("items/999") }
     assertTrue(result is ApiResponse.Error.HttpError)
     assertEquals(404, (result as ApiResponse.Error.HttpError).code)
 }
 ```
 
-### Request verification
-
-```kotlin
-@Test
-fun `createEstimate sends correct body`() = runTest {
-    val mockEngine = MockEngine { request ->
-        val body = request.body.toByteArray().decodeToString()
-        assertTrue(body.contains("\"title\":\"New Estimate\""))
-        respond(content = """{"id":"456","title":"New Estimate","amount":500.0,"status":"draft","created_at":1700000000}""", status = HttpStatusCode.Created)
-    }
-
-    // verify request was made
-    assertEquals(1, mockEngine.requestHistory.size)
-    assertEquals(HttpMethod.Post, mockEngine.requestHistory.first().method)
-}
-```
-
-### Testable architecture
-
 Accept `HttpClientEngine` as a constructor parameter so you can inject `MockEngine` in tests:
 
 ```kotlin
-class EstimateApi(private val client: HttpClient) { /* ... */ }
-
-// Production: EstimateApi(createHttpClient(OkHttp.create(), baseUrl))
-// Test:       EstimateApi(createHttpClient(MockEngine { ... }, baseUrl))
+// Production: ItemApi(createHttpClient(OkHttp.create(), baseUrl))
+// Test:       ItemApi(createHttpClient(MockEngine { ... }, baseUrl))
 ```
 
 ## Koin DI Integration
@@ -691,30 +596,18 @@ actual val platformEngineModule = module {
 }
 
 // Feature module
-val estimateNetworkModule = module {
-    single { EstimateApi(get()) }
-    single<EstimateRepository> { EstimateRepositoryImpl(get()) }
+val featureNetworkModule = module {
+    single { ItemApi(get()) }
+    single<ItemRepository> { ItemRepositoryImpl(get()) }
 }
 
 // App — combine all
 startKoin {
-    modules(networkModule, platformEngineModule, estimateNetworkModule)
+    modules(networkModule, platformEngineModule, featureNetworkModule)
 }
 ```
 
-For Android-only projects using Hilt, the pattern is the same — provide `HttpClient` as a singleton, inject into API services and repositories:
-
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object NetworkModule {
-    @Provides @Singleton
-    fun provideHttpClient(): HttpClient = createHttpClient(OkHttp.create(), "https://api.example.com/")
-
-    @Provides @Singleton
-    fun provideEstimateApi(client: HttpClient): EstimateApi = EstimateApi(client)
-}
-```
+For Android-only projects using Hilt, apply the same pattern — provide `HttpClient` as a `@Singleton` in a `@Module`, inject into API services and repositories. See [Dependency Injection](dependency-injection.md) for Hilt details.
 
 ## Anti-Patterns
 

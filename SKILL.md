@@ -5,12 +5,14 @@ description: >
   KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
   NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
   Res.string, Res.drawable, composeResources, stringResource, painterResource, DataStore,
-  Preferences, SharedPreferences, preferencesDataStore, or questions like "my compose app is
-  slow", "how do I paginate", "how do I navigate", "StateFlow vs SharedFlow", "share code
-  Android iOS", "how do I use resources in KMP", "how do I store settings", "DataStore vs
-  SharedPreferences". Covers: coroutines/Flow, ViewModels, MVI, state modeling,
-  performance, Nav 3, Koin/Hilt DI, Ktor, Paging 3, DataStore, animations, multiplatform
-  resources, cross-platform, testing, UI/UX, and code review.
+  Preferences, SharedPreferences, preferencesDataStore, accessibility, a11y,
+  contentDescription, semantics, screen reader, touch target, or questions like "my compose
+  app is slow", "how do I paginate", "how do I navigate", "StateFlow vs SharedFlow", "share
+  code Android iOS", "how do I use resources in KMP", "how do I store settings", "DataStore
+  vs SharedPreferences", "how do I make my UI accessible". Covers: coroutines/Flow,
+  ViewModels, MVI, state modeling, performance, Nav 3, Koin/Hilt DI, Ktor, Paging 3,
+  DataStore, animations, multiplatform resources, cross-platform, accessibility, testing,
+  UI/UX, and code review.
 ---
 
 # Jetpack Compose & Compose Multiplatform — MVI Architecture
@@ -195,6 +197,7 @@ Load these only when the task requires deeper guidance:
 - **[Performance & Recomposition](references/performance.md)** — three phases, primitive state specializations, `TextFieldState`, Strong Skipping Mode, stability config, Compose Compiler Metrics, baseline profiles, API decision table, 20 recomposition rules, diagnostic checklist
 - **[Animations](references/animations.md)** — complete animation API reference: decision tree, `AnimationSpec` (spring/tween/keyframes), `animate*AsState`, `Animatable` (sequential, concurrent, gesture-driven), `updateTransition`, `rememberInfiniteTransition`, `AnimatedVisibility`, `AnimatedContent`, **shared element transitions** (`sharedElement`/`sharedBounds` with navigation, Coil async images), swipe-to-dismiss, Canvas/custom drawing, `graphicsLayer`, performance optimization
 - **[UI/UX Patterns](references/ui-ux.md)** — loading states, skeleton/shimmer, preserving content during refresh, inline validation, perceived performance
+- **[Accessibility](references/accessibility.md)** — contentDescription rules, Modifier.semantics (role, stateDescription, heading), mergeDescendants, clearAndSetSemantics, touch targets (48dp), WCAG color contrast, custom interactive elements, custom accessibility actions
 - **[Testing Strategy](references/testing.md)** — Turbine for StateFlow testing, ViewModel event→state→effect testing, validation/UI tests, Macrobenchmark, lean test matrix by app scale
 
 ### Data & Persistence
