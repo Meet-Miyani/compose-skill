@@ -385,8 +385,8 @@ class TaskRepository(private val taskDao: TaskDao) {
 private fun collectTasks() {
     viewModelScope.launch {
         repository.observeTasks(projectId)
-            .catch { dispatch(Result.LoadFailed(it.message)) }
-            .collect { dispatch(Result.TasksLoaded(it.map { e -> e.toDomain() })) }
+            .catch { sendEffect(TaskEffect.ShowError(it.message ?: "Load failed")) }
+            .collect { tasks -> updateState { copy(tasks = tasks.map { it.toDomain() }, isLoading = false) } }
     }
 }
 ```

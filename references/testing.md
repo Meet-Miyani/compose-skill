@@ -10,81 +10,40 @@
 
 ## What to Test in commonMain
 
-### Reducer Tests (highest ROI)
+### ViewModel Tests with Turbine (highest ROI)
 
-Since `reduce()` is a pure function, test it directly — no ViewModel, no coroutines, no mocks:
-
-```kotlin
-@Test
-fun `save requested with empty name shows validation error`() {
-    val state = AddCategoryState(name = "")
-    val result = viewModel.reduce(AddCategoryResult.SaveRequested, state)
-
-    assertEquals("Name is required", result.state.validationErrors["name"])
-    assertTrue(result.effects.any { it is AddCategoryEffect.ShowError })
-}
-
-@Test
-fun `save requested with valid name sets saving flag`() {
-    val state = AddCategoryState(name = "Rings")
-    val result = viewModel.reduce(AddCategoryResult.SaveRequested, state)
-
-    assertTrue(result.state.isSaving)
-    assertTrue(result.state.validationErrors.isEmpty())
-}
-
-@Test
-fun `category saved navigates back with success`() {
-    val state = AddCategoryState(isSaving = true)
-    val result = viewModel.reduce(AddCategoryResult.CategorySaved, state)
-
-    assertFalse(result.state.isSaving)
-    assertTrue(result.effects.any { it is AddCategoryEffect.NavigateBack })
-    assertTrue(result.effects.any { it is AddCategoryEffect.ShowSuccess })
-}
-```
-
-Test:
-
-- Field edit transitions
-- Validation transitions
-- Derived result updates
-- Loading -> success/error transitions
-- Retry flow
-- Effect emissions for navigation, snackbar, haptics
-- Preservation of last good content during refresh
-
-### Validation Tests
-
-Test: required, numeric parse, range, cross-field rules, submit rules.
-
-### Calculation Engine Tests
-
-Test: edge cases, rounding policy, domain invariants, regression fixtures.
-
-### Side Effect Tests (handleEvent / async)
-
-Use fakes for: repositories, share/clipboard/haptics services, clocks, dispatchers.
-
-Verify: emitted effects, cancellation policy, success/error message mapping.
-
-### Turbine for StateFlow Testing
-
-Use `kotlinx-coroutines-test` with the **Turbine** library to test full async flows through the ViewModel (including `handleEvent` + `asyncAction`):
+Test the full event→state→effect cycle through the ViewModel. Use `kotlinx-coroutines-test` with the **Turbine** library:
 
 ```kotlin
 @Test
-fun `save category transitions through saving to success`() = runTest {
-    val viewModel = AddCategoryViewModel(FakeCategoryRepository(), FakeSettingsDataStore())
+fun `save with empty title shows validation error`() = runTest {
+    val viewModel = CreateItemViewModel(FakeItemRepository())
 
     viewModel.state.test {
         val initial = awaitItem()
-        assertFalse(initial.isSaving)
+        assertTrue(initial.errors.isEmpty())
 
-        viewModel.onEvent(AddCategoryEvent.OnNameChanged("Rings"))
-        awaitItem() // name updated
+        viewModel.onEvent(CreateItemEvent.OnSaveClick)
+        val afterSave = awaitItem()
 
-        viewModel.onEvent(AddCategoryEvent.OnSaveClick)
+        assertEquals("Title is required", afterSave.errors["title"])
+        assertFalse(afterSave.isSaving)
+    }
+}
+
+@Test
+fun `save with valid input transitions through saving to success`() = runTest {
+    val viewModel = CreateItemViewModel(FakeItemRepository())
+
+    viewModel.state.test {
+        awaitItem() // initial
+
+        viewModel.onEvent(CreateItemEvent.OnTitleChanged("New item"))
+        awaitItem()
+        viewModel.onEvent(CreateItemEvent.OnAmountChanged("42.5"))
+        awaitItem()
+
+        viewModel.onEvent(CreateItemEvent.OnSaveClick)
         val saving = awaitItem()
         assertTrue(saving.isSaving)
 
@@ -92,9 +51,121 @@ fun `save category transitions through saving to success`() = runTest {
         assertFalse(done.isSaving)
     }
 }
+
+@Test
+fun `title changed clears title validation error`() = runTest {
+    val viewModel = CreateItemViewModel(FakeItemRepository())
+
+    viewModel.state.test {
+        awaitItem() // initial
+
+        viewModel.onEvent(CreateItemEvent.OnSaveClick)
+        val withError = awaitItem()
+        assertTrue(withError.errors.containsKey("title"))
+
+        viewModel.onEvent(CreateItemEvent.OnTitleChanged("A"))
+        val cleared = awaitItem()
+        assertFalse(cleared.errors.containsKey("title"))
+    }
+}
+
+@Test
+fun `save emits ShowMessage effect on success`() = runTest {
+    val viewModel = CreateItemViewModel(FakeItemRepository())
+
+    viewModel.onEvent(CreateItemEvent.OnTitleChanged("New item"))
+    viewModel.onEvent(CreateItemEvent.OnAmountChanged("10"))
+
+    viewModel.effect.test {
+        viewModel.onEvent(CreateItemEvent.OnSaveClick)
+        val effect = awaitItem()
+        assertTrue(effect is CreateItemEffect.ShowMessage)
+    }
+}
 ```
 
-Prefer **reducer tests** for state transition logic (pure, fast, no infrastructure). Use **Turbine tests** only for verifying full async flows end-to-end.
+**What to test:**
+
+- Event→state transitions: field edits, validation triggers, loading states
+- Event→effect emissions: navigation, snackbar, error messages
+- Async flows: loading → success, loading → failure, retry
+- Edge cases: empty input, duplicate detection, concurrent saves
+- State preservation: old content kept during refresh, error doesn't wipe data
+
+### Testing State and Effects Separately
+
+When a single event produces both state changes and effects, test them independently for clarity:
+
+```kotlin
+@Test
+fun `back click emits NavigateBack effect without changing state`() = runTest {
+    val viewModel = CreateItemViewModel(FakeItemRepository())
+
+    viewModel.effect.test {
+        viewModel.onEvent(CreateItemEvent.OnBackClick)
+        assertEquals(CreateItemEffect.NavigateBack, awaitItem())
+    }
+
+    viewModel.state.test {
+        val state = awaitItem()
+        assertEquals(CreateItemState(), state)
+    }
+}
+```
+
+### Validation Tests
+
+Test validation logic as pure functions when extracted into a dedicated validator:
+
+```kotlin
+@Test
+fun `validator rejects blank title`() {
+    val errors = CreateItemValidator.validate(title = "", amount = "10")
+    assertEquals("Title is required", errors["title"])
+}
+
+@Test
+fun `validator accepts valid input`() {
+    val errors = CreateItemValidator.validate(title = "Widget", amount = "25.0")
+    assertTrue(errors.isEmpty())
+}
+```
+
+If validation is inline in the ViewModel (acceptable for simple cases), test it through ViewModel events as shown above.
+
+### Calculation Engine Tests
+
+Test pure calculation/domain services directly — no ViewModel needed:
+
+```kotlin
+@Test
+fun `calculator computes correct monthly payment`() {
+    val result = LoanCalculator.monthlyPayment(amount = 100000.0, rate = 5.0, years = 30)
+    assertEquals(536.82, result, 0.01)
+}
+```
+
+Test: edge cases, rounding policy, domain invariants, regression fixtures.
+
+### Fake Repositories for ViewModel Tests
+
+Use fakes (not mocks) for repositories and services:
+
+```kotlin
+class FakeItemRepository : ItemRepository {
+    private val items = mutableListOf<Item>()
+    var shouldThrow: Exception? = null
+
+    override suspend fun create(title: String, amount: Double) {
+        shouldThrow?.let { throw it }
+        items.add(Item(title = title, amount = amount))
+    }
+
+    override suspend fun getAll(): List<Item> = items.toList()
+}
+```
+
+Fakes give you control over success/failure scenarios without mock framework complexity.
 
 ## Compose UI Tests
 
@@ -132,28 +203,28 @@ Test:
 
 ## Lean Default Test Matrix
 
-1. Reducer tests for every feature
-2. Validation/calculation tests for every rule-heavy feature
+1. ViewModel event→state→effect tests for every feature (via Turbine)
+2. Validation/calculation tests for every rule-heavy feature (pure function tests)
 3. UI tests for high-risk screens
 4. Platform integration tests only for real platform behavior
 
-Do not sink weeks into screenshot infrastructure before you have reducer coverage.
+Do not sink weeks into screenshot infrastructure before you have ViewModel test coverage.
 
 ## Recommendations by App Scale
 
 ### Small App
 
 - One shared module, feature packages inside it
-- Direct feature ViewModel, reducer can live in same file if small
+- Direct feature ViewModel, contract can live in same file if small
 - Modules: `shared`, `androidApp`, `iosApp`
 - Low abstraction level
-- Testing: reducer tests, validator/calculator tests, a few shared UI tests
+- Testing: ViewModel tests with Turbine, validator/calculator tests, a few shared UI tests
 - Avoid: multi-module explosion, base MVI framework, use case per repository call
 
 ### Medium App
 
 - `core` shared module + shared feature modules
-- Reducer and effect handling separated, shared validators/calculators/services
+- Separated contract/ViewModel/screen/route files, shared validators/calculators/services
 - Modules: `core`, `feature-estimate`, `feature-settings`, `feature-history`
 - Moderate abstraction, extract only reusable logic and UI
 - Testing: strong `commonTest` coverage, shared UI tests for high-value screens, platform tests for bindings
@@ -165,5 +236,5 @@ Do not sink weeks into screenshot infrastructure before you have reducer coverag
 - Screen ViewModel as default, sub-flow ViewModel only where independently complex
 - Strict no-op emission guards, explicit async cancellation policies
 - `core-*` for stable cross-feature primitives, many vertical feature modules
-- Testing: reducer/effect/domain tests mandatory, more shared UI tests, platform integration tests, performance audits on hot screens
-- Avoid: framework worship, generic base ViewModel inheritance trees, premature cross-feature reducer DSLs
+- Testing: ViewModel/domain tests mandatory, more shared UI tests, platform integration tests, performance audits on hot screens
+- Avoid: framework worship, generic base ViewModel inheritance trees, premature cross-feature DSLs

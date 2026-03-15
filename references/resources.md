@@ -470,7 +470,7 @@ For loading images from URLs, use a dedicated library — multiplatform resource
 
 ## MVI Integration
 
-Resources follow the same strict-MVI principle: **reducers operate on semantic values, UI resolves display strings and images at render time**.
+Resources follow the same MVI principle: **ViewModels operate on semantic values, UI resolves display strings and images at render time**.
 
 ### Semantic keys in state, resolution in UI
 

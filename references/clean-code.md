@@ -13,15 +13,15 @@
 
 ### Disciplined MVI
 
-One feature ViewModel, one clear state model, one reducer pipeline, small number of effects, explicit UI contracts, shared business logic, direct feature names.
+One feature ViewModel, one clear state model, one `onEvent()` function, small number of effects, explicit UI contracts, shared business logic, direct feature names.
 
 ### Bloated MVI
 
-Too many tiny sealed types, every action wrapped twice, separate mapper/presenter/reducer/controller for trivial screens, verbose generic layers with little value.
+Too many tiny sealed types, every action wrapped twice, separate mapper/presenter/handler for trivial screens, verbose generic layers with little value.
 
 ### Overengineered MVI
 
-Generic architecture framework dominates feature code, feature code disappears behind base abstractions, every repository call has a use case wrapper, every row gets a ViewModel, navigation/platform details abstracted long before pain exists.
+Generic architecture framework dominates feature code, feature code disappears behind base abstractions, every repository call has a use case wrapper, every row gets a ViewModel, navigation/platform details abstracted long before pain exists. Introducing a 4th type (`Result`/`PartialState`) and a mandatory pure reducer for screens that don't benefit from it.
 
 ## Decision Rules
 
@@ -35,15 +35,15 @@ When you see: `UserEvent`, `UiEvent`, `SystemEvent`, `InternalEvent`, `ViewEvent
 
 ### When to model effects separately
 
-When the action leaves pure state transition space: network, persistence, delay/debounce, navigation, snackbar, haptics, share, analytics. Do **not** create an effect for plain synchronous state changes.
+When the action leaves the ViewModel's state-management scope: network, persistence, delay/debounce, navigation, snackbar, haptics, share, analytics. Do **not** create an effect for plain synchronous state changes.
 
-### When separate reducers are justified
+### When you need a Result/PartialState type (4th type)
 
-When a sub-flow is large, logically independent, reused, async on its own, or testable on its own. Do not split reducers because a file hit 80 lines.
+Rarely. Consider it only when: the same state transition is triggered by many different sources (events, async completions, WebSocket messages, push notifications) and you want to centralize all transitions in one pure function. For most screens, `onEvent()` handling state updates directly is simpler and more readable.
 
-### When a generic base ViewModel is harmful
+### When a generic base ViewModel helps
 
-Almost always for app feature code. You lose: feature-specific naming, readable control flow, debuggability, obvious transition ownership.
+When you have 10+ features and the boilerplate of `MutableStateFlow` + `Channel` + `onEvent()` is genuinely repetitive. A thin base class or interface that provides `updateState()`, `sendEffect()`, and `currentState` is fine. A base class that forces `handleEvent()` + `reduce()` + `dispatch()` + `asyncAction()` is overengineering unless the entire team has agreed on it.
 
 ### When a screen should have a dedicated ViewModel
 
@@ -79,10 +79,10 @@ That is usually ceremony.
 
 | Area | Good architecture | Overengineering |
 |---|---|---|
-| ViewModel | `EstimateViewModel` with `handleEvent()` + `reduce()` | `BaseMviViewModel<State, Intent, Effect, Result>` |
-| Intents | one feature sealed interface | multi-layer intent taxonomy |
-| Reducer | feature-specific pure reducer | generic framework reducer DSL |
-| Effects | only for impure work | effects for trivial synchronous transitions |
+| ViewModel | `EstimateViewModel` with `onEvent()` | `BaseMviViewModel<State, Intent, Effect, Result>` with `handleEvent()` + `reduce()` |
+| Events | one feature sealed interface | multi-layer intent taxonomy |
+| State updates | inline `updateState { copy(...) }` in `onEvent()` | separate `Result` type + pure `reduce()` function for simple screens |
+| Effects | only for impure one-shot actions | effects for trivial synchronous transitions |
 | UI | route + dumb screen + meaningful leaves | every row has its own ViewModel/presenter |
 | Use cases | used for real domain logic | one wrapper per repository call |
 | Modules | feature-first | giant "domain/data/presentation" package islands |
@@ -107,15 +107,11 @@ shared/
     src/commonMain/kotlin/com/acme/feature/estimate/
       EstimateContract.kt
       EstimateViewModel.kt
-      EstimateValidator.kt
-      EstimateCalculator.kt
-      EstimateRepository.kt
       EstimateRoute.kt
       EstimateScreen.kt
       components/
         EstimateForm.kt
         ResultCard.kt
-        HistoryList.kt
     src/androidMain/kotlin/com/acme/feature/estimate/
       AndroidEstimateBindings.kt
     src/iosMain/kotlin/com/acme/feature/estimate/
@@ -162,7 +158,6 @@ The second form becomes a horizontal maze fast.
 | Concept | Recommended | Avoid |
 |---|---|---|
 | Event | `EstimateEvent` | `EstimateActionEventIntent` |
-| Result | `EstimateResult` | `InternalUiModelMutationSignal` |
 | State | `EstimateState` | `EstimateViewState`, `Contract.State` |
 | Effect | `EstimateEffect` | `EstimateCommandEffectSideEffect`, `SingleLiveEvent` |
 | Contract file | `EstimateContract.kt` | separate files per type for small screens |
@@ -173,7 +168,7 @@ The second form becomes a horizontal maze fast.
 
 ## Code Examples
 
-### BAD: base ViewModel with no reducer — state transitions scattered
+### BAD: base ViewModel with scattered `updateState`/`sendEffect` — no clear structure
 
 ```kotlin
 abstract class BaseViewModel<Event, State, Effect>(initialState: State) : ViewModel() {
@@ -185,61 +180,23 @@ abstract class BaseViewModel<Event, State, Effect>(initialState: State) : ViewMo
 }
 ```
 
-Why: `updateState` and `sendEffect` calls end up scattered through `onEvent`, private functions, coroutine callbacks, and try/catch blocks. State transitions are untestable without full ViewModel setup. No separation between pure logic and async work.
+This base class itself is fine — the problem is what happens in subclasses: `updateState` and `sendEffect` calls scattered through `onEvent`, private functions, coroutine callbacks, and try/catch blocks with no organizing principle. The base class doesn't prevent this, but it doesn't cause it either. **A disciplined `onEvent()` with clear helper functions is the fix, not a more complex base class.**
 
-### BAD: base ViewModel that forces feature logic shape
-
-```kotlin
-abstract class BaseMviViewModel<STATE : Any, INTENT : Any, RESULT : Any, EFFECT : Any> : ViewModel() {
-    abstract val state: StateFlow<STATE>
-    abstract val effects: Flow<EFFECT>
-    abstract fun dispatch(intent: INTENT)
-    protected abstract fun reduce(state: STATE, result: RESULT): STATE
-    protected abstract fun mapIntent(intent: INTENT): RESULT
-}
-```
-
-Why: forces every feature into `reduce`/`mapIntent` shape with extra ceremony. `mapIntent` is unnecessary indirection.
-
-### GOOD: MviViewModel — plumbing + pure reducer
+### BAD: 4-type MVI forced on every screen
 
 ```kotlin
-abstract class MviViewModel<Event, Result, State, Effect>(
-    initialState: State
-) : ViewModel() {
-    val state: StateFlow<State>       // auto-managed
-    val effect: Flow<Effect>          // auto-managed
-    protected val currentState: State
+// For a simple "pick a currency" screen, this is too much:
+sealed interface CurrencyEvent { data class OnSelected(val currency: Currency) : CurrencyEvent }
+sealed interface CurrencyResult { data class CurrencySelected(val currency: Currency) : CurrencyResult }
+data class CurrencyState(val selected: Currency? = null)
+sealed interface CurrencyEffect { data class NavigateBack(val currency: Currency) : CurrencyEffect }
 
-    fun onEvent(event: Event)         // calls handleEvent(event)
-
-    // Features implement these:
-    protected abstract fun handleEvent(event: Event)                     // transforms events into results via dispatch()
-    protected abstract fun reduce(result: Result, state: State): ReducerResult<State, Effect>
-
-    protected fun dispatch(result: Result)                               // sends result to reducer
-    protected fun asyncAction(action: suspend () -> Result, onError: (Exception) -> Result) // coroutine helper
-}
-```
-
-No marker interfaces (`UiState`, `UiEffect`, `UiEvent`) — plain generics are sufficient. Feature-specific sealed interfaces already provide strong typing; marker interfaces add ceremony without type safety. The generic parameter names (`Event`, `Result`, `State`, `Effect`) document each role.
-
-Why this works:
-- **4 separate type parameters**: `Event`, `Result`, `State`, `Effect`. No inheritance between types — no markers, no casts, no hacks
-- **Explicit event-to-result mapping**: `handleEvent()` transforms every event into one or more results via `dispatch()`. One event can produce zero, one, or many results
-- **Reducer is pure**: `reduce(result, state)` returns `ReducerResult(state, effects)`. Reducer never sees raw UI events. Testable without ViewModel, coroutines, or mocks
-- **No scattered state mutations**: all state transitions in one `reduce()` function
-- **Base class handles all plumbing**: features only write business logic
-
-Simple screen (no async) — two functions, both short:
-```kotlin
 class CurrencyViewModel : MviViewModel<CurrencyEvent, CurrencyResult, CurrencyState, CurrencyEffect>(...) {
     override fun handleEvent(event: CurrencyEvent) {
         when (event) {
             is CurrencyEvent.OnSelected -> dispatch(CurrencyResult.CurrencySelected(event.currency))
         }
     }
-
     override fun reduce(result: CurrencyResult, state: CurrencyState) = reduce(state) {
         when (result) {
             is CurrencyResult.CurrencySelected -> {
@@ -251,52 +208,86 @@ class CurrencyViewModel : MviViewModel<CurrencyEvent, CurrencyResult, CurrencySt
 }
 ```
 
-Screen with async — handleEvent maps events and starts work, reducer handles results:
-```kotlin
-class AddCategoryViewModel(...) : MviViewModel<AddCategoryEvent, AddCategoryResult, AddCategoryState, AddCategoryEffect>(...) {
-    override fun handleEvent(event: AddCategoryEvent) {
-        when (event) {
-            is AddCategoryEvent.OnNameChanged -> dispatch(AddCategoryResult.NameChanged(event.name))
-            AddCategoryEvent.OnSaveClick -> {
-                dispatch(AddCategoryResult.SaveRequested)
-                if (currentState.name.isNotBlank()) {
-                    asyncAction(
-                        action = { categoryRepository.insert(/*...*/); AddCategoryResult.CategorySaved },
-                        onError = { AddCategoryResult.SaveFailed(it.message ?: "Failed") }
-                    )
-                }
-            }
-        }
-    }
+Event → Result mapping is 1:1 with no transformation. The `Result` type adds nothing.
 
-    override fun reduce(result: AddCategoryResult, state: AddCategoryState) = reduce(state) {
-        when (result) {
-            is AddCategoryResult.NameChanged -> state(state.copy(name = result.name))
-            AddCategoryResult.SaveRequested -> {
-                if (state.name.isBlank()) {
-                    effect(AddCategoryEffect.ShowError("Name is required"))
-                    state(state.copy(validationErrors = mapOf("name" to "Name is required")))
-                } else {
-                    state(state.copy(isSaving = true))
-                }
-            }
-            AddCategoryResult.CategorySaved -> {
-                effect(AddCategoryEffect.ShowSuccess("Saved"), AddCategoryEffect.NavigateBack)
-                state(state.copy(isSaving = false))
-            }
-            is AddCategoryResult.SaveFailed -> {
-                effect(AddCategoryEffect.ShowError(result.error))
-                state(state.copy(isSaving = false))
+### GOOD: same screen with 3-type MVI
+
+```kotlin
+sealed interface CurrencyEvent { data class OnSelected(val currency: Currency) : CurrencyEvent }
+data class CurrencyState(val selected: Currency? = null)
+sealed interface CurrencyEffect { data class NavigateBack(val currency: Currency) : CurrencyEffect }
+
+class CurrencyViewModel : ViewModel() {
+    private val _state = MutableStateFlow(CurrencyState())
+    val state = _state.asStateFlow()
+    private val _effect = Channel<CurrencyEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
+
+    fun onEvent(event: CurrencyEvent) {
+        when (event) {
+            is CurrencyEvent.OnSelected -> {
+                _state.update { it.copy(selected = event.currency) }
+                _effect.trySend(CurrencyEffect.NavigateBack(event.currency))
             }
         }
     }
 }
 ```
 
-Rules for `MviViewModel`:
-- Never add business logic helpers (`handleError`, `isLoading`, `retry`)
-- Never add cross-cutting concerns (analytics, logging, error tracking)
-- Features own their logic in `handleEvent()` and `reduce()` — the base class only provides plumbing and dispatch
+Direct, readable, testable. No intermediate type.
+
+### GOOD: MVI ViewModel with async work
+
+```kotlin
+class CreateItemViewModel(
+    private val repository: ItemRepository,
+) : ViewModel() {
+    private val _state = MutableStateFlow(CreateItemState())
+    val state: StateFlow<CreateItemState> = _state.asStateFlow()
+
+    private val _effect = Channel<CreateItemEffect>(Channel.BUFFERED)
+    val effect: Flow<CreateItemEffect> = _effect.receiveAsFlow()
+
+    fun onEvent(event: CreateItemEvent) {
+        when (event) {
+            is CreateItemEvent.OnTitleChanged -> {
+                _state.update { it.copy(title = event.title, errors = it.errors - "title") }
+            }
+            is CreateItemEvent.OnAmountChanged -> {
+                _state.update { it.copy(amount = event.amount, errors = it.errors - "amount") }
+            }
+            CreateItemEvent.OnSaveClick -> save()
+            CreateItemEvent.OnBackClick -> _effect.trySend(CreateItemEffect.NavigateBack)
+        }
+    }
+
+    private fun save() {
+        val current = _state.value
+        val errors = buildMap {
+            if (current.title.isBlank()) put("title", "Title is required")
+            if (current.amount.toDoubleOrNull() == null) put("amount", "Enter a valid number")
+        }
+
+        if (errors.isNotEmpty()) {
+            _state.update { it.copy(errors = errors) }
+            return
+        }
+
+        _state.update { it.copy(isSaving = true, errors = emptyMap()) }
+        viewModelScope.launch {
+            try {
+                repository.create(current.title.trim(), current.amount.toDouble())
+                _state.update { it.copy(isSaving = false) }
+                _effect.trySend(CreateItemEffect.ShowMessage("Saved"))
+                _effect.trySend(CreateItemEffect.NavigateBack)
+            } catch (e: Exception) {
+                _state.update { it.copy(isSaving = false) }
+                _effect.trySend(CreateItemEffect.ShowMessage("Failed: ${e.message}"))
+            }
+        }
+    }
+}
+```
 
 ### BAD: one giant intent hierarchy
 
@@ -354,5 +345,9 @@ class EstimateViewModel(
     private val repository: EstimateRepository,
     private val calculator: EstimateCalculator,
     private val validator: EstimateValidator,
-) : MviViewModel<EstimateEvent, EstimateResult, EstimateState, EstimateEffect>(EstimateState())
+) : ViewModel() {
+    private val _state = MutableStateFlow(EstimateState())
+    val state = _state.asStateFlow()
+    // ...
+}
 ```

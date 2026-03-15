@@ -289,9 +289,8 @@ data class UserSettings(
 ```kotlin
 class SettingsViewModel(
     private val repository: SettingsRepository
-) : MviViewModel<SettingsEvent, SettingsResult, SettingsState, SettingsEffect>(
-    initialState = SettingsState()
-) {
+) : ViewModel(), MviHost<SettingsEvent, SettingsState, SettingsEffect> {
+    override val store = MviStore(SettingsState())
 
     init {
         collectSettings()
@@ -300,43 +299,35 @@ class SettingsViewModel(
     private fun collectSettings() {
         viewModelScope.launch {
             repository.settings
-                .catch { dispatch(SettingsResult.LoadFailed(it.message)) }
-                .collect { dispatch(SettingsResult.SettingsLoaded(it)) }
+                .catch { sendEffect(SettingsEffect.ShowError(it.message ?: "Load failed")) }
+                .collect { settings ->
+                    updateState { copy(settings = settings, isLoading = false) }
+                }
         }
     }
 
-    override fun handleEvent(event: SettingsEvent) {
+    override fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.ToggleDarkMode -> {
-                asyncAction(
-                    action = { repository.setDarkMode(!currentState.settings.darkMode); SettingsResult.DarkModeToggled },
-                    onError = { SettingsResult.LoadFailed(it.message) }
-                )
+                viewModelScope.launch {
+                    try {
+                        repository.setDarkMode(!currentState.settings.darkMode)
+                    } catch (e: Exception) {
+                        sendEffect(SettingsEffect.ShowError(e.message ?: "Failed"))
+                    }
+                }
             }
             is SettingsEvent.ChangeLocale -> {
-                asyncAction(
-                    action = { repository.setLocale(event.locale); SettingsResult.LocaleChanged },
-                    onError = { SettingsResult.LoadFailed(it.message) }
-                )
+                viewModelScope.launch {
+                    try {
+                        repository.setLocale(event.locale)
+                    } catch (e: Exception) {
+                        sendEffect(SettingsEffect.ShowError(e.message ?: "Failed"))
+                    }
+                }
             }
         }
     }
-
-    override fun reduce(result: SettingsResult, state: SettingsState): ReducerResult<SettingsState, SettingsEffect> =
-        when (result) {
-            is SettingsResult.SettingsLoaded -> state.copy(
-                settings = result.settings,
-                isLoading = false
-            ) to emptyList()
-
-            is SettingsResult.LoadFailed -> state.copy(
-                error = result.message,
-                isLoading = false
-            ) to emptyList()
-
-            SettingsResult.DarkModeToggled, SettingsResult.LocaleChanged ->
-                state to emptyList()
-        }
 }
 ```
 

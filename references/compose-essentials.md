@@ -1,6 +1,6 @@
 # Compose Essentials
 
-Foundational Compose patterns that complement strict-MVI architecture. Consult this when working with Compose APIs directly.
+Foundational Compose patterns that complement MVI architecture. Consult this when working with Compose APIs directly.
 
 ## Table of Contents
 
@@ -58,7 +58,7 @@ items[0] = items[0].copy(name = "Updated")  // triggers recomposition
 items[0].name = "Updated"        // does NOT trigger recomposition (in-place mutation)
 ```
 
-In strict MVI, prefer immutable collections (`ImmutableList`) in state models. `SnapshotStateList` is acceptable for UI-local state only.
+In MVI, prefer immutable collections (`ImmutableList`) in state models. `SnapshotStateList` is acceptable for UI-local state only.
 
 ### Saver for rememberSaveable
 
@@ -77,7 +77,7 @@ var filter by rememberSaveable(stateSaver = filterSaver) {
 }
 ```
 
-In strict MVI, `rememberSaveable` is only for small UI-local state — screen business state belongs in the ViewModel. `rememberSaveable` is multiplatform and works in CMP `commonMain`.
+In MVI, `rememberSaveable` is only for small UI-local state — screen business state belongs in the ViewModel. `rememberSaveable` is multiplatform and works in CMP `commonMain`.
 
 ## Side Effects
 
@@ -106,7 +106,7 @@ LaunchedEffect(Unit) { viewModel.search(query) }
 LaunchedEffect(query) { viewModel.search(query) }
 ```
 
-In strict MVI, `LaunchedEffect` belongs at the route level for collecting UI effects. Do not use it for business logic in leaf composables.
+In MVI, `LaunchedEffect` belongs at the route level for collecting UI effects. Do not use it for business logic in leaf composables.
 
 ### DisposableEffect — For Cleanup
 
@@ -131,7 +131,7 @@ val scope = rememberCoroutineScope()
 Button(onClick = { scope.launch { fetchData() } }) { Text("Fetch") }
 ```
 
-In strict MVI, prefer dispatching intents to the ViewModel instead. Use `rememberCoroutineScope` only for UI-local async work (e.g., scroll animation, snackbar).
+In MVI, prefer dispatching events to the ViewModel instead. Use `rememberCoroutineScope` only for UI-local async work (e.g., scroll animation, snackbar).
 
 ### rememberUpdatedState — Capturing Latest Values
 
@@ -166,7 +166,7 @@ val user by produceState<User?>(initialValue = null, userId) {
 }
 ```
 
-In strict MVI, the ViewModel already bridges external data via `StateFlow`. Use `produceState` only at route-edge integration points.
+In MVI, the ViewModel already bridges external data via `StateFlow`. Use `produceState` only at route-edge integration points.
 
 ### Effect Ordering
 
@@ -339,4 +339,4 @@ val density = LocalDensity.current
 val LocalTitle = staticCompositionLocalOf<String> { "" }
 ```
 
-In strict MVI, avoid custom CompositionLocals for feature state. State flows through the ViewModel → route → screen → leaves via explicit parameters.
+In MVI, avoid custom CompositionLocals for feature state. State flows through the ViewModel → route → screen → leaves via explicit parameters.

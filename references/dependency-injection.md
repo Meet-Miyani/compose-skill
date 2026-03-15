@@ -18,7 +18,7 @@ References:
 - [Scoped Navigation](#scoped-navigation)
 - [Animations with Nav 3](#animations-with-nav-3)
 - [Adaptive Layouts with Koin](#adaptive-layouts-with-koin)
-- [Koin in Strict MVI](#koin-in-strict-mvi)
+- [Koin in MVI](#koin-in-mvi)
 
 ## Package Selection
 
@@ -503,22 +503,26 @@ val appModule = module {
 }
 ```
 
-## Koin in Strict MVI
+## Koin in MVI
 
-### ViewModel in Strict MVI
+### ViewModel in MVI
 
-The ViewModel extends `MviViewModel<Event, Result, State, Effect>` and implements `handleEvent()` + `reduce()`. This works in both Android-only and CMP `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Declare it with Koin and inject dependencies:
+The ViewModel implements the MVI pattern with `onEvent()` as the single entry point from the UI. This works in both Android-only and CMP `commonMain` since `androidx.lifecycle:lifecycle-viewmodel` is multiplatform. Declare it with Koin and inject dependencies:
 
 ```kotlin
 class EstimateViewModel(
     private val calculator: EstimateCalculator,
     private val validator: EstimateValidator,
     private val repository: EstimateRepository,
-) : MviViewModel<EstimateEvent, EstimateResult, EstimateState, EstimateEffect>(
-    initialState = EstimateState()
-) {
-    override fun handleEvent(event: EstimateEvent) { /* maps events to results via dispatch() */ }
-    override fun reduce(result: EstimateResult, state: EstimateState) = reduce(state) { /* ... */ }
+) : ViewModel(), MviHost<EstimateEvent, EstimateState, EstimateEffect> {
+    override val store = MviStore(EstimateState())
+
+    override fun onEvent(event: EstimateEvent) {
+        when (event) {
+            is EstimateEvent.FieldChanged -> updateState { /* ... */ }
+            EstimateEvent.SubmitClicked -> { /* validate, launch async */ }
+        }
+    }
 }
 
 // Module

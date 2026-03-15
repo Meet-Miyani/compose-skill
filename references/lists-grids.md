@@ -1,6 +1,6 @@
 # Lists & Grids
 
-Compose patterns for lazy layouts, applied within strict-MVI architecture.
+Compose patterns for lazy layouts, applied within MVI architecture.
 
 ## Table of Contents
 

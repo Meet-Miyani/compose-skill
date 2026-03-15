@@ -24,7 +24,7 @@ References:
 - [Back Stack Manipulation Patterns](#back-stack-manipulation-patterns)
 - [Modularization](#modularization)
 - [Deep Links](#deep-links)
-- [Nav 3 in Strict MVI](#nav-3-in-strict-mvi)
+- [Nav 3 in MVI](#nav-3-in-mvi)
 - [Anti-Patterns](#anti-patterns)
 
 ## Core Architecture
@@ -786,7 +786,7 @@ fun App(initialDeepLinkId: String? = null) {
 
 Deep link registration lives in platform entry points: `AndroidManifest.xml` intent filters on Android, App Delegate / `SceneDelegate` on iOS, and application-level URL handlers on Desktop. The back stack construction logic above can live in shared `commonMain` code.
 
-## Nav 3 in Strict MVI
+## Nav 3 in MVI
 
 The architectural rule: **ViewModels emit semantic effects; the route layer manipulates the back stack.**
 

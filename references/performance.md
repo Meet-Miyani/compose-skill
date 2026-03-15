@@ -104,7 +104,7 @@ Use them to **describe truth**, not to silence the compiler. `@Immutable` for tr
 
 ### The Form Input Dilemma
 
-Forms with 25+ fields present a unique challenge in strict MVI. If every keystroke emits an intent that forces a full state copy and full re-render, text input will stutter.
+Forms with 25+ fields present a unique challenge in MVI. If every keystroke emits an event that forces a full state copy and full re-render, text input will stutter.
 
 **Solutions:**
 

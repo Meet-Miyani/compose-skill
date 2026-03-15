@@ -516,7 +516,7 @@ fun `filter change updates estimates`() = runTest {
         val initial = awaitItem()
         assertEquals(FilterType.ALL, initial.selectedFilter)
 
-        viewModel.dispatch(EstimateListEvent.FilterChanged(FilterType.SENT))
+        viewModel.onEvent(EstimateListEvent.FilterChanged(FilterType.SENT))
 
         val updated = awaitItem()
         assertEquals(FilterType.SENT, updated.selectedFilter)
@@ -565,7 +565,7 @@ fun `submit emits navigation effect`() = runTest {
 fun `debounced search triggers after delay`() = runTest {
     val viewModel = SearchViewModel(FakeSearchRepository())
 
-    viewModel.dispatch(SearchEvent.QueryChanged("kotlin"))
+    viewModel.onEvent(SearchEvent.QueryChanged("kotlin"))
     advanceUntilIdle() // skip debounce delay
 
     val state = viewModel.state.value

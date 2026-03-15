@@ -1,6 +1,6 @@
 # Compose Skill README
 
-This repository contains the `compose` skill: a strict-MVI guide for Jetpack Compose and Compose Multiplatform (KMP/CMP).
+This repository contains the `compose` skill: an MVI architecture guide for Jetpack Compose and Compose Multiplatform (KMP/CMP).
 
 ## Installation & usage
 
@@ -59,7 +59,7 @@ You can also just download or copy the skill folder directly into any of the dir
 The skill activates automatically when your prompt mentions Compose, MVI, `StateFlow`, `@Composable`, Koin, Hilt, KMP, etc. You can also invoke it explicitly:
 
 ```text
-Use $compose to refactor this screen with strict MVI architecture.
+Use $compose to refactor this screen with MVI architecture.
 ```
 
 In the **Codex App**, you can also browse installed skills from the **Skills** sidebar and select `compose` from there.
@@ -97,7 +97,7 @@ If you already installed via Codex or Claude Code, the skill is available in Cur
 Once installed, invoke it in Agent chat:
 
 ```text
-Use the compose skill to build a strict-MVI feature screen.
+Use the compose skill to build an MVI feature screen.
 ```
 
 Or type `/` in chat to see available skills and select `compose`.
@@ -122,7 +122,7 @@ Claude Projects on claude.ai let you upload knowledge files that persist across 
 
 1. Create a new **Project** (requires Pro or Team plan).
 2. Open **Project Knowledge** and upload `SKILL.md` (and any `references/*.md` files you need).
-3. Optionally add custom instructions like: *"Follow the strict-MVI rules from the uploaded SKILL.md for all Compose code."*
+3. Optionally add custom instructions like: *"Follow the MVI rules from the uploaded SKILL.md for all Compose code."*
 4. Start a conversation inside that project. Claude will reference the uploaded skill automatically.
 
 ### Other LLM tools / agents
@@ -131,14 +131,14 @@ For any agent that accepts context files or system prompts:
 
 1. Provide `SKILL.md` as a context file or paste its content into the system prompt.
 2. Point the agent to relevant code files (`ViewModel`, `Route`, `Screen`, contracts).
-3. Ask for strict-MVI compliance explicitly.
+3. Ask for MVI compliance explicitly.
 
 ### Verify the skill is working
 
 Include these acceptance criteria in your prompts so outputs are verifiable:
 
-- ViewModel is `MviViewModel<Event, Result, State, Effect>`
-- Reducer is pure and owns all state transitions
+- ViewModel uses MVI with Event, State, Effect — single `onEvent()` entry point
+- All state transitions happen in the ViewModel, not in composables
 - Composables do not run business logic or repository calls
 - Effects are one-off (navigation/snackbar/share), not "consume once" booleans in state
 - UI-only visual state stays local unless business logic depends on it
@@ -147,7 +147,7 @@ Include these acceptance criteria in your prompts so outputs are verifiable:
 
 | Area | What the skill enforces |
 |------|------------------------|
-| Architecture | Strict unidirectional MVI: one `MviViewModel<Event, Result, State, Effect>` per screen, pure reducer, immutable state, one-off effects via channel |
+| Architecture | Unidirectional MVI: one ViewModel per screen with `onEvent(Event)`, immutable `State` via StateFlow, one-off `Effect` via Channel |
 | State modeling | Raw input vs derived values vs persisted snapshot vs transient UI-only state |
 | UI layer | Dumb screens/leaf composables that render state and emit events — no business logic |
 | Performance | Minimal recomposition through state shape, read boundaries, stability, and Compose compiler metrics |
@@ -158,7 +158,7 @@ Include these acceptance criteria in your prompts so outputs are verifiable:
 | Paging | Paging 3 with `PagingData` as a separate Flow (never inside `UiState`) |
 | Cross-platform | `commonMain` sharing, `expect/actual`, lifecycle, resources |
 | Resources | CMP `Res` class vs Android `R`, `composeResources/` directory, drawables, strings, plurals, fonts, raw files, qualifiers, localization, `Res.getUri`, MVI integration |
-| Testing | Reducer/validator unit tests, Turbine for StateFlow, UI tests, Macrobenchmark |
+| Testing | ViewModel event→state→effect tests via Turbine, validator/calculator unit tests, UI tests, Macrobenchmark |
 | Animations | `animate*AsState`, `AnimatedVisibility`, shared element transitions, gesture-driven |
 
 The same architectural rules apply to both Jetpack Compose (Android-only) and Compose Multiplatform (KMP/CMP). Platform-specific behavior is isolated using interfaces or `expect/actual`.
@@ -206,7 +206,7 @@ compose-skill/
 ├── agents/
 │   └── openai.yaml                   # Codex-specific UI metadata (optional, other tools ignore it)
 └── references/
-    ├── architecture.md               # ViewModel/reducer pipeline, state modeling, code examples
+    ├── architecture.md               # ViewModel/MVI pipeline, state modeling, code examples
     ├── coroutines-flow.md            # StateFlow vs SharedFlow vs Channel, operators, backpressure, Turbine
     ├── compose-essentials.md         # Three phases, state primitives, side effects, modifiers, CompositionLocal
     ├── lists-grids.md               # LazyColumn/Row, keys, contentType, grids, pager, nested scrolling
@@ -215,7 +215,7 @@ compose-skill/
     ├── performance.md               # Recomposition rules, stability, Compose Compiler Metrics, baseline profiles
     ├── animations.md                # Animation APIs, shared element transitions, gesture-driven, Canvas
     ├── ui-ux.md                     # Loading states, skeleton/shimmer, inline validation, perceived performance
-    ├── testing.md                   # Turbine, reducer tests, UI tests, Macrobenchmark, test matrix
+    ├── testing.md                   # Turbine, ViewModel tests, UI tests, Macrobenchmark, test matrix
     ├── room-database.md             # KMP + Android setup, entities, DAOs, indexes, relationships, migrations, testing
     ├── networking-ktor.md           # HttpClient, engines, DTOs, ApiResponse, auth, WebSockets, MockEngine
     ├── dependency-injection.md      # Koin setup (CMP), Koin + Nav 3, Hilt for Android-only
@@ -230,13 +230,13 @@ compose-skill/
 1. **Identify the concern** — architecture, state modeling, performance, navigation, DI, animation, cross-platform, or testing.
 2. **Apply core rules from `SKILL.md`** — the decision heuristics and defaults cover most cases.
 3. **Load a reference file** — only when deeper guidance is needed for the specific topic.
-4. **Flag anti-patterns** — if existing code violates strict-MVI principles, call it out with the correct replacement.
+4. **Flag anti-patterns** — if existing code violates MVI principles, call it out with the correct replacement.
 5. **Write the minimal correct solution** — feature-specific code over generic frameworks; no over-engineering.
 
 ## Example prompts
 
 ```text
-Refactor this Compose screen to strict MVI.
+Refactor this Compose screen to MVI.
 ```
 
 ```text

@@ -548,7 +548,7 @@ class EstimateListViewModel(
         }
         .cachedIn(viewModelScope)
 
-    fun dispatch(intent: EstimateListIntent) {
+    fun onEvent(intent: EstimateListIntent) {
         when (intent) {
             is EstimateListIntent.FilterChanged -> {
                 _statusFilter.value = intent.filter
