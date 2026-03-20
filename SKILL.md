@@ -1,5 +1,6 @@
 ---
 name: compose-skill
+license: MIT
 description: >
   Build, refactor, and review apps with Jetpack Compose and Compose Multiplatform (KMP/CMP)
   using MVI architecture. Covers coroutines/Flow, StateFlow, SharedFlow, Channel, ViewModels,
@@ -51,31 +52,12 @@ When helping with Jetpack Compose or Compose Multiplatform code, follow this pro
 
 ## Fetching Up-to-Date Documentation
 
-When integrating a new library, upgrading dependencies, or verifying latest API patterns, a **documentation MCP tool** (such as Context7) can fetch current official documentation directly into context. This supplements the bundled references with real-time documentation.
+When adding a new dependency, upgrading major versions, or verifying latest API patterns, use a **documentation MCP tool** (e.g., Context7) if available. Before invoking, verify the tool's exact name and parameter schema — tool names vary across environments.
 
-### When to Use
-- Adding a new dependency not covered by bundled references
-- Upgrading major library versions (e.g., Ktor 2→3, Coil 2→3, Navigation 2→3)
-- Verifying latest recommended patterns when bundled references may be outdated
-- Resolving discrepancies between bundled guidance and observed API behavior
+1. **Resolve library ID** — if the tool requires a resolution step, call it first.
+2. **Query docs** — call with the resolved ID and a specific question.
 
-### Usage
-1. **Check availability** — Before invoking any doc-fetching tool, verify that a documentation MCP server is installed and confirm the exact tool names and parameter schemas it exposes. Tool names may vary across environments (e.g., `resolve-library-id` / `query-docs`, `search_docs`, or other names). Do not assume fixed tool names.
-2. **Resolve library ID** — If the tool requires a library ID resolution step, call it first with the library name.
-3. **Query docs** — Call the documentation query tool with the resolved ID (or library name, depending on the tool's schema) and a specific question.
-
-**Alternative**: Users can add `use context7` (or equivalent) to their prompt to trigger documentation lookup.
-
-### Common Compose/KMP Libraries
-When a documentation tool is available, these libraries typically have documentation indexed:
-- Jetpack Compose, Compose Multiplatform
-- Ktor (networking)
-- Koin (dependency injection)
-- Coil (image loading)
-- Room (database)
-- Kotlin Coroutines, Kotlin Serialization
-
-**Note**: Bundled references remain the primary source for architectural patterns and MVI guidance. Use documentation tools for API-specific queries and version-specific documentation.
+**Alternative**: Users can add `use context7` (or equivalent) to their prompt. Bundled references remain the primary source for architectural patterns and MVI guidance; use documentation tools for API-specific and version-specific queries.
 
 ## Core Architecture: MVI with Event, State, Effect
 
@@ -175,41 +157,41 @@ For calculator/form screens, split state into four buckets:
 Load these only when the task requires deeper guidance:
 
 ### Kotlin Foundations
-- **[Coroutines & Flow](references/coroutines-flow.md)** — StateFlow vs SharedFlow vs Channel decision table, Flow operators (`flatMapLatest`, `combine`, `debounce`, `catch`), Dispatchers (IO/Default/Main), structured concurrency (`viewModelScope`, `supervisorScope`), exception handling, `CancellationException`, `stateIn`/`shareIn`, backpressure (`buffer`/`conflate`/`collectLatest`), `callbackFlow`, Mutex/Semaphore, testing with Turbine
+- **[Coroutines & Flow](references/coroutines-flow.md)** — StateFlow/SharedFlow/Channel decisions, Flow operators, structured concurrency, Turbine testing
 
 ### Architecture
-- **[Architecture & State Management](references/architecture.md)** — ViewModel/event-handling pipeline, state modeling, Channel vs SharedFlow for effects, **domain layer rules**, **inter-feature communication** (event bus, feature API contracts), **module dependency rules**, GOOD/BAD code examples
-- **[Clean Code & Organization](references/clean-code.md)** — avoiding overengineering, file organization, naming conventions, disciplined vs bloated MVI comparison
-- **[Anti-Patterns](references/anti-patterns.md)** — cross-cutting anti-pattern quick-reference table with "why it hurts" and "better replacement" for each, plus routing index to domain-specific anti-patterns in other reference files
+- **[Architecture & State Management](references/architecture.md)** — ViewModel pipeline, state modeling, domain layer, inter-feature communication
+- **[Clean Code & Organization](references/clean-code.md)** — file organization, naming, disciplined vs bloated MVI
+- **[Anti-Patterns](references/anti-patterns.md)** — cross-cutting anti-pattern table with replacements
 
 ### Compose APIs
-- **[Material 3 Theming & Components](references/material-design.md)** — M3 theme setup (dynamic color, dark/light, color roles), typography/shapes, component decisions (Scaffold, TopAppBar, NavigationBar/Rail/Suite, BottomSheet, Snackbar, Dialog), adaptive layouts (window size classes, canonical layouts), M2→M3 migration
-- **[Image Loading (Coil 3)](references/image-loading.md)** — Coil 3 setup for Compose/CMP, `AsyncImage`/`rememberAsyncImagePainter`/`SubcomposeAsyncImage` decision guide, placeholder/error/fallback/crossfade, memory/disk/network cache policy, `memoryCacheKey` + `placeholderMemoryCacheKey`, transformations vs `Modifier.clip`, SVG (`coil-svg`), `Res.getUri` resource loading
-- **[Compose Essentials](references/compose-essentials.md)** — three phases model, state primitives, side effects (`LaunchedEffect`, `DisposableEffect`, `rememberUpdatedState`), modifier ordering, `graphicsLayer`, slot pattern, `CompositionLocal`, `collectAsStateWithLifecycle`
-- **[Lists & Grids](references/lists-grids.md)** — LazyColumn/LazyRow, keys, `contentType`, grids, pager, scroll state, nested scrolling, list anti-patterns
-- **[Paging 3](references/paging.md)** — PagingSource, Pager + ViewModel setup (**PagingData as separate Flow, never in UiState**), `cachedIn`, filter/search with `flatMapLatest`, `LazyPagingItems`, LoadState handling, transformations, RemoteMediator offline-first, MVI integration, testing, anti-patterns
-- **[Navigation 3](references/navigation.md)** — complete Nav 3 reference: route definition, back stack persistence, `NavDisplay` full API, **top-level tabs** (Now in Android pattern), **ViewModel scoping** with entry decorators, **Scenes** (dialog, bottom sheet, list-detail, Material Adaptive), animations, back stack manipulation, **modularization** (api/impl split, Hilt multibindings, Koin), deep links, MVI integration, CMP polymorphic serialization
+- **[Material 3 Theming & Components](references/material-design.md)** — M3 theme, dynamic color, components, adaptive layouts
+- **[Image Loading (Coil 3)](references/image-loading.md)** — AsyncImage, cache policy, SVG, CMP resources
+- **[Compose Essentials](references/compose-essentials.md)** — three phases, state primitives, side effects, modifiers
+- **[Lists & Grids](references/lists-grids.md)** — LazyColumn/Row, keys, grids, pager, scroll state
+- **[Paging 3](references/paging.md)** — PagingSource, Pager, RemoteMediator, MVI integration
+- **[Navigation 3](references/navigation.md)** — Nav 3 routes, NavDisplay, tabs, scenes, ViewModel scoping, modularization
 
 ### Performance & Quality
-- **[Performance & Recomposition](references/performance.md)** — three phases, primitive state specializations, `TextFieldState`, Strong Skipping Mode, stability config, Compose Compiler Metrics, baseline profiles, API decision table, 20 recomposition rules, diagnostic checklist
-- **[Animations](references/animations.md)** — complete animation API reference: decision tree, `AnimationSpec` (spring/tween/keyframes), `animate*AsState`, `Animatable` (sequential, concurrent, gesture-driven), `updateTransition`, `rememberInfiniteTransition`, `AnimatedVisibility`, `AnimatedContent`, **shared element transitions** (`sharedElement`/`sharedBounds` with navigation, Coil async images), swipe-to-dismiss, Canvas/custom drawing, `graphicsLayer`, performance optimization
-- **[UI/UX Patterns](references/ui-ux.md)** — loading states, skeleton/shimmer, preserving content during refresh, inline validation, perceived performance
-- **[Accessibility](references/accessibility.md)** — contentDescription rules, Modifier.semantics (role, stateDescription, heading), mergeDescendants, clearAndSetSemantics, touch targets (48dp), WCAG color contrast, custom interactive elements, custom accessibility actions
-- **[Testing Strategy](references/testing.md)** — Turbine for StateFlow testing, ViewModel event→state→effect testing, validation/UI tests, Macrobenchmark, lean test matrix by app scale
+- **[Performance & Recomposition](references/performance.md)** — stability, Compiler Metrics, baseline profiles, recomposition rules
+- **[Animations](references/animations.md)** — animation API decision tree, shared elements, gesture-driven, Canvas
+- **[UI/UX Patterns](references/ui-ux.md)** — loading states, skeleton/shimmer, inline validation
+- **[Accessibility](references/accessibility.md)** — semantics, touch targets, WCAG contrast, custom actions
+- **[Testing Strategy](references/testing.md)** — Turbine, ViewModel tests, Macrobenchmark, lean test matrix
 
 ### Data & Persistence
-- **[DataStore](references/datastore.md)** — KMP + Android setup, Preferences DataStore keys/read/write, Typed DataStore with JSON serialization, singleton enforcement, corruption handling, SharedPreferences migration, MVI integration, DI wiring, testing, anti-patterns
-- **[Room Database](references/room-database.md)** — Entity design, performance-oriented DAOs, indexes, relationships (`@Embedded`/`@Relation`/`@Junction`), TypeConverters, transactions, migrations, MVI integration, anti-patterns
+- **[DataStore](references/datastore.md)** — Preferences & Typed DataStore, KMP setup, MVI integration
+- **[Room Database](references/room-database.md)** — entities, DAOs, migrations, relationships, MVI integration
 
 ### Networking, DI & Cross-Platform
-- **[Networking with Ktor](references/networking-ktor.md)** — HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration, anti-patterns
-- **[Dependency Injection](references/dependency-injection.md)** — DI decision guide (Hilt vs Koin), shared concepts
-- **[Koin](references/koin.md)** — Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, **Koin + Nav 3** (`navigation<T>`, `koinEntryProvider`), scoped navigation, MVI ViewModel integration, testing, anti-patterns
-- **[Hilt](references/hilt.md)** — Android-only Hilt setup, `@HiltViewModel`, `hiltViewModel()`, modules (`@Provides`/`@Binds`), scopes, Navigation Compose integration, MVI pattern with Hilt, testing, anti-patterns
-- **[Cross-Platform (KMP)](references/cross-platform.md)** — `commonMain` vs platform placement, interfaces vs `expect/actual`, **platform bridge patterns** (interface+DI, expect/actual, typealias), lifecycle, state restoration, resources, accessibility
-- **[iOS Swift Interop](references/ios-swift-interop.md)** — Kotlin→Swift naming, nullability/collection bridging, SKIE setup, suspend→async, Flow→AsyncSequence, sealed class mapping, **SwiftUI/UIKit interop** (`ComposeUIViewController`, `UIKitView`), iOS API design rules, anti-patterns
-- **[Multiplatform Resources](references/resources.md)** — Android `R` vs CMP `Res` comparison, `composeResources/` directory structure, Gradle setup, drawable/string/plural/font/raw-file APIs with code examples, qualifiers (language, theme, density), localization, generated resource maps, Android assets interop (`Res.getUri`), MVI integration (semantic keys in state, resolution in UI), do/don't
+- **[Networking with Ktor](references/networking-ktor.md)** — HttpClient, ApiResponse wrapper, auth, WebSockets
+- **[Dependency Injection](references/dependency-injection.md)** — Hilt vs Koin decision guide
+- **[Koin](references/koin.md)** — CMP setup, Nav 3 integration, scoped navigation
+- **[Hilt](references/hilt.md)** — Android-only setup, @HiltViewModel, scopes, testing
+- **[Cross-Platform (KMP)](references/cross-platform.md)** — commonMain sharing, expect/actual, platform bridges
+- **[iOS Swift Interop](references/ios-swift-interop.md)** — SKIE, Flow→AsyncSequence, SwiftUI/UIKit interop
+- **[Multiplatform Resources](references/resources.md)** — CMP Res class, qualifiers, localization, Android interop
 
 ### Build, Distribution & CI/CD
-- **[Gradle & Build Configuration](references/gradle-build.md)** — AGP 9+ project structure, version catalog (`[versions]`/`[libraries]`/`[plugins]`/`[bundles]`), bundle patterns, composite builds (`includeBuild` + `dependencySubstitution`), private Maven repos, `settings.gradle.kts`, `gradle.properties`, module-level build scripts (CMP shared, Android app, KMP library, Desktop), `compileSdk { version = release(N) }`, built-in Kotlin, `com.android.kotlin.multiplatform.library`, KSP/Room/Koin wiring, convention plugins guidance, do/don't
-- **[CI/CD & Distribution](references/ci-cd-distribution.md)** — GitHub Actions workflows (Android APK, Desktop multi-OS DMG/MSI/DEB), desktop app module setup (`compose.desktop`), iOS Xcode framework integration, signing/notarization (Android/macOS/iOS), adding JVM desktop target to existing CMP project, Gradle task reference table
+- **[Gradle & Build Configuration](references/gradle-build.md)** — AGP 9+, version catalog, composite builds, convention plugins
+- **[CI/CD & Distribution](references/ci-cd-distribution.md)** — GitHub Actions, desktop packaging, signing, notarization

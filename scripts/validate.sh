@@ -22,10 +22,14 @@ ERRORS=0
 WARNINGS=0
 INFO_COUNT=0
 CHECKS_RUN=0
+CURRENT_SECTION=""
 CI="${CI:-false}"
 NO_COLOR="${NO_COLOR:-0}"
 SKILL_FILE="SKILL.md"
 SKILL_DIR="$(basename "$(pwd)")"
+
+FINDINGS_FILE=$(mktemp)
+trap 'rm -f "$FINDINGS_FILE"' EXIT
 
 # ── Spec limits (agentskills.io/specification) ─────────────────────
 
@@ -61,11 +65,13 @@ fi
 _error() {
   ERRORS=$((ERRORS + 1))
   echo "  $(_red "ERROR") $*"
+  echo "ERROR|${CURRENT_SECTION}|$*" >> "$FINDINGS_FILE"
 }
 
 _warn() {
   WARNINGS=$((WARNINGS + 1))
   echo "  $(_yellow "WARN ") $*"
+  echo "WARN|${CURRENT_SECTION}|$*" >> "$FINDINGS_FILE"
 }
 
 _pass() {
@@ -75,6 +81,7 @@ _pass() {
 _info() {
   INFO_COUNT=$((INFO_COUNT + 1))
   echo "  $(_blue "INFO ") $*"
+  echo "INFO|${CURRENT_SECTION}|$*" >> "$FINDINGS_FILE"
 }
 
 _detail() {
@@ -90,6 +97,7 @@ ci_annotate() {
 
 section() {
   CHECKS_RUN=$((CHECKS_RUN + 1))
+  CURRENT_SECTION="$1"
   echo ""
   echo "  $(_bold "[$CHECKS_RUN]") $(_bold "$1")"
   echo "  $(_dim "$(printf '%.0s─' $(seq 1 60))")"
@@ -365,15 +373,21 @@ check_body() {
     _pass "$heading_count heading(s) providing structure"
   fi
 
-  # Check for code examples
+  # Check for code examples (fenced blocks or inline code)
   local fence_pattern='```'
   local code_fence_count
   code_fence_count=$(grep -cF "$fence_pattern" "$SKILL_FILE" 2>/dev/null || true)
   code_fence_count=${code_fence_count:-0}
   local code_pairs=$(( code_fence_count / 2 ))
 
+  local inline_code_count
+  inline_code_count=$(grep -c '`[^`]' "$SKILL_FILE" 2>/dev/null || true)
+  inline_code_count=${inline_code_count:-0}
+
   if [ "$code_pairs" -gt 0 ]; then
-    _pass "$code_pairs code example(s) in body"
+    _pass "$code_pairs fenced code example(s) in body"
+  elif [ "$inline_code_count" -gt 0 ]; then
+    _pass "$inline_code_count line(s) with inline code references"
   else
     _info "No code examples in body — consider adding for clarity"
   fi
@@ -401,10 +415,11 @@ check_links() {
 
   section "Internal Links"
 
-  local links
-  links=$(grep -nE '\[([^\]]+)\]\(([^)]+)\)' "$SKILL_FILE" | grep -v 'http' || true)
+  # Extract link targets: sed pulls "path" out of "](path)" patterns
+  local link_data
+  link_data=$(grep -nF '](' "$SKILL_FILE" || true)
 
-  if [ -z "$links" ]; then
+  if [ -z "$link_data" ]; then
     _info "No internal links in SKILL.md"
     return
   fi
@@ -412,24 +427,34 @@ check_links() {
   local checked=0 broken=0
 
   while IFS= read -r match; do
-    local line_num link_path file_path
+    local line_num line_content
     line_num=$(echo "$match" | cut -d: -f1)
-    link_path=$(echo "$match" | cut -d: -f2- | grep -oE '\]\(([^)]+)\)' | sed 's/\](\(.*\))/\1/' | head -1)
+    line_content=$(echo "$match" | cut -d: -f2-)
 
-    case "$link_path" in http*|"#"*|"") continue ;; esac
+    # Extract link targets: find all ](…) and pull out the path
+    # Uses tr to split on ] then grep/sed to isolate (path) targets
+    local targets
+    targets=$(echo "$line_content" | tr ']' '\n' | grep '^(' | sed 's/^(\([^)]*\)).*/\1/' | sed '/^$/d')
 
-    file_path=$(echo "$link_path" | cut -d'#' -f1)
-    [ -z "$file_path" ] && continue
+    [ -z "$targets" ] && continue
 
-    checked=$((checked + 1))
-    if [ -f "$file_path" ]; then
-      _pass "Line $line_num: $link_path → $(file_lines "$file_path") lines"
-    else
-      _error "Line $line_num: $link_path → FILE NOT FOUND"
-      ci_annotate "error" "file=$SKILL_FILE,line=$line_num::Broken link: $link_path"
-      broken=$((broken + 1))
-    fi
-  done <<< "$links"
+    while IFS= read -r link_path; do
+      case "$link_path" in http*|https*|"#"*|"") continue ;; esac
+
+      local file_path
+      file_path=$(echo "$link_path" | cut -d'#' -f1)
+      [ -z "$file_path" ] && continue
+
+      checked=$((checked + 1))
+      if [ -f "$file_path" ]; then
+        _pass "Line $line_num: $link_path → $(file_lines "$file_path") lines"
+      else
+        _error "Line $line_num: $link_path → FILE NOT FOUND"
+        ci_annotate "error" "file=$SKILL_FILE,line=$line_num::Broken link: $link_path"
+        broken=$((broken + 1))
+      fi
+    done <<< "$targets"
+  done <<< "$link_data"
 
   echo ""
   _detail "Checked $checked link(s), $broken broken"
@@ -586,15 +611,37 @@ check_scripts() {
 check_package() {
   section "Package Integrity"
 
-  local pkg_path
+  local pkg_path tar_output
   pkg_path="${RUNNER_TEMP:-/tmp}/skill-scan-test.tar.gz"
 
-  tar --exclude='.git' \
-      --exclude='.github' \
-      --exclude='.gitignore' \
-      -czf "$pkg_path" . 2>/dev/null
+  if ! tar --exclude='.git' \
+           --exclude='.github' \
+           --exclude='.gitignore' \
+           -czf "$pkg_path" . 2>&1; then
+    _error "Failed to create tarball"
+    _detail "tar reported an error — check disk space and permissions"
+    ci_annotate "error" "::tar failed to create package"
+    rm -f "$pkg_path"
+    return
+  fi
 
-  if ! tar -tzf "$pkg_path" | grep -q 'SKILL.md'; then
+  if [ ! -f "$pkg_path" ] || [ ! -s "$pkg_path" ]; then
+    _error "Tarball was not created or is empty"
+    rm -f "$pkg_path"
+    return
+  fi
+
+  # Extract listing once for all checks
+  local listing
+  listing=$(tar -tzf "$pkg_path" 2>/dev/null || true)
+
+  if [ -z "$listing" ]; then
+    _error "Tarball is empty or corrupt"
+    rm -f "$pkg_path"
+    return
+  fi
+
+  if ! echo "$listing" | grep -q 'SKILL.md'; then
     _error "SKILL.md missing from package"
     ci_annotate "error" "::Package does not contain SKILL.md"
     rm -f "$pkg_path"
@@ -602,25 +649,23 @@ check_package() {
   fi
   _pass "SKILL.md included"
 
-  if tar -tzf "$pkg_path" | grep -q 'references/'; then
+  if echo "$listing" | grep -q 'references/'; then
     _pass "references/ included"
   fi
 
   # Check for accidental inclusions
-  local has_secrets=false
-  if tar -tzf "$pkg_path" | grep -qiE '\.env$|credentials|\.key$|\.pem$|secret'; then
+  if echo "$listing" | grep -qiE '\.env$|credentials|\.key$|\.pem$|secret'; then
     _warn "Package may contain sensitive files (.env, credentials, keys)"
-    _detail "Review tarball contents: tar -tzf <package>"
-    has_secrets=true
+    _detail "Review contents: tar -tzf <package>"
   fi
 
-  if tar -tzf "$pkg_path" | grep -qE 'node_modules/|__pycache__/|\.DS_Store'; then
+  if echo "$listing" | grep -qE 'node_modules/|__pycache__/|\.DS_Store'; then
     _warn "Package contains development artifacts (node_modules, __pycache__, .DS_Store)"
     _detail "Add to .gitignore or tar --exclude"
   fi
 
   local entry_count size
-  entry_count=$(tar -tzf "$pkg_path" | wc -l | tr -d ' ')
+  entry_count=$(echo "$listing" | wc -l | tr -d ' ')
   size=$(du -h "$pkg_path" | cut -f1)
   _pass "Package: $size compressed, $entry_count entries"
 
@@ -704,30 +749,93 @@ print_report() {
   echo ""
   echo ""
 
-  local line="══════════════════════════════════════════════════════"
-  echo "  $(_bold "╔${line}╗")"
-  echo "  $(_bold "║                    SCAN REPORT                       ║")"
-  echo "  $(_bold "╠${line}╣")"
-  echo "  ║                                                      ║"
-  printf "  ║  Checks run :  %-38s║\n" "$CHECKS_RUN"
-  printf "  ║  $(_red "Errors")     :  %-38s║\n" "$ERRORS"
-  printf "  ║  $(_yellow "Warnings")   :  %-38s║\n" "$WARNINGS"
-  printf "  ║  $(_blue "Info")       :  %-38s║\n" "$INFO_COUNT"
-  echo "  ║                                                      ║"
+  _pad() {
+    local text="$1" width="$2"
+    local visible
+    visible=$(echo "$text" | sed 's/\x1b\[[0-9;]*m//g')
+    local pad_len=$(( width - ${#visible} ))
+    if [ "$pad_len" -lt 0 ]; then pad_len=0; fi
+    printf '%s%*s' "$text" "$pad_len" ""
+  }
 
+  local W=54
+  local line
+  line=$(printf '%.0s═' $(seq 1 $W))
+  local thin_line
+  thin_line=$(printf '%.0s─' $(seq 1 $W))
+
+  # ── Summary box ──
+  echo "  $(_bold "╔${line}╗")"
+  echo "  $(_bold "║")$(_pad "                    SCAN REPORT                       " $W)$(_bold "║")"
+  echo "  $(_bold "╠${line}╣")"
+  echo "  ║$(printf '%*s' $W "")║"
+  echo "  ║  $(_pad "Checks run :  $CHECKS_RUN" 52)║"
+  echo "  ║  $(_pad "$(_red "Errors")     :  $ERRORS" 52)║"
+  echo "  ║  $(_pad "$(_yellow "Warnings")   :  $WARNINGS" 52)║"
+  echo "  ║  $(_pad "$(_blue "Info")       :  $INFO_COUNT" 52)║"
+  echo "  ║$(printf '%*s' $W "")║"
+
+  local result_text
   if [ "$ERRORS" -gt 0 ]; then
-    printf "  ║  Result     :  %-38s║\n" "$(_red "FAIL")"
+    result_text=$(_red "FAIL")
   elif [ "$WARNINGS" -gt 0 ]; then
-    printf "  ║  Result     :  %-38s║\n" "$(_yellow "PASS with warnings")"
+    result_text=$(_yellow "PASS with warnings")
   else
-    printf "  ║  Result     :  %-38s║\n" "$(_green "ALL CLEAR")"
+    result_text=$(_green "ALL CLEAR")
+  fi
+  echo "  ║  $(_pad "Result     :  $result_text" 52)║"
+
+  echo "  ║$(printf '%*s' $W "")║"
+  echo "  $(_bold "╚${line}╝")"
+
+  # ── Detailed findings ──
+  local total_findings
+  total_findings=$(wc -l < "$FINDINGS_FILE" | tr -d ' ')
+
+  if [ "$total_findings" -gt 0 ]; then
+    echo ""
+    echo "  $(_bold "┌${thin_line}┐")"
+    echo "  $(_bold "│")$(_pad "                 DETAILED FINDINGS                     " $W)$(_bold "│")"
+    echo "  $(_bold "└${thin_line}┘")"
+
+    _print_findings_by_severity() {
+      local severity="$1" label="$2" color_fn="$3"
+      local matches
+      matches=$(grep "^${severity}|" "$FINDINGS_FILE" 2>/dev/null || true)
+      [ -z "$matches" ] && return
+
+      local count
+      count=$(echo "$matches" | wc -l | tr -d ' ')
+
+      echo ""
+      echo "  $($color_fn "$label ($count)")"
+      echo "  $(_dim "$(printf '%.0s─' $(seq 1 52))")"
+
+      local prev_section=""
+      while IFS='|' read -r _ sec msg; do
+        if [ "$sec" != "$prev_section" ]; then
+          echo "  $(_dim "[$sec]")"
+          prev_section="$sec"
+        fi
+        echo "    $($color_fn "▸") $msg"
+      done <<< "$matches"
+    }
+
+    _print_findings_by_severity "ERROR" "ERRORS" "_red"
+    _print_findings_by_severity "WARN"  "WARNINGS" "_yellow"
+    _print_findings_by_severity "INFO"  "SUGGESTIONS" "_blue"
+
+    echo ""
+    echo "  $(_dim "$(printf '%.0s─' $(seq 1 56))")"
+  else
+    echo ""
+    echo "  $(_green "No findings — skill package is in perfect shape.")"
   fi
 
-  echo "  ║                                                      ║"
-  echo "  $(_bold "╚${line}╝")"
+  echo "  $(_dim "Validated against agentskills.io/specification")"
   echo ""
 
-  # CI job summary
+  # ── CI job summary ──
   if [ "$CI" = "true" ]; then
     {
       echo "## Skill Scan Report"
@@ -746,6 +854,28 @@ print_report() {
       echo "| Errors | $ERRORS |"
       echo "| Warnings | $WARNINGS |"
       echo "| Info | $INFO_COUNT |"
+
+      if [ "$total_findings" -gt 0 ]; then
+        echo ""
+        echo "### Findings"
+        echo ""
+
+        _ci_findings() {
+          local severity="$1" icon="$2"
+          local matches
+          matches=$(grep "^${severity}|" "$FINDINGS_FILE" 2>/dev/null || true)
+          [ -z "$matches" ] && return
+
+          while IFS='|' read -r _ sec msg; do
+            echo "- ${icon} **${sec}**: ${msg}"
+          done <<< "$matches"
+        }
+
+        _ci_findings "ERROR" "❌"
+        _ci_findings "WARN"  "⚠️"
+        _ci_findings "INFO"  "💡"
+      fi
+
       echo ""
       echo "_Validated against [agentskills.io/specification](https://agentskills.io/specification)_"
     } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"

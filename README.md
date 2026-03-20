@@ -29,49 +29,60 @@ The skill covers **Android**, **iOS**, **Desktop**, and **Web** targets with the
 
 <table>
   <tr>
-    <td width="50%" valign="top">
-
-### Architecture & State
-- MVI (Model-View-Intent) with Event, State, Effect
-- Unidirectional data flow, ViewModel patterns
-- State modeling (input / derived / persisted / transient)
-- Clean code organization, anti-pattern detection
-
-### Compose UI & Components
-- Three-phase model, state primitives, side effects
-- Image loading with Coil 3 (AsyncImage, cache, SVG, CMP resources)
-- Lists, grids, pagers, lazy layouts with proper keying
-- Animations (shared elements, gesture-driven, transitions)
-- Accessibility (semantics, touch targets, WCAG contrast)
-- UI/UX patterns (skeleton loading, inline validation)
-
-### Data & Networking
-- Ktor HTTP client, DTO-to-domain mapping, auth flows
-- Room Database with KMP support, migrations
-- DataStore (Preferences & Typed) for persistence
-- Paging 3 with proper MVI integration
-
-</td>
-<td width="50%" valign="top">
-
-### Navigation & DI
-- Navigation 3 (NavDisplay, tabs, scenes, deep links)
-- Koin (CMP) and Hilt (Android-only) patterns
-
-### Performance & Quality
-- Recomposition minimization via state shape
-- Compose Compiler Metrics, baseline profiles
-- ViewModel event→state→effect testing via Turbine
-- Macrobenchmark, UI tests, lean test matrices
-
-### Cross-Platform & Distribution
-- KMP `commonMain` sharing, `expect/actual`
-- iOS Swift interop (SKIE, Flow→AsyncSequence)
-- Multiplatform resources (`Res` class, localization)
-- Gradle/AGP 9+ config, version catalogs
-- CI/CD, desktop packaging (DMG/MSI/DEB), signing
-
-</td>
+    <td align="center" width="33%"><strong>🏗️ Architecture & State</strong></td>
+    <td align="center" width="33%"><strong>🎨 Compose UI</strong></td>
+    <td align="center" width="33%"><strong>🌐 Data & Networking</strong></td>
+  </tr>
+  <tr>
+    <td valign="top">
+      MVI with Event, State, Effect<br>
+      Unidirectional data flow<br>
+      ViewModel patterns<br>
+      State modeling (4 buckets)<br>
+      Clean code & anti-patterns
+    </td>
+    <td valign="top">
+      Three-phase model & side effects<br>
+      Coil 3 image loading<br>
+      Lists, grids, pagers & keying<br>
+      Shared element animations<br>
+      Material 3 theming & adaptive
+    </td>
+    <td valign="top">
+      Ktor HTTP client & auth flows<br>
+      DTO-to-domain mapping<br>
+      Room Database (KMP)<br>
+      DataStore (Preferences & Typed)<br>
+      Paging 3 with MVI
+    </td>
+  </tr>
+  <tr><td colspan="3"></td></tr>
+  <tr>
+    <td align="center"><strong>🧭 Navigation & DI</strong></td>
+    <td align="center"><strong>⚡ Performance & Quality</strong></td>
+    <td align="center"><strong>📱 Cross-Platform</strong></td>
+  </tr>
+  <tr>
+    <td valign="top">
+      Navigation 3 (NavDisplay)<br>
+      Tabs, scenes, deep links<br>
+      Koin (CMP) & Hilt (Android)<br>
+      ViewModel scoping
+    </td>
+    <td valign="top">
+      Recomposition minimization<br>
+      Compiler Metrics & profiles<br>
+      Turbine testing<br>
+      Macrobenchmark & UI tests<br>
+      Accessibility & WCAG
+    </td>
+    <td valign="top">
+      KMP <code>commonMain</code> sharing<br>
+      <code>expect/actual</code> patterns<br>
+      iOS interop (SKIE)<br>
+      CMP resources & localization<br>
+      Gradle/AGP 9+, CI/CD, signing
+    </td>
   </tr>
 </table>
 
@@ -151,38 +162,127 @@ $compose-skill Refactor this screen to MVI with proper state modeling.
 compose-skill/
 ├── SKILL.md                            # Skill definition (required)
 ├── README.md                           # This file
+├── LICENSE                             # MIT License
 ├── assets/
-│   └── compose-multiplatform-icon.svg  # Official CMP logo (Kotlin brand assets)
+│   └── compose-multiplatform-icon.svg  # Official CMP logo
 ├── agents/
 │   └── openai.yaml                     # Codex UI metadata (optional)
+├── scripts/
+│   └── validate.sh                     # Skill scanner / validation tool
 └── references/                         # 26 deep-dive reference files
-    ├── architecture.md                 # MVI pipeline, state modeling, code examples
-    ├── coroutines-flow.md              # StateFlow vs SharedFlow vs Channel, Turbine
-    ├── compose-essentials.md           # Three phases, side effects, modifiers
-    ├── material-design.md              # M3 theming, components, adaptive layouts
-    ├── image-loading.md                # Coil 3, AsyncImage, caching, SVG, CMP resources
-    ├── lists-grids.md                  # LazyColumn/Row, keys, grids, pager
-    ├── paging.md                       # PagingSource, Pager, RemoteMediator
-    ├── navigation.md                   # Nav 3, NavDisplay, tabs, scenes
-    ├── performance.md                  # Recomposition, stability, Compiler Metrics
-    ├── animations.md                   # Shared elements, gesture-driven, Canvas
-    ├── ui-ux.md                        # Loading states, skeleton/shimmer
-    ├── testing.md                      # Turbine, ViewModel tests, Macrobenchmark
-    ├── room-database.md                # Entities, DAOs, migrations, KMP
-    ├── datastore.md                    # Preferences, Typed DataStore, MVI
-    ├── networking-ktor.md              # HttpClient, ApiResponse, auth, WebSockets
-    ├── dependency-injection.md         # DI decision guide, shared concepts
-    ├── koin.md                         # Koin (CMP), Koin + Nav 3
-    ├── hilt.md                         # Hilt (Android-only), @HiltViewModel, scopes
-    ├── cross-platform.md               # commonMain, expect/actual, lifecycle
-    ├── resources.md                    # CMP Res class, qualifiers, localization
-    ├── ios-swift-interop.md            # SKIE, Flow→AsyncSequence, SwiftUI/UIKit
-    ├── accessibility.md                # Semantics, touch targets, WCAG contrast
-    ├── clean-code.md                   # File organization, naming conventions
-    ├── anti-patterns.md                # 20 harmful patterns with replacements
-    ├── gradle-build.md                 # AGP 9+, version catalog, conventions
-    └── ci-cd-distribution.md           # GitHub Actions, packaging, signing
+    ├── architecture.md
+    ├── coroutines-flow.md
+    ├── compose-essentials.md
+    ├── material-design.md
+    ├── image-loading.md
+    ├── lists-grids.md
+    ├── paging.md
+    ├── navigation.md
+    ├── performance.md
+    ├── animations.md
+    ├── ui-ux.md
+    ├── testing.md
+    ├── room-database.md
+    ├── datastore.md
+    ├── networking-ktor.md
+    ├── dependency-injection.md
+    ├── koin.md
+    ├── hilt.md
+    ├── cross-platform.md
+    ├── resources.md
+    ├── ios-swift-interop.md
+    ├── accessibility.md
+    ├── clean-code.md
+    ├── anti-patterns.md
+    ├── gradle-build.md
+    └── ci-cd-distribution.md
 ```
+
+## Reference Guide
+
+The `references/` directory contains 26 deep-dive files that the skill loads on-demand. Here's what each one covers in detail:
+
+<details>
+<summary><strong>Kotlin Foundations</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **coroutines-flow.md** | StateFlow vs SharedFlow vs Channel decision table, Flow operators (`flatMapLatest`, `combine`, `debounce`, `catch`), Dispatchers (IO/Default/Main), structured concurrency (`viewModelScope`, `supervisorScope`), exception handling, `CancellationException`, `stateIn`/`shareIn`, backpressure (`buffer`/`conflate`/`collectLatest`), `callbackFlow`, Mutex/Semaphore, testing with Turbine |
+
+</details>
+
+<details>
+<summary><strong>Architecture</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **architecture.md** | ViewModel/event-handling pipeline, state modeling, Channel vs SharedFlow for effects, domain layer rules, inter-feature communication (event bus, feature API contracts), module dependency rules, GOOD/BAD code examples |
+| **clean-code.md** | Avoiding overengineering, file organization, naming conventions, disciplined vs bloated MVI comparison |
+| **anti-patterns.md** | Cross-cutting anti-pattern quick-reference table with "why it hurts" and "better replacement" for each, plus routing index to domain-specific anti-patterns in other reference files |
+
+</details>
+
+<details>
+<summary><strong>Compose APIs</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **material-design.md** | M3 theme setup (dynamic color, dark/light, color roles), typography/shapes, component decisions (Scaffold, TopAppBar, NavigationBar/Rail/Suite, BottomSheet, Snackbar, Dialog), adaptive layouts (window size classes, canonical layouts), M2→M3 migration |
+| **image-loading.md** | Coil 3 setup for Compose/CMP, `AsyncImage`/`rememberAsyncImagePainter`/`SubcomposeAsyncImage` decision guide, placeholder/error/fallback/crossfade, memory/disk/network cache policy, transformations vs `Modifier.clip`, SVG (`coil-svg`), `Res.getUri` resource loading |
+| **compose-essentials.md** | Three phases model, state primitives, side effects (`LaunchedEffect`, `DisposableEffect`, `rememberUpdatedState`), modifier ordering, `graphicsLayer`, slot pattern, `CompositionLocal`, `collectAsStateWithLifecycle` |
+| **lists-grids.md** | LazyColumn/LazyRow, keys, `contentType`, grids, pager, scroll state, nested scrolling, list anti-patterns |
+| **paging.md** | PagingSource, Pager + ViewModel setup (PagingData as separate Flow, never in UiState), `cachedIn`, filter/search with `flatMapLatest`, `LazyPagingItems`, LoadState handling, RemoteMediator offline-first, MVI integration, testing |
+| **navigation.md** | Complete Nav 3 reference: route definition, back stack persistence, `NavDisplay` full API, top-level tabs (Now in Android pattern), ViewModel scoping with entry decorators, Scenes (dialog, bottom sheet, list-detail, Material Adaptive), animations, modularization (api/impl split, Hilt multibindings, Koin), deep links, CMP polymorphic serialization |
+
+</details>
+
+<details>
+<summary><strong>Performance & Quality</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **performance.md** | Three phases, primitive state specializations, `TextFieldState`, Strong Skipping Mode, stability config, Compose Compiler Metrics, baseline profiles, API decision table, 20 recomposition rules, diagnostic checklist |
+| **animations.md** | Complete animation API reference: decision tree, `AnimationSpec` (spring/tween/keyframes), `animate*AsState`, `Animatable` (sequential, concurrent, gesture-driven), `updateTransition`, `AnimatedVisibility`, `AnimatedContent`, shared element transitions with navigation and Coil, swipe-to-dismiss, Canvas/custom drawing, `graphicsLayer`, performance optimization |
+| **ui-ux.md** | Loading states, skeleton/shimmer, preserving content during refresh, inline validation, perceived performance |
+| **accessibility.md** | `contentDescription` rules, `Modifier.semantics` (role, stateDescription, heading), `mergeDescendants`, `clearAndSetSemantics`, touch targets (48dp), WCAG color contrast, custom interactive elements, custom accessibility actions |
+| **testing.md** | Turbine for StateFlow testing, ViewModel event→state→effect testing, validation/UI tests, Macrobenchmark, lean test matrix by app scale |
+
+</details>
+
+<details>
+<summary><strong>Data & Persistence</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **datastore.md** | KMP + Android setup, Preferences DataStore keys/read/write, Typed DataStore with JSON serialization, singleton enforcement, corruption handling, SharedPreferences migration, MVI integration, DI wiring, testing, anti-patterns |
+| **room-database.md** | Entity design, performance-oriented DAOs, indexes, relationships (`@Embedded`/`@Relation`/`@Junction`), TypeConverters, transactions, migrations, MVI integration, anti-patterns |
+
+</details>
+
+<details>
+<summary><strong>Networking, DI & Cross-Platform</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **networking-ktor.md** | HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration |
+| **dependency-injection.md** | DI decision guide (Hilt vs Koin), shared concepts |
+| **koin.md** | Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, Koin + Nav 3 (`navigation<T>`, `koinEntryProvider`), scoped navigation, MVI ViewModel integration, testing |
+| **hilt.md** | Android-only Hilt setup, `@HiltViewModel`, `hiltViewModel()`, modules (`@Provides`/`@Binds`), scopes, Navigation Compose integration, MVI pattern with Hilt, testing |
+| **cross-platform.md** | `commonMain` vs platform placement, interfaces vs `expect/actual`, platform bridge patterns (interface+DI, expect/actual, typealias), lifecycle, state restoration, resources, accessibility |
+| **ios-swift-interop.md** | Kotlin→Swift naming, nullability/collection bridging, SKIE setup, suspend→async, Flow→AsyncSequence, sealed class mapping, SwiftUI/UIKit interop (`ComposeUIViewController`, `UIKitView`), iOS API design rules |
+| **resources.md** | Android `R` vs CMP `Res` comparison, `composeResources/` directory structure, Gradle setup, drawable/string/plural/font/raw-file APIs with code examples, qualifiers (language, theme, density), localization, generated resource maps, Android assets interop (`Res.getUri`), MVI integration |
+
+</details>
+
+<details>
+<summary><strong>Build, Distribution & CI/CD</strong></summary>
+
+| Reference | What's Inside |
+|:----------|:-------------|
+| **gradle-build.md** | AGP 9+ project structure, version catalog (`[versions]`/`[libraries]`/`[plugins]`/`[bundles]`), bundle patterns, composite builds (`includeBuild` + `dependencySubstitution`), private Maven repos, `settings.gradle.kts`, `gradle.properties`, module-level build scripts, `compileSdk { version = release(N) }`, KSP/Room/Koin wiring, convention plugins guidance |
+| **ci-cd-distribution.md** | GitHub Actions workflows (Android APK, Desktop multi-OS DMG/MSI/DEB), desktop app module setup (`compose.desktop`), iOS Xcode framework integration, signing/notarization (Android/macOS/iOS), adding JVM desktop target to existing CMP project, Gradle task reference table |
+
+</details>
 
 ## Example Prompts
 
@@ -254,6 +354,31 @@ Set up ViewModel tests with Turbine for this feature.
 | Koin | [insert-koin.io](https://insert-koin.io/docs/reference/koin-compose/compose/) |
 | Hilt | [developer.android.com/hilt](https://developer.android.com/training/dependency-injection/hilt-android) |
 | Agent Skills Standard | [agentskills.io](https://agentskills.io/) |
+
+## Contributing
+
+Contributions are welcome! Whether it's fixing a typo, improving a reference doc, or adding coverage for a new Compose API — all help is appreciated.
+
+1. **Fork** the repository
+2. **Create a branch** for your change (`git checkout -b improve-navigation-docs`)
+3. **Make your changes** — keep reference files focused and under 500 lines where possible
+4. **Run the scanner** to verify everything passes:
+   ```bash
+   ./scripts/validate.sh
+   ```
+5. **Open a pull request** with a clear description of what changed and why
+
+### Guidelines
+
+- Follow the [agentskills.io specification](https://agentskills.io/specification) for any structural changes
+- Keep `SKILL.md` body under 500 lines — move detailed content to `references/`
+- Every reference file in `references/` should be linked from `SKILL.md`
+- Use code examples that compile and follow the skill's MVI conventions
+- Don't add dependencies — the skill is pure markdown and bash
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
