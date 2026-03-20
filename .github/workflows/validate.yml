@@ -215,28 +215,42 @@ jobs:
 
       - name: Verify package can be created
         run: |
-          # Test that the tarball can be created without errors
+          echo "=== Package Creation Verification ==="
+          echo ""
+
+          PACKAGE_PATH="${RUNNER_TEMP:-/tmp}/test-package.tar.gz"
+
+          echo "  Creating tarball at: $PACKAGE_PATH"
           tar --exclude='.git' \
               --exclude='.github' \
               --exclude='.gitignore' \
-              --exclude='*.tar.gz' \
-              -czvf test-package.tar.gz . > /dev/null
+              -czvf "$PACKAGE_PATH" . > /dev/null
 
-          # Verify the tarball contains SKILL.md
-          if ! tar -tzf test-package.tar.gz | grep -q 'SKILL.md'; then
+          echo "  Verifying tarball contents..."
+
+          if ! tar -tzf "$PACKAGE_PATH" | grep -q 'SKILL.md'; then
+            echo "  ✗ SKILL.md not found in package"
             echo "::error::Package does not contain SKILL.md"
+            rm -f "$PACKAGE_PATH"
             exit 1
           fi
+          echo "  ✓ SKILL.md included"
 
-          # Verify the tarball contains references/
-          if ! tar -tzf test-package.tar.gz | grep -q 'references/'; then
+          if ! tar -tzf "$PACKAGE_PATH" | grep -q 'references/'; then
+            echo "  ✗ references/ not found in package"
             echo "::error::Package does not contain references/ directory"
+            rm -f "$PACKAGE_PATH"
             exit 1
           fi
+          echo "  ✓ references/ included"
 
-          SIZE=$(du -h test-package.tar.gz | cut -f1)
-          echo "✓ Package created successfully ($SIZE)"
-          rm test-package.tar.gz
+          FILE_COUNT=$(tar -tzf "$PACKAGE_PATH" | wc -l | tr -d ' ')
+          SIZE=$(du -h "$PACKAGE_PATH" | cut -f1)
+          echo ""
+          echo "  Package size: $SIZE ($FILE_COUNT entries)"
+          rm -f "$PACKAGE_PATH"
+
+          echo "✓ Package created successfully"
 
       - name: Summary
         run: |
