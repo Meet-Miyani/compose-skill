@@ -105,22 +105,66 @@ The skill covers **Android**, **iOS**, **Desktop**, and **Web** targets with the
 
 ## Installation
 
-> **The directory name must match** the `name` field in `SKILL.md` — here that is **`compose-skill`**.
->
+Pick your agent and run **one command**. The clone target becomes the skill folder — agents detect `SKILL.md` at the root automatically.
+
+> **Only three things matter for the skill to work:** `SKILL.md`, `agents/`, and `references/`. Everything else in this repo (README, LICENSE, scripts, assets, .github) is for documentation, validation, and CI — the agent never reads them. If you prefer a minimal install, you only need those three.
+
+> **Why is `SKILL.md` at the root?** All three agents (Codex, Cursor, Claude Code) look for `SKILL.md` at the **top level** of the skill directory. This repo is structured so that cloning it directly into the skill path gives you a ready-to-use skill — no moving files or extra nesting required.
+
 > Skill installation paths may change as agents evolve. The locations below are accurate at the time of writing — for the latest instructions, refer to each agent's official docs or ask your agent *"How do I add a skill?"*
 > - [Codex Skills docs](https://developers.openai.com/codex/skills/) · [Cursor Skills docs](https://www.cursor.com/docs/context/skills) · [Claude Code Skills docs](https://code.claude.com/docs/en/slash-commands)
 
-| Client | Install locations |
-|:-------|:------------------|
-| **Codex** | Repo: `.agents/skills/compose-skill/` — User: `~/.agents/skills/compose-skill/` |
-| **Cursor** | Repo: `.cursor/skills/compose-skill/` — User: `~/.cursor/skills/compose-skill/` |
-| **Claude Code** | Project: `.claude/skills/compose-skill/` — User: `~/.claude/skills/compose-skill/` |
-| **Other agents** | Upload `SKILL.md` and `references/` as project knowledge |
+### Quick Install (copy-paste)
+
+<details open>
+<summary><strong>Codex</strong></summary>
 
 ```bash
-# Example: clone as a user-global Cursor skill
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose-skill
+# User-global (available in all projects)
+git clone https://github.com/Meet-Miyani/compose-skill.git ~/.codex/skills/compose-skill
+
+# Per-repo (committed to your project)
+git clone https://github.com/Meet-Miyani/compose-skill.git .codex/skills/compose-skill
 ```
+</details>
+
+<details>
+<summary><strong>Cursor</strong></summary>
+
+```bash
+# User-global (available in all projects)
+git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose-skill
+
+# Per-repo (committed to your project)
+git clone https://github.com/Meet-Miyani/compose-skill.git .cursor/skills/compose-skill
+```
+</details>
+
+<details>
+<summary><strong>Claude Code</strong></summary>
+
+```bash
+# User-global (available in all projects)
+git clone https://github.com/Meet-Miyani/compose-skill.git ~/.claude/skills/compose-skill
+
+# Per-repo (committed to your project)
+git clone https://github.com/Meet-Miyani/compose-skill.git .claude/skills/compose-skill
+```
+</details>
+
+<details>
+<summary><strong>Other agents</strong></summary>
+
+Upload `SKILL.md` and the `references/` folder as project knowledge in your agent's settings.
+</details>
+
+### Common Mistakes
+
+| Problem | Fix |
+|:--------|:----|
+| Folder named `compose-skill-main` | Rename to `compose-skill` (GitHub ZIP downloads add `-main`) |
+| `SKILL.md` not at root of skill folder | Don't nest inside another directory — clone directly into the skill path |
+| Skill not detected after install | Restart the agent / IDE |
 
 ### Verify Activation
 
@@ -129,8 +173,6 @@ git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/comp
 | **Codex** | Run `/skills` — `compose-skill` appears in the list |
 | **Cursor** | **Settings → Rules** — skill appears under *Agent Decides* |
 | **Claude Code** | Run `/skills` or ask *"What skills are available?"* |
-
-If not visible, confirm the folder is named `compose-skill` (not `compose-skill-main`) and restart the client.
 
 ## Usage
 
@@ -160,16 +202,13 @@ $compose-skill Refactor this screen to MVI with proper state modeling.
 
 ```text
 compose-skill/
-├── SKILL.md                            # Skill definition (required)
-├── README.md                           # This file
-├── LICENSE                             # MIT License
-├── assets/
-│   └── compose-multiplatform-icon.svg  # Official CMP logo
+│
+│   ## Required (the skill itself) ─────────────────────
+├── SKILL.md                            # Skill definition — agent reads this
 ├── agents/
-│   └── openai.yaml                     # Codex UI metadata (optional)
-├── scripts/
-│   └── validate.sh                     # Skill scanner / validation tool
+│   └── openai.yaml                     # Codex UI metadata
 └── references/                         # 26 deep-dive reference files
+    │                                   #   (loaded on-demand by SKILL.md)
     ├── architecture.md
     ├── coroutines-flow.md
     ├── compose-essentials.md
@@ -196,6 +235,14 @@ compose-skill/
     ├── anti-patterns.md
     ├── gradle-build.md
     └── ci-cd-distribution.md
+│
+│   ## Optional (repo extras) ──────────────────────────
+├── README.md                           # This file (not read by agents)
+├── LICENSE                             # MIT License
+├── assets/
+│   └── compose-multiplatform-icon.svg  # Logo for README
+└── scripts/
+    └── validate.sh                     # Skill scanner / validation tool
 ```
 
 ## Reference Guide
