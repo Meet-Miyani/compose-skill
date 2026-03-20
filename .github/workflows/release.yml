@@ -1,9 +1,20 @@
-name: Auto Release
+name: Release
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: write
@@ -17,42 +28,99 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get latest commit message
-        id: commit
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Tag push: use the tag directly
+            TAG="${GITHUB_REF#refs/tags/}"
+            echo "new_tag=$TAG" >> "$GITHUB_OUTPUT"
+            echo "Using pushed tag: $TAG"
+          else
+            # Manual dispatch: compute next version
+            LATEST=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+            if [ -z "$LATEST" ]; then
+              MAJOR=1
+              MINOR=0
+              PATCH=0
+            else
+              VERSION="${LATEST#v}"
+              MAJOR=$(echo "$VERSION" | cut -d. -f1)
+              MINOR=$(echo "$VERSION" | cut -d. -f2)
+              PATCH=$(echo "$VERSION" | cut -d. -f3)
+
+              case "${{ inputs.version_bump }}" in
+                major)
+                  MAJOR=$((MAJOR + 1))
+                  MINOR=0
+                  PATCH=0
+                  ;;
+                minor)
+                  MINOR=$((MINOR + 1))
+                  PATCH=0
+                  ;;
+                patch)
+                  PATCH=$((PATCH + 1))
+                  ;;
+              esac
+            fi
+            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+            echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+            echo "Computed next version: $NEW_TAG (bump: ${{ inputs.version_bump }})"
+          fi
+
+      - name: Get release info
+        id: release_info
         run: |
           MSG=$(git log -1 --pretty=format:'%s')
-          BODY=$(git log -1 --pretty=format:'%b')
           echo "msg=$MSG" >> "$GITHUB_OUTPUT"
+
+          # Use heredoc with random delimiter to safely handle multiline body
+          DELIMITER="EOF_$(openssl rand -hex 8)"
+          BODY=$(git log -1 --pretty=format:'%b')
           {
-            echo 'body<<EOF'
-            echo "$BODY"
-            echo 'EOF'
+            echo "body<<$DELIMITER"
+            printf '%s' "$BODY"
+            echo ""
+            echo "$DELIMITER"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Generate version tag
-        id: tag
+      - name: Package skill artifact
+        id: package
         run: |
-          LATEST=$(git tag --sort=-v:refname | head -n 1)
-          if [ -z "$LATEST" ]; then
-            NEW_TAG="v1.0.0"
-          else
-            MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
-            MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
-            PATCH=$(echo "$LATEST" | sed 's/v//' | cut -d. -f3)
-            PATCH=$((PATCH + 1))
-            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-          fi
-          echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          TAG="${{ steps.version.outputs.new_tag }}"
+          ARTIFACT_NAME="compose-skill-${TAG}.tar.gz"
+
+          # Create tarball excluding git metadata, CI files, and development artifacts
+          tar --exclude='.git' \
+              --exclude='.github' \
+              --exclude='.gitignore' \
+              --exclude='*.tar.gz' \
+              -czvf "$ARTIFACT_NAME" .
+
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "artifact_path=$(pwd)/$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "Created artifact: $ARTIFACT_NAME"
+
+      - name: Create tag (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.new_tag }}"
+          git push origin "${{ steps.version.outputs.new_tag }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.new_tag }}
-          name: ${{ steps.tag.outputs.new_tag }} — ${{ steps.commit.outputs.msg }}
+          tag_name: ${{ steps.version.outputs.new_tag }}
+          name: ${{ steps.version.outputs.new_tag }} — ${{ steps.release_info.outputs.msg }}
           body: |
             **Commit:** `${{ github.sha }}`
+            **Branch:** `${{ github.ref_name }}`
             **Author:** ${{ github.actor }}
 
-            ${{ steps.commit.outputs.body }}
+            ${{ steps.release_info.outputs.body }}
           draft: false
           prerelease: false
+          files: ${{ steps.package.outputs.artifact_path }}

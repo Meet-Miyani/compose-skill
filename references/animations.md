@@ -462,7 +462,7 @@ SharedTransitionLayout {
 
 ### Async images (Coil)
 
-For full Coil 3 guidance (API choice, caching strategy, SVG, and CMP resource loading), see [Image Loading](references/image-loading.md).
+For full Coil 3 guidance (API choice, caching strategy, SVG, and CMP resource loading), see [Image Loading](image-loading.md).
 
 ```kotlin
 AsyncImage(
@@ -633,6 +633,18 @@ Box(Modifier.graphicsLayer { scaleX = animatedScale.value })
 - Animations in Drawing phase are cheapest; Layout phase is moderate; Composition phase is most expensive
 - `animateContentSize` must be placed BEFORE size modifiers in the modifier chain
 - In `AnimatedContent`/`AnimatedVisibility`: always use the lambda parameter (`targetState`), not the outer variable
+
+## Anti-Patterns
+
+| Anti-pattern | Why it hurts | Better replacement |
+|---|---|---|
+| Animation state in ViewModel (`shakeCount`, `alpha`, `pulsePhase`) | pollutes business state, couples ViewModel to render timing | local composable animation state via `animate*AsState` or `Animatable` |
+| `Modifier.scale()`/`.offset()` instead of `graphicsLayer` | triggers recomposition every frame | `Modifier.graphicsLayer { scaleX = ...; translationX = ... }` (Drawing phase only) |
+| Animating every keystroke or every state change | UI feels jittery and unstable | animate meaningful transitions only (appear/disappear, navigation, user-initiated) |
+| `animateContentSize` after size modifiers | has no effect — size already resolved | place `animateContentSize()` BEFORE `size`/`fillMaxWidth` modifiers |
+| Reading outer variable inside `AnimatedContent`/`AnimatedVisibility` | stale value during exit animation | use the lambda parameter (`targetState`) inside the content block |
+| Hardcoded `tween`/`snap` everywhere | feels mechanical, handles interruption poorly | prefer `spring` as default; use `tween` only for precise timing needs |
+| Animating layout-heavy properties (padding, size) on every frame | expensive Layout phase work each frame | prefer `graphicsLayer` transforms (translation, scale, alpha) |
 
 ## When Not to Animate
 

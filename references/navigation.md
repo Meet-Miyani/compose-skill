@@ -11,8 +11,20 @@ References:
 - [CMP Nav 3 recipes](https://github.com/terrakok/nav3-recipes)
 - [Kotlin CMP Nav 3 docs](https://kotlinlang.org/docs/multiplatform/compose-navigation-3.html)
 
+## Scope Note
+
+This reference focuses on **Navigation 3** as the default recommendation for new Compose projects following MVI architecture. Nav 3's user-owned back stack integrates naturally with MVI's state-centric model—navigation becomes list manipulation rather than imperative controller calls.
+
+**Nav 2 (`NavHost`/`NavController`) is not deprecated.** Google continues to maintain and support it. Nav 2 examples may appear in this skill for:
+- Migration guidance from Nav 2 to Nav 3
+- Interoperability with existing Nav 2 codebases
+- Projects where Nav 2's declarative graph DSL or built-in deep link parsing is preferred
+
+When working on an existing Nav 2 project, respect its conventions unless there's a deliberate migration effort.
+
 ## Table of Contents
 
+- [Scope Note](#scope-note)
 - [Core Architecture](#core-architecture)
 - [Route Definition](#route-definition)
 - [Back Stack Creation and Persistence](#back-stack-creation-and-persistence)
@@ -26,6 +38,8 @@ References:
 - [Deep Links](#deep-links)
 - [Nav 3 in MVI](#nav-3-in-mvi)
 - [Anti-Patterns](#anti-patterns)
+- [Nav 2 Compatibility Reference](#nav-2-compatibility-reference)
+- [Migrating from Nav 2 to Nav 3](#migrating-from-nav-2-to-nav-3)
 
 ## Core Architecture
 
@@ -602,7 +616,7 @@ sealed interface EstimateEffect {
 // Route collects effects and manipulates back stack
 @Composable
 fun EstimateRoute(viewModel: EstimateViewModel, backStack: SnapshotStateList<NavKey>) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     CollectEffect(viewModel.effect) { effect ->
         when (effect) {
@@ -640,5 +654,230 @@ Nav 3's user-owned back stack is more natural for MVI than Nav 2's `NavControlle
 | Recreating back stacks on tab switch | Loses user navigation history within tabs | Maintain persistent per-tab stacks, swap root only |
 | Passing back stack to ViewModel | Violates MVI boundary, navigation becomes business logic | ViewModel emits semantic effects; route handles back stack |
 | Missing entry decorators | ViewModels leak, saveable state lost | Always include both `rememberSaveableStateHolderNavEntryDecorator` and `rememberViewModelStoreNavEntryDecorator` |
-| Using Nav 2 `NavHost`/`NavController` | Deprecated approach, less Compose-native | Migrate to Nav 3 `NavDisplay` with user-owned back stack |
+| Using Nav 2 `NavHost`/`NavController` in new MVI codebases | Nav 3's user-owned back stack aligns better with MVI state ownership | Prefer Nav 3 `NavDisplay` for new MVI-first projects; Nav 2 remains valid for existing codebases |
+
+## Nav 2 Compatibility Reference
+
+This section covers Navigation Compose (Nav 2) patterns for working with **existing codebases**. Nav 2 is not deprecated and remains fully supported, but **Nav 3 is the preferred default for new projects** following this skill's MVI architecture. Use this section as compatibility knowledge.
+
+### Core Concepts
+
+Nav 2 has three building blocks:
+
+1. **NavController** — imperative controller that manages the back stack and navigation actions
+2. **NavHost** — composable container that maps routes to composable destinations
+3. **NavGraph** — the navigation graph defined via the `NavHost` DSL
+
+### Basic Setup
+
+```kotlin
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen(onNavigateToDetail = { id -> navController.navigate("detail/$id") })
+        }
+        composable("detail/{itemId}") { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+            DetailScreen(itemId = itemId)
+        }
+    }
+}
+```
+
+### Type-Safe Routes (Navigation Compose 2.8+)
+
+From Navigation Compose 2.8+, routes can be `@Serializable` types instead of strings:
+
+```kotlin
+@Serializable data object Home
+@Serializable data class Detail(val itemId: String)
+
+NavHost(navController = navController, startDestination = Home) {
+    composable<Home> {
+        HomeScreen(onNavigateToDetail = { id -> navController.navigate(Detail(id)) })
+    }
+    composable<Detail> { backStackEntry ->
+        val detail: Detail = backStackEntry.toRoute()
+        DetailScreen(itemId = detail.itemId)
+    }
+}
+```
+
+### Navigation Arguments
+
+```kotlin
+composable(
+    route = "detail/{itemId}?sort={sort}",
+    arguments = listOf(
+        navArgument("itemId") { type = NavType.StringType },
+        navArgument("sort") { type = NavType.StringType; defaultValue = "name" },
+    )
+) { backStackEntry ->
+    val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
+    val sort = backStackEntry.arguments?.getString("sort") ?: "name"
+    DetailScreen(itemId = itemId, sortBy = sort)
+}
+```
+
+### Common Navigation Actions
+
+```kotlin
+navController.navigate("detail/$id")
+navController.navigate("detail/$id") {
+    popUpTo("home") { inclusive = false }
+    launchSingleTop = true
+}
+navController.navigateUp()
+navController.popBackStack()
+```
+
+### Nested Navigation Graphs
+
+Group related destinations under a nested graph for organization and scoping:
+
+```kotlin
+NavHost(navController = navController, startDestination = "home") {
+    composable("home") { HomeScreen(navController) }
+
+    navigation(startDestination = "checkout/cart", route = "checkout") {
+        composable("checkout/cart") { CartScreen(navController) }
+        composable("checkout/shipping") { ShippingScreen(navController) }
+        composable("checkout/payment") { PaymentScreen(navController) }
+    }
+}
+```
+
+### Graph-Scoped ViewModels
+
+Share a ViewModel across all destinations within a nested navigation graph:
+
+```kotlin
+composable("checkout/cart") { entry ->
+    val parentEntry = remember(entry) { navController.getBackStackEntry("checkout") }
+    val sharedViewModel: CheckoutViewModel = viewModel(parentEntry)
+    CartScreen(viewModel = sharedViewModel)
+}
+```
+
+With Hilt:
+
+```kotlin
+val parentEntry = remember(entry) { navController.getBackStackEntry("checkout") }
+val sharedViewModel: CheckoutViewModel = hiltViewModel(parentEntry)
+```
+
+### Nav 2 in MVI
+
+The MVI boundary still applies: ViewModels emit semantic effects, the route layer calls `navController`:
+
+```kotlin
+@Composable
+fun EstimateRoute(
+    navController: NavController,
+    viewModel: EstimateViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    CollectEffect(viewModel.effect) { effect ->
+        when (effect) {
+            is EstimateEffect.NavigateBack -> navController.navigateUp()
+            is EstimateEffect.OpenDetails -> navController.navigate("detail/${effect.id}")
+        }
+    }
+
+    EstimateScreen(state = state, onEvent = viewModel::onEvent)
+}
+```
+
+### When Nav 2 Is Appropriate
+
+- **Existing codebases** already built on `NavHost`/`NavController`
+- Projects requiring **built-in deep link parsing** via `NavDeepLink`
+- Projects using **Navigation Compose's built-in transitions** (AnimatedNavHost)
+- Teams maintaining **hybrid Compose + Fragment** apps where Nav 2 provides Fragment integration
+
+## Migrating from Nav 2 to Nav 3
+
+This section provides a concise migration guide based on the [official Android Nav 2 → Nav 3 migration documentation](https://developer.android.com/guide/navigation/migrate-to-nav3). **Nav 2 is not deprecated** — this migration is optional and recommended for projects that want Nav 3's state-ownership model.
+
+### Key Conceptual Shifts
+
+| Nav 2 | Nav 3 |
+|---|---|
+| `NavController` owns the back stack | You own the back stack (`SnapshotStateList`) |
+| `NavHost` renders composable destinations | `NavDisplay` observes the back stack and renders entries |
+| Routes are strings or `@Serializable` types | Keys are `@Serializable` types implementing `NavKey` |
+| Imperative navigation (`navController.navigate()`) | List manipulation (`backStack.add()`, `backStack.removeLastOrNull()`) |
+| `NavGraph` groups destinations | No separate graph — entries are resolved by the `entryProvider` |
+| Deep links parsed by Navigation library | Deep links parsed by your code — you construct the back stack |
+| Graph-scoped ViewModels via `getBackStackEntry()` | Entry-scoped ViewModels via `rememberViewModelStoreNavEntryDecorator()` |
+
+### Migration Steps
+
+**1. Replace route types with NavKey**
+
+```kotlin
+// Nav 2
+@Serializable data object Home
+@Serializable data class Detail(val id: String)
+
+// Nav 3
+@Serializable data object Home : NavKey
+@Serializable data class Detail(val id: String) : NavKey
+```
+
+**2. Replace NavController with a SnapshotStateList back stack**
+
+```kotlin
+// Nav 2
+val navController = rememberNavController()
+navController.navigate(Detail(id))
+
+// Nav 3
+val backStack = rememberNavBackStack(Home)
+backStack.add(Detail(id))
+```
+
+**3. Replace NavHost with NavDisplay**
+
+```kotlin
+// Nav 2
+NavHost(navController = navController, startDestination = Home) {
+    composable<Home> { HomeScreen(onNavigate = { navController.navigate(Detail(it)) }) }
+    composable<Detail> { entry -> DetailScreen(entry.toRoute<Detail>().id) }
+}
+
+// Nav 3
+NavDisplay(
+    backStack = backStack,
+    onBack = { backStack.removeLastOrNull() },
+    entryDecorators = listOf(
+        rememberSaveableStateHolderNavEntryDecorator(),
+        rememberViewModelStoreNavEntryDecorator(),
+    ),
+    entryProvider = entryProvider {
+        entry<Home> { HomeScreen(onNavigate = { backStack.add(Detail(it)) }) }
+        entry<Detail> { key -> DetailScreen(key.id) }
+    },
+)
+```
+
+**4. Replace graph-scoped ViewModels with entry decorators**
+
+Nav 3 scopes ViewModels to entries automatically via `rememberViewModelStoreNavEntryDecorator()`. For shared state across entries, lift state to a parent composable or use a shared ViewModel at the Activity/App scope.
+
+**5. Replace deep link integration**
+
+Nav 3 does not parse deep links — parse URIs in your platform entry point and construct the back stack manually (see [Deep Links](#deep-links) above).
+
+### Incremental Migration
+
+You do not have to migrate everything at once. The official docs recommend:
+
+1. Start with leaf screens that have simple navigation
+2. Move shared/graph-scoped ViewModels last
+3. Keep Nav 2 running alongside Nav 3 during transition if needed — they can coexist in the same app
 

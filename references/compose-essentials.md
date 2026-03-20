@@ -203,10 +203,10 @@ Usage at the route level:
 ```kotlin
 @Composable
 fun EstimateRoute(viewModel: EstimateViewModel) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    CollectEffect(viewModel.effects) { effect ->
+    CollectEffect(viewModel.effect) { effect ->
         when (effect) {
             is EstimateEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             is EstimateEffect.NavigateBack -> navigator.goBack()
@@ -217,7 +217,7 @@ fun EstimateRoute(viewModel: EstimateViewModel) {
 }
 ```
 
-This keeps effect collection consistent across all routes without a base class — just call `CollectEffect` wherever you need it.
+This keeps effect collection consistent across all routes without a base class — just call `CollectEffect` wherever you need it. Note that `collectAsStateWithLifecycle()` matches the recommendation above and `viewModel.effect` uses the singular naming convention from the ViewModel pattern in [clean-code.md](clean-code.md).
 
 ## Modifier Ordering
 

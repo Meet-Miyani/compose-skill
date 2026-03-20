@@ -1,26 +1,57 @@
 # Anti-Patterns
 
-Comprehensive table of patterns that hurt MVI Compose Multiplatform codebases.
+Quick-reference table of cross-cutting patterns that hurt MVI Compose Multiplatform codebases. Domain-specific anti-patterns (navigation, networking, paging, DI, etc.) live in their respective reference files — see the "Detailed in" column.
 
-| Anti-pattern | Why it is harmful | How it appears in code review | Better replacement |
+For overengineering patterns (bloated base classes, unnecessary use cases, 4-type MVI), see [clean-code.md](clean-code.md).
+
+## Cross-Cutting Anti-Patterns
+
+| Anti-pattern | Why it is harmful | Better replacement | Detailed in |
 |---|---|---|---|
-| Business logic inside composables | forks source of truth, hurts testability, reruns during composition | parsing, validation, repo calls, analytics in composable body | move logic into ViewModel/domain services |
-| Giant god-ViewModel | blast radius too large, slow reasoning, hard ownership | one ViewModel owns many screens/features | one ViewModel per screen or independent flow |
-| Over-modeled intents/effects | ceremony exceeds problem, reduces clarity | 5 sealed layers for simple user actions, or 4-type MVI (Event/Result/State/Effect) for trivial screens | one feature event sealed interface, one effect type if needed; 3-type MVI (Event/State/Effect) is usually enough |
-| Base ViewModel with scattered `updateState`/`sendEffect` and no organizing principle | state transitions hard to trace, mutations scattered across callbacks and coroutines with no clear structure | `updateState { copy(...) }` in 15+ random places across helpers, callbacks, catch blocks | disciplined `onEvent()` as single entry point with well-named helper functions for complex flows |
-| Base class that forces unnecessary ceremony | adds 4th type (Result) and pure reducer for screens that don't benefit | `BaseMviViewModel<Event, Result, State, Effect>` with `handleEvent()` + `reduce()` + `dispatch()` for a 3-field form | use 3-type MVI (Event/State/Effect) with direct state updates in `onEvent()` |
-| Unstable state models | more recomposition, harder skipping | mutable collections, lambdas, platform objects in state | immutable data classes, immutable collections |
-| Duplicated derived data | bugs from drift, harder transitions | `total`, `formattedTotal`, `hasTotal`, `showTotal` all stored | keep canonical value + derive via computed property |
-| Animation state in ViewModel for no reason | pollutes business state | `shakeCount`, `alpha`, `pulsePhase` in screen state | local composable animation state |
-| Broad state reads in parent composables | recomposition cascades | every child takes `state` | slice state and pass only required props |
-| Mutable state passed deep into tree | hidden writes, unpredictable flow | `MutableState<T>` or `SnapshotStateList` passed to leaves | explicit props + callbacks |
-| Platform abstraction too early | unnecessary indirection, poor fit | interfaces for everything before pain exists | share business logic first, abstract real platform capabilities only |
-| Full-screen loading wipes existing content | bad UX, layout jumps, lost trust | `if (isLoading) Spinner else Content` during refresh | keep old content + inline refresh indicator |
-| ViewModel doing platform work in onEvent directly | breaks testability, platform coupling | `onEvent` calls share/analytics/navigation APIs directly | emit effects and handle them in the Route composable |
-| Unnecessary use case wrappers | ceremony without value | every repository method wrapped in one class | direct repo/service injection for trivial cases |
-| Too many trivial composables | fragmentation, harder reading | wrappers around single `Text`/`Spacer` with no meaning | extract only meaningful boundaries |
-| Poor lazy list keys | state jumps between rows, bad animations | no key or index-based key | stable key by domain ID |
-| Formatting-heavy display strings stored too early | locale inflexibility, state duplication, harder reuse | ViewModel emitting pre-baked display strings | keep canonical values until presentation boundary |
-| One-off events stored as consumable state | event replay bugs, stale effects | `showSnackbarOnce = true` flags in state | separate `Effect` via `Channel` |
-| No-op state emissions | wasted recomposition | state copied even when same | guard unchanged values and avoid pointless updates |
-| Forcing MVI migration on existing codebase | churn without value, team friction | rewriting working MVVM screens to MVI when not asked | respect existing patterns, introduce MVI for new features only |
+| Business logic inside composables | forks source of truth, hurts testability, reruns during composition | move logic into ViewModel/domain services | [architecture.md](architecture.md) |
+| Giant god-ViewModel | blast radius too large, slow reasoning, hard ownership | one ViewModel per screen or independent flow | [architecture.md](architecture.md) |
+| Scattered `updateState`/`sendEffect` with no structure | state transitions hard to trace, mutations across callbacks | disciplined `onEvent()` as single entry point | [clean-code.md](clean-code.md) |
+| Unstable state models (mutable collections, lambdas in state) | defeats Compose skipping, more recomposition | immutable data classes, immutable collections | [performance.md](performance.md) |
+| Duplicated derived data (`total`, `formattedTotal`, `hasTotal` all stored) | bugs from drift, harder transitions | keep canonical value + derive via computed property | [architecture.md](architecture.md) |
+| Broad state reads in parent composables | recomposition cascades to all children | slice state, pass only required props to each child | [performance.md](performance.md) |
+| Mutable state passed deep into tree | hidden writes, unpredictable data flow | explicit props + callbacks | [compose-essentials.md](compose-essentials.md) |
+| One-off events stored as consumable state (`showSnackbarOnce = true`) | event replay on config change, stale effects | separate `Effect` via `Channel` | [architecture.md](architecture.md) |
+| No-op state emissions (copy state when nothing changed) | wasted recomposition cycles | guard unchanged values before updating | [performance.md](performance.md) |
+| Full-screen loading wipes existing content | bad UX, layout jumps, lost user trust | keep old content + inline refresh indicator | [ui-ux.md](ui-ux.md) |
+| ViewModel doing platform work directly (share, analytics, navigation) | breaks testability, platform coupling | emit effects, handle in Route composable | [architecture.md](architecture.md) |
+| Animation state in ViewModel for no reason (`shakeCount`, `alpha`) | pollutes business state | local composable animation state | [animations.md](animations.md) |
+| Display strings stored too early (ViewModel emits pre-baked formatted text) | locale inflexibility, state duplication, harder reuse | keep canonical values until presentation boundary | [architecture.md](architecture.md) |
+| Poor lazy list keys (no key or index-based) | state jumps between rows, broken animations | stable key by domain ID | [lists-grids.md](lists-grids.md) |
+| Too many trivial composables (wrappers around single `Text`/`Spacer`) | fragmentation, harder reading | extract only meaningful boundaries | [clean-code.md](clean-code.md) |
+| Platform abstraction too early (interfaces for everything before pain) | unnecessary indirection, poor fit | share business logic first, abstract real platform capabilities only | [cross-platform.md](cross-platform.md) |
+| Forcing MVI migration on existing codebase | churn without value, team friction | respect existing patterns, introduce MVI for new features only | [clean-code.md](clean-code.md) |
+
+## Domain-Specific Anti-Patterns
+
+These reference files contain their own anti-pattern sections with detailed BAD/GOOD code examples:
+
+| Domain | Reference | What it covers |
+|---|---|---|
+| Architecture & MVI | [architecture.md](architecture.md) | event handling, state modeling, effect misuse, domain layer violations |
+| Overengineering | [clean-code.md](clean-code.md) | bloated base classes, 4-type MVI, use case wrappers, naming |
+| Coroutines & Flow | [coroutines-flow.md](coroutines-flow.md) | GlobalScope, blocking dispatchers, unbound scopes, stateIn misuse |
+| Performance | [performance.md](performance.md) | recomposition, stability, state shape, read boundaries |
+| Compose Essentials | [compose-essentials.md](compose-essentials.md) | side effects, modifier ordering, CompositionLocal |
+| Animations | [animations.md](animations.md) | ViewModel animation state, graphicsLayer misuse, over-animating |
+| Lists & Grids | [lists-grids.md](lists-grids.md) | keys, nested scrolling, contentType |
+| UI/UX | [ui-ux.md](ui-ux.md) | disappearing content, layout jumps, loading states |
+| Navigation | [navigation.md](navigation.md) | route design, back stack, ViewModel scoping |
+| Paging | [paging.md](paging.md) | PagingData in UiState, key misuse, LoadState handling |
+| Networking | [networking-ktor.md](networking-ktor.md) | client config, error handling, auth |
+| Room Database | [room-database.md](room-database.md) | entity design, DAO patterns, migrations |
+| DataStore | [datastore.md](datastore.md) | singleton enforcement, blocking reads, corruption |
+| DI (Koin) | [koin.md](koin.md) | module organization, scoping, ViewModel injection |
+| DI (Hilt) | [hilt.md](hilt.md) | module structure, scoping, testing |
+| Image Loading | [image-loading.md](image-loading.md) | cache policy, transformations, placeholder usage |
+| Testing | [testing.md](testing.md) | missing ViewModel tests, mocking DI, testing internals |
+| Cross-Platform | [cross-platform.md](cross-platform.md) | expect/actual misuse, premature abstraction |
+| iOS Interop | [ios-swift-interop.md](ios-swift-interop.md) | naming, nullability, Flow bridging |
+| Resources | [resources.md](resources.md) | Android R vs CMP Res, qualifier usage |
+| Material Design | [material-design.md](material-design.md) | theme setup, component choice, adaptive layouts |
+| Accessibility | [accessibility.md](accessibility.md) | missing semantics, touch targets, contrast |
+| Gradle & Build | [gradle-build.md](gradle-build.md) | hardcoded versions, buildSrc, convention plugin timing |

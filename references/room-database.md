@@ -395,7 +395,7 @@ Room `Flow` queries automatically re-emit when data changes — the ViewModel re
 
 Map entities to domain models at the repository boundary with extension functions (`TaskEntity.toDomain()` / `Task.toEntity()`). Keep `@Entity` classes as data-layer types — never pass them to the UI.
 
-For DI wiring (Koin/Hilt), see [dependency-injection.md](dependency-injection.md).
+For DI wiring, see [koin.md](koin.md) or [hilt.md](hilt.md).
 
 ## Testing
 

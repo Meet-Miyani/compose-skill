@@ -54,11 +54,11 @@ One-off UI commands that don't belong in state: navigate, show snackbar, trigger
 
 `Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()` is the default for effects:
 
-- **Guarantees delivery**: buffered channel holds effects even if the collector is temporarily inactive (e.g. during configuration change with short-lived scope)
+- **Guarantees delivery**: buffered channel holds effects even if the collector is temporarily inactive (e.g., during recomposition, rapid lifecycle transitions, or — on Android — configuration changes)
 - **Single consumer**: only one collector receives each effect — no accidental double-handling
 - **No replay**: new collectors don't receive stale effects
 
-`SharedFlow(replay=0)` drops effects when no collector is active. This is acceptable for truly fire-and-forget signals but risks losing effects during rapid lifecycle transitions. Prefer `Channel` unless you have a specific reason.
+`SharedFlow(replay=0)` drops effects when no collector is active. This is acceptable for truly fire-and-forget signals but risks losing effects during brief collector gaps. Prefer `Channel` unless you have a specific reason.
 
 ### Event Processing Flow
 
@@ -88,7 +88,7 @@ If the project uses a base class or interface (like `MviHost<Event, State, Effec
 
 ### UI Rendering Boundary
 
-- **Route** composable: obtains ViewModel (via `koinViewModel()`, `hiltViewModel()`, or manual construction), collects state once via `collectAsStateWithLifecycle()`, collects effects via `LaunchedEffect`, binds navigation/snackbar/sheet/platform APIs
+- **Route** composable: obtains ViewModel (via `koinViewModel()`, `hiltViewModel()`, or manual construction), collects state once via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (see [compose-essentials.md](compose-essentials.md)), binds navigation/snackbar/sheet/platform APIs
 - **Screen** composable: render screen from state, adapt to smaller callbacks for leaf composables. Stateless — receives state and event callback
 - **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state
 
@@ -487,12 +487,10 @@ fun CreateItemRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                CreateItemEffect.NavigateBack -> onNavigateBack()
-                is CreateItemEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
-            }
+    CollectEffect(viewModel.effect) { effect ->
+        when (effect) {
+            CreateItemEffect.NavigateBack -> onNavigateBack()
+            is CreateItemEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
         }
     }
 

@@ -47,6 +47,17 @@ Runtime permissions, system share/open sheet, platform haptics, clipboard, URL o
 | navigation controller binding | platform/UI shell | ViewModel should not know controller type |
 | analytics SDK integration | platform or shared facade | real implementation differs |
 
+### Dependency Verification for commonMain
+
+**Before claiming any dependency works in `commonMain`, verify it actually publishes multiplatform artifacts.** Many Jetpack/AndroidX libraries remain Android-only. A subset now publish KMP artifacts (e.g., `lifecycle-viewmodel`, `datastore-preferences`), but availability and API surface vary by version.
+
+**Verification steps:**
+1. Check Maven Central or Google Maven for the artifact — look for `-jvm`, `-iosarm64`, `-iosX64`, or similar classifier suffixes
+2. Consult the library's official documentation for KMP support status
+3. If context7 MCP is available, use `resolve-library-id` then `query-docs` to confirm multiplatform support
+
+**If verification is not possible**, state this explicitly and note the dependency may require platform-specific placement or wrapper interfaces.
+
 ## Interfaces vs expect/actual
 
 ### Default recommendation
@@ -115,7 +126,7 @@ class IosPlayer : Player {
 }
 ```
 
-Wire via platform Koin modules (see [dependency-injection.md](dependency-injection.md) for full Koin setup):
+Wire via platform Koin modules (see [koin.md](koin.md) for full Koin setup):
 
 ```kotlin
 // androidMain
@@ -182,14 +193,23 @@ Prefer interface+DI when you need fakes or when the platform type doesn't match 
 
 ## Lifecycle
 
-Compose Multiplatform has shared lifecycle support. `androidx.lifecycle:lifecycle-viewmodel` and `lifecycle-runtime-compose` are multiplatform since lifecycle 2.8+. This means:
+**Some** AndroidX Lifecycle artifacts now publish multiplatform support. `androidx.lifecycle:lifecycle-viewmodel` and `lifecycle-runtime-compose` added KMP targets in recent versions, enabling `ViewModel`, `viewModelScope`, and `collectAsStateWithLifecycle` in `commonMain` — but availability and API surface vary by version.
 
-- `ViewModel`, `viewModelScope`, and `collectAsStateWithLifecycle` work in `commonMain`
-- ViewModels can extend `ViewModel()` in shared code and use `viewModelScope` for coroutine management
-- `koinViewModel()` works in CMP to inject lifecycle-managed ViewModels
+**Caveat:** Shared lifecycle support depends on the project's chosen androidx/KMP setup. Not all lifecycle extensions are multiplatform. Before assuming any lifecycle API works in `commonMain`, verify:
+1. The specific artifact version publishes KMP targets (check Maven Central for `-jvm`, `-iosarm64`, etc.)
+2. The API you need exists in the multiplatform artifact (some APIs remain Android-only)
+3. Your project's KMP configuration includes the required targets
 
-**Default:**
+**Always verify the current stable version** via context7 MCP or official AndroidX release notes before recommending a specific version. Do not assume versions mentioned in this skill are current.
 
+When verification is not possible, state this explicitly and consider wrapping platform-specific lifecycle behavior behind interfaces.
+
+**Commonly available in `commonMain` (verify version support):**
+- `ViewModel`, `viewModelScope` — shared coroutine scope management
+- `collectAsStateWithLifecycle` — lifecycle-aware state collection
+- `koinViewModel()` — lifecycle-managed ViewModel injection via Koin
+
+**Default patterns:**
 - Route owns collection
 - ViewModel owns coroutine work
 - ViewModel survives as long as the screen flow should survive

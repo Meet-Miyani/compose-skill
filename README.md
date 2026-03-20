@@ -152,13 +152,14 @@ compose-skill/
 ├── SKILL.md                            # Skill definition (required)
 ├── README.md                           # This file
 ├── assets/
-│   └── compose-multiplatform-icon.svg  # Logo
+│   └── compose-multiplatform-icon.svg  # Official CMP logo (Kotlin brand assets)
 ├── agents/
 │   └── openai.yaml                     # Codex UI metadata (optional)
-└── references/                         # 23 deep-dive reference files
+└── references/                         # 26 deep-dive reference files
     ├── architecture.md                 # MVI pipeline, state modeling, code examples
     ├── coroutines-flow.md              # StateFlow vs SharedFlow vs Channel, Turbine
     ├── compose-essentials.md           # Three phases, side effects, modifiers
+    ├── material-design.md              # M3 theming, components, adaptive layouts
     ├── image-loading.md                # Coil 3, AsyncImage, caching, SVG, CMP resources
     ├── lists-grids.md                  # LazyColumn/Row, keys, grids, pager
     ├── paging.md                       # PagingSource, Pager, RemoteMediator
@@ -170,13 +171,15 @@ compose-skill/
     ├── room-database.md                # Entities, DAOs, migrations, KMP
     ├── datastore.md                    # Preferences, Typed DataStore, MVI
     ├── networking-ktor.md              # HttpClient, ApiResponse, auth, WebSockets
-    ├── dependency-injection.md         # Koin (CMP), Koin + Nav 3, Hilt
-    ├── cross-platform.md              # commonMain, expect/actual, lifecycle
+    ├── dependency-injection.md         # DI decision guide, shared concepts
+    ├── koin.md                         # Koin (CMP), Koin + Nav 3
+    ├── hilt.md                         # Hilt (Android-only), @HiltViewModel, scopes
+    ├── cross-platform.md               # commonMain, expect/actual, lifecycle
     ├── resources.md                    # CMP Res class, qualifiers, localization
     ├── ios-swift-interop.md            # SKIE, Flow→AsyncSequence, SwiftUI/UIKit
     ├── accessibility.md                # Semantics, touch targets, WCAG contrast
     ├── clean-code.md                   # File organization, naming conventions
-    ├── anti-patterns.md                # 18 harmful patterns with replacements
+    ├── anti-patterns.md                # 20 harmful patterns with replacements
     ├── gradle-build.md                 # AGP 9+, version catalog, conventions
     └── ci-cd-distribution.md           # GitHub Actions, packaging, signing
 ```

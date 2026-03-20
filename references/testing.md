@@ -210,6 +210,17 @@ Test:
 
 Do not sink weeks into screenshot infrastructure before you have ViewModel test coverage.
 
+## Anti-Patterns
+
+| Anti-pattern | Why it hurts | Better replacement |
+|---|---|---|
+| No ViewModel tests, only UI tests | slow feedback, flaky, hard to isolate failures | ViewModel event→state→effect tests with Turbine first |
+| Testing implementation details (private functions, internal state) | brittle tests that break on refactoring | test through public API: send event, assert state/effect |
+| Mocking the DI framework | couples tests to DI internals | swap real implementations with fakes via constructor injection |
+| Screenshot tests before ViewModel coverage | high maintenance, low defect yield | establish ViewModel + validator coverage first, then add screenshots selectively |
+| Testing derived/computed properties in isolation from ViewModel | duplicates logic, drifts from real behavior | test derived values through ViewModel state assertions |
+| Sharing mutable test fixtures across tests | hidden coupling, order-dependent failures | fresh state per test, explicit setup in each test function |
+
 ## Recommendations by App Scale
 
 ### Small App

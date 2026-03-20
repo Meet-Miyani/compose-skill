@@ -168,19 +168,55 @@ The second form becomes a horizontal maze fast.
 
 ## Code Examples
 
-### BAD: base ViewModel with scattered `updateState`/`sendEffect` — no clear structure
+### Pattern: base ViewModel that provides `updateState`/`sendEffect`
 
 ```kotlin
 abstract class BaseViewModel<Event, State, Effect>(initialState: State) : ViewModel() {
-    val state: StateFlow<State> = MutableStateFlow(initialState).asStateFlow()
-    val effect: Flow<Effect> = Channel<Effect>(Channel.BUFFERED).receiveAsFlow()
-    protected fun updateState(reduce: State.() -> State) { /* ... */ }
-    protected fun sendEffect(effect: Effect) { /* ... */ }
+    private val _state = MutableStateFlow(initialState)
+    val state: StateFlow<State> = _state.asStateFlow()
+
+    private val _effect = Channel<Effect>(Channel.BUFFERED)
+    val effect: Flow<Effect> = _effect.receiveAsFlow()
+
+    protected fun updateState(reduce: State.() -> State) {
+        _state.update { it.reduce() }
+    }
+
+    protected fun sendEffect(effect: Effect) {
+        _effect.trySend(effect)
+    }
+
     abstract fun onEvent(event: Event)
 }
 ```
 
-This base class itself is fine — the problem is what happens in subclasses: `updateState` and `sendEffect` calls scattered through `onEvent`, private functions, coroutine callbacks, and try/catch blocks with no organizing principle. The base class doesn't prevent this, but it doesn't cause it either. **A disciplined `onEvent()` with clear helper functions is the fix, not a more complex base class.**
+This base class is structurally valid and eliminates repeated `MutableStateFlow`/`Channel` boilerplate across features. The risk is not the base class itself — it is **how subclasses use it**. Without discipline, `updateState` and `sendEffect` calls scatter through `onEvent`, private functions, nested coroutines, and try/catch blocks with no organizing principle. A sprawling subclass with no clear control flow is the anti-pattern, not the presence of a base class. **A disciplined `onEvent()` with well-named helper functions is the fix, not a more complex base class.**
+
+### Alternative: interface + delegate (composition over inheritance)
+
+Some teams prefer composition over inheritance. The pattern uses two pieces:
+
+```kotlin
+class MviStore<State, Effect>(initialState: State) {
+    // Holds _state: MutableStateFlow, _effect: Channel
+    // Provides: state, effect, currentState, updateState(), sendEffect()
+}
+
+interface MviHost<Event, State, Effect> {
+    val store: MviStore<State, Effect>
+    fun onEvent(event: Event)
+    // Delegates state, effect, updateState, sendEffect to store
+}
+```
+
+Usage: `class MyViewModel : ViewModel(), MviHost<E, S, Eff> { override val store = MviStore(InitialState()) }`
+
+| Approach | Pros | Cons |
+|---|---|---|
+| Abstract base class | Simpler setup, familiar pattern | Single inheritance limit |
+| Interface + delegate | Composition, ViewModel can extend other classes | More ceremony |
+
+Both are valid. The discipline of a clean `onEvent()` matters more than the inheritance model.
 
 ### BAD: 4-type MVI forced on every screen
 

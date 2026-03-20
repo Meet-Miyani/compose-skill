@@ -1,0 +1,176 @@
+name: Validate Skill
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate SKILL.md exists and has required frontmatter
+        run: |
+          if [ ! -f "SKILL.md" ]; then
+            echo "::error::SKILL.md not found in repository root"
+            exit 1
+          fi
+
+          # Check for YAML frontmatter
+          if ! head -1 SKILL.md | grep -q '^---$'; then
+            echo "::error::SKILL.md missing YAML frontmatter (should start with ---)"
+            exit 1
+          fi
+
+          # Extract frontmatter and check required fields
+          FRONTMATTER=$(sed -n '1,/^---$/p' SKILL.md | tail -n +2 | head -n -1)
+
+          if ! echo "$FRONTMATTER" | grep -q '^name:'; then
+            echo "::error::SKILL.md frontmatter missing required 'name' field"
+            exit 1
+          fi
+
+          if ! echo "$FRONTMATTER" | grep -q '^description:'; then
+            echo "::error::SKILL.md frontmatter missing required 'description' field"
+            exit 1
+          fi
+
+          echo "✓ SKILL.md exists with valid frontmatter"
+
+      - name: Validate README.md exists
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "::error::README.md not found in repository root"
+            exit 1
+          fi
+          echo "✓ README.md exists"
+
+      - name: Validate references directory structure
+        run: |
+          if [ ! -d "references" ]; then
+            echo "::error::references/ directory not found"
+            exit 1
+          fi
+
+          # Check that references/ contains at least one .md file
+          MD_COUNT=$(find references -name '*.md' -type f | wc -l)
+          if [ "$MD_COUNT" -eq 0 ]; then
+            echo "::error::references/ directory contains no .md files"
+            exit 1
+          fi
+
+          echo "✓ references/ directory contains $MD_COUNT markdown files"
+
+      - name: Validate internal links in SKILL.md
+        run: |
+          ERRORS=0
+
+          # Extract markdown links to local files from SKILL.md
+          # Pattern: [text](path) where path doesn't start with http
+          LINKS=$(grep -oE '\[([^\]]+)\]\(([^)]+)\)' SKILL.md | \
+                  sed 's/.*(\([^)]*\))/\1/' | \
+                  grep -v '^http' | \
+                  grep -v '^#' || true)
+
+          for link in $LINKS; do
+            # Remove any anchor from the link
+            FILE_PATH=$(echo "$link" | cut -d'#' -f1)
+            if [ -n "$FILE_PATH" ] && [ ! -f "$FILE_PATH" ]; then
+              echo "::warning::Broken link in SKILL.md: $link (file not found: $FILE_PATH)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::warning::Found $ERRORS broken internal links"
+          else
+            echo "✓ All internal links in SKILL.md are valid"
+          fi
+
+      - name: Check for required reference files
+        run: |
+          # Core references that should exist based on SKILL.md claims
+          REQUIRED_REFS=(
+            "references/architecture.md"
+            "references/compose-essentials.md"
+            "references/navigation.md"
+            "references/dependency-injection.md"
+            "references/koin.md"
+            "references/cross-platform.md"
+          )
+
+          MISSING=0
+          for ref in "${REQUIRED_REFS[@]}"; do
+            if [ ! -f "$ref" ]; then
+              echo "::error::Missing required reference: $ref"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::$MISSING required reference files are missing"
+            exit 1
+          fi
+
+          echo "✓ All required reference files exist"
+
+      - name: Validate markdown syntax
+        run: |
+          # Check for common markdown issues in all .md files
+          ERRORS=0
+
+          find . -name '*.md' -not -path './.git/*' | while read -r file; do
+            # Check for unclosed code blocks (odd number of ```)
+            BACKTICK_COUNT=$(grep -c '```' "$file" 2>/dev/null || echo 0)
+            if [ $((BACKTICK_COUNT % 2)) -ne 0 ]; then
+              echo "::warning file=$file::Potential unclosed code block (odd number of \`\`\` delimiters)"
+            fi
+          done
+
+          echo "✓ Basic markdown validation complete"
+
+      - name: Verify package can be created
+        run: |
+          # Test that the tarball can be created without errors
+          tar --exclude='.git' \
+              --exclude='.github' \
+              --exclude='.gitignore' \
+              --exclude='*.tar.gz' \
+              -czvf test-package.tar.gz . > /dev/null
+
+          # Verify the tarball contains SKILL.md
+          if ! tar -tzf test-package.tar.gz | grep -q 'SKILL.md'; then
+            echo "::error::Package does not contain SKILL.md"
+            exit 1
+          fi
+
+          # Verify the tarball contains references/
+          if ! tar -tzf test-package.tar.gz | grep -q 'references/'; then
+            echo "::error::Package does not contain references/ directory"
+            exit 1
+          fi
+
+          SIZE=$(du -h test-package.tar.gz | cut -f1)
+          echo "✓ Package created successfully ($SIZE)"
+          rm test-package.tar.gz
+
+      - name: Summary
+        run: |
+          echo "## Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All skill package validations passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Validated:**" >> $GITHUB_STEP_SUMMARY
+          echo "- SKILL.md frontmatter structure" >> $GITHUB_STEP_SUMMARY
+          echo "- README.md presence" >> $GITHUB_STEP_SUMMARY
+          echo "- References directory structure" >> $GITHUB_STEP_SUMMARY
+          echo "- Internal link integrity" >> $GITHUB_STEP_SUMMARY
+          echo "- Required reference files" >> $GITHUB_STEP_SUMMARY
+          echo "- Markdown syntax" >> $GITHUB_STEP_SUMMARY
+          echo "- Package creation" >> $GITHUB_STEP_SUMMARY

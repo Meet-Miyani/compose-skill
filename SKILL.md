@@ -1,33 +1,22 @@
 ---
 name: compose-skill
 description: >
-  Complete AI agent skill for building apps with Jetpack Compose and Compose Multiplatform
-  (KMP/CMP). Covers architecture (MVI), UI, state, navigation, networking, persistence,
-  performance, accessibility, cross-platform, build, distribution, and code review. Triggered by Compose,
-  KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
-  NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
-  Res.string, Res.drawable, composeResources, stringResource, painterResource, DataStore,
-  Preferences, SharedPreferences, preferencesDataStore, accessibility, a11y,
-  contentDescription, semantics, screen reader, touch target, Gradle, AGP, build.gradle,
-  version catalog, libs.versions.toml, convention plugins, gradle.properties, compileSdk,
-  includeBuild, composite build, dependencySubstitution, CI/CD, GitHub Actions, desktop,
-  DMG, MSI, DEB, packageDmg, signing, notarization, Xcode, embedAndSignAppleFrameworkForXcode,
-  Swift, iOS interop, SKIE, KotlinUnit, AsyncSequence, @HiddenFromObjC, sealed Swift,
-  ComposeUIViewController, UIKitView, UIViewControllerRepresentable, UIHostingController,
-  or questions like "my compose app is slow", "how do I paginate", "how do I navigate",
-  "StateFlow vs SharedFlow", "share code Android iOS", "how do I use resources in KMP",
-  "how do I store settings", "DataStore vs SharedPreferences", "how do I make my UI accessible",
-  "how do I set up Gradle for KMP", "how do I build a desktop app", "how do I distribute my app",
-  "how do I expose Kotlin to Swift", "how do I observe StateFlow from iOS",
-  "how do I embed SwiftUI in Compose", "how do I use Compose in a SwiftUI app".
-  Covers: coroutines/Flow, ViewModels, MVI, state modeling, performance, Nav 3, Koin/Hilt DI,
-  Ktor, Paging 3, DataStore, animations, multiplatform resources, cross-platform, iOS Swift interop,
-  accessibility, testing, UI/UX, Gradle/AGP configuration, CI/CD, desktop distribution, and code review.
+  Build, refactor, and review apps with Jetpack Compose and Compose Multiplatform (KMP/CMP)
+  using MVI architecture. Covers coroutines/Flow, StateFlow, SharedFlow, Channel, ViewModels,
+  state modeling, recomposition, Nav 3 (NavDisplay), Koin/Hilt DI, Ktor networking, Paging 3,
+  Room, DataStore, animations, Coil image loading, accessibility (semantics, a11y, WCAG),
+  multiplatform resources (Res.string, Res.drawable, composeResources), iOS Swift interop
+  (SKIE, ComposeUIViewController, UIKitView, Flow→AsyncSequence), Gradle/AGP configuration
+  (version catalog, convention plugins, composite builds), CI/CD, and desktop distribution
+  (DMG/MSI/DEB, signing, notarization). Use when working with @Composable, ViewModel,
+  StateFlow, Flow, KMP, Ktor, Koin, Hilt, DataStore, Room, PagingData, recomposition,
+  Xcode/iOS interop, Gradle build config, or any Compose app development task including
+  performance optimization, testing, cross-platform sharing, and code review.
 ---
 
 # Jetpack Compose & Compose Multiplatform
 
-This skill covers the full Compose app development lifecycle — from architecture and state management through UI, networking, persistence, performance, accessibility, cross-platform sharing, build configuration, and distribution. Jetpack Compose and Compose Multiplatform share the same core APIs and mental model; most Jetpack libraries — including `ViewModel`, `viewModelScope`, `collectAsStateWithLifecycle`, and `lifecycle-runtime-compose` — are multiplatform and work in `commonMain`. CMP uses `expect/actual` or interfaces for platform-specific code. MVI (Model-View-Intent) is the recommended architecture, but the skill adapts to existing project conventions.
+This skill covers the full Compose app development lifecycle — from architecture and state management through UI, networking, persistence, performance, accessibility, cross-platform sharing, build configuration, and distribution. Jetpack Compose and Compose Multiplatform share the same core APIs and mental model. **Not all Jetpack libraries work in `commonMain`** — many remain Android-only. A subset of AndroidX libraries now publish multiplatform artifacts (e.g., `lifecycle-viewmodel`, `lifecycle-runtime-compose`, `datastore-preferences`), but availability and API surface vary by version. **Before adding any Jetpack/AndroidX dependency to `commonMain`, verify the artifact is published for all required targets by checking Maven Central or the library's official documentation.** CMP uses `expect/actual` or interfaces for platform-specific code. MVI (Model-View-Intent) is the recommended architecture, but the skill adapts to existing project conventions.
 
 ## Existing Project Policy
 
@@ -41,13 +30,28 @@ When helping with Jetpack Compose or Compose Multiplatform code, follow this pro
 2. **Identify the concern** — is this architecture, state modeling, performance, navigation, DI, animation, cross-platform, or testing?
 3. **Apply the core rules below** — the decision heuristics and defaults in this file cover most cases.
 4. **Consult the right reference** — load the relevant file from `references/` only when deeper guidance is needed. Each reference is listed in the [Detailed References](#detailed-references) section with its scope.
-5. **Fetch latest docs when needed** — for new libraries, version upgrades, or API verification, use context7 MCP if available (see [Fetching Up-to-Date Documentation](#fetching-up-to-date-documentation)).
+5. **Verify dependencies before recommending** — before adding or upgrading any dependency, verify coordinates, target support, and API shape via a documentation MCP tool or official docs (see [Dependency Verification Rule](#dependency-verification-rule)).
 6. **Flag anti-patterns** — if the user's code violates architectural best practices, call it out and suggest the correct pattern.
 7. **Write the minimal correct solution** — do not over-engineer. Prefer feature-specific code over generic frameworks.
 
+## Dependency Verification Rule
+
+**Before recommending any new dependency or version upgrade, verify:**
+
+1. **Coordinates** — Confirm the exact Maven coordinates (`group:artifact:version`) exist and are current.
+2. **Target support** — Confirm the artifact supports the project's targets (Android, iOS, Desktop, `commonMain`). Do not assume a Jetpack library works in `commonMain` unless verified.
+3. **API shape** — Confirm the API you plan to use actually exists in that version. Function signatures, parameter names, and return types change between major versions.
+
+**How to verify:**
+- **Documentation MCP tool** (preferred) — If a documentation MCP server is available (e.g., Context7), verify exact tool names and schemas first, then use it to fetch current official documentation for the library.
+- **Official docs** — Search the library's official documentation or release notes.
+- **Maven Central / Google Maven** — Check artifact availability and supported platforms.
+
+**If verification is not possible** (no documentation tool, no network access, docs unavailable), state this explicitly and note that coordinates or APIs may need adjustment.
+
 ## Fetching Up-to-Date Documentation
 
-When integrating a new library, upgrading dependencies, or verifying latest API patterns, the **context7 MCP** can fetch current official documentation directly into context. This supplements the bundled references with real-time documentation.
+When integrating a new library, upgrading dependencies, or verifying latest API patterns, a **documentation MCP tool** (such as Context7) can fetch current official documentation directly into context. This supplements the bundled references with real-time documentation.
 
 ### When to Use
 - Adding a new dependency not covered by bundled references
@@ -56,14 +60,14 @@ When integrating a new library, upgrading dependencies, or verifying latest API 
 - Resolving discrepancies between bundled guidance and observed API behavior
 
 ### Usage
-1. **Check availability** — Verify context7 MCP is installed. If not available, suggest installation at https://context7.com or fall back to bundled references.
-2. **Resolve library ID** — Call `resolve-library-id` with the library name to get the Context7-compatible ID.
-3. **Query docs** — Call `query-docs` with the resolved ID and a specific question.
+1. **Check availability** — Before invoking any doc-fetching tool, verify that a documentation MCP server is installed and confirm the exact tool names and parameter schemas it exposes. Tool names may vary across environments (e.g., `resolve-library-id` / `query-docs`, `search_docs`, or other names). Do not assume fixed tool names.
+2. **Resolve library ID** — If the tool requires a library ID resolution step, call it first with the library name.
+3. **Query docs** — Call the documentation query tool with the resolved ID (or library name, depending on the tool's schema) and a specific question.
 
-**Alternative**: Users can add `use context7` to their prompt to trigger documentation lookup.
+**Alternative**: Users can add `use context7` (or equivalent) to their prompt to trigger documentation lookup.
 
 ### Common Compose/KMP Libraries
-When context7 is available, these libraries have documentation indexed:
+When a documentation tool is available, these libraries typically have documentation indexed:
 - Jetpack Compose, Compose Multiplatform
 - Ktor (networking)
 - Koin (dependency injection)
@@ -71,7 +75,7 @@ When context7 is available, these libraries have documentation indexed:
 - Room (database)
 - Kotlin Coroutines, Kotlin Serialization
 
-**Note**: Bundled references remain the primary source for architectural patterns and MVI guidance. Use context7 for API-specific queries and version-specific documentation.
+**Note**: Bundled references remain the primary source for architectural patterns and MVI guidance. Use documentation tools for API-specific queries and version-specific documentation.
 
 ## Core Architecture: MVI with Event, State, Effect
 
@@ -87,7 +91,7 @@ For detailed rationale (why 3 types not 4, data flow diagrams, ViewModel interna
 
 ### UI Rendering Boundary
 
-- **Route** composable: obtains ViewModel, collects state via `collectAsStateWithLifecycle()`, collects effects via `LaunchedEffect`, binds navigation/snackbar/platform APIs
+- **Route** composable: obtains ViewModel, collects state via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (see [compose-essentials.md](references/compose-essentials.md)), binds navigation/snackbar/platform APIs
 - **Screen** composable: stateless renderer — receives state and `onEvent` callback, renders the screen, adapts callbacks for leaf composables
 - **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state (focus, scroll, animation)
 
@@ -134,7 +138,7 @@ For calculator/form screens, split state into four buckets:
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, update state on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
 | Resource access | Semantic keys/enums in state; resolve strings/icons close to UI. CMP uses `Res.string` / `Res.drawable` (not Android `R`). See [Resources](references/resources.md) |
-| Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs. Android-only: standard package structure with Hilt DI |
+| Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs. Android-only: standard package structure, Hilt DI by default (Koin also valid) |
 | Navigation | ViewModel emits semantic navigation effect; route/navigation layer executes it |
 | Persistence (settings) | DataStore Preferences in `commonMain` for key-value settings; Typed DataStore (JSON) for structured settings objects; Room for relational/queried data. See [DataStore](references/datastore.md) |
 | Testing | ViewModel event→state→effect tests via Turbine in `commonTest`; validators/calculators tested as pure functions; platform bindings tested per target |
@@ -176,7 +180,7 @@ Load these only when the task requires deeper guidance:
 ### Architecture
 - **[Architecture & State Management](references/architecture.md)** — ViewModel/event-handling pipeline, state modeling, Channel vs SharedFlow for effects, **domain layer rules**, **inter-feature communication** (event bus, feature API contracts), **module dependency rules**, GOOD/BAD code examples
 - **[Clean Code & Organization](references/clean-code.md)** — avoiding overengineering, file organization, naming conventions, disciplined vs bloated MVI comparison
-- **[Anti-Patterns](references/anti-patterns.md)** — 18-row table of harmful patterns with why they hurt, how to spot them, and better replacements
+- **[Anti-Patterns](references/anti-patterns.md)** — cross-cutting anti-pattern quick-reference table with "why it hurts" and "better replacement" for each, plus routing index to domain-specific anti-patterns in other reference files
 
 ### Compose APIs
 - **[Material 3 Theming & Components](references/material-design.md)** — M3 theme setup (dynamic color, dark/light, color roles), typography/shapes, component decisions (Scaffold, TopAppBar, NavigationBar/Rail/Suite, BottomSheet, Snackbar, Dialog), adaptive layouts (window size classes, canonical layouts), M2→M3 migration
@@ -199,7 +203,9 @@ Load these only when the task requires deeper guidance:
 
 ### Networking, DI & Cross-Platform
 - **[Networking with Ktor](references/networking-ktor.md)** — HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration, anti-patterns
-- **[Dependency Injection (Koin)](references/dependency-injection.md)** — Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, **Koin + Nav 3** (`navigation<T>`, `koinEntryProvider`), scoped navigation, adaptive layouts, MVI ViewModel integration. For Android-only projects, Hilt/Dagger patterns apply with the same architectural principles.
+- **[Dependency Injection](references/dependency-injection.md)** — DI decision guide (Hilt vs Koin), shared concepts
+- **[Koin](references/koin.md)** — Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, **Koin + Nav 3** (`navigation<T>`, `koinEntryProvider`), scoped navigation, MVI ViewModel integration, testing, anti-patterns
+- **[Hilt](references/hilt.md)** — Android-only Hilt setup, `@HiltViewModel`, `hiltViewModel()`, modules (`@Provides`/`@Binds`), scopes, Navigation Compose integration, MVI pattern with Hilt, testing, anti-patterns
 - **[Cross-Platform (KMP)](references/cross-platform.md)** — `commonMain` vs platform placement, interfaces vs `expect/actual`, **platform bridge patterns** (interface+DI, expect/actual, typealias), lifecycle, state restoration, resources, accessibility
 - **[iOS Swift Interop](references/ios-swift-interop.md)** — Kotlin→Swift naming, nullability/collection bridging, SKIE setup, suspend→async, Flow→AsyncSequence, sealed class mapping, **SwiftUI/UIKit interop** (`ComposeUIViewController`, `UIKitView`), iOS API design rules, anti-patterns
 - **[Multiplatform Resources](references/resources.md)** — Android `R` vs CMP `Res` comparison, `composeResources/` directory structure, Gradle setup, drawable/string/plural/font/raw-file APIs with code examples, qualifiers (language, theme, density), localization, generated resource maps, Android assets interop (`Res.getUri`), MVI integration (semantic keys in state, resolution in UI), do/don't

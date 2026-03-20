@@ -46,7 +46,16 @@ implementation("androidx.paging:paging-common:3.3.6")
 testImplementation("androidx.paging:paging-testing:3.3.6")
 ```
 
-**CMP note:** The CashApp [multiplatform-paging](https://github.com/cashapp/multiplatform-paging) library was archived in September 2025. For CMP projects, check the latest JetBrains paging support or use platform-specific implementations with shared repository interfaces.
+**CMP note:** AndroidX Paging 3 officially supports Kotlin Multiplatform (since 3.3.0-alpha02). The CashApp `multiplatform-paging` library was merged upstream into AndroidX and archived. Multiplatform target support by artifact:
+
+| Artifact | Android | JVM | iOS | Web |
+|---|---|---|---|---|
+| `paging-common` | Yes | Yes | Yes | Verify before use |
+| `paging-compose` | Yes | Yes (common) | Yes (common) | Verify before use |
+| `paging-testing` | Yes | Yes | Yes | Verify before use |
+| `paging-runtime` | Yes | No | No | No |
+
+Use `paging-common` and `paging-compose` in `commonMain` for CMP projects. `paging-runtime` (Android `RecyclerView` adapters) is Android-only and not needed in Compose projects. Always verify the exact KMP target support for your Paging version, as newer releases may expand Web/WASM targets.
 
 ## Core Data Flow
 
@@ -261,7 +270,7 @@ class EstimateListViewModel(private val repository: EstimateRepository) : ViewMo
 ```kotlin
 @Composable
 fun EstimateListRoute(viewModel: EstimateListViewModel = koinViewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val estimates = viewModel.estimates.collectAsLazyPagingItems()
 
     EstimateListScreen(
@@ -570,7 +579,7 @@ class EstimateListViewModel(
 ```kotlin
 @Composable
 fun EstimateListRoute(viewModel: EstimateListViewModel = koinViewModel()) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val estimates = viewModel.estimates.collectAsLazyPagingItems()
 
     EstimateListScreen(

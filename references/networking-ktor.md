@@ -607,7 +607,7 @@ startKoin {
 }
 ```
 
-For Android-only projects using Hilt, apply the same pattern — provide `HttpClient` as a `@Singleton` in a `@Module`, inject into API services and repositories. See [Dependency Injection](dependency-injection.md) for Hilt details.
+For Android-only projects using Hilt, apply the same pattern — provide `HttpClient` as a `@Singleton` in a `@Module`, inject into API services and repositories. See [Hilt](hilt.md) for details.
 
 ## Anti-Patterns
 
