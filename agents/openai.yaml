@@ -1,4 +1,4 @@
 interface:
   display_name: "compose-skill"
   short_description: "AI agent skill for Jetpack Compose and Compose Multiplatform — architecture, state, navigation, DI, performance, cross-platform, and code review"
-  default_prompt: "Use $compose-skill to build, refactor, or review Compose/CMP features following MVI architecture, verifying dependencies before recommending them."
+  default_prompt: "Use $compose-skill to build, refactor, or review Compose/CMP features, adapting to the project's architecture (MVI recommended for new work), and verifying dependencies before recommending them."

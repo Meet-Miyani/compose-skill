@@ -61,6 +61,8 @@ When adding a new dependency, upgrading major versions, or verifying latest API 
 
 ## Core Architecture: MVI with Event, State, Effect
 
+**This is the recommended architecture for all Compose work.** If the project already uses a different pattern, suggest MVI as the preferred approach but do not force-migrate working code — follow [Existing Project Policy](#existing-project-policy).
+
 MVI (Model-View-Intent) enforces **unidirectional data flow**: UI renders state → user acts → event dispatched → new state computed → UI re-renders. Every feature defines 3 types:
 
 - **Event** — user actions and lifecycle signals (`sealed interface`). The **only** input from the UI to the ViewModel.
@@ -111,6 +113,8 @@ For calculator/form screens, split state into four buckets:
 
 ## Recommended Defaults
 
+Apply these unless the project already follows a different coherent pattern.
+
 | Concern | Default |
 |---|---|
 | ViewModel | One ViewModel per screen with `onEvent(Event)` entry point (`commonMain` for CMP, feature package for Android-only) |
@@ -120,7 +124,7 @@ For calculator/form screens, split state into four buckets:
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, update state on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
 | Resource access | Semantic keys/enums in state; resolve strings/icons close to UI. CMP uses `Res.string` / `Res.drawable` (not Android `R`). See [Resources](references/resources.md) |
-| Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs. Android-only: standard package structure, Hilt DI by default (Koin also valid) |
+| Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs, Koin DI by default. Android-only: standard package structure, Hilt DI by default (Koin also valid) |
 | Navigation | ViewModel emits semantic navigation effect; route/navigation layer executes it |
 | Persistence (settings) | DataStore Preferences in `commonMain` for key-value settings; Typed DataStore (JSON) for structured settings objects; Room for relational/queried data. See [DataStore](references/datastore.md) |
 | Testing | ViewModel event→state→effect tests via Turbine in `commonTest`; validators/calculators tested as pure functions; platform bindings tested per target |
