@@ -180,11 +180,11 @@ Use `collectAsStateWithLifecycle()` instead of `collectAsState()` to collect onl
 val state by viewModel.state.collectAsStateWithLifecycle()
 ```
 
-This prevents collection during background states and avoids unnecessary work. `collectAsStateWithLifecycle` is available in both Android and Compose Multiplatform via `androidx.lifecycle:lifecycle-runtime-compose` (multiplatform since lifecycle 2.8+). Use it in `commonMain` shared code — it works on all targets.
+This prevents collection during background states and avoids unnecessary work. `collectAsStateWithLifecycle` is available in both Android and Compose Multiplatform via `androidx.lifecycle:lifecycle-runtime-compose`. Verify your project's lifecycle version supports your KMP targets before using it in `commonMain`.
 
 ### CollectEffect — Lifecycle-Aware Effect Collection
 
-A reusable composable for collecting one-off effects (navigation, snackbar, haptics) from a `Channel` or `Flow` in a lifecycle-aware manner. Effects are only processed when the UI is at least STARTED. `LocalLifecycleOwner` and `repeatOnLifecycle` are multiplatform since lifecycle 2.8+ — this works in both Android and CMP `commonMain`:
+A reusable composable for collecting one-off effects (navigation, snackbar, haptics) from a `Channel` or `Flow` in a lifecycle-aware manner. Effects are only processed when the UI is at least STARTED. `LocalLifecycleOwner` and `repeatOnLifecycle` are multiplatform. This works in both Android and CMP `commonMain`:
 
 ```kotlin
 @Composable

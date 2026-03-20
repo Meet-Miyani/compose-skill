@@ -1,6 +1,6 @@
 # Navigation 3
 
-In-depth reference for Navigation 3 in Jetpack Compose and Compose Multiplatform. Navigation 3 is a completely redesigned library — you own the back stack, navigation is list manipulation, and the library observes your state. Nav 3 works on all CMP targets. Sections below that are Android-specific (Hilt, Activity, Fragment interop) are clearly labeled.
+In-depth reference for Navigation 3 in Jetpack Compose and Compose Multiplatform. Navigation 3 is a completely redesigned library — you own the back stack, navigation is list manipulation, and the library observes your state. Nav 3 works on all CMP targets — verify artifact maturity before adopting in production. Sections below that are Android-specific (Hilt, Activity, Fragment interop) are clearly labeled.
 
 References:
 - [Android Nav 3 docs](https://developer.android.com/guide/navigation/navigation-3)

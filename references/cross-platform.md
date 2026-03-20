@@ -193,7 +193,7 @@ Prefer interface+DI when you need fakes or when the platform type doesn't match 
 
 ## Lifecycle
 
-**Some** AndroidX Lifecycle artifacts now publish multiplatform support. `androidx.lifecycle:lifecycle-viewmodel` and `lifecycle-runtime-compose` added KMP targets in recent versions, enabling `ViewModel`, `viewModelScope`, and `collectAsStateWithLifecycle` in `commonMain` — but availability and API surface vary by version.
+**Some** AndroidX Lifecycle artifacts publish multiplatform support in latest artifacts. `androidx.lifecycle:lifecycle-viewmodel` and `lifecycle-runtime-compose` publish KMP targets, enabling `ViewModel`, `viewModelScope`, and `collectAsStateWithLifecycle` in `commonMain`.
 
 **Caveat:** Shared lifecycle support depends on the project's chosen androidx/KMP setup. Not all lifecycle extensions are multiplatform. Before assuming any lifecycle API works in `commonMain`, verify:
 1. The specific artifact version publishes KMP targets (check Maven Central for `-jvm`, `-iosarm64`, etc.)
