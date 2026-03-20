@@ -116,47 +116,21 @@ Pick your agent and run **one command**. The clone target becomes the skill fold
 
 ### Quick Install (copy-paste)
 
-<details open>
-<summary><strong>Codex</strong></summary>
+| Client | User-global | Per-repo |
+|:-------|:------------|:---------|
+| **Codex** | `~/.codex/skills/compose-skill` | `.codex/skills/compose-skill` |
+| **Cursor** | `~/.cursor/skills/compose-skill` | `.cursor/skills/compose-skill` |
+| **Claude Code** | `~/.claude/skills/compose-skill` | `.claude/skills/compose-skill` |
+| **Other agents** | Upload `SKILL.md`, `agents/`, and `references/` as project knowledge | — |
 
 ```bash
-# User-global (available in all projects)
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.codex/skills/compose-skill
+# Replace <path> with the install location from the table above
+git clone https://github.com/Meet-Miyani/compose-skill.git <path>
 
-# Per-repo (committed to your project)
+# Examples:
+git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose-skill
 git clone https://github.com/Meet-Miyani/compose-skill.git .codex/skills/compose-skill
 ```
-</details>
-
-<details>
-<summary><strong>Cursor</strong></summary>
-
-```bash
-# User-global (available in all projects)
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose-skill
-
-# Per-repo (committed to your project)
-git clone https://github.com/Meet-Miyani/compose-skill.git .cursor/skills/compose-skill
-```
-</details>
-
-<details>
-<summary><strong>Claude Code</strong></summary>
-
-```bash
-# User-global (available in all projects)
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.claude/skills/compose-skill
-
-# Per-repo (committed to your project)
-git clone https://github.com/Meet-Miyani/compose-skill.git .claude/skills/compose-skill
-```
-</details>
-
-<details>
-<summary><strong>Other agents</strong></summary>
-
-Upload `SKILL.md` and the `references/` folder as project knowledge in your agent's settings.
-</details>
 
 ### Common Mistakes
 
