@@ -2,11 +2,9 @@ name: Validate Skill
 
 on:
   push:
-    branches:
-      - '**'
+    branches: [main]
   pull_request:
-    branches:
-      - '**'
+  workflow_call:
 
 jobs:
   validate:
@@ -15,87 +13,93 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Validate SKILL.md exists and has required frontmatter
+      - name: Validate core files and frontmatter
         run: |
-          echo "=== SKILL.md Frontmatter Validation ==="
+          echo "=== Core File Validation ==="
           echo ""
+          ERRORS=0
 
+          # --- SKILL.md ---
           if [ ! -f "SKILL.md" ]; then
-            echo "::error file=SKILL.md::File not found in repository root"
             echo "  ✗ SKILL.md does not exist"
-            exit 1
+            echo "::error file=SKILL.md::File not found in repository root"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "  ✓ SKILL.md exists ($(wc -l < SKILL.md | tr -d ' ') lines)"
+
+            FIRST_LINE=$(head -1 SKILL.md)
+            if [ "$FIRST_LINE" != "---" ]; then
+              echo "  ✗ SKILL.md line 1: Expected '---', found: '$FIRST_LINE'"
+              echo "::error file=SKILL.md,line=1::Missing YAML frontmatter (first line should be ---)"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ✓ YAML frontmatter opening delimiter found (line 1)"
+
+              FRONTMATTER=$(sed -n '1,/^---$/p' SKILL.md | tail -n +2 | head -n -1)
+              echo "  Frontmatter content:"
+              echo "$FRONTMATTER" | while IFS= read -r line; do
+                echo "    | $line"
+              done
+
+              if ! echo "$FRONTMATTER" | grep -q '^name:'; then
+                echo "  ✗ Required field 'name' not found in frontmatter"
+                echo "::error file=SKILL.md::Frontmatter missing required 'name' field"
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "  ✓ Field 'name' present"
+              fi
+
+              if ! echo "$FRONTMATTER" | grep -q '^description:'; then
+                echo "  ✗ Required field 'description' not found in frontmatter"
+                echo "::error file=SKILL.md::Frontmatter missing required 'description' field"
+                ERRORS=$((ERRORS + 1))
+              else
+                echo "  ✓ Field 'description' present"
+              fi
+            fi
           fi
-          echo "  ✓ SKILL.md exists ($(wc -l < SKILL.md | tr -d ' ') lines)"
-
-          FIRST_LINE=$(head -1 SKILL.md)
-          if [ "$FIRST_LINE" != "---" ]; then
-            echo "  ✗ Line 1: Expected '---', found: '$FIRST_LINE'"
-            echo "::error file=SKILL.md,line=1::Missing YAML frontmatter (first line should be ---)"
-            exit 1
-          fi
-          echo "  ✓ YAML frontmatter opening delimiter found (line 1)"
-
-          FRONTMATTER=$(sed -n '1,/^---$/p' SKILL.md | tail -n +2 | head -n -1)
-
-          echo "  Frontmatter content:"
-          echo "$FRONTMATTER" | while IFS= read -r line; do
-            echo "    | $line"
-          done
-
-          if ! echo "$FRONTMATTER" | grep -q '^name:'; then
-            echo "  ✗ Required field 'name' not found in frontmatter"
-            echo "::error file=SKILL.md::Frontmatter missing required 'name' field"
-            exit 1
-          fi
-          echo "  ✓ Field 'name' present"
-
-          if ! echo "$FRONTMATTER" | grep -q '^description:'; then
-            echo "  ✗ Required field 'description' not found in frontmatter"
-            echo "::error file=SKILL.md::Frontmatter missing required 'description' field"
-            exit 1
-          fi
-          echo "  ✓ Field 'description' present"
 
           echo ""
-          echo "✓ SKILL.md exists with valid frontmatter"
 
-      - name: Validate README.md exists
-        run: |
+          # --- README.md ---
           if [ ! -f "README.md" ]; then
-            echo "::error::README.md not found in repository root"
-            exit 1
+            echo "  ✗ README.md does not exist"
+            echo "::error file=README.md::File not found in repository root"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "  ✓ README.md exists ($(wc -l < README.md | tr -d ' ') lines)"
           fi
-          echo "✓ README.md exists"
 
-      - name: Validate references directory structure
-        run: |
-          echo "=== References Directory Validation ==="
           echo ""
 
+          # --- references/ directory ---
           if [ ! -d "references" ]; then
             echo "  ✗ references/ directory not found"
             echo "::error::references/ directory not found in repository root"
-            exit 1
+            ERRORS=$((ERRORS + 1))
+          else
+            MD_COUNT=$(find references -name '*.md' -type f | wc -l | tr -d ' ')
+            if [ "$MD_COUNT" -eq 0 ]; then
+              echo "  ✗ No .md files found in references/"
+              echo "::error::references/ directory contains no .md files"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ✓ references/ directory exists ($MD_COUNT markdown files)"
+              find references -name '*.md' -type f | sort | while IFS= read -r f; do
+                SIZE=$(wc -l < "$f" | tr -d ' ')
+                echo "    - $f ($SIZE lines)"
+              done
+            fi
           fi
-          echo "  ✓ references/ directory exists"
-
-          MD_COUNT=$(find references -name '*.md' -type f | wc -l)
-          if [ "$MD_COUNT" -eq 0 ]; then
-            echo "  ✗ No .md files found in references/"
-            echo "::error::references/ directory contains no .md files"
-            exit 1
-          fi
-
-          echo "  Files found ($MD_COUNT):"
-          find references -name '*.md' -type f | sort | while IFS= read -r f; do
-            SIZE=$(wc -l < "$f" | tr -d ' ')
-            echo "    - $f ($SIZE lines)"
-          done
 
           echo ""
-          echo "✓ references/ directory contains $MD_COUNT markdown files"
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "✗ $ERRORS error(s) found in core file validation"
+            exit 1
+          fi
+          echo "✓ Core file validation passed"
 
-      - name: Validate internal links in SKILL.md
+      - name: Validate links and references from SKILL.md
         run: |
           ERRORS=0
           CHECKED=0
@@ -103,18 +107,17 @@ jobs:
           echo "=== Internal Link Validation (SKILL.md) ==="
           echo ""
 
-          LINKS=$(grep -nE '\[([^\]]+)\]\(([^)]+)\)' SKILL.md | \
-                  grep -v 'http' || true)
+          # Extract all markdown links with line numbers, excluding external URLs
+          LINKS=$(grep -nE '\[([^\]]+)\]\(([^)]+)\)' SKILL.md | grep -v 'http' || true)
 
           if [ -z "$LINKS" ]; then
-            echo "No internal links found in SKILL.md"
+            echo "  No internal links found in SKILL.md"
           else
             echo "$LINKS" | while IFS= read -r match; do
               LINE_NUM=$(echo "$match" | cut -d: -f1)
               LINE_CONTENT=$(echo "$match" | cut -d: -f2-)
               LINK_PATH=$(echo "$LINE_CONTENT" | grep -oE '\]\(([^)]+)\)' | sed 's/\](\(.*\))/\1/' | head -1)
 
-              # Skip http links and anchors
               case "$LINK_PATH" in
                 http*|"#"*) continue ;;
               esac
@@ -123,10 +126,11 @@ jobs:
               if [ -n "$FILE_PATH" ]; then
                 CHECKED=$((CHECKED + 1))
                 if [ -f "$FILE_PATH" ]; then
-                  echo "  ✓ Line $LINE_NUM: $LINK_PATH"
+                  SIZE=$(wc -l < "$FILE_PATH" | tr -d ' ')
+                  echo "  ✓ Line $LINE_NUM: $LINK_PATH ($SIZE lines)"
                 else
-                  echo "  ✗ Line $LINE_NUM: $LINK_PATH → FILE NOT FOUND: $FILE_PATH"
-                  echo "::warning file=SKILL.md,line=$LINE_NUM::Broken link: $LINK_PATH (file not found: $FILE_PATH)"
+                  echo "  ✗ Line $LINE_NUM: $LINK_PATH → FILE NOT FOUND"
+                  echo "::error file=SKILL.md,line=$LINE_NUM::Broken link: $LINK_PATH (file does not exist)"
                   ERRORS=$((ERRORS + 1))
                 fi
               fi
@@ -134,84 +138,80 @@ jobs:
           fi
 
           echo ""
-          if [ "$ERRORS" -gt 0 ]; then
-            echo "::warning::Found $ERRORS broken internal link(s)"
+
+          # Dynamically derive required references from SKILL.md links
+          echo "=== Required References (derived from SKILL.md) ==="
+          echo ""
+          REF_LINKS=$(grep -oE '\]\(references/[^)]+\)' SKILL.md | sed 's/\](\(.*\))/\1/' | cut -d'#' -f1 | sort -u)
+          MISSING=0
+          TOTAL=0
+
+          if [ -z "$REF_LINKS" ]; then
+            echo "  No references/ links found in SKILL.md"
           else
-            echo "✓ All internal links in SKILL.md are valid"
+            for ref in $REF_LINKS; do
+              TOTAL=$((TOTAL + 1))
+              if [ -f "$ref" ]; then
+                SIZE=$(wc -l < "$ref" | tr -d ' ')
+                echo "  ✓ $ref ($SIZE lines)"
+              else
+                echo "  ✗ $ref → MISSING"
+                echo "::error file=$ref::Referenced in SKILL.md but file does not exist"
+                MISSING=$((MISSING + 1))
+              fi
+            done
           fi
 
-      - name: Check for required reference files
-        run: |
-          echo "=== Required Reference Files Check ==="
           echo ""
-
-          REQUIRED_REFS=(
-            "references/architecture.md"
-            "references/compose-essentials.md"
-            "references/navigation.md"
-            "references/dependency-injection.md"
-            "references/koin.md"
-            "references/cross-platform.md"
-          )
-
-          MISSING=0
-          TOTAL=${#REQUIRED_REFS[@]}
-          for ref in "${REQUIRED_REFS[@]}"; do
-            if [ -f "$ref" ]; then
-              SIZE=$(wc -l < "$ref" | tr -d ' ')
-              echo "  ✓ $ref ($SIZE lines)"
-            else
-              echo "  ✗ $ref → MISSING"
-              echo "::error file=$ref::Required reference file is missing"
-              MISSING=$((MISSING + 1))
-            fi
-          done
-
-          echo ""
-          echo "Checked: $TOTAL | Found: $((TOTAL - MISSING)) | Missing: $MISSING"
+          echo "References linked: $TOTAL | Found: $((TOTAL - MISSING)) | Missing: $MISSING"
 
           if [ "$MISSING" -gt 0 ]; then
-            echo "::error::$MISSING of $TOTAL required reference files are missing"
+            echo "::error::$MISSING of $TOTAL referenced files are missing"
             exit 1
           fi
 
-          echo "✓ All required reference files exist"
+          echo ""
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "✗ $ERRORS broken link(s) found"
+            exit 1
+          fi
+          echo "✓ All links and references valid"
 
-      - name: Validate markdown syntax
+      - name: Lint markdown
         run: |
-          PATTERN='```'
-          WARNINGS=0
-          FILE_COUNT=0
-
-          echo "=== Markdown Syntax Validation ==="
+          echo "=== Markdown Lint ==="
           echo ""
 
-          while IFS= read -r file; do
-            FILE_COUNT=$((FILE_COUNT + 1))
-            BACKTICK_COUNT=$(grep -cF "$PATTERN" "$file" 2>/dev/null || true)
-            BACKTICK_COUNT=${BACKTICK_COUNT:-0}
-            echo "[$FILE_COUNT] File: $file"
-            echo "     Code fences found: $BACKTICK_COUNT"
+          npm install --no-save markdownlint-cli 2>/dev/null
+          echo ""
 
-            if [ "$BACKTICK_COUNT" -gt 0 ] && [ $((BACKTICK_COUNT % 2)) -ne 0 ]; then
-              WARNINGS=$((WARNINGS + 1))
-              echo "     ⚠ ISSUE: Odd number of code fences ($BACKTICK_COUNT) — likely an unclosed block"
-              echo "     Fence locations:"
-              grep -nF "$PATTERN" "$file" 2>/dev/null | while IFS= read -r match; do
-                echo "       → Line $(echo "$match" | cut -d: -f1): $(echo "$match" | cut -d: -f2-)"
-              done
-              echo "::warning file=$file::Unclosed code block detected (found $BACKTICK_COUNT fence delimiters, expected even number). Run: grep -nF '\`\`\`' $file"
-            else
-              echo "     ✓ OK"
-            fi
+          # MD013: line length — disabled (reference docs have long lines by design)
+          # MD024: no duplicate headings — disabled (common in reference docs)
+          # MD033: no inline HTML — disabled (used for anchors/badges)
+          # MD041: first line heading — disabled (SKILL.md starts with frontmatter)
+          # MD036: no emphasis as heading - disabled (used stylistically)
+          npx markdownlint '**/*.md' \
+            --disable MD013 MD024 MD033 MD041 MD036 \
+            2>&1 | tee lint-output.txt || true
+
+          ISSUE_COUNT=$(wc -l < lint-output.txt | tr -d ' ')
+          if [ "$ISSUE_COUNT" -gt 0 ]; then
             echo ""
-          done < <(find . -name '*.md' -not -path './.git/*' | sort)
+            echo "⚠ $ISSUE_COUNT lint issue(s) found (non-blocking)"
 
-          echo "=== Summary ==="
-          echo "Files scanned: $FILE_COUNT"
-          echo "Warnings: $WARNINGS"
+            while IFS= read -r line; do
+              FILE=$(echo "$line" | cut -d: -f1)
+              LINE_NUM=$(echo "$line" | cut -d: -f2)
+              MSG=$(echo "$line" | cut -d: -f3-)
+              echo "::warning file=$FILE,line=$LINE_NUM::$MSG"
+            done < lint-output.txt
+          else
+            echo "  No issues found"
+          fi
+
+          rm -f lint-output.txt
           echo ""
-          echo "✓ Basic markdown validation complete"
+          echo "✓ Markdown lint complete"
 
       - name: Verify package can be created
         run: |
@@ -262,7 +262,6 @@ jobs:
           echo "- SKILL.md frontmatter structure" >> $GITHUB_STEP_SUMMARY
           echo "- README.md presence" >> $GITHUB_STEP_SUMMARY
           echo "- References directory structure" >> $GITHUB_STEP_SUMMARY
-          echo "- Internal link integrity" >> $GITHUB_STEP_SUMMARY
-          echo "- Required reference files" >> $GITHUB_STEP_SUMMARY
-          echo "- Markdown syntax" >> $GITHUB_STEP_SUMMARY
+          echo "- Internal link integrity (derived from SKILL.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- Markdown lint (markdownlint-cli)" >> $GITHUB_STEP_SUMMARY
           echo "- Package creation" >> $GITHUB_STEP_SUMMARY

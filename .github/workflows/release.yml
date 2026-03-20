@@ -20,11 +20,15 @@ permissions:
   contents: write
 
 jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
   release:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -32,17 +36,13 @@ jobs:
         id: version
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            # Tag push: use the tag directly
             TAG="${GITHUB_REF#refs/tags/}"
             echo "new_tag=$TAG" >> "$GITHUB_OUTPUT"
             echo "Using pushed tag: $TAG"
           else
-            # Manual dispatch: compute next version
             LATEST=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
             if [ -z "$LATEST" ]; then
-              MAJOR=1
-              MINOR=0
-              PATCH=0
+              MAJOR=1; MINOR=0; PATCH=0
             else
               VERSION="${LATEST#v}"
               MAJOR=$(echo "$VERSION" | cut -d. -f1)
@@ -50,18 +50,9 @@ jobs:
               PATCH=$(echo "$VERSION" | cut -d. -f3)
 
               case "${{ inputs.version_bump }}" in
-                major)
-                  MAJOR=$((MAJOR + 1))
-                  MINOR=0
-                  PATCH=0
-                  ;;
-                minor)
-                  MINOR=$((MINOR + 1))
-                  PATCH=0
-                  ;;
-                patch)
-                  PATCH=$((PATCH + 1))
-                  ;;
+                major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+                minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+                patch) PATCH=$((PATCH + 1)) ;;
               esac
             fi
             NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
@@ -75,7 +66,6 @@ jobs:
           MSG=$(git log -1 --pretty=format:'%s')
           echo "msg=$MSG" >> "$GITHUB_OUTPUT"
 
-          # Use heredoc with random delimiter to safely handle multiline body
           DELIMITER="EOF_$(openssl rand -hex 8)"
           BODY=$(git log -1 --pretty=format:'%b')
           {
@@ -90,17 +80,16 @@ jobs:
         run: |
           TAG="${{ steps.version.outputs.new_tag }}"
           ARTIFACT_NAME="compose-skill-${TAG}.tar.gz"
+          ARTIFACT_PATH="${RUNNER_TEMP}/${ARTIFACT_NAME}"
 
-          # Create tarball excluding git metadata, CI files, and development artifacts
           tar --exclude='.git' \
               --exclude='.github' \
               --exclude='.gitignore' \
-              --exclude='*.tar.gz' \
-              -czvf "$ARTIFACT_NAME" .
+              -czvf "$ARTIFACT_PATH" .
 
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-          echo "artifact_path=$(pwd)/$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-          echo "Created artifact: $ARTIFACT_NAME"
+          echo "artifact_path=$ARTIFACT_PATH" >> "$GITHUB_OUTPUT"
+          echo "Created artifact: $ARTIFACT_NAME ($(du -h "$ARTIFACT_PATH" | cut -f1))"
 
       - name: Create tag (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
