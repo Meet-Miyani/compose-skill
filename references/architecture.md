@@ -54,7 +54,7 @@ One-off UI commands that don't belong in state: navigate, show snackbar, trigger
 
 `Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()` is the default for effects:
 
-- **Guarantees delivery**: buffered channel holds effects even if the collector is temporarily inactive (e.g., during recomposition, rapid lifecycle transitions, or — on Android — configuration changes)
+- **Buffers for reliable delivery**: buffered channel holds effects even if the collector is temporarily inactive (e.g., during recomposition, rapid lifecycle transitions, or — on Android — configuration changes)
 - **Single consumer**: only one collector receives each effect — no accidental double-handling
 - **No replay**: new collectors don't receive stale effects
 
