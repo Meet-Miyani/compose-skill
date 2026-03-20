@@ -2,6 +2,21 @@
 
 Gradle best practices for Compose Multiplatform (CMP) and Android-only Jetpack Compose projects, including AGP 9+ changes.
 
+## Table of Contents
+
+- [1. Project Structure Patterns](#1-project-structure-patterns)
+- [2. Version Catalog (`libs.versions.toml`)](#2-version-catalog-libsversionstoml)
+- [3. Bundles (`[bundles]`)](#3-bundles-bundles)
+- [4. `settings.gradle.kts`](#4-settingsgradlekts)
+- [5. Root `build.gradle.kts`](#5-root-buildgradlekts)
+- [6. AGP 9+ Changes](#6-agp-9-changes)
+- [7. Module Patterns](#7-module-patterns)
+- [8. `gradle.properties`](#8-gradleproperties)
+- [9. KSP Wiring](#9-ksp-wiring)
+- [10. Composite Builds](#10-composite-builds)
+- [11. Convention Plugins](#11-convention-plugins)
+- [12. Do / Don't](#12-do--dont)
+
 ## 1. Project Structure Patterns
 
 ### CMP Project (Android + iOS + optional Desktop)

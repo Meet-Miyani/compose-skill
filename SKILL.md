@@ -1,7 +1,9 @@
 ---
 name: compose-skill
 description: >
-  MVI for Jetpack Compose and Compose Multiplatform (KMP/CMP). Triggered by Compose,
+  Complete AI agent skill for building apps with Jetpack Compose and Compose Multiplatform
+  (KMP/CMP). Covers architecture (MVI), UI, state, navigation, networking, persistence,
+  performance, accessibility, cross-platform, build, distribution, and code review. Triggered by Compose,
   KMP, @Composable, StateFlow, SharedFlow, Flow, coroutines, viewModelScope, Dispatchers,
   NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
   Res.string, Res.drawable, composeResources, stringResource, painterResource, DataStore,
@@ -23,9 +25,9 @@ description: >
   accessibility, testing, UI/UX, Gradle/AGP configuration, CI/CD, desktop distribution, and code review.
 ---
 
-# Jetpack Compose & Compose Multiplatform — MVI Architecture
+# Jetpack Compose & Compose Multiplatform
 
-Jetpack Compose and Compose Multiplatform share the same core APIs, mental model, and architecture patterns. The differences are narrow: Hilt/Dagger is Android-only, but most other Jetpack libraries — including `androidx.lifecycle.ViewModel`, `viewModelScope`, `collectAsStateWithLifecycle`, and `lifecycle-runtime-compose` — are multiplatform and work in `commonMain`. CMP uses `expect/actual` or interfaces for platform-specific code. This skill covers both equally — apply the same MVI principles regardless of target.
+This skill covers the full Compose app development lifecycle — from architecture and state management through UI, networking, persistence, performance, accessibility, cross-platform sharing, build configuration, and distribution. Jetpack Compose and Compose Multiplatform share the same core APIs and mental model; most Jetpack libraries — including `ViewModel`, `viewModelScope`, `collectAsStateWithLifecycle`, and `lifecycle-runtime-compose` — are multiplatform and work in `commonMain`. CMP uses `expect/actual` or interfaces for platform-specific code. MVI (Model-View-Intent) is the recommended architecture, but the skill adapts to existing project conventions.
 
 ## Existing Project Policy
 
@@ -39,74 +41,55 @@ When helping with Jetpack Compose or Compose Multiplatform code, follow this pro
 2. **Identify the concern** — is this architecture, state modeling, performance, navigation, DI, animation, cross-platform, or testing?
 3. **Apply the core rules below** — the decision heuristics and defaults in this file cover most cases.
 4. **Consult the right reference** — load the relevant file from `references/` only when deeper guidance is needed. Each reference is listed in the [Detailed References](#detailed-references) section with its scope.
-5. **Flag anti-patterns** — if the user's code violates MVI principles, call it out and suggest the correct pattern.
-6. **Write the minimal correct solution** — do not over-engineer. Prefer feature-specific code over generic frameworks.
+5. **Fetch latest docs when needed** — for new libraries, version upgrades, or API verification, use context7 MCP if available (see [Fetching Up-to-Date Documentation](#fetching-up-to-date-documentation)).
+6. **Flag anti-patterns** — if the user's code violates architectural best practices, call it out and suggest the correct pattern.
+7. **Write the minimal correct solution** — do not over-engineer. Prefer feature-specific code over generic frameworks.
+
+## Fetching Up-to-Date Documentation
+
+When integrating a new library, upgrading dependencies, or verifying latest API patterns, the **context7 MCP** can fetch current official documentation directly into context. This supplements the bundled references with real-time documentation.
+
+### When to Use
+- Adding a new dependency not covered by bundled references
+- Upgrading major library versions (e.g., Ktor 2→3, Coil 2→3, Navigation 2→3)
+- Verifying latest recommended patterns when bundled references may be outdated
+- Resolving discrepancies between bundled guidance and observed API behavior
+
+### Usage
+1. **Check availability** — Verify context7 MCP is installed. If not available, suggest installation at https://context7.com or fall back to bundled references.
+2. **Resolve library ID** — Call `resolve-library-id` with the library name to get the Context7-compatible ID.
+3. **Query docs** — Call `query-docs` with the resolved ID and a specific question.
+
+**Alternative**: Users can add `use context7` to their prompt to trigger documentation lookup.
+
+### Common Compose/KMP Libraries
+When context7 is available, these libraries have documentation indexed:
+- Jetpack Compose, Compose Multiplatform
+- Ktor (networking)
+- Koin (dependency injection)
+- Coil (image loading)
+- Room (database)
+- Kotlin Coroutines, Kotlin Serialization
+
+**Note**: Bundled references remain the primary source for architectural patterns and MVI guidance. Use context7 for API-specific queries and version-specific documentation.
 
 ## Core Architecture: MVI with Event, State, Effect
 
-MVI (Model-View-Intent) enforces **unidirectional data flow**. The UI is a function of state. User interactions produce events. Events are processed to produce new state and optional side effects. The cycle is always: UI renders state → user acts → event dispatched → new state computed → UI re-renders.
+MVI (Model-View-Intent) enforces **unidirectional data flow**: UI renders state → user acts → event dispatched → new state computed → UI re-renders. Every feature defines 3 types:
 
-### The 3 MVI Types
+- **Event** — user actions and lifecycle signals (`sealed interface`). The **only** input from the UI to the ViewModel.
+- **State** — immutable data class that fully describes the screen. Owned by the ViewModel via `StateFlow`.
+- **Effect** — one-shot commands (navigate, snackbar, share) delivered via `Channel`. Not state — fire and forget.
 
-Every feature defines 3 types:
+The ViewModel owns `StateFlow<State>`, `Channel<Effect>`, and a single `onEvent(event: Event)` entry point. All event handling, state transitions, effect emissions, and async launches happen inside `onEvent()`.
 
-- **Event** — user actions and lifecycle signals from the UI. Button clicks, field changes, screen shown, retry, refresh, back pressed. Events are the **only** input from the UI to the ViewModel. A `sealed interface` per feature.
-- **State** — immutable data class that **fully describes** what the screen should render. One state, one source of truth. The UI is a pure function of this state — given the same state, the screen always looks the same. Owned by the ViewModel via `StateFlow`.
-- **Effect** — one-shot commands that don't belong in state: navigate, show snackbar, trigger haptic, copy to clipboard, share, open browser. Delivered via `Channel` (buffered, consumed once). Effects are **not** state — they fire and forget.
-
-### Why 3 Types, Not 4
-
-Some MVI frameworks introduce a fourth type — `Result` or `PartialState` — as an intermediary between events and state. This adds indirection: every event must be mapped to one or more results, and a pure reducer consumes those results. While this has theoretical benefits (pure reducer testability), in practice it often doubles the sealed class count, scatters simple logic across two functions (`handleEvent` + `reduce`), and makes straightforward screens harder to read. The 3-type model keeps event handling and state mutation in one place (`onEvent`), which is simpler for most features. If a project already uses 4-type MVI, respect that — but for new code, 3 types is the default.
-
-### The Data Flow
-
-```text
-UI gesture / lifecycle signal
-    → Event (via onEvent)
-    → ViewModel processes the event
-    → State updated (via StateFlow.update or equivalent)
-    → UI re-renders from new state
-    → Effects emitted for one-shot actions (navigate, snackbar)
-    → Async work launched in viewModelScope
-    → On completion, state updated again
-```
-
-### ViewModel Structure
-
-The ViewModel owns:
-- `StateFlow<State>` — the single source of truth for the screen
-- `Channel<Effect>` / `Flow<Effect>` — one-shot effect delivery
-- `onEvent(event: Event)` — the single entry point from the UI
-
-All event handling lives in `onEvent()`. State transitions happen via `updateState { copy(...) }` or equivalent. Effects are sent via `sendEffect(effect)`. Async work is launched in `viewModelScope`.
+For detailed rationale (why 3 types not 4, data flow diagrams, ViewModel internals, file structure) see [Architecture & State Management](references/architecture.md).
 
 ### UI Rendering Boundary
 
 - **Route** composable: obtains ViewModel, collects state via `collectAsStateWithLifecycle()`, collects effects via `LaunchedEffect`, binds navigation/snackbar/platform APIs
 - **Screen** composable: stateless renderer — receives state and `onEvent` callback, renders the screen, adapts callbacks for leaf composables
 - **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state (focus, scroll, animation)
-
-### Default File Structure
-
-**Compose Multiplatform (shared code in commonMain):**
-
-```text
-shared/src/commonMain/kotlin/feature/estimate/
-  EstimateContract.kt       EstimateRoute.kt
-  EstimateViewModel.kt      EstimateScreen.kt
-  components/
-```
-
-**Android-only Jetpack Compose (same pattern, single source set):**
-
-```text
-app/src/main/kotlin/feature/estimate/
-  EstimateContract.kt       EstimateRoute.kt
-  EstimateViewModel.kt      EstimateScreen.kt
-  components/
-```
-
-`EstimateContract.kt` defines all 3 types: `EstimateEvent`, `EstimateState`, `EstimateEffect`. The architecture is identical across platforms — only the module structure and DI framework (Hilt vs Koin) differ.
 
 ## Decision Heuristics
 
@@ -181,7 +164,7 @@ For calculator/form screens, split state into four buckets:
 - Pass entire state to every child composable
 - Wrap every repository call in a use case class
 - Wipe the screen with a full-screen spinner during refresh
-- Force-migrate a working MVI codebase to a different base class
+- Force-migrate a working codebase to a different architecture or base class
 
 ## Detailed References
 
@@ -196,6 +179,8 @@ Load these only when the task requires deeper guidance:
 - **[Anti-Patterns](references/anti-patterns.md)** — 18-row table of harmful patterns with why they hurt, how to spot them, and better replacements
 
 ### Compose APIs
+- **[Material 3 Theming & Components](references/material-design.md)** — M3 theme setup (dynamic color, dark/light, color roles), typography/shapes, component decisions (Scaffold, TopAppBar, NavigationBar/Rail/Suite, BottomSheet, Snackbar, Dialog), adaptive layouts (window size classes, canonical layouts), M2→M3 migration
+- **[Image Loading (Coil 3)](references/image-loading.md)** — Coil 3 setup for Compose/CMP, `AsyncImage`/`rememberAsyncImagePainter`/`SubcomposeAsyncImage` decision guide, placeholder/error/fallback/crossfade, memory/disk/network cache policy, `memoryCacheKey` + `placeholderMemoryCacheKey`, transformations vs `Modifier.clip`, SVG (`coil-svg`), `Res.getUri` resource loading
 - **[Compose Essentials](references/compose-essentials.md)** — three phases model, state primitives, side effects (`LaunchedEffect`, `DisposableEffect`, `rememberUpdatedState`), modifier ordering, `graphicsLayer`, slot pattern, `CompositionLocal`, `collectAsStateWithLifecycle`
 - **[Lists & Grids](references/lists-grids.md)** — LazyColumn/LazyRow, keys, `contentType`, grids, pager, scroll state, nested scrolling, list anti-patterns
 - **[Paging 3](references/paging.md)** — PagingSource, Pager + ViewModel setup (**PagingData as separate Flow, never in UiState**), `cachedIn`, filter/search with `flatMapLatest`, `LazyPagingItems`, LoadState handling, transformations, RemoteMediator offline-first, MVI integration, testing, anti-patterns

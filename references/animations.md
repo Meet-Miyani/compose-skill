@@ -462,6 +462,8 @@ SharedTransitionLayout {
 
 ### Async images (Coil)
 
+For full Coil 3 guidance (API choice, caching strategy, SVG, and CMP resource loading), see [Image Loading](references/image-loading.md).
+
 ```kotlin
 AsyncImage(
     model = ImageRequest.Builder(LocalPlatformContext.current)

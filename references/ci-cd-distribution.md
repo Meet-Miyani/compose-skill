@@ -2,6 +2,18 @@
 
 CI/CD and native distribution for Compose Multiplatform: Android, Desktop (JVM), and iOS.
 
+## Table of Contents
+
+- [1. Distribution Overview](#1-distribution-overview)
+- [2. GitHub Actions — Android](#2-github-actions--android)
+- [3. GitHub Actions — Desktop Multi-Platform](#3-github-actions--desktop-multi-platform)
+- [4. Desktop App Module](#4-desktop-app-module)
+- [5. iOS Xcode Integration](#5-ios-xcode-integration)
+- [6. Signing](#6-signing)
+- [7. Adding Desktop to Existing CMP Project](#7-adding-desktop-to-existing-cmp-project)
+- [8. Gradle Tasks](#8-gradle-tasks)
+- [9. Troubleshooting](#9-troubleshooting)
+
 ## 1. Distribution Overview
 
 | Platform | Output | Gradle Task | Notes |

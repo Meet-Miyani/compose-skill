@@ -1,4 +1,4 @@
 interface:
-  display_name: "Compose"
-  short_description: "Architecture and best practices for Compose apps"
-  default_prompt: "Use $compose to build, refactor, or review a Jetpack Compose or Compose Multiplatform feature with clean architecture, state modeling, and performance best practices."
+  display_name: "compose-skill"
+  short_description: "Complete AI agent skill for building Compose and Compose Multiplatform apps"
+  default_prompt: "Use $compose-skill to build, refactor, or review a Jetpack Compose or Compose Multiplatform feature with clean architecture and best practices."
