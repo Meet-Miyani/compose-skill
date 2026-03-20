@@ -1,147 +1,49 @@
-# Compose Skill README
+# compose-skill
 
-This repository contains the `compose` skill: an MVI architecture guide for Jetpack Compose and Compose Multiplatform (KMP/CMP).
+Production-ready MVI architecture for Jetpack Compose and Compose Multiplatform.
 
-## Installation & usage
+## Why this skill
 
-### OpenAI Codex
+Building Compose apps without consistent architecture leads to scattered state, business logic in UI, and hard-to-test code. This skill gives AI agents the rules and patterns to write clean MVI from the start — or refactor existing code to match.
 
-Skills work the same way in the **Codex App** (desktop), **Codex CLI**, and **Codex IDE Extension**. They all read from the same skill directories.
+## Without vs With compose-skill
 
-**Option A - `/skills` slash command (interactive):**
+| Concern | Without | With compose-skill |
+|---------|---------|-------------------|
+| State management | Scattered `mutableStateOf` in composables | Single `StateFlow<State>` owned by ViewModel |
+| Business logic | Mixed into UI layer | Isolated in ViewModel's `onEvent()` handler |
+| One-shot actions | Boolean flags in state ("consumed once" pattern) | `Channel<Effect>` for navigation, snackbar, etc. |
+| Recomposition | Frequent, hard to diagnose | Minimized via state shape and read boundaries |
+| Navigation | Ad-hoc calls from composables | Semantic effects from ViewModel, route layer executes |
+| Cross-platform | Android-only or inconsistent sharing | `commonMain` patterns with `expect/actual` for platform APIs |
+| Testing | Manual UI testing | ViewModel event→state→effect tests via Turbine |
+| Code review | Inconsistent patterns across features | Anti-pattern detection with documented replacements |
 
-Type `/skills` in the Codex App, CLI, or IDE Extension. Codex presents options like **list** and **install**. Choose **install**, then provide the GitHub URL when prompted:
+## Installation
 
-```text
-https://github.com/Meet-Miyani/compose-skill
-```
+The **directory name must match** the `name` field in `SKILL.md` — here that is **`compose-skill`**.
 
-**Option B - `$skill-installer` in a prompt:**
-
-Type a natural-language request and Codex invokes the installer automatically:
-
-```text
-Install the compose skill from https://github.com/Meet-Miyani/compose-skill
-```
-
-Both options download the skill into `~/.codex/skills/compose-skill/`.
-
-**Option C - Manual clone / copy-paste:**
-
-```bash
-# Clone into the user-level skills directory
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.codex/skills/compose-skill
-```
-
-Or place it in a repo-scoped location so the whole team gets it:
+| Client | Install locations |
+|--------|-------------------|
+| **Codex** | Repo: `.agents/skills/compose-skill/` or User: `~/.agents/skills/compose-skill/` |
+| **Cursor** | Repo: `.cursor/skills/compose-skill/` or User: `~/.cursor/skills/compose-skill/` |
+| **Claude Code** | Project: `.claude/skills/compose-skill/` or User: `~/.claude/skills/compose-skill/` |
+| **Other agents** | Upload `SKILL.md` and `references/` files as project knowledge |
 
 ```bash
-# Repo-scoped (checked into your project)
-git clone https://github.com/Meet-Miyani/compose-skill.git .agents/skills/compose-skill
+# Clone as user-global skill
+git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose-skill
 ```
 
-You can also just download or copy the skill folder directly into any of the directories listed below.
+### Verify activation
 
-**Restart Codex** after installing to pick up the new skill (or wait for auto-detection).
+| Client | How to verify |
+|--------|---------------|
+| Codex | Run `/skills` — `compose-skill` appears in the list |
+| Cursor | **Settings → Rules** — skill appears under *Agent Decides* |
+| Claude Code | Run `/skills` or ask *"What skills are available?"* |
 
-**Skill directories Codex scans (in order):**
-
-| Scope | Location |
-|-------|----------|
-| Repo (CWD) | `.agents/skills/` |
-| Repo (parent dirs up to root) | `../.agents/skills/` |
-| User (global) | `~/.codex/skills/` |
-| Admin (system-wide) | `/etc/codex/skills/` |
-| System (bundled by OpenAI) | shipped with Codex |
-
-**Invoke the skill:**
-
-The skill activates automatically when your prompt mentions Compose, MVI, `StateFlow`, `@Composable`, Koin, Hilt, KMP, etc. You can also invoke it explicitly:
-
-```text
-Use $compose to refactor this screen with MVI architecture.
-```
-
-In the **Codex App**, you can also browse installed skills from the **Skills** sidebar and select `compose` from there.
-
-In the **CLI / IDE Extension**, type `$` or run `/skills` to see available skills.
-
-### Cursor
-
-Cursor discovers skills from multiple directories automatically:
-
-| Scope | Path |
-|-------|------|
-| Project | `.cursor/skills/compose/` or `.agents/skills/compose/` |
-| User (global) | `~/.cursor/skills/compose/` |
-| Cross-tool | `~/.codex/skills/`, `~/.claude/skills/` (also scanned by Cursor) |
-
-**Option A - Clone into the skills directory:**
-
-```bash
-# Global (available in every project)
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/compose
-
-# Or project-scoped (committed with your repo)
-git clone https://github.com/Meet-Miyani/compose-skill.git .cursor/skills/compose
-```
-
-**Option B - Symlink from an existing clone:**
-
-```bash
-ln -s /path/to/compose-skill ~/.cursor/skills/compose
-```
-
-If you already installed via Codex or Claude Code, the skill is available in Cursor automatically (Cursor reads from `~/.codex/skills/` and `~/.claude/skills/` too).
-
-Once installed, invoke it in Agent chat:
-
-```text
-Use the compose skill to build an MVI feature screen.
-```
-
-Or type `/` in chat to see available skills and select `compose`.
-
-### Claude Code
-
-Claude Code discovers skills from `~/.claude/skills/` (global) or `.claude/skills/` (project-scoped).
-
-```bash
-# Global
-git clone https://github.com/Meet-Miyani/compose-skill.git ~/.claude/skills/compose
-
-# Project-scoped
-git clone https://github.com/Meet-Miyani/compose-skill.git .claude/skills/compose
-```
-
-Claude Code picks up new skills automatically (no restart needed). The skill triggers when your prompt matches the description keywords.
-
-### Claude (Web / Projects)
-
-Claude Projects on claude.ai let you upload knowledge files that persist across conversations:
-
-1. Create a new **Project** (requires Pro or Team plan).
-2. Open **Project Knowledge** and upload `SKILL.md` (and any `references/*.md` files you need).
-3. Optionally add custom instructions like: *"Follow the MVI rules from the uploaded SKILL.md for all Compose code."*
-4. Start a conversation inside that project. Claude will reference the uploaded skill automatically.
-
-### Other LLM tools / agents
-
-For any agent that accepts context files or system prompts:
-
-1. Provide `SKILL.md` as a context file or paste its content into the system prompt.
-2. Point the agent to relevant code files (`ViewModel`, `Route`, `Screen`, contracts).
-3. Ask for MVI compliance explicitly.
-
-### Verify the skill is working
-
-Include these acceptance criteria in your prompts so outputs are verifiable:
-
-- ViewModel uses MVI with Event, State, Effect — single `onEvent()` entry point
-- All state transitions happen in the ViewModel, not in composables
-- Composables do not run business logic or repository calls
-- Effects are one-off (navigation/snackbar/share), not "consume once" booleans in state
-- UI-only visual state stays local unless business logic depends on it
+If not visible, confirm the folder is named `compose-skill` (not `compose-skill-main`) and restart the client.
 
 ## What this skill covers
 
@@ -158,6 +60,8 @@ Include these acceptance criteria in your prompts so outputs are verifiable:
 | Paging | Paging 3 with `PagingData` as a separate Flow (never inside `UiState`) |
 | Cross-platform | `commonMain` sharing, `expect/actual`, lifecycle, resources |
 | Resources | CMP `Res` class vs Android `R`, `composeResources/` directory, drawables, strings, plurals, fonts, raw files, qualifiers, localization, `Res.getUri`, MVI integration |
+| DataStore | Preferences and Typed DataStore for settings, SharedPreferences migration, MVI integration |
+| Accessibility | `contentDescription`, `Modifier.semantics`, touch targets, WCAG contrast, screen reader support |
 | Testing | ViewModel event→state→effect tests via Turbine, validator/calculator unit tests, UI tests, Macrobenchmark |
 | Animations | `animate*AsState`, `AnimatedVisibility`, shared element transitions, gesture-driven |
 
@@ -167,62 +71,42 @@ The same architectural rules apply to both Jetpack Compose (Android-only) and Co
 
 The skill activates when your prompt includes terms like:
 
-`@Composable`, `StateFlow`, `SharedFlow`, `Flow`, coroutines, `viewModelScope`, `Dispatchers`, `NavDisplay`, Koin, Hilt, Ktor, Paging 3, `LazyPagingItems`, MVI, recomposition, Turbine, KMP, CMP, `Res.string`, `Res.drawable`, `composeResources`, `stringResource`, `painterResource`, `pluralStringResource`, multiplatform resources
+`@Composable`, `StateFlow`, `SharedFlow`, `Flow`, coroutines, `viewModelScope`, `Dispatchers`, `NavDisplay`, Koin, Hilt, Ktor, Paging 3, `LazyPagingItems`, MVI, recomposition, Turbine, KMP, CMP, `Res.string`, `Res.drawable`, `composeResources`, `stringResource`, `painterResource`, DataStore, Preferences, accessibility, `contentDescription`, semantics
 
-Or questions like *"my compose app is slow"*, *"how do I paginate"*, *"StateFlow vs SharedFlow"*, *"share code Android iOS"*, *"how do I use resources in KMP"*, *"R.string vs Res.string"*.
+Or questions like *"my compose app is slow"*, *"how do I paginate"*, *"StateFlow vs SharedFlow"*, *"share code Android iOS"*, *"how do I use resources in KMP"*, *"how do I store settings"*, *"DataStore vs SharedPreferences"*, *"how do I make my UI accessible"*.
 
-## Skill format and compatibility
+## Skill format
 
-`SKILL.md` follows the [Agent Skills open standard](https://agentskills.io/specification). The format is the same across all supported tools — you write one `SKILL.md` and it works everywhere:
-
-| Tool | Reads `SKILL.md` | Status |
-|------|-------------------|--------|
-| OpenAI Codex (App, CLI, IDE Extension) | Yes | Supported |
-| Cursor | Yes | Supported |
-| Claude Code | Yes | Supported |
-| GitHub Copilot | Yes | Supported |
-| Gemini CLI | Yes | Supported |
-| VS Code | Yes | Supported |
-| Any agent supporting the open standard | Yes | Supported |
-
-You do **not** need to create separate skill files for each tool. One `SKILL.md` with the standard frontmatter (`name` + `description`) is all that's required.
-
-### What is `agents/openai.yaml`?
-
-The `agents/` folder holds **optional, product-specific** metadata files. These are read by the tool's UI/harness, not by the AI agent itself.
-
-`agents/openai.yaml` is Codex-specific. It provides UI metadata for the Codex App (display name, icon, brand color, default prompt shown in the Skills sidebar). It can also declare MCP tool dependencies and invocation policy. **Other tools ignore this file** — they only need `SKILL.md`.
-
-If other tools introduce their own product-specific config in the future (e.g., a hypothetical `agents/cursor.yaml`), they would also go in this folder. As of now, no other tool requires one.
-
-In short: `SKILL.md` is the universal contract. `agents/openai.yaml` is optional Codex-specific UI polish.
+`SKILL.md` is the portable skill definition. The `agents/` folder holds optional client-specific metadata (e.g., `agents/openai.yaml` provides Codex UI metadata like display name, icon, and default prompt).
 
 ## Repo structure
 
 ```text
 compose-skill/
-├── SKILL.md                          # Universal skill file (works across all tools)
+├── SKILL.md                          # Skill definition (required)
 ├── README.md                         # This file
 ├── agents/
-│   └── openai.yaml                   # Codex-specific UI metadata (optional, other tools ignore it)
+│   └── openai.yaml                   # Codex-specific UI metadata (optional)
 └── references/
     ├── architecture.md               # ViewModel/MVI pipeline, state modeling, code examples
     ├── coroutines-flow.md            # StateFlow vs SharedFlow vs Channel, operators, backpressure, Turbine
     ├── compose-essentials.md         # Three phases, state primitives, side effects, modifiers, CompositionLocal
-    ├── lists-grids.md               # LazyColumn/Row, keys, contentType, grids, pager, nested scrolling
-    ├── paging.md                    # PagingSource, Pager, LazyPagingItems, RemoteMediator, MVI integration
-    ├── navigation.md                # Nav 3, NavDisplay, tabs, ViewModel scoping, scenes, deep links
-    ├── performance.md               # Recomposition rules, stability, Compose Compiler Metrics, baseline profiles
-    ├── animations.md                # Animation APIs, shared element transitions, gesture-driven, Canvas
-    ├── ui-ux.md                     # Loading states, skeleton/shimmer, inline validation, perceived performance
-    ├── testing.md                   # Turbine, ViewModel tests, UI tests, Macrobenchmark, test matrix
-    ├── room-database.md             # KMP + Android setup, entities, DAOs, indexes, relationships, migrations, testing
-    ├── networking-ktor.md           # HttpClient, engines, DTOs, ApiResponse, auth, WebSockets, MockEngine
-    ├── dependency-injection.md      # Koin setup (CMP), Koin + Nav 3, Hilt for Android-only
-    ├── cross-platform.md            # commonMain vs platform, expect/actual, lifecycle, resources
-    ├── resources.md                 # CMP Res class, composeResources/, drawables, strings, fonts, qualifiers, localization
-    ├── clean-code.md                # File organization, naming, disciplined vs bloated MVI
-    └── anti-patterns.md             # 18-row table of harmful patterns with replacements
+    ├── lists-grids.md                # LazyColumn/Row, keys, contentType, grids, pager, nested scrolling
+    ├── paging.md                     # PagingSource, Pager, LazyPagingItems, RemoteMediator, MVI integration
+    ├── navigation.md                 # Nav 3, NavDisplay, tabs, ViewModel scoping, scenes, deep links
+    ├── performance.md                # Recomposition rules, stability, Compose Compiler Metrics, baseline profiles
+    ├── animations.md                 # Animation APIs, shared element transitions, gesture-driven, Canvas
+    ├── ui-ux.md                      # Loading states, skeleton/shimmer, inline validation, perceived performance
+    ├── testing.md                    # Turbine, ViewModel tests, UI tests, Macrobenchmark, test matrix
+    ├── room-database.md              # KMP + Android setup, entities, DAOs, indexes, relationships, migrations, testing
+    ├── datastore.md                  # Preferences and Typed DataStore, migrations, MVI integration
+    ├── networking-ktor.md            # HttpClient, engines, DTOs, ApiResponse, auth, WebSockets, MockEngine
+    ├── dependency-injection.md       # Koin setup (CMP), Koin + Nav 3, Hilt for Android-only
+    ├── cross-platform.md             # commonMain vs platform, expect/actual, lifecycle, resources
+    ├── resources.md                  # CMP Res class, composeResources/, drawables, strings, fonts, qualifiers, localization
+    ├── accessibility.md              # contentDescription, semantics, touch targets, WCAG contrast
+    ├── clean-code.md                 # File organization, naming, disciplined vs bloated MVI
+    └── anti-patterns.md              # 18-row table of harmful patterns with replacements
 ```
 
 ## How the agent uses this skill
@@ -252,9 +136,26 @@ How should I structure a KMP feature module with Compose UI and ViewModel?
 ```
 
 ```text
-Audit this feature against the compose skill and list anti-patterns first, then apply minimal fixes.
+Audit this feature against the compose-skill and list anti-patterns first, then apply minimal fixes.
 ```
 
 ```text
 Optimize recomposition in this screen and explain each state-shape change.
 ```
+
+## Official documentation
+
+Architecture and API references aligned with this skill's guidance:
+
+- [Jetpack Compose](https://developer.android.com/develop/ui/compose) — Android's modern UI toolkit
+- [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) — JetBrains cross-platform UI
+- [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) — Async programming
+- [StateFlow and SharedFlow](https://kotlinlang.org/docs/flow.html#stateflow-and-sharedflow) — State holders
+- [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) — Lifecycle-aware state management
+- [Navigation 3](https://developer.android.com/develop/ui/compose/navigation) — Compose navigation
+- [Paging 3](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) — Large dataset handling
+- [Room](https://developer.android.com/training/data-storage/room) — Local database
+- [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) — Key-value and typed persistence
+- [Ktor Client](https://ktor.io/docs/client.html) — Multiplatform HTTP client
+- [Koin](https://insert-koin.io/docs/reference/koin-compose/compose/) — Lightweight DI for Compose
+- [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) — Android DI

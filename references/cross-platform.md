@@ -5,6 +5,7 @@
 - [Sharing Strategy](#sharing-strategy)
 - [Placement Guide](#placement-guide)
 - [Interfaces vs expect/actual](#interfaces-vs-expectactual)
+- [Platform Bridge Patterns](#platform-bridge-patterns)
 - [Lifecycle](#lifecycle)
 - [State Restoration](#state-restoration)
 - [Keyboard, Focus, and Input](#keyboard-focus-and-input)
@@ -72,6 +73,112 @@ Never resolve localized strings within the reducer. Reducers should process math
 // GOOD: Reducer sets state.paymentAmount = 100.00
 //       UI applies: stringResource(Res.string.payment_label, state.paymentAmount)
 ```
+
+## Platform Bridge Patterns
+
+The rules above say *when* to use interfaces vs `expect/actual`. This section shows *how* to implement each approach.
+
+### Choosing the Right Bridge
+
+| Need | Pattern | Why |
+|---|---|---|
+| Service with lifecycle, state, or async (player, auth, payments, analytics) | Interface + DI | Testable, fakeable, swappable impls |
+| Stateless platform fact (UUID, platform name, default locale) | `expect/actual` function | No DI overhead for a one-liner |
+| Reuse existing platform type in common signature | `expect class` + `actual typealias` | Rare — prefer interface when possible |
+
+### Pattern 1: Interface + DI (Primary)
+
+Define the contract in `commonMain`. Platform modules provide implementations. DI wires them. ViewModel depends only on the interface — never imports platform types.
+
+```kotlin
+// commonMain
+interface Player {
+    fun play(uri: String)
+    fun pause()
+    fun release()
+}
+
+// androidMain
+class AndroidPlayer(private val context: Context) : Player {
+    private val mediaPlayer = MediaPlayer()
+    override fun play(uri: String) { mediaPlayer.setDataSource(context, uri.toUri()); mediaPlayer.start() }
+    override fun pause() { mediaPlayer.pause() }
+    override fun release() { mediaPlayer.release() }
+}
+
+// iosMain
+class IosPlayer : Player {
+    private var avPlayer: AVPlayer? = null
+    override fun play(uri: String) { avPlayer = AVPlayer(uRL = NSURL(string = uri)); avPlayer?.play() }
+    override fun pause() { avPlayer?.pause() }
+    override fun release() { avPlayer = null }
+}
+```
+
+Wire via platform Koin modules (see [dependency-injection.md](dependency-injection.md) for full Koin setup):
+
+```kotlin
+// androidMain
+val androidModule = module { single<Player> { AndroidPlayer(get()) } }
+
+// iosMain
+val iosModule = module { single<Player> { IosPlayer() } }
+
+// commonMain — ViewModel depends only on the interface
+class PlayerViewModel(private val player: Player) : ViewModel() {
+    fun onEvent(event: PlayerEvent) {
+        when (event) {
+            is PlayerEvent.Play -> player.play(event.uri)
+            PlayerEvent.Pause -> player.pause()
+        }
+    }
+}
+```
+
+Testing is trivial — create `FakePlayer : Player` with no platform dependencies.
+
+### Pattern 2: expect/actual for Thin Primitives
+
+No DI, no interface — for stateless one-liners with no test-double needs:
+
+```kotlin
+// commonMain
+expect fun randomUUID(): String
+
+// androidMain
+actual fun randomUUID(): String = java.util.UUID.randomUUID().toString()
+
+// iosMain
+actual fun randomUUID(): String = platform.Foundation.NSUUID().UUIDString()
+```
+
+### Pattern 3: expect/actual with Typealias
+
+When an existing platform type already fits your contract exactly:
+
+```kotlin
+// commonMain
+expect class PlatformDate {
+    fun toEpochMillis(): Long
+}
+
+// jvmMain — existing type matches, use typealias
+actual typealias PlatformDate = java.time.Instant
+
+// nativeMain — no matching type, implement directly
+actual class PlatformDate(private val nsDate: NSDate) {
+    actual fun toEpochMillis(): Long = (nsDate.timeIntervalSince1970 * 1000).toLong()
+}
+```
+
+Prefer interface+DI when you need fakes or when the platform type doesn't match 1:1.
+
+### Bridge Anti-Patterns
+
+- `expect/actual` class for anything with lifecycle, state, or async behavior — use interface+DI instead
+- Platform `import` leaking into `commonMain` — compiler catches this, but flag it in review
+- Fat `expect/actual` with significant logic — keep them thin, push logic into the interface impl
+- Skipping the interface when the service will need fakes in tests
 
 ## Lifecycle
 

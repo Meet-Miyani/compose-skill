@@ -4,6 +4,9 @@
 
 - [Source of Truth](#source-of-truth)
 - [MVI Pipeline](#mvi-pipeline)
+- [Domain Layer](#domain-layer)
+- [Inter-Feature Communication](#inter-feature-communication)
+- [Module Dependency Rules](#module-dependency-rules)
 - [State Modeling for Forms and Calculators](#state-modeling-for-forms-and-calculators)
 - [Avoiding Duplicated State](#avoiding-duplicated-state)
 - [Where Logic Belongs](#where-logic-belongs)
@@ -96,6 +99,105 @@ Lives outside UI: validators, calculators, rounding rules, eligibility rules, su
 ### Data Layer Boundary
 
 Lives outside the ViewModel's event handling: repositories, local persistence, remote APIs, DTO mapping, caching policies.
+
+## Domain Layer
+
+Pure business logic and abstraction contracts. Zero platform or framework dependencies — everything here runs in `commonTest` without emulators.
+
+| Rule | Rationale |
+|---|---|
+| Zero platform imports | Testable anywhere, shareable across targets |
+| Domain models are never DTOs or entities | Decouples from API contract and DB schema |
+| Repository interfaces declared here, impls in data | Dependency inversion — domain defines the contract |
+| Mappers live at the data boundary, not in domain | Domain ignores serialization formats (see [networking-ktor.md](networking-ktor.md) DTO-to-Domain Mappers) |
+| Use cases only for multi-step orchestration | Avoid ceremony — see [clean-code.md](clean-code.md) "When a use case is ceremony" |
+
+```kotlin
+data class Item(val id: String, val name: String, val status: ItemStatus)
+
+interface ItemRepository {
+    suspend fun getById(id: String): Item?
+    suspend fun save(item: Item)
+}
+
+class CreateItemUseCase(
+    private val repository: ItemRepository,
+    private val validator: ItemValidator,
+) {
+    suspend operator fun invoke(name: String, status: ItemStatus): Result<Item> {
+        val errors = validator.validate(name)
+        if (errors.isNotEmpty()) return Result.failure(ValidationException(errors))
+        val item = Item(id = uuid(), name = name.trim(), status = status)
+        repository.save(item)
+        return Result.success(item)
+    }
+}
+```
+
+## Inter-Feature Communication
+
+Features must never depend on each other's implementations. Two patterns handle cross-feature needs.
+
+### Pattern 1: Event Bus (cross-feature reactive events)
+
+Use `SharedFlow` for fire-and-forget broadcasts — logout, session expiry, cart changes — where multiple features may react independently. Define events in a shared module (`core/events/`).
+
+```kotlin
+sealed interface AppEvent {
+    data class UserLoggedOut(val reason: String) : AppEvent
+    data object SessionExpired : AppEvent
+}
+
+interface AppEventBus {
+    val events: SharedFlow<AppEvent>
+    suspend fun emit(event: AppEvent)
+}
+
+// In any ViewModel that needs to react:
+init {
+    viewModelScope.launch {
+        eventBus.events.filterIsInstance<AppEvent.UserLoggedOut>().collect { clearDraft() }
+    }
+}
+```
+
+### Pattern 2: Feature API Contract (navigation/callbacks)
+
+Each feature exposes a thin `:api` module with an interface; other features depend only on that API, never the implementation. Wire via DI. For the full api/impl split pattern with code, see [navigation.md](navigation.md) Modularization section.
+
+### When to Use Which
+
+| Need | Pattern | Why |
+|---|---|---|
+| React to event from another feature | Event bus (`SharedFlow`) | Fire-and-forget, many listeners |
+| Navigate to another feature's screen | Feature API contract | Type-safe route, no impl dependency |
+| Pass data back from another feature | Feature API contract + callback | Structured return, testable |
+| Shared data stream (current user, etc.) | Shared repository in `core` | Persistent state, not one-shot |
+
+**Anti-patterns:** importing another feature's ViewModel or Contract directly; global "god event bus" carrying 50 unrelated events; tunneling cross-feature data via `CompositionLocal`.
+
+## Module Dependency Rules
+
+These rules apply to multi-module KMP projects. Single-module projects enforce the same inward-only direction via `internal` visibility and package discipline.
+
+### Allowed Dependencies
+
+```text
+app -> feature:*:impl, feature:*:api, core:*
+feature:*:impl -> feature:*:api (any feature), core:*
+feature:*:api -> core:designsystem (route types only)
+core:data -> core:network, core:database, core:datastore
+```
+
+### Forbidden Dependencies
+
+| Forbidden | Why |
+|---|---|
+| `feature:impl` -> another `feature:impl` | Circular risk, breaks independent compilation |
+| `feature:api` -> any `feature` module | API contracts must be leaf dependencies |
+| `core:*` -> `feature:*` | Core is shared foundation, cannot depend on consumers |
+| `core:*` -> `app` | Inversion violation |
+| Domain layer -> Data layer | Domain declares interfaces, data implements them |
 
 ## State Modeling for Forms and Calculators
 

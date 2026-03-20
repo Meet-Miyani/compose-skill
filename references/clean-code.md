@@ -85,7 +85,7 @@ That is usually ceremony.
 | Effects | only for impure one-shot actions | effects for trivial synchronous transitions |
 | UI | route + dumb screen + meaningful leaves | every row has its own ViewModel/presenter |
 | Use cases | used for real domain logic | one wrapper per repository call |
-| Modules | feature-first | giant "domain/data/presentation" package islands |
+| Modules | feature-first (see [architecture.md](architecture.md) Module Dependency Rules for multi-module arrows) | giant "domain/data/presentation" package islands |
 | Platform abstractions | introduced when needed | abstracted preemptively everywhere |
 | Navigation | semantic effect + route binding | global command bus + abstract navigator hierarchy |
 | Naming | `EstimateState`, `EstimateEvent` | `FeatureContract.State`, `FeatureContract.Action` |

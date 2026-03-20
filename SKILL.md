@@ -6,13 +6,21 @@ description: >
   NavDisplay, Koin, Hilt, Ktor, PagingData, LazyPagingItems, MVI, recomposition, Turbine,
   Res.string, Res.drawable, composeResources, stringResource, painterResource, DataStore,
   Preferences, SharedPreferences, preferencesDataStore, accessibility, a11y,
-  contentDescription, semantics, screen reader, touch target, or questions like "my compose
-  app is slow", "how do I paginate", "how do I navigate", "StateFlow vs SharedFlow", "share
-  code Android iOS", "how do I use resources in KMP", "how do I store settings", "DataStore
-  vs SharedPreferences", "how do I make my UI accessible". Covers: coroutines/Flow,
-  ViewModels, MVI, state modeling, performance, Nav 3, Koin/Hilt DI, Ktor, Paging 3,
-  DataStore, animations, multiplatform resources, cross-platform, accessibility, testing,
-  UI/UX, and code review.
+  contentDescription, semantics, screen reader, touch target, Gradle, AGP, build.gradle,
+  version catalog, libs.versions.toml, convention plugins, gradle.properties, compileSdk,
+  includeBuild, composite build, dependencySubstitution, CI/CD, GitHub Actions, desktop,
+  DMG, MSI, DEB, packageDmg, signing, notarization, Xcode, embedAndSignAppleFrameworkForXcode,
+  Swift, iOS interop, SKIE, KotlinUnit, AsyncSequence, @HiddenFromObjC, sealed Swift,
+  ComposeUIViewController, UIKitView, UIViewControllerRepresentable, UIHostingController,
+  or questions like "my compose app is slow", "how do I paginate", "how do I navigate",
+  "StateFlow vs SharedFlow", "share code Android iOS", "how do I use resources in KMP",
+  "how do I store settings", "DataStore vs SharedPreferences", "how do I make my UI accessible",
+  "how do I set up Gradle for KMP", "how do I build a desktop app", "how do I distribute my app",
+  "how do I expose Kotlin to Swift", "how do I observe StateFlow from iOS",
+  "how do I embed SwiftUI in Compose", "how do I use Compose in a SwiftUI app".
+  Covers: coroutines/Flow, ViewModels, MVI, state modeling, performance, Nav 3, Koin/Hilt DI,
+  Ktor, Paging 3, DataStore, animations, multiplatform resources, cross-platform, iOS Swift interop,
+  accessibility, testing, UI/UX, Gradle/AGP configuration, CI/CD, desktop distribution, and code review.
 ---
 
 # Jetpack Compose & Compose Multiplatform — MVI Architecture
@@ -183,7 +191,7 @@ Load these only when the task requires deeper guidance:
 - **[Coroutines & Flow](references/coroutines-flow.md)** — StateFlow vs SharedFlow vs Channel decision table, Flow operators (`flatMapLatest`, `combine`, `debounce`, `catch`), Dispatchers (IO/Default/Main), structured concurrency (`viewModelScope`, `supervisorScope`), exception handling, `CancellationException`, `stateIn`/`shareIn`, backpressure (`buffer`/`conflate`/`collectLatest`), `callbackFlow`, Mutex/Semaphore, testing with Turbine
 
 ### Architecture
-- **[Architecture & State Management](references/architecture.md)** — ViewModel/event-handling pipeline, state modeling, Channel vs SharedFlow for effects, GOOD/BAD code examples
+- **[Architecture & State Management](references/architecture.md)** — ViewModel/event-handling pipeline, state modeling, Channel vs SharedFlow for effects, **domain layer rules**, **inter-feature communication** (event bus, feature API contracts), **module dependency rules**, GOOD/BAD code examples
 - **[Clean Code & Organization](references/clean-code.md)** — avoiding overengineering, file organization, naming conventions, disciplined vs bloated MVI comparison
 - **[Anti-Patterns](references/anti-patterns.md)** — 18-row table of harmful patterns with why they hurt, how to spot them, and better replacements
 
@@ -207,5 +215,10 @@ Load these only when the task requires deeper guidance:
 ### Networking, DI & Cross-Platform
 - **[Networking with Ktor](references/networking-ktor.md)** — HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration, anti-patterns
 - **[Dependency Injection (Koin)](references/dependency-injection.md)** — Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, **Koin + Nav 3** (`navigation<T>`, `koinEntryProvider`), scoped navigation, adaptive layouts, MVI ViewModel integration. For Android-only projects, Hilt/Dagger patterns apply with the same architectural principles.
-- **[Cross-Platform (KMP)](references/cross-platform.md)** — `commonMain` vs platform placement, interfaces vs `expect/actual`, lifecycle, state restoration, resources, accessibility
+- **[Cross-Platform (KMP)](references/cross-platform.md)** — `commonMain` vs platform placement, interfaces vs `expect/actual`, **platform bridge patterns** (interface+DI, expect/actual, typealias), lifecycle, state restoration, resources, accessibility
+- **[iOS Swift Interop](references/ios-swift-interop.md)** — Kotlin→Swift naming, nullability/collection bridging, SKIE setup, suspend→async, Flow→AsyncSequence, sealed class mapping, **SwiftUI/UIKit interop** (`ComposeUIViewController`, `UIKitView`), iOS API design rules, anti-patterns
 - **[Multiplatform Resources](references/resources.md)** — Android `R` vs CMP `Res` comparison, `composeResources/` directory structure, Gradle setup, drawable/string/plural/font/raw-file APIs with code examples, qualifiers (language, theme, density), localization, generated resource maps, Android assets interop (`Res.getUri`), MVI integration (semantic keys in state, resolution in UI), do/don't
+
+### Build, Distribution & CI/CD
+- **[Gradle & Build Configuration](references/gradle-build.md)** — AGP 9+ project structure, version catalog (`[versions]`/`[libraries]`/`[plugins]`/`[bundles]`), bundle patterns, composite builds (`includeBuild` + `dependencySubstitution`), private Maven repos, `settings.gradle.kts`, `gradle.properties`, module-level build scripts (CMP shared, Android app, KMP library, Desktop), `compileSdk { version = release(N) }`, built-in Kotlin, `com.android.kotlin.multiplatform.library`, KSP/Room/Koin wiring, convention plugins guidance, do/don't
+- **[CI/CD & Distribution](references/ci-cd-distribution.md)** — GitHub Actions workflows (Android APK, Desktop multi-OS DMG/MSI/DEB), desktop app module setup (`compose.desktop`), iOS Xcode framework integration, signing/notarization (Android/macOS/iOS), adding JVM desktop target to existing CMP project, Gradle task reference table
