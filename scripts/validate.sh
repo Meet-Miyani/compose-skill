@@ -608,68 +608,38 @@ check_scripts() {
 
 # ── [9] Package Integrity ────────────────────────────────────────
 
-check_package() {
-  section "Package Integrity"
+check_repo_hygiene() {
+  section "Repository Hygiene"
 
-  local pkg_path tar_output
-  pkg_path="${RUNNER_TEMP:-/tmp}/skill-scan-test.tar.gz"
+  # Check for sensitive files
+  local sensitive
+  sensitive=$(find . -maxdepth 3 \
+    \( -name '.env' -o -name '*.key' -o -name '*.pem' -o -name 'credentials*' \) \
+    -not -path './.git/*' 2>/dev/null || true)
 
-  if ! tar --exclude='.git' \
-           --exclude='.github' \
-           --exclude='.gitignore' \
-           -czf "$pkg_path" . 2>&1; then
-    _error "Failed to create tarball"
-    _detail "tar reported an error — check disk space and permissions"
-    ci_annotate "error" "::tar failed to create package"
-    rm -f "$pkg_path"
-    return
+  if [ -n "$sensitive" ]; then
+    _warn "Possible sensitive files detected"
+    echo "$sensitive" | while IFS= read -r f; do
+      _detail "  $f"
+    done
+  else
+    _pass "No sensitive files (.env, .key, .pem, credentials)"
   fi
 
-  if [ ! -f "$pkg_path" ] || [ ! -s "$pkg_path" ]; then
-    _error "Tarball was not created or is empty"
-    rm -f "$pkg_path"
-    return
+  # Check for development artifacts
+  local artifacts
+  artifacts=$(find . -maxdepth 3 \
+    \( -name 'node_modules' -o -name '__pycache__' -o -name '.DS_Store' \) \
+    -not -path './.git/*' 2>/dev/null || true)
+
+  if [ -n "$artifacts" ]; then
+    _warn "Development artifacts found — add to .gitignore"
+    echo "$artifacts" | while IFS= read -r f; do
+      _detail "  $f"
+    done
+  else
+    _pass "No development artifacts (node_modules, __pycache__, .DS_Store)"
   fi
-
-  # Extract listing once for all checks
-  local listing
-  listing=$(tar -tzf "$pkg_path" 2>/dev/null || true)
-
-  if [ -z "$listing" ]; then
-    _error "Tarball is empty or corrupt"
-    rm -f "$pkg_path"
-    return
-  fi
-
-  if ! echo "$listing" | grep -q 'SKILL.md'; then
-    _error "SKILL.md missing from package"
-    ci_annotate "error" "::Package does not contain SKILL.md"
-    rm -f "$pkg_path"
-    return
-  fi
-  _pass "SKILL.md included"
-
-  if echo "$listing" | grep -q 'references/'; then
-    _pass "references/ included"
-  fi
-
-  # Check for accidental inclusions
-  if echo "$listing" | grep -qiE '\.env$|credentials|\.key$|\.pem$|secret'; then
-    _warn "Package may contain sensitive files (.env, credentials, keys)"
-    _detail "Review contents: tar -tzf <package>"
-  fi
-
-  if echo "$listing" | grep -qE 'node_modules/|__pycache__/|\.DS_Store'; then
-    _warn "Package contains development artifacts (node_modules, __pycache__, .DS_Store)"
-    _detail "Add to .gitignore or tar --exclude"
-  fi
-
-  local entry_count size
-  entry_count=$(echo "$listing" | wc -l | tr -d ' ')
-  size=$(du -h "$pkg_path" | cut -f1)
-  _pass "Package: $size compressed, $entry_count entries"
-
-  rm -f "$pkg_path"
 }
 
 # ── [10] Agent Metadata ──────────────────────────────────────────
@@ -910,7 +880,7 @@ show_help() {
   echo "    $(_cyan " 6.") Markdown syntax        Unclosed code blocks"
   echo "    $(_cyan " 7.") Reference nesting      No deep cross-reference chains"
   echo "    $(_cyan " 8.") Scripts                Executable permissions, documentation"
-  echo "    $(_cyan " 9.") Package integrity      Tarball build, content check, secret scan"
+    echo "    $(_cyan " 9.") Repository hygiene      Sensitive files, development artifacts"
   echo "    $(_cyan "10.") Agent metadata         agents/openai.yaml validation"
   echo ""
   echo "  $(_bold "Severity:")"
@@ -953,7 +923,7 @@ main() {
   check_markdown
   check_reference_depth
   check_scripts
-  check_package
+  check_repo_hygiene
   check_agents_metadata
 
   print_report

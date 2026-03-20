@@ -75,22 +75,6 @@ jobs:
             echo "$DELIMITER"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Package skill artifact
-        id: package
-        run: |
-          TAG="${{ steps.version.outputs.new_tag }}"
-          ARTIFACT_NAME="compose-skill-${TAG}.tar.gz"
-          ARTIFACT_PATH="${RUNNER_TEMP}/${ARTIFACT_NAME}"
-
-          tar --exclude='.git' \
-              --exclude='.github' \
-              --exclude='.gitignore' \
-              -czvf "$ARTIFACT_PATH" .
-
-          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
-          echo "artifact_path=$ARTIFACT_PATH" >> "$GITHUB_OUTPUT"
-          echo "Created artifact: $ARTIFACT_NAME ($(du -h "$ARTIFACT_PATH" | cut -f1))"
-
       - name: Create tag (manual dispatch only)
         if: github.event_name == 'workflow_dispatch'
         run: |
@@ -103,7 +87,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.new_tag }}
-          name: ${{ steps.version.outputs.new_tag }} — ${{ steps.release_info.outputs.msg }}
+          name: ${{ steps.version.outputs.new_tag }}
           body: |
             **Commit:** `${{ github.sha }}`
             **Branch:** `${{ github.ref_name }}`
@@ -112,4 +96,3 @@ jobs:
             ${{ steps.release_info.outputs.body }}
           draft: false
           prerelease: false
-          files: ${{ steps.package.outputs.artifact_path }}
