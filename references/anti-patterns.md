@@ -25,6 +25,7 @@ For overengineering patterns (bloated base classes, unnecessary use cases, 4-typ
 | Too many trivial composables (wrappers around single `Text`/`Spacer`) | fragmentation, harder reading | extract only meaningful boundaries | [clean-code.md](clean-code.md) |
 | Platform abstraction too early (interfaces for everything before pain) | unnecessary indirection, poor fit | share business logic first, abstract real platform capabilities only | [cross-platform.md](cross-platform.md) |
 | Forcing MVI migration on existing codebase | churn without value, team friction | respect existing patterns, introduce MVI for new features only | [clean-code.md](clean-code.md) |
+| Inline fully qualified package paths | hurts readability, clutters business logic, hides intent behind package noise | import at file top; use `import ... as ...` for name clashes | [clean-code.md](clean-code.md) |
 
 ## Domain-Specific Anti-Patterns
 

@@ -141,6 +141,7 @@ Apply these unless the project already follows a different coherent pattern.
 - Map domain data to UI state close to the presentation boundary
 - Use feature-specific ViewModel names
 - Key list items by stable domain ID
+- Import all types and functions at the top of the file; use `import ... as ...` aliases to resolve name clashes
 - Guard no-op state emissions (don't update state if nothing changed)
 - Respect the project's existing MVI conventions
 
@@ -155,6 +156,7 @@ Apply these unless the project already follows a different coherent pattern.
 - Wrap every repository call in a use case class
 - Wipe the screen with a full-screen spinner during refresh
 - Force-migrate a working codebase to a different architecture or base class
+- Use fully qualified package paths inline (e.g., `com.example.pkg.SomeClass.method()`) — always import at file top
 
 ## Detailed References
 

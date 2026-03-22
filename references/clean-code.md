@@ -166,6 +166,37 @@ The second form becomes a horizontal maze fast.
 | Screen | `EstimateScreen` | `EstimateView` |
 | Leaf component | `ResultCard`, `EstimateForm` | `EstimateFormWidgetComponentView` |
 
+## Import Hygiene
+
+**Strict rule:** never write fully qualified package paths inline. Always import at the top of the file. Use `import ... as ...` with a descriptive alias when two types share the same simple name.
+
+### BAD — inline fully qualified name
+
+```kotlin
+val unit = com.example.app.data.db.entity.enums.WeightUnit.entries
+    .find { it.name == rawValue }
+```
+
+### GOOD — proper import
+
+```kotlin
+import com.example.app.data.db.entity.enums.WeightUnit
+
+val unit = WeightUnit.entries.find { it.name == rawValue }
+```
+
+### GOOD — import alias for name clashes
+
+```kotlin
+import com.example.app.data.db.entity.enums.WeightUnit as DbWeightUnit
+import com.example.app.domain.model.WeightUnit
+
+val dbUnit = DbWeightUnit.entries.find { it.name == rawValue }
+val domainUnit = WeightUnit.fromDb(dbUnit)
+```
+
+**Alias naming:** prefix or suffix with the distinguishing layer — `Db`, `Domain`, `Ui`, `Api`, `Dto`.
+
 ## Code Examples
 
 ### Pattern: base ViewModel that provides `updateState`/`sendEffect`
