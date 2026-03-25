@@ -1,16 +1,9 @@
 # Navigation 3 + Dependency Injection
 
-DI wiring patterns for Navigation 3 with Hilt and Koin. Covers ViewModel injection in entry blocks, modularization with api/impl splits, and entry-scoped ViewModel lifecycle. Examples here focus on **DI mechanics** — how to obtain and scope ViewModels. How you wire state, events, and effects between the ViewModel and the Screen depends on your project's architecture — the MVI Route/Screen pattern (state via `collectAsStateWithLifecycle`, effects via `CollectEffect`, `onEvent` callback) applies inside entry blocks.
+DI wiring for Nav 3 entries: entry-scoped ViewModels, modularization, and multi-module entry providers with Hilt and Koin.
 
 For Nav 3 core reference (routes, NavDisplay, scenes, animations), see [navigation-3.md](navigation-3.md).
 For shared navigation concepts and anti-patterns, see [navigation.md](navigation.md).
-
-## Table of Contents
-
-- [Entry-Scoped ViewModels](#entry-scoped-viewmodels)
-- [Hilt Integration](#hilt-integration)
-- [Koin Integration](#koin-integration)
-- [Modularization](#modularization)
 
 ## Entry-Scoped ViewModels
 
@@ -32,6 +25,8 @@ val viewModel: DetailViewModel = viewModel() // scoped to entry via decorator
 For shared state across entries, lift state to a parent composable or use a shared ViewModel at the Activity/App scope.
 
 ## Hilt Integration
+
+For general Hilt setup, modules, and scopes, see [hilt.md](hilt.md). Below covers Nav 3–specific patterns only.
 
 ### hiltViewModel in entry blocks (Android only)
 
@@ -82,6 +77,8 @@ NavDisplay(
 ```
 
 ## Koin Integration
+
+For general Koin setup, modules, and scopes, see [koin.md](koin.md). Below covers Nav 3–specific patterns only.
 
 ### koinViewModel in entry blocks (Android + CMP)
 

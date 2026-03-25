@@ -1,0 +1,118 @@
+---
+description: Token-optimized writing standards for skill reference files. Apply when creating or editing reference .md files in the references/ directory.
+globs: references/*.md
+alwaysApply: false
+---
+
+# Reference File Writing Standards
+
+Every reference file must be token-efficient. Agents already know standard APIs — provide patterns, pitfalls, and project-specific rules, not tutorials.
+
+## File Structure
+
+1. **Line 1: `# Title`** — concise topic name
+2. **Line 2-3: One-liner scope** — what this file covers and when to use it, not a marketing paragraph
+3. **Cross-links** — point to related canonical files (e.g., "For shared architecture concepts, see [architecture.md](architecture.md)")
+4. **`References:` block** (optional) — external URLs for provenance; keep, they're cheap
+5. **No Table of Contents** — agents navigate by headings, not TOC lists
+
+## Writing Rules
+
+| Rule | Do | Don't |
+|---|---|---|
+| Tables over prose | `\| Issue \| Fix \|` table | Multi-paragraph explanations |
+| Rules over explanations | State the rule directly | Explain "why" unless non-obvious |
+| Examples over descriptions | One BAD/GOOD code pair | Three paragraphs describing the concept |
+| No tutorial content | Show the pattern/pitfall | Explain what `StateFlow` or `PagingSource` is |
+| One-liner intros | "SQLite persistence via Room (KMP-ready since 2.7.0)" | "Room is a powerful persistence library that provides an abstraction layer over SQLite..." |
+| Trim filler words | Direct statements | "It is important to note that...", "In order to...", "You should consider..." |
+
+## DRY Cross-Referencing
+
+Each concept has ONE canonical home. Other files link to it instead of duplicating.
+
+| Concept | Canonical home | Other files do |
+|---|---|---|
+| MVI ViewModel collection pattern | `architecture.md` § Reactive Data Collection | 5-8 line domain stub + cross-link |
+| State modeling (forms, calculators) | `architecture.md` § State Modeling | Cross-link |
+| Effect delivery (Channel vs SharedFlow) | `architecture.md` § Effect Delivery | Cross-link |
+| Generic test setup (runTest, Turbine) | `testing.md` | Domain-specific test factory + cross-link |
+| Koin module patterns | `koin.md` | 1-2 line binding example + cross-link |
+| Hilt module patterns | `hilt.md` | 1-2 line binding example + cross-link |
+| Nav 3 + DI wiring | `navigation-3-di.md` | Condensed example + cross-link |
+
+## Section Templates
+
+### MVI Integration (in data-layer files)
+
+Keep to ~5-8 lines: state the domain-specific mapping rule + cross-link.
+
+```markdown
+## MVI Integration
+
+Map entities to domain models at the repository boundary. Never pass raw [DataType] to the UI.
+
+For the ViewModel collection pattern, see [architecture.md](architecture.md) — Reactive Data Collection.
+```
+
+### DI Integration (in data-layer files)
+
+1-2 line binding examples + link.
+
+```markdown
+## DI Integration
+
+Always provide [Type] as a **singleton**.
+
+\`\`\`kotlin
+// Koin: single<Type> { createType(get()) }
+// Hilt: @Provides @Singleton fun provideType(...): Type = ...
+\`\`\`
+
+For full module patterns, see [koin.md](koin.md) or [hilt.md](hilt.md).
+```
+
+### Anti-Patterns (table format)
+
+```markdown
+## Anti-Patterns
+
+| Anti-pattern | Why it is harmful | Better replacement |
+|---|---|---|
+| [pattern] | [consequence] | [fix] |
+```
+
+### Performance / Critical Rules (table format)
+
+```markdown
+## Critical Rules
+
+| Rule | Why |
+|---|---|
+| [rule] | [brief rationale] |
+```
+
+## Code Examples
+
+- Use BAD/GOOD pairs — show the mistake and the fix side by side
+- No redundant comments like `// Import the module` — only explain non-obvious intent
+- Keep examples minimal: show the pattern, not a full app
+- Use `<latest>` for dependency versions with a comment: `// search: "library latest version"`
+
+## Token Budget
+
+- Target: **under 3,500 tokens** per reference file (hard max: 4,000)
+- Estimate: characters / 4
+- If a file grows past 3,500 tokens, split into base + advanced (e.g., `animations.md` + `animations-advanced.md`)
+
+## Checklist for New Reference Files
+
+- [ ] One-liner scope, no marketing intro
+- [ ] No Table of Contents
+- [ ] Tables instead of multi-paragraph prose
+- [ ] BAD/GOOD code examples for key pitfalls
+- [ ] Anti-patterns table at the end
+- [ ] Cross-links to canonical homes (no duplicated patterns)
+- [ ] MVI/DI/Testing sections use stubs + cross-links
+- [ ] Under 3,500 tokens
+- [ ] Linked from `SKILL.md` (both trigger list and reference catalog)

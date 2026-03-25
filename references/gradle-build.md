@@ -2,21 +2,6 @@
 
 Gradle best practices for Compose Multiplatform (CMP) and Android-only Jetpack Compose projects, including AGP 9+ changes.
 
-## Table of Contents
-
-- [1. Project Structure Patterns](#1-project-structure-patterns)
-- [2. Version Catalog (`libs.versions.toml`)](#2-version-catalog-libsversionstoml)
-- [3. Bundles (`[bundles]`)](#3-bundles-bundles)
-- [4. `settings.gradle.kts`](#4-settingsgradlekts)
-- [5. Root `build.gradle.kts`](#5-root-buildgradlekts)
-- [6. AGP 9+ Changes](#6-agp-9-changes)
-- [7. Module Patterns](#7-module-patterns)
-- [8. `gradle.properties`](#8-gradleproperties)
-- [9. KSP Wiring](#9-ksp-wiring)
-- [10. Composite Builds](#10-composite-builds)
-- [11. Convention Plugins](#11-convention-plugins)
-- [12. Do / Don't](#12-do--dont)
-
 ## 1. Project Structure Patterns
 
 ### CMP Project (Android + iOS + optional Desktop)
@@ -90,27 +75,11 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 
 ## 3. Bundles (`[bundles]`)
 
-The `[bundles]` section in the version catalog groups libraries that are **always added together** into a single alias. A bundle is purely a convenience — it does not affect dependency resolution, version alignment, or transitive behavior. It just lets a module write one `implementation(libs.bundles.X)` line instead of many.
-
-**When to create a bundle:** two or more libraries that every consuming module adds as a set. Group by functional domain (e.g., AndroidX base, lifecycle, layout, networking) and use comment headers inside `[bundles]` the same way as in `[versions]`/`[libraries]`.
-
-**When NOT to bundle:**
-- Libraries using different configurations (`ksp()`, `debugImplementation`, `testImplementation`) — bundles only work with a single configuration
-- A single library — indirection with no benefit
-- Libraries that some modules need selectively — that's not "always together"
-
-**Usage in build scripts:**
+`[bundles]` groups libraries **always added together** into one alias — convenience only; no change to resolution or alignment. Create bundles when two+ libs are added as a set; group by domain and use comment headers like `[versions]`/`[libraries]`.
 
 ```kotlin
 implementation(libs.bundles.androidx.base)
 implementation(libs.bundles.androidx.lifecycle)
-```
-
-If a BOM is involved (Compose, Firebase), declare the BOM platform first, then the bundle:
-
-```kotlin
-implementation(platform(libs.compose.bom))
-implementation(libs.bundles.compose)
 ```
 
 **CMP projects** rarely need bundles because `commonMain.dependencies` already groups everything in one place.
@@ -229,24 +198,20 @@ kotlin {
         compileSdk = 35
         minSdk = 26
     }
-    
+
     listOf(iosArm64(), iosSimulatorArm64()).forEach {
         it.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
     }
-    
-    // jvm()  // Uncomment for desktop
-    
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.material3)
             // Add other common dependencies
         }
-        androidMain.dependencies { /* Android-specific */ }
-        iosMain.dependencies { /* iOS-specific */ }
     }
 }
 
@@ -257,68 +222,9 @@ dependencies {
 }
 ```
 
-### Android App Module (`androidApp`)
+Android app module: thin shell with `com.android.application` + `compose-compiler` plugins, depending on `projects.composeApp`.
 
-Thin shell depending on shared module:
-
-```kotlin
-plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.compose.compiler)
-}
-
-android {
-    namespace = "com.example.myapp"
-    compileSdk { version = release(35) }
-    
-    defaultConfig {
-        applicationId = "com.example.myapp"
-        minSdk = 26
-        targetSdk = 35
-    }
-    
-    buildFeatures { compose = true }
-}
-
-kotlin { jvmToolchain(21) }
-
-dependencies {
-    implementation(projects.composeApp)
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.material3)
-}
-```
-
-### Desktop Module (`desktopApp`)
-
-```kotlin
-plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
-}
-
-kotlin {
-    jvm()
-    sourceSets {
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(projects.composeApp)
-        }
-    }
-}
-
-compose.desktop {
-    application {
-        mainClass = "com.example.MainKt"
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MyApp"
-            packageVersion = "1.0.0"
-        }
-    }
-}
-```
+Desktop module: KMP plugin + `compose.desktop.currentOs`, entry point via `compose.desktop { application { mainClass = "..." } }`.
 
 ## 8. `gradle.properties`
 
@@ -339,8 +245,6 @@ android.nonTransitiveRClass=true
 # CMP (if targeting iOS)
 kotlin.mpp.enableCInteropCommonization=true
 ```
-
-Remove deprecated flags on AGP 9+: `android.enableAppCompileTimeRClass`, `android.r8.optimizedResourceShrinking`, etc.
 
 ## 9. KSP Wiring
 
@@ -363,7 +267,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 ## 10. Composite Builds
 
-Develop a library and consuming app side-by-side. Guard with `if (path.exists())` so CI works without local checkout.
+Conditional `includeBuild` for local library dev (use `if (path.exists())` so CI works without checkout):
 
 ```kotlin
 // settings.gradle.kts
@@ -379,17 +283,7 @@ if (localLibPath.exists()) {
 
 ## 11. Convention Plugins
 
-Introduce when 3+ modules have duplicated config. Use `build-logic/` included build pattern.
-
-```text
-build-logic/
-├── settings.gradle.kts
-└── convention/src/main/kotlin/
-    ├── AndroidLibraryConventionPlugin.kt
-    └── KmpLibraryConventionPlugin.kt
-```
-
-Not needed for small projects (≤3 modules).
+Introduce convention plugins when 3+ modules duplicate config. Use `build-logic/` included build pattern. Not needed for small projects (≤3 modules).
 
 ## 12. Do / Don't
 

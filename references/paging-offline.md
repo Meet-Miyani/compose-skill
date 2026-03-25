@@ -5,13 +5,6 @@ Room as the single source of truth, network as the refresh trigger. This file bu
 References:
 - [Network + database paging](https://developer.android.com/topic/libraries/architecture/paging/v3-network-db)
 
-## Table of Contents
-
-- [RemoteMediator.initialize](#remotemediatorinitialize)
-- [RemoteMediator Implementation](#remotemediator-implementation)
-- [Pager Wiring](#pager-wiring)
-- [Remote Keys](#remote-keys)
-
 ## RemoteMediator.initialize
 
 Override `initialize()` to control whether RemoteMediator triggers a remote refresh on first load. This determines if cached data is shown immediately or if a network request fires first.

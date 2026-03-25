@@ -132,7 +132,7 @@ git clone https://github.com/Meet-Miyani/compose-skill.git ~/.cursor/skills/comp
 git clone https://github.com/Meet-Miyani/compose-skill.git .codex/skills/compose-skill
 ```
 
-### Common Mistakes
+## Common Mistakes
 
 | Problem | Fix |
 |:--------|:----|
@@ -140,7 +140,7 @@ git clone https://github.com/Meet-Miyani/compose-skill.git .codex/skills/compose
 | `SKILL.md` not at root of skill folder | Don't nest inside another directory — clone directly into the skill path |
 | Skill not detected after install | Restart the agent / IDE |
 
-### Verify Activation
+## Verify Activation
 
 | Client | How to verify |
 |:-------|:--------------|

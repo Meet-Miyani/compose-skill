@@ -1,15 +1,5 @@
 # Material 3 Theming & Components
 
-## Table of Contents
-
-- [TL;DR Defaults](#tldr-defaults)
-- [Theming Baseline](#theming-baseline)
-- [Color Roles and Dark/Light](#color-roles-and-darklight)
-- [Typography and Shapes](#typography-and-shapes)
-- [Component Decision Matrix](#component-decision-matrix)
-- [Adaptive Layout Defaults](#adaptive-layout-defaults)
-- [M2 to M3 Migration Notes](#m2-to-m3-migration-notes)
-
 ## TL;DR Defaults
 
 | Concern | Default |
@@ -143,16 +133,12 @@ val AppShapes = Shapes(
 
 ### Top App Bar
 
-| Variant | Use case |
-|---|---|
-| `TopAppBar` (small) | Simple screens, minimal actions |
-| `CenterAlignedTopAppBar` | Single primary action, centered title |
-| `MediumTopAppBar` | Moderate navigation, collapsible on scroll |
-| `LargeTopAppBar` | Hero screens, prominent title, collapsible |
-
-**Scroll behaviors**: `pinnedScrollBehavior`, `enterAlwaysScrollBehavior`, `exitUntilCollapsedScrollBehavior`.
-
-**Default**: `TopAppBar` with `pinnedScrollBehavior` unless scroll collapse is needed.
+| Variant | Use case | Scroll / default |
+|---|---|---|
+| `TopAppBar` (small) | Simple screens, minimal actions | Default: `pinnedScrollBehavior` unless you need collapse |
+| `CenterAlignedTopAppBar` | Single primary action, centered title | Same bar family as small |
+| `MediumTopAppBar` | Moderate navigation, collapsible on scroll | `exitUntilCollapsedScrollBehavior` (also `enterAlwaysScrollBehavior` where needed) |
+| `LargeTopAppBar` | Hero screens, prominent title, collapsible | Same scroll behavior family as medium |
 
 ### Navigation
 
@@ -241,16 +227,7 @@ Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { /* ... */ }
 
 **Default**: For list-detail apps, use `NavigableListDetailPaneScaffold` which handles pane visibility and back navigation.
 
-### Adaptive Navigation Pattern
-
-```kotlin
-@Composable
-fun AppRoot() {
-    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val showTopAppBar = windowSizeClass.isHeightAtLeastBreakpoint(HEIGHT_DP_MEDIUM_LOWER_BOUND)
-    MainScreen(showTopAppBar = showTopAppBar)
-}
-```
+**Adaptive navigation:** read `windowSizeClass` (or related adaptive info) once at the root and pass derived flags (e.g. whether to show a top app bar) into your main screen composable.
 
 ## M2 to M3 Migration Notes
 

@@ -1,6 +1,6 @@
 # Navigation
 
-Shared navigation reference for Jetpack Compose and Compose Multiplatform. This file covers concepts and rules that apply to both Navigation 3 and Navigation 2. Load this file first for any navigation question, then follow the routing below to the version-specific reference.
+Shared navigation concepts for Nav 2 and Nav 3. Load first, then see version-specific references.
 
 References:
 - [Nav 3 official docs](https://developer.android.com/guide/navigation/navigation-3)

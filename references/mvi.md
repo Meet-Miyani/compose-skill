@@ -1,21 +1,8 @@
 # MVI (Event/State/Effect)
 
-Full reference for MVI pattern in Jetpack Compose and Compose Multiplatform. MVI uses a sealed event contract with a single `onEvent()` entry point. Use when the project has chosen MVI or when a new architecture decision points there.
+MVI pattern: sealed Event contract processed by a single `onEvent()` entry point. Use when the project has chosen MVI.
 
 For shared architecture concepts (state owner selection, domain layer, module rules), see [architecture.md](architecture.md).
-
-## Table of Contents
-
-- [The 3 MVI Types](#the-3-mvi-types)
-- [Event Naming](#event-naming)
-- [State Modeling](#state-modeling)
-- [Effect and Effect Delivery](#effect-and-effect-delivery)
-- [Event Processing Flow](#event-processing-flow)
-- [Screen State Holder Anatomy](#screen-state-holder-anatomy)
-- [UI Rendering Boundary](#ui-rendering-boundary)
-- [Base Class and Interface Patterns](#base-class-and-interface-patterns)
-- [When MVI Is Appropriate](#when-mvi-is-appropriate)
-- [Code Examples](#code-examples)
 
 ## The 3 MVI Types
 
@@ -52,33 +39,11 @@ The event describes a user action; the ViewModel decides how to handle it.
 
 ## State Modeling
 
-```kotlin
-data class CreateItemState(
-    val title: String = "",
-    val amount: String = "",
-    val isSaving: Boolean = false,
-    val errors: Map<String, String> = emptyMap()
-) {
-    val canSave: Boolean get() = title.isNotBlank() && amount.isNotBlank()
-    val hasErrors: Boolean get() = errors.isNotEmpty()
-}
-```
+Use immutable `data class` with computed properties for derivations. For detailed guidance (forms, calculators, avoiding duplicated state), see [architecture.md](architecture.md) — State Modeling for Forms and Calculators.
 
-For detailed state modeling guidance (forms, calculators, avoiding duplicated state), see [architecture.md](architecture.md).
+## Effect Delivery
 
-## Effect and Effect Delivery
-
-### Channel vs SharedFlow
-
-`Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()` is the default for new single-consumer effects:
-
-- **Buffers for reliable delivery**: holds effects even if the collector is temporarily inactive (during recomposition, rapid lifecycle transitions, or configuration changes)
-- **Single consumer**: only one collector receives each effect — no accidental double-handling
-- **No replay**: new collectors don't receive stale effects
-
-`SharedFlow(replay=0)` with no extra buffer can drop effects when no collector is active. Acceptable for truly fire-and-forget signals but risky for mandatory user-visible effects.
-
-**Preservation rule:** keep an existing `SharedFlow`-based effect mechanism when it is already consistent and correct.
+For Channel vs SharedFlow guidance, see [architecture.md](architecture.md) — Effect Delivery. Default: `Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()`.
 
 ## Event Processing Flow
 
@@ -118,13 +83,9 @@ Stateless render function receiving state plus `onEvent: (Event) -> Unit` callba
 
 Render sub-state, emit specific callbacks, keep only tiny visual-local state. Do not pass `onEvent` to reusable leaves — adapt to specific callbacks.
 
-### Domain Logic Boundary
+### Domain and Data Layer Boundaries
 
-Lives outside UI: validators, calculators, rounding rules, eligibility rules, submit enablement rules, derived result engines, formatting rules with business meaning.
-
-### Data Layer Boundary
-
-Lives outside the ViewModel's event handling: repositories, local persistence, remote APIs, DTO mapping, caching policies.
+See [architecture.md](architecture.md) — Domain Layer and Where Logic Belongs.
 
 ## When MVI Is Appropriate
 
@@ -144,29 +105,18 @@ fun LoanCalculatorScreen() {
     var amountText by rememberSaveable { mutableStateOf("") }
     var rateText by rememberSaveable { mutableStateOf("") }
     var yearsText by rememberSaveable { mutableStateOf("") }
-
-    val amount = amountText.toDoubleOrNull() ?: 0.0
-    val rate = rateText.toDoubleOrNull() ?: 0.0
-    val years = yearsText.toIntOrNull() ?: 0
-
-    val isValid = amount > 0.0 && rate > 0.0 && years > 0
-    val monthlyPayment = if (isValid) {
-        val monthlyRate = rate / 1200.0
-        val months = years * 12
-        (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months.toDouble()))
-    } else 0.0
-
+    // Calculation/validation omitted — belongs in state holder, not here.
     Column {
         OutlinedTextField(value = amountText, onValueChange = { amountText = it })
         OutlinedTextField(value = rateText, onValueChange = { rateText = it })
         OutlinedTextField(value = yearsText, onValueChange = { yearsText = it })
-        Text("Monthly payment: $monthlyPayment")
-        Button(enabled = isValid, onClick = { /* repository.save(...) */ }) { Text("Calculate") }
+        Text("Monthly payment: …")
+        Button(onClick = { /* … */ }) { Text("Calculate") }
     }
 }
 ```
 
-Problems: state forked between UI and domain logic, validation in UI, calculation in UI, side effects in UI, impossible to test cleanly, recomputation tied to composition.
+Problems: logic and validation live in the composable, hard to test, and recomposition becomes the execution model.
 
 ### GOOD: MVI contract — Event, State, Effect
 
@@ -195,6 +145,8 @@ sealed interface CreateItemEffect {
 
 ### GOOD: ViewModel with onEvent
 
+Full `save()` (validation + `viewModelScope.launch`): identical body to [mvvm.md](mvvm.md) — **GOOD: ViewModel with named functions**; here it is invoked from `onEvent` instead of public named functions.
+
 ```kotlin
 class CreateItemViewModel(
     private val repository: ItemRepository,
@@ -207,122 +159,43 @@ class CreateItemViewModel(
 
     fun onEvent(event: CreateItemEvent) {
         when (event) {
-            is CreateItemEvent.OnTitleChanged -> {
-                _state.update { it.copy(title = event.title, errors = it.errors - "title") }
-            }
-            is CreateItemEvent.OnAmountChanged -> {
-                _state.update { it.copy(amount = event.amount, errors = it.errors - "amount") }
-            }
+            is CreateItemEvent.OnTitleChanged -> _state.update { it.copy(title = event.title, errors = it.errors - "title") }
+            is CreateItemEvent.OnAmountChanged -> _state.update { it.copy(amount = event.amount, errors = it.errors - "amount") }
             CreateItemEvent.OnSaveClick -> save()
             CreateItemEvent.OnBackClick -> _effect.trySend(CreateItemEffect.NavigateBack)
         }
     }
 
-    private fun save() {
-        val current = _state.value
-        val errors = buildMap {
-            if (current.title.isBlank()) put("title", "Title is required")
-            if (current.amount.toDoubleOrNull() == null) put("amount", "Enter a valid number")
-        }
-
-        if (errors.isNotEmpty()) {
-            _state.update { it.copy(errors = errors) }
-            return
-        }
-
-        _state.update { it.copy(isSaving = true, errors = emptyMap()) }
-
-        viewModelScope.launch {
-            try {
-                repository.create(current.title.trim(), current.amount.toDouble())
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Saved"))
-                _effect.trySend(CreateItemEffect.NavigateBack)
-            } catch (e: Exception) {
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Failed: ${e.message}"))
-            }
-        }
-    }
+    // save(): validate, set isSaving, launch coroutine, update state, trySend ShowMessage / NavigateBack on success or failure
+    private fun save() { /* … */ }
 }
 ```
-
-Key observations:
-- **`onEvent()` is the single entry point** — every user action enters here
-- **State updates are inline** — right where the decision happens
-- **Effects are sent immediately** — no indirection through a reducer
-- **Async work lives in the ViewModel** — `viewModelScope.launch` with try/catch
-- **No `Result` type needed** — the event handler directly updates state and sends effects
 
 ### GOOD: Same pattern with a base class or interface
 
-```kotlin
-class CreateItemViewModel(
-    private val repository: ItemRepository,
-) : ViewModel(), MviHost<CreateItemEvent, CreateItemState, CreateItemEffect> {
-    override val store = MviStore(CreateItemState())
-
-    override fun onEvent(event: CreateItemEvent) {
-        when (event) {
-            is CreateItemEvent.OnTitleChanged -> {
-                updateState { copy(title = event.title, errors = errors - "title") }
-            }
-            is CreateItemEvent.OnAmountChanged -> {
-                updateState { copy(amount = event.amount, errors = errors - "amount") }
-            }
-            CreateItemEvent.OnSaveClick -> save()
-            CreateItemEvent.OnBackClick -> sendEffect(CreateItemEffect.NavigateBack)
-        }
-    }
-
-    private fun save() {
-        // validation, async work, state updates — same pattern as standalone
-    }
-}
-```
-
-Both approaches are valid. The base class/interface reduces boilerplate across many features; standalone is fine for smaller projects or when the team prefers explicitness.
+`class CreateItemViewModel(...) : ViewModel(), MviHost<CreateItemEvent, CreateItemState, CreateItemEffect>` — same `onEvent` / `save()` shape; `updateState` / `sendEffect` from the host. Full base-class pattern: [clean-code.md](clean-code.md), [architecture.md](architecture.md).
 
 ### GOOD: Route/Screen/Leaf split
 
+Layering: [architecture.md](architecture.md) — **State Collection and Slicing**. Full Route + `CollectEffect` sample: [mvvm.md](mvvm.md) — Route/Screen/Leaf (swap named callbacks for `onEvent`).
+
 ```kotlin
 @Composable
-fun CreateItemRoute(
-    viewModel: CreateItemViewModel = koinViewModel(),
-    snackbarHostState: SnackbarHostState,
-    onNavigateBack: () -> Unit,
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    CollectEffect(viewModel.effect) { effect ->
-        when (effect) {
-            CreateItemEffect.NavigateBack -> onNavigateBack()
-            is CreateItemEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
-        }
-    }
-
-    CreateItemScreen(state = state, onEvent = viewModel::onEvent)
+fun CreateItemRoute(vm: CreateItemViewModel = koinViewModel(), snackbar: SnackbarHostState, onBack: () -> Unit) {
+    val state by vm.state.collectAsStateWithLifecycle()
+    CollectEffect(vm.effect) { e -> when (e) {
+        CreateItemEffect.NavigateBack -> onBack()
+        is CreateItemEffect.ShowMessage -> snackbar.showSnackbar(e.text)
+    }}
+    CreateItemScreen(state, vm::onEvent)
 }
 
 @Composable
 fun CreateItemScreen(state: CreateItemState, onEvent: (CreateItemEvent) -> Unit) {
     Column {
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = { onEvent(CreateItemEvent.OnTitleChanged(it)) },
-            isError = state.errors.containsKey("title"),
-            label = { Text("Title") },
-        )
-        OutlinedTextField(
-            value = state.amount,
-            onValueChange = { onEvent(CreateItemEvent.OnAmountChanged(it)) },
-            isError = state.errors.containsKey("amount"),
-            label = { Text("Amount") },
-        )
-        Button(
-            onClick = { onEvent(CreateItemEvent.OnSaveClick) },
-            enabled = !state.isSaving && state.canSave,
-        ) {
+        OutlinedTextField(state.title, { onEvent(CreateItemEvent.OnTitleChanged(it)) })
+        OutlinedTextField(state.amount, { onEvent(CreateItemEvent.OnAmountChanged(it)) })
+        Button(onClick = { onEvent(CreateItemEvent.OnSaveClick) }, enabled = !state.isSaving && state.canSave) {
             Text(if (state.isSaving) "Saving..." else "Save")
         }
     }

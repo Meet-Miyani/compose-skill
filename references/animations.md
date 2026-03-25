@@ -1,140 +1,46 @@
 # Animations
 
-Core Compose animation reference — from simple value animations to AnimatedVisibility and AnimatedContent. All animation APIs described here work in both Jetpack Compose (Android) and Compose Multiplatform (CMP) unless explicitly noted. For shared element transitions, gesture-driven motion, Canvas drawing, and graphicsLayer, see [animations-advanced.md](animations-advanced.md).
+animate*AsState, Animatable, updateTransition, AnimatedVisibility, AnimatedContent, and AnimationSpec patterns. Works on all CMP targets. For shared element transitions, gesture-driven motion, and graphicsLayer, see [animations-advanced.md](animations-advanced.md).
 
 References:
 - [Choose an animation API (Android)](https://developer.android.com/develop/ui/compose/animation/choose-api)
 - [Quick guide (Android)](https://developer.android.com/develop/ui/compose/animation/quick-guide)
-- [Animation modifiers and composables](https://developer.android.com/develop/ui/compose/animation/composables-modifiers)
-- [Value-based animations](https://developer.android.com/develop/ui/compose/animation/value-based)
-- [Customize animations](https://developer.android.com/develop/ui/compose/animation/customize)
-
-## Table of Contents
-
-- [MVI Rules for Animation State](#mvi-rules-for-animation-state)
-- [Choosing the Right API](#choosing-the-right-api)
-- [AnimationSpec — Customizing Timing](#animationspec--customizing-timing)
-- [animate*AsState — Single Value](#animateasstate--single-value)
-- [Animatable — Coroutine-Based Control](#animatable--coroutine-based-control)
-- [updateTransition — Multi-Property State Machine](#updatetransition--multi-property-state-machine)
-- [rememberInfiniteTransition](#reminderinfinitetransition)
-- [AnimatedVisibility](#animatedvisibility)
-- [AnimatedContent](#animatedcontent)
-- [Performance Optimization](#performance-optimization)
-- [When Not to Animate](#when-not-to-animate)
-- [Advanced Animation Patterns](#advanced-animation-patterns)
 
 ## MVI Rules for Animation State
 
-- Animation state is usually **local UI state** — keep it in composables
-- Reducer state describes business/UI meaning, not visual tween progress
-- Animate state changes that improve comprehension, not every change available
-- Prefer simple APIs first
-
-### What stays local
-
-Expanded/collapsed toggles, pulse/shimmer alpha, transition progress, temporary validation highlights, local appearance/disappearance.
-
-### What should NOT go into reducer state
-
-`buttonBounceProgress`, `errorShakeCounter`, `skeletonAlpha`, `contentFadeInStarted`, `rowRemovalAnimationPhase` — these are render choreography, not business state.
+- Animation state is **local UI state** — keep in composables, not reducers
+- Reducer state = business/UI meaning, not visual tween progress
+- Never put `buttonBounceProgress`, `errorShakeCounter`, `skeletonAlpha`, `rowRemovalAnimationPhase` in ViewModel state
 
 ## Choosing the Right API
 
 | Question | API |
 |---|---|
-| Art-based SVG/icon animation? | `AnimatedVectorDrawable` (Android), Lottie (`airbnb/lottie-compose` on Android, `alexzhirkevich/compottie` for CMP) |
+| SVG/icon animation? | `AnimatedVectorDrawable` (Android), Lottie/Compottie (CMP) |
 | Infinite repeat? | `rememberInfiniteTransition` |
-| Switching between composables? | `AnimatedContent` or `Crossfade` |
-| Appearance/disappearance? | `AnimatedVisibility` |
+| Switching composables? | `AnimatedContent` or `Crossfade` |
+| Appear/disappear? | `AnimatedVisibility` |
 | Size change? | `Modifier.animateContentSize()` |
-| Multiple properties changing together? | `updateTransition` |
-| Multiple properties with different timing? | `Animatable` with sequential `animateTo` |
-| Single property with target value? | `animate*AsState` |
-| Gesture-driven, source of truth? | `Animatable` with `animateTo`/`snapTo` |
+| Multiple props together? | `updateTransition` |
+| Different timing per prop? | `Animatable` with sequential `animateTo` |
+| Single prop with target? | `animate*AsState` |
+| Gesture-driven? | `Animatable` with `animateTo`/`snapTo` |
 | List item insert/remove/reorder? | `Modifier.animateItem()` |
-| Position change? | `animateIntOffsetAsState` + `Modifier.offset { }` |
 
-## AnimationSpec — Customizing Timing
+## AnimationSpec Reference
 
-All animation APIs accept an `animationSpec` parameter to control timing.
+| Spec | When to use | Key detail |
+|---|---|---|
+| `spring` (default) | General purpose, interruption-safe | Maintains velocity on target change; `dampingRatio` (bounciness), `stiffness` (speed) |
+| `tween` | Need exact duration control | `durationMillis`, `delayMillis`, `easing` (`FastOutSlowInEasing`, `LinearEasing`, etc.) |
+| `keyframes` | Specific values at timestamps | `value at millis using easing` |
+| `keyframesWithSplines` | Smooth 2D curved paths | `Offset at fraction` |
+| `repeatable` / `infiniteRepeatable` | Looping | `iterations`, `repeatMode` (Reverse/Restart) |
+| `snap` | Instant jump | Optional `delayMillis` |
 
-### spring (default)
-
-Physics-based. Handles interruption smoothly — maintains velocity when target changes mid-animation.
-
-```kotlin
-animationSpec = spring(
-    dampingRatio = Spring.DampingRatioMediumBouncy,
-    stiffness = Spring.StiffnessLow,
-)
-```
-
-`dampingRatio` controls bounciness (0 = no bounce, 1 = critical damping). `stiffness` controls speed toward target.
-
-### tween
-
-Duration-based with easing curve.
-
-```kotlin
-animationSpec = tween(
-    durationMillis = 300,
-    delayMillis = 50,
-    easing = FastOutSlowInEasing,
-)
-```
-
-Built-in easings: `FastOutSlowInEasing`, `LinearOutSlowInEasing`, `FastOutLinearInEasing`, `LinearEasing`, `CubicBezierEasing`.
-
-### keyframes
-
-Specific values at specific timestamps:
-
-```kotlin
-animationSpec = keyframes {
-    durationMillis = 375
-    0.0f at 0 using LinearOutSlowInEasing
-    0.2f at 15 using FastOutLinearInEasing
-    0.4f at 75
-    0.4f at 225
-}
-```
-
-### keyframesWithSplines
-
-Smooth curved path between keyframes — ideal for 2D motion:
-
-```kotlin
-animationSpec = keyframesWithSpline {
-    durationMillis = 6000
-    Offset(0f, 0f) at 0
-    Offset(150f, 200f) atFraction 0.5f
-    Offset(0f, 100f) atFraction 0.7f
-}
-```
-
-### repeatable and infiniteRepeatable
-
-```kotlin
-animationSpec = repeatable(iterations = 3, animation = tween(300), repeatMode = RepeatMode.Reverse)
-animationSpec = infiniteRepeatable(animation = tween(1000), repeatMode = RepeatMode.Reverse)
-```
-
-### snap
-
-Instant jump, optionally delayed:
-
-```kotlin
-animationSpec = snap(delayMillis = 50)
-```
-
-### spring vs tween interruption
-
-`spring` is the default for a reason — when interrupted mid-animation, it continues from the current velocity. `tween` snaps to a new timing curve, which can feel jarring. Prefer `spring` unless you need exact duration control.
+**Prefer `spring`** — handles interruption smoothly. `tween` snaps to a new curve on interruption, which feels jarring.
 
 ## animate*AsState — Single Value
-
-The simplest animation API. Provide a target value and Compose animates to it automatically.
 
 ```kotlin
 val alpha by animateFloatAsState(if (enabled) 1f else 0.5f, label = "alpha")
@@ -143,140 +49,69 @@ val padding by animateDpAsState(if (expanded) 16.dp else 0.dp, label = "padding"
 val offset by animateIntOffsetAsState(if (moved) IntOffset(100, 100) else IntOffset.Zero, label = "offset")
 ```
 
-Available: `Float`, `Color`, `Dp`, `Size`, `Offset`, `Rect`, `Int`, `IntOffset`, `IntSize`. Custom types via `animateValueAsState` with `TwoWayConverter`.
+Available types: `Float`, `Color`, `Dp`, `Size`, `Offset`, `Rect`, `Int`, `IntOffset`, `IntSize`. Custom types via `animateValueAsState` with `TwoWayConverter`.
 
-### Animated background color (performant)
-
-```kotlin
-val animatedColor by animateColorAsState(if (active) Color.Green else Color.Blue, label = "bg")
-Column(modifier = Modifier.drawBehind { drawRect(animatedColor) }) { /* content */ }
-```
-
-`drawBehind` is more performant than `Modifier.background()` for animated colors — avoids recomposition.
-
-### Animated text scale
-
-```kotlin
-val scale by animateFloatAsState(if (enlarged) 2f else 1f, label = "scale")
-Text(
-    "Hello",
-    modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale },
-    style = LocalTextStyle.current.copy(textMotion = TextMotion.Animated),
-)
-```
-
-Set `textMotion = TextMotion.Animated` for smooth text size transitions.
+**Performance tips:**
+- `Modifier.drawBehind { drawRect(animatedColor) }` is more performant than `Modifier.background()` for animated colors
+- `Modifier.graphicsLayer { scaleX = scale; scaleY = scale }` for transforms — Drawing phase only
+- Set `textMotion = TextMotion.Animated` for smooth text scale transitions
 
 ## Animatable — Coroutine-Based Control
-
-Finer-grained control than `animate*AsState`. Suspending API for sequential, concurrent, and gesture-driven animations.
 
 ```kotlin
 val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
 
-LaunchedEffect(targetPosition) {
-    offset.animateTo(targetPosition)
-}
-
+LaunchedEffect(targetPosition) { offset.animateTo(targetPosition) }
 Box(Modifier.offset { offset.value.toIntOffset() })
 ```
 
-### Key operations
-
 | Operation | Purpose |
 |---|---|
-| `animateTo(target)` | Animate to target value (suspends) |
-| `snapTo(value)` | Set value instantly (sync with gestures) |
+| `animateTo(target)` | Animate to target (suspends) |
+| `snapTo(value)` | Instant set (gesture sync) |
 | `animateDecay(velocity, decay)` | Fling deceleration |
-| `stop()` | Cancel ongoing animation |
-| `updateBounds(lower, upper)` | Constrain value range |
-
-### Sequential animations
+| `stop()` | Cancel animation |
+| `updateBounds(lower, upper)` | Constrain range |
 
 ```kotlin
+// Sequential
 LaunchedEffect(Unit) {
-    alphaAnim.animateTo(1f)       // first: fade in
-    yAnim.animateTo(100f)          // then: slide down
-    yAnim.animateTo(500f, tween(100)) // then: fast slide further
+    alphaAnim.animateTo(1f)
+    yAnim.animateTo(100f)
 }
-```
 
-### Concurrent animations
-
-```kotlin
+// Concurrent
 LaunchedEffect(Unit) {
     launch { alphaAnim.animateTo(1f) }
     launch { yAnim.animateTo(100f) }
 }
 ```
 
-### Interruption
-
-New `animateTo` cancels the ongoing animation automatically and continues from current value and velocity — no jumpiness.
+New `animateTo` cancels ongoing animation and continues from current value/velocity — no jumpiness.
 
 ## updateTransition — Multi-Property State Machine
-
-Animate multiple properties simultaneously based on a state enum:
 
 ```kotlin
 enum class CardState { Collapsed, Expanded }
 
 val transition = updateTransition(cardState, label = "card")
-
 val size by transition.animateDp(label = "size") { state ->
     when (state) { CardState.Collapsed -> 64.dp; CardState.Expanded -> 128.dp }
 }
 val color by transition.animateColor(label = "color") { state ->
     when (state) { CardState.Collapsed -> Color.Gray; CardState.Expanded -> Color.Red }
 }
-val borderWidth by transition.animateDp(
-    transitionSpec = {
-        when { CardState.Expanded isTransitioningTo CardState.Collapsed -> spring(stiffness = 50f); else -> tween(500) }
-    },
-    label = "border",
-) { state ->
-    when (state) { CardState.Collapsed -> 1.dp; CardState.Expanded -> 0.dp }
-}
 ```
 
-### Start animation immediately
+Per-transition timing: `transitionSpec = { when { Expanded isTransitioningTo Collapsed -> spring(stiffness = 50f); else -> tween(500) } }`.
 
-```kotlin
-val state = remember { MutableTransitionState(CardState.Collapsed).apply { targetState = CardState.Expanded } }
-val transition = rememberTransition(state, label = "card")
-```
+Start immediately: `MutableTransitionState(Collapsed).apply { targetState = Expanded }`.
 
-### Coordinated child transitions
-
-```kotlin
-transition.AnimatedVisibility(visible = { it == CardState.Expanded }) {
-    Text("Expanded content")
-}
-transition.AnimatedContent { targetState ->
-    if (targetState == CardState.Expanded) ExpandedView() else CollapsedView()
-}
-```
-
-### Encapsulate as reusable pattern
-
-```kotlin
-private class TransitionData(color: State<Color>, size: State<Dp>) {
-    val color by color
-    val size by size
-}
-
-@Composable
-private fun updateCardTransitionData(state: CardState): TransitionData {
-    val transition = updateTransition(state, label = "card")
-    val color = transition.animateColor(label = "color") { /* ... */ }
-    val size = transition.animateDp(label = "size") { /* ... */ }
-    return remember(transition) { TransitionData(color, size) }
-}
-```
+Coordinated children: `transition.AnimatedVisibility(visible = { it == Expanded }) { ... }` and `transition.AnimatedContent { ... }`.
 
 ## rememberInfiniteTransition
 
-Animations that never stop — shimmer, pulsing indicators, loading spinners:
+Shimmer, pulsing indicators, loading spinners:
 
 ```kotlin
 val infiniteTransition = rememberInfiniteTransition(label = "infinite")
@@ -285,30 +120,17 @@ val alpha by infiniteTransition.animateFloat(
     animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
     label = "alpha",
 )
-val color by infiniteTransition.animateColor(
-    initialValue = Color.Red, targetValue = Color.Blue,
-    animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
-    label = "color",
-)
 ```
 
-Note: `infiniteRepeatable` animations are not run in Compose tests by default.
-
 ## AnimatedVisibility
-
-Animate appearance and disappearance of composables:
 
 ```kotlin
 AnimatedVisibility(
     visible = isVisible,
-    enter = fadeIn() + slideInVertically { -40.dp.roundToPx() } + expandVertically(expandFrom = Alignment.Top),
-    exit = slideOutVertically() + shrinkVertically() + fadeOut(),
-) {
-    Text("Hello")
-}
+    enter = fadeIn() + slideInVertically { -40.dp.roundToPx() },
+    exit = slideOutVertically() + fadeOut(),
+) { Text("Hello") }
 ```
-
-### Enter/exit transitions
 
 | Enter | Exit |
 |---|---|
@@ -317,33 +139,19 @@ AnimatedVisibility(
 | `scaleIn` | `scaleOut` |
 | `expandIn` / `expandHorizontally` / `expandVertically` | `shrinkOut` / `shrinkHorizontally` / `shrinkVertically` |
 
-Combine with `+`: `fadeIn() + slideInVertically()`.
-
-### Per-child animations
-
-```kotlin
-AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
-    Box(Modifier.fillMaxSize().background(Color.DarkGray)) {
-        Box(Modifier.animateEnterExit(enter = slideInVertically(), exit = slideOutVertically()))
-    }
-}
-```
-
-Use `EnterTransition.None` / `ExitTransition.None` on parent to let children define their own.
+Combine with `+`. Per-child: `Modifier.animateEnterExit(enter = ..., exit = ...)`. Use `EnterTransition.None`/`ExitTransition.None` on parent to let children define their own.
 
 ## AnimatedContent
-
-Animate content swaps based on target state:
 
 ```kotlin
 AnimatedContent(
     targetState = uiState,
     transitionSpec = {
-        if (targetState > initialState) {
+        if (targetState > initialState)
             slideInVertically { it } + fadeIn() togetherWith slideOutVertically { -it } + fadeOut()
-        } else {
+        else
             slideInVertically { -it } + fadeIn() togetherWith slideOutVertically { it } + fadeOut()
-        }.using(SizeTransform(clip = false))
+        using SizeTransform(clip = false)
     },
     label = "content",
 ) { target ->
@@ -355,39 +163,29 @@ AnimatedContent(
 }
 ```
 
-`SizeTransform` controls how size animates between states. `slideIntoContainer` / `slideOutOfContainer` calculate slide distance from content sizes automatically.
+`SizeTransform` controls size animation between states. Always use the lambda parameter (`target`), not the outer variable.
 
-## Performance Optimization
+## Performance Rules
 
-- Use `spring` as default — handles interruption gracefully, physically natural
-- Use lambda modifiers: `Modifier.offset { }` instead of `Modifier.offset()` — defers read to Layout phase
-- Use `graphicsLayer { }` for all visual-only transforms — runs in Drawing phase only
-- Use `drawBehind` for animated colors instead of `Modifier.background()`
-- Animations in Drawing phase are cheapest; Layout phase is moderate; Composition phase is most expensive
-- `animateContentSize` must be placed BEFORE size modifiers in the modifier chain
-- In `AnimatedContent`/`AnimatedVisibility`: always use the lambda parameter (`targetState`), not the outer variable
+- `spring` as default — handles interruption, physically natural
+- `Modifier.offset { }` (lambda) defers to Layout phase
+- `graphicsLayer { }` for visual transforms — Drawing phase only, cheapest
+- `drawBehind` for animated colors instead of `background()`
+- `animateContentSize` BEFORE size modifiers in chain
+- In `AnimatedContent`/`AnimatedVisibility`: use lambda parameter, not outer variable
 
 ## Anti-Patterns
 
-| Anti-pattern | Why it hurts | Better replacement |
+| Anti-pattern | Why | Fix |
 |---|---|---|
-| Animation state in ViewModel (`shakeCount`, `alpha`, `pulsePhase`) | pollutes business state, couples ViewModel to render timing | local composable animation state via `animate*AsState` or `Animatable` |
-| `Modifier.scale()`/`.offset()` instead of `graphicsLayer` | triggers recomposition every frame | `Modifier.graphicsLayer { scaleX = ...; translationX = ... }` (Drawing phase only) |
-| Animating every keystroke or every state change | UI feels jittery and unstable | animate meaningful transitions only (appear/disappear, navigation, user-initiated) |
-| `animateContentSize` after size modifiers | has no effect — size already resolved | place `animateContentSize()` BEFORE `size`/`fillMaxWidth` modifiers |
-| Reading outer variable inside `AnimatedContent`/`AnimatedVisibility` | stale value during exit animation | use the lambda parameter (`targetState`) inside the content block |
-| Hardcoded `tween`/`snap` everywhere | feels mechanical, handles interruption poorly | prefer `spring` as default; use `tween` only for precise timing needs |
-| Animating layout-heavy properties (padding, size) on every frame | expensive Layout phase work each frame | prefer `graphicsLayer` transforms (translation, scale, alpha) |
+| Animation state in ViewModel | Pollutes business state | Local `animate*AsState` or `Animatable` |
+| `Modifier.scale()`/`.offset()` | Recomposition every frame | `graphicsLayer { scaleX = ...; translationX = ... }` |
+| Animating every change | Jittery UI | Animate meaningful transitions only |
+| `animateContentSize` after size modifiers | No effect | Place BEFORE `size`/`fillMaxWidth` |
+| Outer variable in AnimatedContent | Stale during exit | Use lambda parameter |
+| `tween`/`snap` everywhere | Jarring interruption | Prefer `spring` |
+| Animating padding/size every frame | Expensive Layout phase | Prefer `graphicsLayer` transforms |
 
-## When Not to Animate
+## Advanced Patterns
 
-- Every keystroke-driven total update
-- Every loading indicator appearance
-- Large section changes that make forms feel unstable
-- Repeated list row changes in dense data-entry screens
-- Error states that need immediate clarity more than flourish
-- Every calculator result on every keystroke
-
-## Advanced Animation Patterns
-
-For shared element transitions, gesture-driven animations, Canvas/custom drawing, and graphicsLayer optimization, see [animations-advanced.md](animations-advanced.md).
+For shared element transitions, gesture-driven animations, Canvas, and graphicsLayer optimization, see [animations-advanced.md](animations-advanced.md).

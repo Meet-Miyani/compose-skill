@@ -2,13 +2,6 @@
 
 Backpressure strategies, bridging callback APIs to Flow, concurrency primitives, and testing with Turbine. For core coroutine and Flow patterns (StateFlow/SharedFlow/Channel, operators, dispatchers, scopes, exception handling, stateIn/shareIn), see [coroutines-flow.md](coroutines-flow.md).
 
-## Table of Contents
-
-- [Backpressure](#backpressure)
-- [callbackFlow and channelFlow](#callbackflow-and-channelflow)
-- [Concurrency Primitives](#concurrency-primitives)
-- [Testing with Turbine](#testing-with-turbine)
-
 ## Backpressure
 
 When producer emits faster than consumer processes:
@@ -109,52 +102,6 @@ Use Semaphore for: rate-limiting concurrent network calls, limiting parallel fil
 
 ## Testing with Turbine
 
-### Setup
-
-```kotlin
-testImplementation("app.cash.turbine:turbine:1.2.0")
-testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-```
-
-### Testing StateFlow emissions
-
-```kotlin
-@Test
-fun `filter change updates products`() = runTest {
-    val viewModel = ProductListViewModel(FakeRepository())
-
-    viewModel.state.test {
-        val initial = awaitItem()
-        assertEquals(FilterType.ALL, initial.selectedFilter)
-
-        viewModel.onEvent(ProductListEvent.FilterChanged(FilterType.SENT))
-
-        val updated = awaitItem()
-        assertEquals(FilterType.SENT, updated.selectedFilter)
-
-        cancelAndIgnoreRemainingEvents()
-    }
-}
-```
-
-### Testing Channel effects
-
-```kotlin
-@Test
-fun `submit emits navigation effect`() = runTest {
-    val viewModel = ProductViewModel(FakeRepository())
-
-    viewModel.effects.test {
-        viewModel.onEvent(ProductEvent.SubmitClicked)
-
-        val effect = awaitItem()
-        assertTrue(effect is ProductEffect.NavigateToResult)
-
-        cancelAndIgnoreRemainingEvents()
-    }
-}
-```
-
 ### Turbine API quick reference
 
 | Function | Purpose |
@@ -167,19 +114,6 @@ fun `submit emits navigation effect`() = runTest {
 | `cancelAndIgnoreRemainingEvents()` | Clean up after assertions |
 | `cancelAndConsumeRemainingEvents()` | Cancel and return remaining events |
 
-### runTest
+`runTest` from `kotlinx-coroutines-test` provides deterministic coroutine execution — delays are skipped automatically. Use `advanceUntilIdle()` to process all pending coroutines.
 
-`runTest` from `kotlinx-coroutines-test` provides deterministic coroutine execution. Delays are skipped automatically. Use `advanceUntilIdle()` to process all pending coroutines.
-
-```kotlin
-@Test
-fun `debounced search triggers after delay`() = runTest {
-    val viewModel = SearchViewModel(FakeSearchRepository())
-
-    viewModel.onEvent(SearchEvent.QueryChanged("kotlin"))
-    advanceUntilIdle() // skip debounce delay
-
-    val state = viewModel.state.value
-    assertTrue(state.results.isNotEmpty())
-}
-```
+For full ViewModel event→state→effect testing patterns with Turbine, see [testing.md](testing.md).

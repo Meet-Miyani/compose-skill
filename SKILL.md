@@ -201,3 +201,7 @@ Apply these unless the project already follows a different coherent pattern.
 - **CMP Res class, qualifiers, localization, or Android resource interop** → [resources.md](references/resources.md)
 - **AGP 9+, version catalog, convention plugins, or composite builds** → [gradle-build.md](references/gradle-build.md)
 - **GitHub Actions CI/CD, desktop packaging, signing, or notarization** → [ci-cd-distribution.md](references/ci-cd-distribution.md)
+
+## Validation
+
+Run `./scripts/validate.sh` to scan the skill package against the [agentskills.io spec](https://agentskills.io/specification). It checks token budgets, broken links, file structure, and content quality. Fix any errors before committing.

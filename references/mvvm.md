@@ -1,18 +1,8 @@
 # MVVM (ViewModel with Named Functions)
 
-Full reference for MVVM pattern in Jetpack Compose and Compose Multiplatform. MVVM uses a ViewModel with named public functions instead of a sealed event contract. Use when the project has chosen MVVM or when a new architecture decision points there.
+MVVM pattern: ViewModel with named public functions instead of sealed events. Use when the project has chosen MVVM.
 
 For shared architecture concepts (state owner selection, domain layer, module rules), see [architecture.md](architecture.md).
-
-## Table of Contents
-
-- [The 2 MVVM Types](#the-2-mvvm-types)
-- [State Modeling](#state-modeling)
-- [Effect and Effect Delivery](#effect-and-effect-delivery)
-- [Screen State Holder Anatomy](#screen-state-holder-anatomy)
-- [UI Rendering Boundary](#ui-rendering-boundary)
-- [When MVVM Is Appropriate](#when-mvvm-is-appropriate)
-- [Code Examples](#code-examples)
 
 ## The 2 MVVM Types
 
@@ -32,33 +22,11 @@ One-off UI commands that don't belong in state: navigate, show snackbar, trigger
 
 ## State Modeling
 
-```kotlin
-data class CreateItemState(
-    val title: String = "",
-    val amount: String = "",
-    val isSaving: Boolean = false,
-    val errors: Map<String, String> = emptyMap()
-) {
-    val canSave: Boolean get() = title.isNotBlank() && amount.isNotBlank()
-    val hasErrors: Boolean get() = errors.isNotEmpty()
-}
-```
+Use immutable `data class` with computed properties for derivations. For detailed guidance (forms, calculators, avoiding duplicated state), see [architecture.md](architecture.md) — State Modeling for Forms and Calculators.
 
-For detailed state modeling guidance (forms, calculators, avoiding duplicated state), see [architecture.md](architecture.md).
+## Effect Delivery
 
-## Effect and Effect Delivery
-
-### Channel vs SharedFlow
-
-`Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()` is the default for new single-consumer effects:
-
-- **Buffers for reliable delivery**: holds effects even if the collector is temporarily inactive (during recomposition, rapid lifecycle transitions, or configuration changes)
-- **Single consumer**: only one collector receives each effect — no accidental double-handling
-- **No replay**: new collectors don't receive stale effects
-
-`SharedFlow(replay=0)` with no extra buffer can drop effects when no collector is active. Acceptable for truly fire-and-forget signals but risky for mandatory user-visible effects.
-
-**Preservation rule:** keep an existing `SharedFlow`-based effect mechanism when it is already consistent and correct.
+For Channel vs SharedFlow guidance, see [architecture.md](architecture.md) — Effect Delivery. Default: `Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()`.
 
 ### Effects from Named Functions
 
@@ -158,13 +126,9 @@ fun CreateItemScreen(
 
 Render sub-state, emit specific callbacks, keep only tiny visual-local state. Receive only what they need; do not pass the ViewModel to leaves.
 
-### Domain Logic Boundary
+### Domain and Data Layer Boundaries
 
-Lives outside UI: validators, calculators, rounding rules, eligibility rules, submit enablement rules, derived result engines, formatting rules with business meaning.
-
-### Data Layer Boundary
-
-Lives outside the ViewModel's named functions: repositories, local persistence, remote APIs, DTO mapping, caching policies.
+See [architecture.md](architecture.md) — Domain Layer and Where Logic Belongs.
 
 ## When MVVM Is Appropriate
 
@@ -220,18 +184,12 @@ class CreateItemViewModel(
 
     fun save() {
         val current = _state.value
-        val errors = buildMap {
-            if (current.title.isBlank()) put("title", "Title is required")
-            if (current.amount.toDoubleOrNull() == null) put("amount", "Enter a valid number")
-        }
-
+        val errors = /* validate current.title / current.amount */
         if (errors.isNotEmpty()) {
             _state.update { it.copy(errors = errors) }
             return
         }
-
         _state.update { it.copy(isSaving = true, errors = emptyMap()) }
-
         viewModelScope.launch {
             try {
                 repository.create(current.title.trim(), current.amount.toDouble())
@@ -247,68 +205,9 @@ class CreateItemViewModel(
 }
 ```
 
-Key observations:
-- **Named functions are direct entry points** — each user action has its own function
-- **State updates are inline** — right where the decision happens
-- **Effects are sent immediately** — no indirection through an event dispatcher
-- **Async work lives in the ViewModel** — `viewModelScope.launch` with try/catch
-- **No sealed Event class needed** — function signatures define the contract
-
 ### GOOD: Route/Screen/Leaf split
 
-```kotlin
-@Composable
-fun CreateItemRoute(
-    viewModel: CreateItemViewModel = koinViewModel(),
-    snackbarHostState: SnackbarHostState,
-    onNavigateBack: () -> Unit,
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    CollectEffect(viewModel.effect) { effect ->
-        when (effect) {
-            CreateItemEffect.NavigateBack -> onNavigateBack()
-            is CreateItemEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
-        }
-    }
-
-    CreateItemScreen(
-        state = state,
-        onTitleChange = viewModel::onTitleChanged,
-        onAmountChange = viewModel::onAmountChanged,
-        onSaveClick = viewModel::save,
-    )
-}
-
-@Composable
-fun CreateItemScreen(
-    state: CreateItemState,
-    onTitleChange: (String) -> Unit,
-    onAmountChange: (String) -> Unit,
-    onSaveClick: () -> Unit,
-) {
-    Column {
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = onTitleChange,
-            isError = state.errors.containsKey("title"),
-            label = { Text("Title") },
-        )
-        OutlinedTextField(
-            value = state.amount,
-            onValueChange = onAmountChange,
-            isError = state.errors.containsKey("amount"),
-            label = { Text("Amount") },
-        )
-        Button(
-            onClick = onSaveClick,
-            enabled = !state.isSaving && state.canSave,
-        ) {
-            Text(if (state.isSaving) "Saving..." else "Save")
-        }
-    }
-}
-```
+See the Route example above in **UI Rendering Boundary** for the full Route/Screen split (including `CollectEffect` and callback wiring).
 
 ### GOOD: Callback grouping for complex screens
 
@@ -332,20 +231,6 @@ fun CreateItemScreen(
 ) {
     // Use actions.onTitleChanged, actions.onSaveClick, etc.
 }
-
-// In Route:
-CreateItemScreen(
-    state = state,
-    actions = object : CreateItemActions {
-        override fun onTitleChanged(title: String) = viewModel.onTitleChanged(title)
-        override fun onAmountChanged(amount: String) = viewModel.onAmountChanged(amount)
-        override fun onCategorySelected(category: Category) = viewModel.onCategorySelected(category)
-        override fun onTagsChanged(tags: List<Tag>) = viewModel.onTagsChanged(tags)
-        override fun onSaveClick() = viewModel.save()
-        override fun onDeleteClick() = viewModel.delete()
-        override fun onBackClick() = viewModel.onBackClick()
-    }
-)
 ```
 
-This provides structure without the ceremony of a sealed event class. The interface can be implemented directly by the ViewModel if preferred.
+The ViewModel can implement this interface directly. This provides structure without the ceremony of a sealed event class.

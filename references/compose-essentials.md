@@ -2,16 +2,6 @@
 
 Foundational Compose patterns that complement MVI architecture. Consult this when working with Compose APIs directly.
 
-## Table of Contents
-
-- [Three Phases Model](#three-phases-model)
-- [State Primitives](#state-primitives)
-- [Side Effects](#side-effects)
-- [Modifier Ordering](#modifier-ordering)
-- [Slot Pattern](#slot-pattern)
-- [Composable Extraction Guidelines](#composable-extraction-guidelines)
-- [CompositionLocal](#compositionlocal)
-
 ## Three Phases Model
 
 Every frame consists of three phases. Understanding which phase reads state prevents unnecessary recompositions.
@@ -96,21 +86,9 @@ LaunchedEffect(userId) { loadUserData(userId) }
 LaunchedEffect(userId, postId) { loadUserAndPost(userId, postId) }
 ```
 
-**Pitfall — wrong key selection:**
-
-```kotlin
-// BAD: won't re-run when query changes
-LaunchedEffect(Unit) { viewModel.search(query) }
-
-// GOOD: re-runs when query changes
-LaunchedEffect(query) { viewModel.search(query) }
-```
-
 In MVI, `LaunchedEffect` belongs at the route level for collecting UI effects. Do not use it for business logic in leaf composables.
 
 ### DisposableEffect — For Cleanup
-
-Runs after composition and requires an `onDispose` cleanup block:
 
 ```kotlin
 DisposableEffect(lifecycle) {
@@ -120,11 +98,9 @@ DisposableEffect(lifecycle) {
 }
 ```
 
-**Rule:** Always pair resource registration with `onDispose` cleanup.
+Always pair registration with `onDispose` cleanup.
 
 ### rememberCoroutineScope — From Event Handlers
-
-Provides a coroutine scope for launching work from click handlers and gestures:
 
 ```kotlin
 val scope = rememberCoroutineScope()
@@ -133,40 +109,11 @@ Button(onClick = { scope.launch { fetchData() } }) { Text("Fetch") }
 
 In MVI, prefer dispatching events to the ViewModel instead. Use `rememberCoroutineScope` only for UI-local async work (e.g., scroll animation, snackbar).
 
-### rememberUpdatedState — Capturing Latest Values
+Use `rememberUpdatedState` to capture latest callback values in long-running effects without restarting them.
 
-For long-running effects that need the latest value without restarting:
+`SideEffect { }` runs after every successful composition — use sparingly for stateless synchronization.
 
-```kotlin
-// BAD: effect restarts when callback changes
-LaunchedEffect(onSuccess) { val result = expensiveOp(); onSuccess(result) }
-
-// GOOD: captures latest without restarting
-val updatedOnSuccess = rememberUpdatedState(onSuccess)
-LaunchedEffect(Unit) { val result = expensiveOp(); updatedOnSuccess.value(result) }
-```
-
-### SideEffect — After Every Composition
-
-Runs after every successful composition. No keys, no cleanup:
-
-```kotlin
-SideEffect { analytics.logScreenView(screenName) }
-```
-
-Use sparingly — only for simple, stateless synchronization.
-
-### produceState — Bridging External Sources
-
-Converts imperative state sources into Compose state:
-
-```kotlin
-val user by produceState<User?>(initialValue = null, userId) {
-    value = fetchUser(userId)
-}
-```
-
-In MVI, the ViewModel already bridges external data via `StateFlow`. Use `produceState` only at route-edge integration points.
+`produceState` bridges imperative state sources into Compose state; prefer ViewModel's `StateFlow` in MVI.
 
 ### Effect Ordering
 
@@ -184,8 +131,6 @@ This prevents collection during background states and avoids unnecessary work. `
 
 ### CollectEffect — Lifecycle-Aware Effect Collection
 
-A reusable composable for collecting one-off effects (navigation, snackbar, haptics) from a `Channel` or `Flow` in a lifecycle-aware manner. Effects are only processed when the UI is at least STARTED. `LocalLifecycleOwner` and `repeatOnLifecycle` are multiplatform. This works in both Android and CMP `commonMain`:
-
 ```kotlin
 @Composable
 fun <E> CollectEffect(effect: Flow<E>, onEffect: (E) -> Unit) {
@@ -198,26 +143,7 @@ fun <E> CollectEffect(effect: Flow<E>, onEffect: (E) -> Unit) {
 }
 ```
 
-Usage at the route level:
-
-```kotlin
-@Composable
-fun ProductRoute(viewModel: ProductViewModel) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    CollectEffect(viewModel.effect) { effect ->
-        when (effect) {
-            is ProductEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-            is ProductEffect.NavigateBack -> navigator.goBack()
-        }
-    }
-
-    ProductScreen(state = state, onEvent = viewModel::onEvent)
-}
-```
-
-This keeps effect collection consistent across all routes without a base class — just call `CollectEffect` wherever you need it. Note that `collectAsStateWithLifecycle()` matches the recommendation above and `viewModel.effect` uses the singular naming convention from the ViewModel pattern in [clean-code.md](clean-code.md).
+Collect one-off effects at the route level when STARTED; usage patterns live in [mvi.md](mvi.md).
 
 ## Modifier Ordering
 
@@ -230,35 +156,6 @@ Modifier.background(Color.Red).padding(16.dp).size(100.dp)
 // Padding is inside the sized box, then background wraps everything
 Modifier.size(100.dp).padding(16.dp).background(Color.Red)
 ```
-
-### Common patterns
-
-```kotlin
-// Clip before background to keep background inside the shape
-Modifier.clip(RoundedCornerShape(8.dp)).background(Color.Blue)
-
-// fillMaxWidth before padding for full-width background
-Modifier.fillMaxWidth().background(Color.Blue).padding(16.dp)
-
-// Conditional modifiers with then()
-Modifier.padding(16.dp).then(if (isSelected) Modifier.background(Color.Blue) else Modifier)
-```
-
-### Modifier.Node vs composed
-
-New custom modifiers should use `Modifier.Node` (more efficient, no composition scope). `Modifier.composed` is deprecated but still supported.
-
-### graphicsLayer for Animations
-
-`graphicsLayer` applies transformations at the rendering level without recomposition:
-
-```kotlin
-Box(modifier = Modifier.graphicsLayer(
-    scaleX = 1.2f, rotationZ = 45f, alpha = 0.8f
-))
-```
-
-Use for: scale, rotation, translation, alpha animations. Much more efficient than animating state that triggers recomposition.
 
 ### Always accept Modifier parameter
 
@@ -301,19 +198,12 @@ Slots accept `@Composable` lambdas, not pre-composed values. This ensures compos
 
 ## Composable Extraction Guidelines
 
-### Extract when
-
-- Reused in multiple places
-- Single responsibility — handles one visual/behavioral concern
-- Easier to test as an isolated unit
-- Enables independent recomposition skipping
-
-### Don't extract when
-
-- Single use with no reuse potential
-- Trivial wrapper around a single `Text` or `Icon`
-- Would require passing more parameters than the inline code
-- Tightly coupled logic that's clearer inline
+| Signal | Prefer |
+|--------|--------|
+| Reused in multiple places, or a single clear visual/behavioral responsibility | Extract |
+| Easier to test in isolation, or independent recomposition skipping helps | Extract |
+| Single use, trivial wrapper around one `Text`/`Icon`, or more parameters than inline clarity | Don't extract |
+| Tightly coupled logic that reads clearer inline | Don't extract |
 
 ## CompositionLocal
 

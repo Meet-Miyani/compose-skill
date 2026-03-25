@@ -6,13 +6,6 @@ References:
 - [Ktor testing](https://ktor.io/docs/client-testing.html)
 - [Ktor MockEngine](https://api.ktor.io/ktor-client-mock/io.ktor.client.engine.mock/-mock-engine/index.html)
 
-## Table of Contents
-
-- [Testing with MockEngine](#testing-with-mockengine)
-- [Koin DI Integration](#koin-di-integration)
-- [Hilt DI Integration](#hilt-di-integration)
-- [Anti-Patterns](#anti-patterns)
-
 ## Testing with MockEngine
 
 ### Setup
@@ -136,61 +129,16 @@ Accept `HttpClientEngine` as a constructor parameter so you can inject `MockEngi
 
 Share the same `createHttpClient` factory in production and tests to keep plugin configuration consistent.
 
-## Koin DI Integration
+## DI Integration
+
+Provide `HttpClient` and `HttpClientEngine` as singletons. Use `expect/actual` platform modules for engine selection (OkHttp on Android, Darwin on iOS):
 
 ```kotlin
-// commonMain — network module
-val networkModule = module {
-    single {
-        createHttpClient(engine = get(), baseUrl = "https://api.example.com/")
-    }
-}
-
-// Platform engine — via expect/actual
-expect val platformEngineModule: Module
-
-// androidMain
-actual val platformEngineModule = module {
-    single<HttpClientEngine> { OkHttp.create() }
-}
-
-// iosMain
-actual val platformEngineModule = module {
-    single<HttpClientEngine> { Darwin.create() }
-}
-
-// Feature module
-val featureNetworkModule = module {
-    single { ItemApi(get()) }
-    single<ItemRepository> { ItemRepositoryImpl(get()) }
-}
-
-// App — combine all
-startKoin {
-    modules(networkModule, platformEngineModule, featureNetworkModule)
-}
+// Koin: single { createHttpClient(engine = get(), baseUrl = "https://api.example.com/") }
+// Hilt: @Provides @Singleton fun provideHttpClient(): HttpClient = createHttpClient(...)
 ```
 
-## Hilt DI Integration
-
-For Android-only projects using Hilt, provide `HttpClient` as a `@Singleton` in a `@Module`. See [hilt.md](hilt.md) for details.
-
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-object NetworkModule {
-
-    @Provides
-    @Singleton
-    fun provideHttpClient(): HttpClient {
-        return createHttpClient(OkHttp.create(), "https://api.example.com/")
-    }
-
-    @Provides
-    @Singleton
-    fun provideItemApi(client: HttpClient): ItemApi = ItemApi(client)
-}
-```
+For full Koin module patterns (including platform engine modules), see [koin.md](koin.md). For Hilt module patterns, see [hilt.md](hilt.md).
 
 ## Anti-Patterns
 
