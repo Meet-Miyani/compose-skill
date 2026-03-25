@@ -1,8 +1,6 @@
 # Networking with Ktor Client
 
-Ktor is a Kotlin-native HTTP client with first-class multiplatform support. Use it for all networking in Compose Multiplatform projects; it also works well for Android-only Jetpack Compose apps as an alternative to Retrofit.
-
-This file covers the **default** setup — everything most projects need. Optional and advanced topics live in separate files:
+Default Ktor client setup for Compose Multiplatform and Android projects. Advanced topics in separate files:
 
 - [Architecture decisions](networking-ktor-architecture.md) — result wrappers, error classification, plugin composition *(optional)*
 - [Auth, WebSockets & SSE](networking-ktor-auth.md) — bearer tokens, realtime *(use when needed)*
@@ -12,16 +10,6 @@ References:
 - [Ktor client overview](https://ktor.io/docs/client.html)
 - [Ktor client plugins](https://ktor.io/docs/client-plugins.html)
 - [Ktor content negotiation](https://ktor.io/docs/client-serialization.html)
-
-## Table of Contents
-
-- [Dependencies and Platform Engines](#dependencies-and-platform-engines)
-- [HttpClient Configuration](#httpclient-configuration)
-- [DTO Models and Serialization](#dto-models-and-serialization)
-- [DTO-to-Domain Mappers](#dto-to-domain-mappers)
-- [API Service Layer](#api-service-layer)
-- [Repository Pattern](#repository-pattern)
-- [Type-Safe Resources (Optional)](#type-safe-resources-optional)
 
 ## Dependencies and Platform Engines
 
@@ -42,14 +30,7 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 ```
 
-Add these only when needed:
-
-```toml
-ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
-ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
-ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
-ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
-```
+As needed: `ktor-client-auth`, `ktor-client-websockets`, `ktor-client-resources`, `ktor-client-encoding` (same `version.ref = "ktor"` pattern).
 
 ### build.gradle.kts
 
@@ -98,9 +79,9 @@ fun createHttpClient(engine: HttpClientEngine, baseUrl: String): HttpClient {
     return HttpClient(engine) {
         install(ContentNegotiation) {
             json(Json {
-                ignoreUnknownKeys = true
-                coerceInputValues = true
-                encodeDefaults = true
+                ignoreUnknownKeys = true      // ignore unknown JSON fields
+                coerceInputValues = true        // null → defaults for non-null props
+                encodeDefaults = true         // include defaults when serializing
             })
         }
 
@@ -126,6 +107,8 @@ fun createHttpClient(engine: HttpClientEngine, baseUrl: String): HttpClient {
 
 This is the minimal production-ready client. Add plugins incrementally when the project needs them — auth, retry, compression, and content encoding are covered in the sub-references.
 
+Set `isLenient = true` only for non-standard APIs; it accepts malformed JSON and can hide data issues in production.
+
 ### `expectSuccess` — choose based on error strategy
 
 | Setting | Behavior | Use when |
@@ -134,27 +117,6 @@ This is the minimal production-ready client. Add plugins incrementally when the 
 | `false` | Returns the response regardless of status | Inspecting `response.status` manually in a custom wrapper |
 
 Both are valid. Pick one approach and apply it consistently. See [networking-ktor-architecture.md](networking-ktor-architecture.md) for wrapper patterns that pair with `expectSuccess = false`.
-
-### Json configuration options
-
-| Option | Purpose |
-|---|---|
-| `ignoreUnknownKeys = true` | Ignore JSON fields not in the data class — prevents crashes when API adds new fields |
-| `coerceInputValues = true` | Replace `null` with default values for non-nullable properties |
-| `encodeDefaults = true` | Include default values in serialized output |
-
-`isLenient = true` accepts malformed JSON (unquoted strings, trailing commas). Only enable when dealing with non-standard APIs — in production it masks data issues.
-
-### Per-request timeout override
-
-```kotlin
-val largeFile = client.get("reports/export") {
-    timeout {
-        requestTimeoutMillis = 120_000
-        socketTimeoutMillis = 60_000
-    }
-}.body<ByteArray>()
-```
 
 ## DTO Models and Serialization
 
@@ -231,26 +193,6 @@ class ItemApi(private val client: HttpClient) {
 data class CreateItemRequest(val name: String)
 ```
 
-### Multipart file upload
-
-```kotlin
-suspend fun uploadDocument(parentId: String, fileName: String, fileBytes: ByteArray): DocumentDto {
-    return client.submitFormWithBinaryData(
-        url = "items/$parentId/documents",
-        formData = formData {
-            append("file", fileBytes, Headers.build {
-                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
-                append(HttpHeaders.ContentType, "application/pdf")
-            })
-        }
-    ) {
-        onUpload { bytesSent, totalBytes ->
-            val progress = if (totalBytes > 0) bytesSent.toFloat() / totalBytes else 0f
-        }
-    }.body()
-}
-```
-
 ## Repository Pattern
 
 The repository maps DTOs to domain models and handles errors. The error-handling approach is a project decision — see [networking-ktor-architecture.md](networking-ktor-architecture.md) for `Result<T>` vs custom sealed class options.
@@ -275,29 +217,7 @@ class ItemRepositoryImpl(private val api: ItemApi) : ItemRepository {
 }
 ```
 
-The ViewModel catches exceptions and updates state. This works well for simpler apps.
-
-### With a result wrapper
-
-```kotlin
-interface ItemRepository {
-    suspend fun getItems(): Result<List<Item>>
-    suspend fun getItem(id: String): Result<Item>
-}
-
-class ItemRepositoryImpl(private val api: ItemApi) : ItemRepository {
-
-    override suspend fun getItems(): Result<List<Item>> {
-        return runCatching { api.getItems().items.toDomain() }
-    }
-
-    override suspend fun getItem(id: String): Result<Item> {
-        return runCatching { api.getItem(id).toDomain() }
-    }
-}
-```
-
-For apps that need richer error classification (per-status-code UI branching, offline messages, auth redirects), see the custom `ApiResult<T>` sealed class in [networking-ktor-architecture.md](networking-ktor-architecture.md).
+The ViewModel catches exceptions and updates state. This works well for simpler apps. For `Result` / richer error classification, see [networking-ktor-architecture.md](networking-ktor-architecture.md).
 
 ### Offline-first pattern
 
@@ -320,34 +240,7 @@ class OfflineFirstItemRepository(
 
 ## Type-Safe Resources (Optional)
 
-The Ktor Resources plugin provides compile-time URL safety by mapping `@Resource`-annotated data classes to HTTP paths. Use when you want type-safe, refactor-friendly API routes instead of string URLs.
-
-References:
-- [Ktor type-safe requests](https://ktor.io/docs/client-resources.html)
-
-### Dependencies
-
-```toml
-# Version catalog — add alongside existing ktor entries
-ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
-```
-
-```kotlin
-commonMain.dependencies {
-    implementation(libs.ktor.client.resources)
-}
-```
-
-### Setup
-
-```kotlin
-val client = HttpClient(engine) {
-    install(Resources)
-    install(ContentNegotiation) { json() }
-}
-```
-
-### Defining Resources
+The Ktor Resources plugin maps `@Resource`-annotated data classes to HTTP paths for compile-time URL safety. Add `ktor-client-resources` to the catalog and `implementation(libs.ktor.client.resources)`; `install(Resources)` alongside `ContentNegotiation`. Reference: [Ktor type-safe requests](https://ktor.io/docs/client-resources.html).
 
 ```kotlin
 import io.ktor.resources.*
@@ -364,30 +257,14 @@ class Articles {
     @Resource("search")
     class Search(val parent: Articles = Articles(), val query: String, val page: Int = 1)
 }
-```
 
-Nested classes create nested URL paths: `Articles.ById(id = 42)` resolves to `/articles/42`. Query parameters are appended automatically: `Articles.Search(query = "kotlin")` resolves to `/articles/search?query=kotlin&page=1`.
-
-### Typed Requests
-
-```kotlin
+// Nested paths and query params resolve from the resource tree, e.g. /articles/42, /articles/search?query=compose&page=1
 val articles: List<ArticleDto> = client.get(Articles()).body()
-
 val article: ArticleDto = client.get(Articles.ById(id = 42)).body()
-
 val results: ArticleListDto = client.get(Articles.Search(query = "compose")).body()
-
 val created: ArticleDto = client.post(Articles()) {
     contentType(ContentType.Application.Json)
     setBody(CreateArticleRequest(title = "New Article"))
 }.body()
-
 client.delete(Articles.ById(id = 42))
 ```
-
-### When to Use
-
-- **Use Resources** when the project has many endpoints and benefits from compile-time URL validation, or when refactoring API paths frequently.
-- **Use string URLs** (the standard approach in the sections above) for smaller APIs or when the team prefers simplicity.
-
-Both approaches work with all other Ktor features (auth, content negotiation, MockEngine testing).

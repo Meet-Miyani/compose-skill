@@ -1,6 +1,6 @@
 # Navigation 2
 
-Full reference for Navigation Compose (Nav 2) in Jetpack Compose. Nav 2 provides `NavHost`, `NavController`, and a declarative graph DSL for managing navigation. Nav 2 is **not deprecated** and remains fully supported — this is a first-class reference, not a compatibility guide.
+NavHost, NavController, and graph DSL for Jetpack Compose navigation. Nav 2 is **not deprecated** and remains fully supported.
 
 For shared navigation concepts (MVI rules, anti-patterns, version decision guide), see [navigation.md](navigation.md).
 For DI wiring (Hilt/Koin + Nav 2), see [navigation-2-di.md](navigation-2-di.md).
@@ -11,21 +11,6 @@ References:
 - [Type-safe navigation (2.8+)](https://developer.android.com/guide/navigation/design/type-safety)
 - [Navigation with Compose](https://developer.android.com/develop/ui/compose/navigation)
 - [Animate transitions](https://developer.android.com/guide/navigation/use-graph/animate-transitions)
-
-## Table of Contents
-
-- [Core Concepts](#core-concepts)
-- [Basic Setup with String Routes](#basic-setup-with-string-routes)
-- [Type-Safe Routes (2.8+)](#type-safe-routes-28)
-- [Navigation Arguments (Legacy String Routes)](#navigation-arguments-legacy-string-routes)
-- [Common Navigation Actions](#common-navigation-actions)
-- [Top-Level Tabs with NavigationBar](#top-level-tabs-with-navigationbar)
-- [Deep Links](#deep-links)
-- [Navigate with Results](#navigate-with-results)
-- [Nested Navigation Graphs](#nested-navigation-graphs)
-- [Animations](#animations)
-- [Conditional Navigation (Auth Guards)](#conditional-navigation-auth-guards)
-- [When Nav 2 Is Appropriate](#when-nav-2-is-appropriate)
 
 ## Core Concepts
 
@@ -118,9 +103,7 @@ navController.navigate(Detail(id)) {
 
 ## Top-Level Tabs with NavigationBar
 
-Use `NavigationBar` with `currentBackStackEntryAsState()` to build tab navigation. The key patterns are: tracking selected state via `hierarchy`, using `popUpTo` with `saveState`/`restoreState` to preserve tab state.
-
-### Defining tab destinations
+Use `NavigationBar` with `currentBackStackEntryAsState()`. Track selection with `destination.hierarchy` and `hasRoute(route::class)`.
 
 ```kotlin
 @Serializable sealed interface TopLevelRoute {
@@ -129,39 +112,27 @@ Use `NavigationBar` with `currentBackStackEntryAsState()` to build tab navigatio
     @Serializable data object Profile : TopLevelRoute
 }
 
-data class TopLevelItem(
-    val route: TopLevelRoute,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
-    val label: String,
-)
-
-val TOP_LEVEL_ITEMS = listOf(
-    TopLevelItem(TopLevelRoute.Home, Icons.Filled.Home, Icons.Outlined.Home, "Home"),
-    TopLevelItem(TopLevelRoute.Search, Icons.Filled.Search, Icons.Outlined.Search, "Search"),
-    TopLevelItem(TopLevelRoute.Profile, Icons.Filled.Person, Icons.Outlined.Person, "Profile"),
-)
-```
-
-### Building the scaffold
-
-```kotlin
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val tabs = listOf(
+        Triple(TopLevelRoute.Home, Icons.Default.Home, "Home"),
+        Triple(TopLevelRoute.Search, Icons.Default.Search, "Search"),
+        Triple(TopLevelRoute.Profile, Icons.Default.Person, "Profile"),
+    )
 
     Scaffold(
         bottomBar = {
             NavigationBar {
-                TOP_LEVEL_ITEMS.forEach { item ->
+                tabs.forEach { (route, icon, label) ->
+                    val selected =
+                        currentDestination?.hierarchy?.any { it.hasRoute(route::class) } == true
                     NavigationBarItem(
-                        selected = currentDestination
-                            ?.hierarchy
-                            ?.any { it.hasRoute(item.route::class) } == true,
+                        selected = selected,
                         onClick = {
-                            navController.navigate(item.route) {
+                            navController.navigate(route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -169,15 +140,8 @@ fun MainScreen() {
                                 restoreState = true
                             }
                         },
-                        icon = {
-                            Icon(
-                                if (currentDestination?.hierarchy?.any {
-                                    it.hasRoute(item.route::class)
-                                } == true) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.label,
-                            )
-                        },
-                        label = { Text(item.label) },
+                        icon = { Icon(icon, contentDescription = label) },
+                        label = { Text(label) },
                     )
                 }
             }
@@ -196,11 +160,9 @@ fun MainScreen() {
 }
 ```
 
-The `saveState = true` / `restoreState = true` pattern preserves the navigation state of each tab when switching between them.
-
 ## Deep Links
 
-### Type-safe deep links (2.8+)
+Type-safe (2.8+):
 
 ```kotlin
 composable<Detail>(
@@ -213,75 +175,27 @@ composable<Detail>(
 }
 ```
 
-### Legacy string deep links
-
-```kotlin
-composable(
-    route = "detail/{itemId}",
-    deepLinks = listOf(
-        navDeepLink { uriPattern = "https://example.com/detail/{itemId}" }
-    )
-) { backStackEntry ->
-    val itemId = backStackEntry.arguments?.getString("itemId") ?: return@composable
-    DetailScreen(itemId)
-}
-```
-
-### AndroidManifest intent filter
-
-Register the deep link scheme in `AndroidManifest.xml` so the system routes incoming intents to your Activity:
-
-```xml
-<activity android:name=".MainActivity">
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="https" android:host="example.com" />
-    </intent-filter>
-</activity>
-```
-
 ## Navigate with Results
 
-Pass data back to the previous destination using `SavedStateHandle` on the back stack entries.
-
-### Sender (current screen returning a result)
+Pass data back via `SavedStateHandle` on back stack entries (avoids bloating route arguments):
 
 ```kotlin
-@Composable
-fun FilterScreen(navController: NavController) {
-    // Set result on the PREVIOUS entry's SavedStateHandle before navigating back
-    Button(onClick = {
-        navController.previousBackStackEntry
-            ?.savedStateHandle
-            ?.set("filter_result", selectedFilter)
-        navController.navigateUp()
-    }) {
-        Text("Apply")
-    }
-}
+// Sender: set on previous entry, then pop
+Button(onClick = {
+    navController.previousBackStackEntry?.savedStateHandle?.set("filter_result", selectedFilter)
+    navController.navigateUp()
+}) { Text("Apply") }
+
+// Receiver: observe on current entry
+val filterResult = navController.currentBackStackEntry
+    ?.savedStateHandle
+    ?.getStateFlow<String?>("filter_result", null)
+    ?.collectAsStateWithLifecycle()
 ```
-
-### Receiver (screen that launched the sender)
-
-```kotlin
-@Composable
-fun ListScreen(navController: NavController) {
-    val filterResult = navController.currentBackStackEntry
-        ?.savedStateHandle
-        ?.getStateFlow<String?>("filter_result", null)
-        ?.collectAsStateWithLifecycle()
-
-    // Use filterResult?.value to apply the filter
-}
-```
-
-This pattern avoids passing complex data through route arguments. The result is available only while the receiving entry is on the back stack.
 
 ## Nested Navigation Graphs
 
-Group related destinations under a nested graph for organization and scoping:
+Group related destinations under a nested graph:
 
 ```kotlin
 NavHost(navController = navController, startDestination = "home") {
@@ -295,76 +209,31 @@ NavHost(navController = navController, startDestination = "home") {
 }
 ```
 
-Type-safe nested graphs (2.8+):
-
-```kotlin
-@Serializable data object CheckoutGraph
-@Serializable data object Cart
-@Serializable data object Shipping
-
-NavHost(navController = navController, startDestination = Home) {
-    composable<Home> { HomeScreen(navController) }
-
-    navigation<CheckoutGraph>(startDestination = Cart) {
-        composable<Cart> { CartScreen(navController) }
-        composable<Shipping> { ShippingScreen(navController) }
-    }
-}
-```
+Type-safe: use `navigation<Graph>(startDestination = Route)` with `@Serializable` types — same structure as above.
 
 ## Animations
 
-### NavHost transition parameters
+Default transitions on `NavHost`:
 
 ```kotlin
 NavHost(
     navController = navController,
     startDestination = Home,
-    enterTransition = {
-        slideInHorizontally(initialOffsetX = { it }) + fadeIn()
-    },
-    exitTransition = {
-        slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
-    },
-    popEnterTransition = {
-        slideInHorizontally(initialOffsetX = { -it }) + fadeIn()
-    },
-    popExitTransition = {
-        slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-    },
-) {
-    // destinations...
-}
+    enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+    exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
+    popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
+    popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() },
+) { /* destinations */ }
 ```
-
-### Per-destination animation overrides
-
-```kotlin
-composable<Detail>(
-    enterTransition = {
-        slideInVertically(initialOffsetY = { it })
-    },
-    exitTransition = {
-        slideOutVertically(targetOffsetY = { it })
-    },
-) { backStackEntry ->
-    DetailScreen(backStackEntry.toRoute<Detail>().itemId)
-}
-```
-
-### Predictive back (Navigation Compose 2.8+)
-
-Navigation Compose 2.8+ supports the Android predictive back gesture natively. The back animation plays as the user swipes, providing a preview of the previous destination. Enable by ensuring `android:enableOnBackInvokedCallback="true"` in your `AndroidManifest.xml`.
 
 ## Conditional Navigation (Auth Guards)
 
-Redirect unauthenticated users to a login screen before showing protected content:
+Redirect via `startDestination` and clear login from the stack after success:
 
 ```kotlin
 @Composable
 fun AppNavigation(isAuthenticated: Boolean) {
     val navController = rememberNavController()
-
     val startDestination = if (isAuthenticated) Home else Login
 
     NavHost(navController = navController, startDestination = startDestination) {
@@ -380,23 +249,3 @@ fun AppNavigation(isAuthenticated: Boolean) {
     }
 }
 ```
-
-For runtime auth state changes, observe the auth state and navigate imperatively:
-
-```kotlin
-LaunchedEffect(authState) {
-    if (authState == AuthState.LoggedOut) {
-        navController.navigate(Login) {
-            popUpTo(navController.graph.id) { inclusive = true }
-        }
-    }
-}
-```
-
-## When Nav 2 Is Appropriate
-
-- **Existing codebases** already built on `NavHost`/`NavController`
-- Projects requiring **built-in deep link parsing** via `NavDeepLink`
-- Projects using **Navigation Compose's built-in transitions** with predictive back
-- Teams maintaining **hybrid Compose + Fragment** apps where Nav 2 provides Fragment integration
-- **Android-only** projects where CMP support is not needed

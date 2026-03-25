@@ -2,16 +2,6 @@
 
 Optional patterns for projects that outgrow the simple approach in [networking-ktor.md](networking-ktor.md). Use these when the project needs richer error classification, centralized request handling, or production instrumentation. For auth see [networking-ktor-auth.md](networking-ktor-auth.md). For testing see [networking-ktor-testing.md](networking-ktor-testing.md).
 
-## Table of Contents
-
-- [Error Handling Strategy](#error-handling-strategy)
-- [Safe Request Wrapper](#safe-request-wrapper)
-- [Exception Classification](#exception-classification)
-- [Plugin Composition](#plugin-composition)
-- [Custom Client Plugins](#custom-client-plugins)
-- [Debug vs Production Logging](#debug-vs-production-logging)
-- [Anti-Patterns](#anti-patterns)
-
 ## Error Handling Strategy
 
 Choose one approach and use it consistently across the project.
@@ -55,15 +45,6 @@ viewModelScope.launch {
 }
 ```
 
-**Note:** `runCatching` catches `CancellationException`. If using this pattern, re-throw it:
-
-```kotlin
-suspend inline fun <reified T> HttpClient.safeRequest(
-    block: HttpRequestBuilder.() -> Unit,
-): Result<T> = runCatching { request { block() }.body<T>() }
-    .also { if (it.exceptionOrNull() is CancellationException) throw it.exceptionOrNull()!! }
-```
-
 ### Option B — Custom `ApiResult<T>`
 
 ```kotlin
@@ -99,18 +80,6 @@ fun <T> ApiResult<T>.getOrNull(): T? = (this as? ApiResult.Success)?.data
 ## Safe Request Wrapper
 
 A `safeRequest` extension centralizes error handling so repositories stay focused on data mapping. This is one valid project-level pattern — not required for every project.
-
-### With `Result<T>`
-
-```kotlin
-suspend inline fun <reified T> HttpClient.safeRequest(
-    block: HttpRequestBuilder.() -> Unit,
-): Result<T> = runCatching { request { block() }.body<T>() }
-```
-
-Exceptions stay typed inside `Result.failure` — consumers inspect them with `onFailure { when (it) { ... } }`.
-
-### With `ApiResult<T>`
 
 Pair with `expectSuccess = false` so the wrapper inspects status codes instead of catching Ktor's response exceptions:
 
@@ -190,8 +159,7 @@ fun classifyStatus(code: Int, serverMessage: String? = null): ApiResult.Failure 
     403 -> ApiResult.Failure.HttpError(code, "Access denied", serverMessage)
     404 -> ApiResult.Failure.HttpError(code, "Not found", serverMessage)
     429 -> ApiResult.Failure.HttpError(code, "Too many requests", serverMessage)
-    in 400..499 -> ApiResult.Failure.HttpError(code, "Request failed", serverMessage)
-    in 500..599 -> ApiResult.Failure.HttpError(code, "Server error", serverMessage)
+    in 400..599 -> ApiResult.Failure.HttpError(code, if (code < 500) "Request failed" else "Server error", serverMessage)
     else -> ApiResult.Failure.HttpError(code, "Unexpected error", serverMessage)
 }
 ```
@@ -248,19 +216,7 @@ val client = HttpClient(engine) {
 }
 ```
 
-For global response observation (analytics, session expiry), a custom plugin can watch all responses without interfering with error handling:
-
-```kotlin
-val ResponseObserverPlugin = createClientPlugin("ResponseObserver", ::ResponseObserverConfig) {
-    onResponse { response ->
-        pluginConfig.onResponseCode(response.status.value)
-    }
-}
-
-class ResponseObserverConfig {
-    var onResponseCode: (Int) -> Unit = {}
-}
-```
+For global response observation (analytics, session expiry), use `onResponse` in a similar plugin without changing error handling.
 
 ## Debug vs Production Logging
 
@@ -268,16 +224,6 @@ class ResponseObserverConfig {
 |---|---|---|
 | Ktor `Logging` plugin | `LogLevel.BODY` | `LogLevel.HEADERS` or not installed |
 | `sanitizeHeader` | Optional | Required for `Authorization` |
-
-```kotlin
-if (isDebug) {
-    install(Logging) {
-        logger = Logger.DEFAULT
-        level = LogLevel.BODY
-        sanitizeHeader { it == "Authorization" }
-    }
-}
-```
 
 ## Anti-Patterns
 

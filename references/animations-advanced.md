@@ -2,13 +2,6 @@
 
 Shared element transitions, gesture-driven animations, Canvas drawing, and graphicsLayer optimization. For core animation APIs (animate*AsState, Animatable, updateTransition, AnimatedVisibility, AnimatedContent, AnimationSpec) and the animation API decision table, see [animations.md](animations.md).
 
-## Table of Contents
-
-- [Shared Element Transitions](#shared-element-transitions)
-- [Gesture-Driven Animations](#gesture-driven-animations)
-- [Canvas and Custom Drawing](#canvas-and-custom-drawing)
-- [graphicsLayer for Efficient Animation](#graphicslayer-for-efficient-animation)
-
 ## Shared Element Transitions
 
 Seamless transitions between composables that share visual content (e.g., list item -> detail screen). Available in both Jetpack Compose and Compose Multiplatform (since CMP 1.7+).
@@ -209,34 +202,7 @@ Canvas(modifier = Modifier.fillMaxSize()) {
 
 ### Drawing modifiers
 
-```kotlin
-Modifier.drawBehind { drawRect(animatedColor) }
-Modifier.drawWithContent { drawContent(); drawCircle(Color.Red, 5.dp.toPx(), center + Offset(64.dp.toPx(), -32.dp.toPx())) }
-```
-
-`drawBehind` draws behind composable content. `drawWithContent` draws over (or around) it.
-
-### Brush for gradients
-
-```kotlin
-val brush = Brush.linearGradient(colors = listOf(Color.Red, Color.Blue))
-Canvas(Modifier.size(200.dp)) { drawRect(brush = brush) }
-
-Brush.radialGradient(colors = listOf(Color.Yellow, Color.Transparent))
-Brush.sweepGradient(colors = listOf(Color.Cyan, Color.Magenta, Color.Cyan))
-```
-
-### Custom shapes
-
-```kotlin
-val triangleShape = GenericShape { size, _ ->
-    moveTo(size.width / 2f, 0f)
-    lineTo(size.width, size.height)
-    lineTo(0f, size.height)
-    close()
-}
-Box(Modifier.size(100.dp).clip(triangleShape).background(Color.Blue))
-```
+`Modifier.drawBehind { }` draws behind child content; `Modifier.drawWithContent { drawContent(); … }` draws over or around it.
 
 ### Animate canvas content
 

@@ -1,17 +1,5 @@
 # iOS Swift Interop
 
-## Table of Contents
-
-- [Kotlin → Swift Naming](#kotlin--swift-naming)
-- [Nullability & Type Bridging](#nullability--type-bridging)
-- [Coroutines → Swift Async](#coroutines--swift-async)
-- [Flow → Swift Observation](#flow--swift-observation)
-- [Sealed Classes in Swift](#sealed-classes-in-swift)
-- [iOS API Design Rules](#ios-api-design-rules)
-- [Compose in SwiftUI App](#compose-in-swiftui-app)
-- [Native iOS Views in Compose](#native-ios-views-in-compose)
-- [Anti-Patterns](#anti-patterns)
-
 ## Kotlin → Swift Naming
 
 | Kotlin construct | Swift equivalent |
@@ -20,7 +8,7 @@
 | `object AppInit` | `AppInit.shared` |
 | `companion object` member | Direct on class: `MyClass.value` |
 | `sealed class UiState` | Class hierarchy (or SKIE exhaustive enum) |
-| `suspend fun load()` | SKIE: `async func load()` / manual: callback wrapper |
+| `suspend fun load()` | SKIE: `async func load()` |
 
 ```swift
 // Entry point — top-level function in MainViewController.kt
@@ -44,7 +32,6 @@ let controller = MainViewControllerKt.MainViewController()
 |---|---|---|
 | **SKIE** | Default for new CMP projects | Automatic `async`/`AsyncSequence`; adds build plugin |
 | **KMP-NativeCoroutines** | Existing projects already using it | Annotation-driven; SKIE preferred for greenfield |
-| **Manual callback** | Minimal dependencies or single call site | Boilerplate per function; no tooling help |
 
 ### SKIE (recommended)
 
@@ -56,26 +43,6 @@ suspend fun loadItems(): List<Item> = repository.getAll()
 ```
 ```swift
 let items = try await viewModel.loadItems() // SKIE-generated async bridge
-```
-
-### Manual callback wrapper
-
-Without SKIE — wrap the suspend function on the Kotlin side:
-
-```kotlin
-// iosMain
-fun loadItems(onSuccess: (List<Item>) -> Unit, onError: (String) -> Unit) {
-    CoroutineScope(Dispatchers.Main).launch {
-        try { onSuccess(repository.getAll()) }
-        catch (e: Exception) { onError(e.message ?: "Unknown error") }
-    }
-}
-```
-```swift
-viewModel.loadItems(
-    onSuccess: { items in self.items = items },
-    onError: { msg in self.errorMessage = msg }
-)
 ```
 
 ## Flow → Swift Observation
@@ -94,7 +61,7 @@ func observeState() async {
 
 ### Manual StateFlow wrapper
 
-Without SKIE, expose a callback-based observer from Kotlin:
+Without SKIE, expose a callback-based observer from Kotlin; Swift holds the returned cancel closure and invokes it in `deinit`.
 
 ```kotlin
 // iosMain
@@ -106,20 +73,6 @@ class IosStateCollector<T>(private val flow: StateFlow<T>, private val scope: Co
     }
 }
 ```
-```swift
-class FeatureViewController: UIViewController {
-    private var cancelObservation: (() -> Void)?
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        cancelObservation = viewModel.stateCollector.observe { [weak self] state in
-            self?.render(state: state)
-        }
-    }
-    deinit { cancelObservation?() }
-}
-```
-
-Always cancel observation in `deinit` to prevent leaks.
 
 ## Sealed Classes in Swift
 

@@ -5,12 +5,6 @@ MVI dual-flow pattern for paging, testing strategies, and anti-patterns. This fi
 References:
 - [Paging testing](https://developer.android.com/topic/libraries/architecture/paging/test)
 
-## Table of Contents
-
-- [MVI Integration](#mvi-integration)
-- [Testing](#testing)
-- [Anti-Patterns](#anti-patterns)
-
 ## MVI Integration
 
 PagingData must be a **separate Flow** from the MVI ViewModel state. The ViewModel handles non-paging concerns (filters, selection mode, errors). PagingData flows independently.

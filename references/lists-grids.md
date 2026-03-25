@@ -2,16 +2,6 @@
 
 Compose patterns for lazy layouts, applied within MVI architecture.
 
-## Table of Contents
-
-- [LazyColumn and LazyRow](#lazycolumn-and-lazyrow)
-- [Keys](#keys)
-- [ContentType for Recycling](#contenttype-for-recycling)
-- [Grids and Pager](#grids-and-pager)
-- [Scroll State and Derived Logic](#scroll-state-and-derived-logic)
-- [Nested Scrolling](#nested-scrolling)
-- [List Anti-Patterns](#list-anti-patterns)
-
 ## LazyColumn and LazyRow
 
 Only compose visible items — use for large or dynamic lists. For small fixed lists (<10 items), prefer `Column`/`Row`.

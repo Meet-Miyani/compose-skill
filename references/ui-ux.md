@@ -1,18 +1,5 @@
 # UI/UX Patterns for Utility Apps
 
-## Table of Contents
-
-- [Core Principles](#core-principles)
-- [Loading States](#loading-states)
-- [Inline Validation](#inline-validation)
-- [Disabled States](#disabled-states)
-- [Preserving User Input](#preserving-user-input)
-- [Progressive Disclosure](#progressive-disclosure)
-- [Partial Results](#partial-results)
-- [Perceived Performance](#perceived-performance)
-- [Accessibility](#accessibility)
-- [Code Examples](#code-examples)
-
 ## Core Principles
 
 Utility apps are trust products. The UI must feel: stable, immediate, precise, reversible, non-destructive.

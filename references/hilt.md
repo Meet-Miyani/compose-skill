@@ -1,6 +1,6 @@
 # Dependency Injection with Hilt (Android-only)
 
-Hilt is the recommended DI framework for Android-only Jetpack Compose projects. It provides compile-time dependency injection with first-class support for Android lifecycle components, ViewModel, and Compose.
+Compile-time DI for Android-only Compose projects with ViewModel and lifecycle integration.
 
 For Hilt vs Koin decision guidance and shared DI concepts, see [dependency-injection.md](dependency-injection.md). For Koin (multiplatform), see [koin.md](koin.md).
 
@@ -8,18 +8,6 @@ References:
 - [Hilt Android docs](https://developer.android.com/training/dependency-injection/hilt-android)
 - [Hilt with Compose](https://developer.android.com/develop/ui/compose/libraries#hilt)
 - [Hilt ViewModel](https://developer.android.com/training/dependency-injection/hilt-jetpack#viewmodels)
-
-## Table of Contents
-
-- [Setup](#setup)
-- [Modules](#modules)
-- [ViewModel Injection](#viewmodel-injection)
-- [Compose Integration](#compose-integration)
-- [Navigation Integration](#navigation-integration)
-- [Scopes](#scopes)
-- [Hilt in MVI](#hilt-in-mvi)
-- [Testing](#testing)
-- [Anti-Patterns](#anti-patterns)
 
 ## Setup
 
@@ -220,16 +208,6 @@ val sharedViewModel: CheckoutViewModel = hiltViewModel(parentEntry)
 | `@ActivityScoped` | Activity instance | Activity-bound resources |
 | `@FragmentScoped` | Fragment instance | Fragment-bound resources (rare in Compose) |
 
-### Component hierarchy
-
-```text
-SingletonComponent
-    └── ActivityRetainedComponent
-            └── ViewModelComponent
-            └── ActivityComponent
-                    └── FragmentComponent
-```
-
 ## Hilt in MVI
 
 The only Hilt-specific wiring is `@HiltViewModel` + `@Inject constructor`. The MVI pattern (Event/State/Effect, `onEvent()`) is framework-agnostic — DI only affects constructor injection and injection-site calls.
@@ -298,4 +276,3 @@ object FakeRepositoryModule {
 | `@Inject` on ViewModel without `@HiltViewModel` | ViewModel not managed by Hilt | Always use `@HiltViewModel` with `@Inject constructor` |
 | Manual ViewModel instantiation | Bypasses Hilt injection | Use `hiltViewModel()` in Compose |
 | Installing ViewModel dependencies in `SingletonComponent` | Unnecessary lifecycle extension | Use `ViewModelComponent` or `ViewModelScoped` |
-| Using `@EntryPoint` for simple injection | Overcomplicates access | Use constructor injection or `hiltViewModel()` |

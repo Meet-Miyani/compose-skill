@@ -7,13 +7,6 @@ References:
 - [Ktor WebSockets](https://ktor.io/docs/client-websockets.html)
 - [Ktor SSE](https://ktor.io/docs/client-server-sent-events.html)
 
-## Table of Contents
-
-- [Bearer Token Auth](#bearer-token-auth)
-- [Advanced: Isolated Refresh Client](#advanced-isolated-refresh-client)
-- [WebSocket Support](#websocket-support)
-- [Server-Sent Events (SSE)](#server-sent-events-sse)
-
 ## Bearer Token Auth
 
 Use Ktor's `Auth` plugin with `bearer` for token management. The plugin handles loading cached tokens, attaching them to requests, and refreshing on 401 automatically.
@@ -180,11 +173,7 @@ client.webSocket("wss://api.example.com/ws") {
 
 ## Server-Sent Events (SSE)
 
-SSE provides server-push updates over HTTP. Unlike WebSockets, SSE is unidirectional (server to client) and works over standard HTTP.
-
-### Dependencies
-
-SSE support is built into `ktor-client-core` — no extra dependency needed.
+SSE provides server-push updates over HTTP. Unlike WebSockets, SSE is unidirectional (server to client) and works over standard HTTP. SSE support is built into `ktor-client-core` — no extra dependency needed.
 
 ### Basic usage
 

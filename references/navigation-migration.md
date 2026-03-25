@@ -1,6 +1,6 @@
 # Migrating from Nav 2 to Nav 3
 
-Dedicated migration guide based on the [official Android Nav 2 → Nav 3 migration documentation](https://developer.android.com/guide/navigation/migrate-to-nav3). **Nav 2 is not deprecated** — this migration is optional and recommended for projects that want Nav 3's state-ownership model.
+Nav 2 → Nav 3 migration based on [official docs](https://developer.android.com/guide/navigation/migrate-to-nav3). Nav 2 is **not deprecated** — migration is optional.
 
 For Nav 3 full reference, see [navigation-3.md](navigation-3.md).
 For Nav 2 full reference, see [navigation-2.md](navigation-2.md).
@@ -48,27 +48,7 @@ backStack.add(Detail(id))
 
 ### 3. Replace NavHost with NavDisplay
 
-```kotlin
-// Nav 2
-NavHost(navController = navController, startDestination = Home) {
-    composable<Home> { HomeScreen(onNavigate = { navController.navigate(Detail(it)) }) }
-    composable<Detail> { entry -> DetailScreen(entry.toRoute<Detail>().id) }
-}
-
-// Nav 3
-NavDisplay(
-    backStack = backStack,
-    onBack = { backStack.removeLastOrNull() },
-    entryDecorators = listOf(
-        rememberSaveableStateHolderNavEntryDecorator(),
-        rememberViewModelStoreNavEntryDecorator(),
-    ),
-    entryProvider = entryProvider {
-        entry<Home> { HomeScreen(onNavigate = { backStack.add(Detail(it)) }) }
-        entry<Detail> { key -> DetailScreen(key.id) }
-    },
-)
-```
+Replace `NavHost` + `composable<T>` with `NavDisplay` + `entryProvider` + `entry<T>`. Each `composable` block becomes an `entry` block; `navController.navigate()` becomes `backStack.add()`. For full `NavDisplay` API, decorators, and DI wiring, see [navigation-3.md](navigation-3.md) and [navigation-3-di.md](navigation-3-di.md).
 
 ### 4. Replace graph-scoped ViewModels with entry decorators
 

@@ -1,36 +1,20 @@
 # Cross-Platform (KMP) Specifics
 
-## Table of Contents
-
-- [Sharing Strategy](#sharing-strategy)
-- [Placement Guide](#placement-guide)
-- [Interfaces vs expect/actual](#interfaces-vs-expectactual)
-- [Platform Bridge Patterns](#platform-bridge-patterns)
-- [Lifecycle](#lifecycle)
-- [State Restoration](#state-restoration)
-- [Keyboard, Focus, and Input](#keyboard-focus-and-input)
-- [Safe Area and Layout](#safe-area-and-layout)
-- [Platform Capabilities](#platform-capabilities)
-- [Navigation](#navigation)
-- [Resources](#resources)
-- [Accessibility](#accessibility)
-- [Code Examples](#code-examples)
-
 ## Sharing Strategy
 
 Share these first: reducers, ViewModels, validators, calculators, formatting policies, screen state models, most screen UI.
 
-Keep these platform-specific until proven otherwise: permissions, share sheets, clipboard APIs, haptics, file pickers, notifications, deep-link registration, app review prompts, platform-only input traits, OS-specific navigation shell integration.
+Keep platform-specific until proven otherwise: permissions, share sheets, clipboard, haptics, file pickers, notifications, deep links, review prompts, platform input traits, OS navigation shell.
 
 ## Placement Guide
 
 ### What belongs in `commonMain`
 
-Feature state models, intents and messages, reducer/ViewModel logic, calculators, validators, eligibility engines, repository interfaces, use cases only when they earn their keep, shared screen composables, presentation mapping, semantic navigation effects, semantic error/message keys.
+Feature state, intents/messages, reducer/ViewModel logic, calculators, validators, eligibility, repository interfaces, use cases that earn their keep, shared composables, presentation mapping, semantic nav effects and error keys.
 
 ### What should remain platform-specific
 
-Runtime permissions, system share/open sheet, platform haptics, clipboard, URL opening, native purchase/billing integrations, notification registration, biometrics, deep-link registration in app manifests/app delegates, OS widgets/shortcuts.
+Runtime permissions, share/open sheet, haptics, clipboard, URLs, billing, notifications, biometrics, manifest/delegate deep links, OS widgets/shortcuts.
 
 ### Placement Table
 
@@ -49,14 +33,7 @@ Runtime permissions, system share/open sheet, platform haptics, clipboard, URL o
 
 ### Dependency Verification for commonMain
 
-**Before claiming any dependency works in `commonMain`, verify it actually publishes multiplatform artifacts.** Many Jetpack/AndroidX libraries remain Android-only. A subset now publish KMP artifacts (e.g., `lifecycle-viewmodel`, `datastore-preferences`), but availability and API surface vary by version.
-
-**Verification steps:**
-1. Check Maven Central or Google Maven for the artifact — look for `-jvm`, `-iosarm64`, `-iosX64`, or similar classifier suffixes
-2. Consult the library's official documentation for KMP support status
-3. If context7 MCP is available, use `resolve-library-id` then `query-docs` to confirm multiplatform support
-
-**If verification is not possible**, state this explicitly and note the dependency may require platform-specific placement or wrapper interfaces.
+**Before claiming `commonMain`:** confirm multiplatform artifacts exist. Much of AndroidX is still Android-only; some libs publish KMP (e.g. `lifecycle-viewmodel`, `datastore-preferences`) with version-dependent surfaces. Check Maven for `-jvm`, `-iosarm64`, `-iosX64`, etc.; use context7 `resolve-library-id` + `query-docs` when available. **If unverifiable**, say so—use platform placement or wrapper interfaces.
 
 ## Interfaces vs expect/actual
 
@@ -64,7 +41,7 @@ Runtime permissions, system share/open sheet, platform haptics, clipboard, URL o
 
 Use **interfaces** for app capabilities: haptics, clipboard, share, URL opener, analytics, date/number formatting, file opener.
 
-Use **`expect/actual`** for thin low-level platform facts or tiny helpers when an interface buys little.
+Use **`expect/actual`** for thin platform facts or one-off helpers when an interface buys little.
 
 ### Practical rule
 
@@ -73,21 +50,11 @@ Use **`expect/actual`** for thin low-level platform facts or tiny helpers when a
 
 ### Dependency Injection
 
-For complex, asynchronous, or hardware-bound platform services (GPS, biometrics, secure keystore), define a pure Kotlin interface in `commonMain` and inject platform-specific implementations using a framework like Koin. Reserve `expect/actual` strictly for lightweight, synchronous, procedural primitives (UUID generation, system date formatting, clipboard access).
-
-### Resource Formatting
-
-Never resolve localized strings within the reducer. Reducers should process mathematical values, leaving translation and formatting entirely to the composable execution context:
-
-```kotlin
-// BAD: Reducer sets state.payment = "Payment: $100"
-// GOOD: Reducer sets state.paymentAmount = 100.00
-//       UI applies: stringResource(Res.string.payment_label, state.paymentAmount)
-```
+Heavy/async/hardware services (GPS, biometrics, keystore): `commonMain` interface + Koin (or similar) for platform impls. Reserve `expect/actual` for tiny sync primitives (UUID, dates, clipboard).
 
 ## Platform Bridge Patterns
 
-The rules above say *when* to use interfaces vs `expect/actual`. This section shows *how* to implement each approach.
+The rules above cover *when* to prefer interfaces vs `expect/actual`; below is *how* to wire each pattern.
 
 ### Choosing the Right Bridge
 
@@ -99,58 +66,43 @@ The rules above say *when* to use interfaces vs `expect/actual`. This section sh
 
 ### Pattern 1: Interface + DI (Primary)
 
-Define the contract in `commonMain`. Platform modules provide implementations. DI wires them. ViewModel depends only on the interface — never imports platform types.
+Contract in `commonMain`; platform modules supply impls; DI binds them. ViewModel depends only on the interface. Koin setup: [koin.md](koin.md).
 
 ```kotlin
 // commonMain
-interface Player {
-    fun play(uri: String)
-    fun pause()
-    fun release()
-}
+interface Player { fun play(uri: String); fun pause(); fun release() }
 
 // androidMain
 class AndroidPlayer(private val context: Context) : Player {
-    private val mediaPlayer = MediaPlayer()
-    override fun play(uri: String) { mediaPlayer.setDataSource(context, uri.toUri()); mediaPlayer.start() }
-    override fun pause() { mediaPlayer.pause() }
-    override fun release() { mediaPlayer.release() }
+    private val mp = MediaPlayer()
+    override fun play(uri: String) { mp.setDataSource(context, uri.toUri()); mp.start() }
+    override fun pause() = mp.pause()
+    override fun release() = mp.release()
 }
 
 // iosMain
 class IosPlayer : Player {
-    private var avPlayer: AVPlayer? = null
-    override fun play(uri: String) { avPlayer = AVPlayer(uRL = NSURL(string = uri)); avPlayer?.play() }
-    override fun pause() { avPlayer?.pause() }
-    override fun release() { avPlayer = null }
+    private var av: AVPlayer? = null
+    override fun play(uri: String) { av = AVPlayer(uRL = NSURL(string = uri)); av?.play() }
+    override fun pause() { av?.pause() }
+    override fun release() { av = null }
 }
-```
 
-Wire via platform Koin modules (see [koin.md](koin.md) for full Koin setup):
-
-```kotlin
 // androidMain
-val androidModule = module { single<Player> { AndroidPlayer(get()) } }
-
+val androidPlayerModule = module { single<Player> { AndroidPlayer(get()) } }
 // iosMain
-val iosModule = module { single<Player> { IosPlayer() } }
+val iosPlayerModule = module { single<Player> { IosPlayer() } }
 
-// commonMain — ViewModel depends only on the interface
 class PlayerViewModel(private val player: Player) : ViewModel() {
-    fun onEvent(event: PlayerEvent) {
-        when (event) {
-            is PlayerEvent.Play -> player.play(event.uri)
-            PlayerEvent.Pause -> player.pause()
-        }
+    fun onEvent(e: PlayerEvent) {
+        when (e) { is PlayerEvent.Play -> player.play(e.uri); PlayerEvent.Pause -> player.pause() }
     }
 }
 ```
 
-Testing is trivial — create `FakePlayer : Player` with no platform dependencies.
-
 ### Pattern 2: expect/actual for Thin Primitives
 
-No DI, no interface — for stateless one-liners with no test-double needs:
+Stateless one-liners, no DI/interface/fakes:
 
 ```kotlin
 // commonMain
@@ -165,7 +117,7 @@ actual fun randomUUID(): String = platform.Foundation.NSUUID().UUIDString()
 
 ### Pattern 3: expect/actual with Typealias
 
-When an existing platform type already fits your contract exactly:
+When a platform type already matches the contract:
 
 ```kotlin
 // commonMain
@@ -173,115 +125,65 @@ expect class PlatformDate {
     fun toEpochMillis(): Long
 }
 
-// jvmMain — existing type matches, use typealias
+// jvmMain
 actual typealias PlatformDate = java.time.Instant
 
-// nativeMain — no matching type, implement directly
+// nativeMain
 actual class PlatformDate(private val nsDate: NSDate) {
     actual fun toEpochMillis(): Long = (nsDate.timeIntervalSince1970 * 1000).toLong()
 }
 ```
 
-Prefer interface+DI when you need fakes or when the platform type doesn't match 1:1.
+Prefer interface+DI for fakes or when types do not match 1:1.
 
 ### Bridge Anti-Patterns
 
-- `expect/actual` class for anything with lifecycle, state, or async behavior — use interface+DI instead
-- Platform `import` leaking into `commonMain` — compiler catches this, but flag it in review
-- Fat `expect/actual` with significant logic — keep them thin, push logic into the interface impl
-- Skipping the interface when the service will need fakes in tests
+- `expect/actual` for lifecycle/state/async → interface+DI
+- Platform imports in `commonMain` (compiler flags; still catch in review)
+- Fat `expect/actual` → thin bridge, logic in impls
+- Skipping interfaces when tests need fakes
 
 ## Lifecycle
 
-**Some** AndroidX Lifecycle artifacts publish multiplatform support in latest artifacts. `androidx.lifecycle:lifecycle-viewmodel` and `lifecycle-runtime-compose` publish KMP targets, enabling `ViewModel`, `viewModelScope`, and `collectAsStateWithLifecycle` in `commonMain`.
+`lifecycle-viewmodel` / `lifecycle-runtime-compose` can expose `ViewModel`, `viewModelScope`, `collectAsStateWithLifecycle` in `commonMain`; not all Lifecycle APIs are MP—depends on androidx/KMP.
 
-**Caveat:** Shared lifecycle support depends on the project's chosen androidx/KMP setup. Not all lifecycle extensions are multiplatform. Before assuming any lifecycle API works in `commonMain`, verify:
-1. The specific artifact version publishes KMP targets (check Maven Central for `-jvm`, `-iosarm64`, etc.)
-2. The API you need exists in the multiplatform artifact (some APIs remain Android-only)
-3. Your project's KMP configuration includes the required targets
-
-**Always verify the current stable version** via context7 MCP or official AndroidX release notes before recommending a specific version. Do not assume versions mentioned in this skill are current.
-
-When verification is not possible, state this explicitly and consider wrapping platform-specific lifecycle behavior behind interfaces.
-
-**Commonly available in `commonMain` (verify version support):**
-- `ViewModel`, `viewModelScope` — shared coroutine scope management
-- `collectAsStateWithLifecycle` — lifecycle-aware state collection
-- `koinViewModel()` — lifecycle-managed ViewModel injection via Koin
-
-**Default patterns:**
-- Route owns collection
-- ViewModel owns coroutine work
-- ViewModel survives as long as the screen flow should survive
-- Do not scatter collection logic into leaves
+- Artifact must publish KMP targets (`-jvm`, `-iosarm64`, …) and expose the API on MP (many APIs stay Android-only); match project targets.
+- **Confirm versions** via context7 or AndroidX notes; if not, say so—wrap platform lifecycle behind interfaces if needed.
+- **Typical in `commonMain` (re-verify):** `ViewModel`, `viewModelScope`, `collectAsStateWithLifecycle`, `koinViewModel()`.
 
 ## State Restoration
 
-- `rememberSaveable` is for small local UI state
-- Draft restoration across Android/iOS should come from persisted draft rehydration, not from hoping platform restoration semantics align
-- Keep ViewModel state serializable only when there is a real restoration requirement
+- `rememberSaveable`: small local UI state only
+- Cross-platform drafts: rehydrate from persistence, not assumed OS restoration parity
+- Serialize ViewModel state only when product requires it
 
 ## Keyboard, Focus, and Input
 
-- Test text input on real iOS devices
-- Isolate input quirks at the UI/platform boundary
-- Do not put platform keyboard workaround flags into reducer state
-- Use insets/safe-area aware layout in shared UI
-- Keep selection/composition handling local if a text field needs it
+- Test text input on real iOS hardware; isolate quirks at the UI/platform edge
+- No keyboard workaround flags in reducer state; shared UI uses inset/safe-area layout
+- Keep selection/composition local per field when needed
 
 ## Safe Area and Layout
 
-Use shared insets-aware layouts, but test: top/bottom safe areas, keyboard overlap, sheet presentation, navigation chrome differences.
-
-Do not encode "iOS safe area adjustment required" into feature state.
+Insets-aware shared layouts; verify safe areas, keyboard overlap, sheets, nav chrome. Never put “iOS safe-area hack” into feature state.
 
 ## Platform Capabilities
 
-Model haptics, clipboard, share as semantic effects.
+Model haptics, clipboard, share as semantic effects; shell executes them.
 
 ```kotlin
 enum class HapticType { Confirm, Error, Selection }
-
-interface Haptics {
-    fun perform(type: HapticType)
-}
-
+interface Haptics { fun perform(type: HapticType) }
 sealed interface ProductEffect {
     data class TriggerHaptic(val type: HapticType) : ProductEffect
     data class ShareQuote(val text: String) : ProductEffect
 }
+interface ShareText { suspend fun share(text: String) }
 ```
-
-Route/platform shell executes the effect.
-
-```kotlin
-interface ShareText {
-    suspend fun share(text: String)
-}
-```
-
-## Navigation
-
-Reducers emit semantic navigation effects; the route/navigation layer executes them.
-
-Good: `ProductEffect.NavigateBack`, `ProductEffect.OpenDetails(id)`
-
-Bad: reducer calling navigation controller directly, composable deciding destination rules ad hoc.
 
 ## Resources
 
-Use Compose Multiplatform shared resources for strings, images, fonts, localization, and environment qualifiers. For the complete API reference — directory structure, Gradle setup, all resource type APIs (`Res.string`, `Res.drawable`, fonts, plurals, raw files), qualifiers, localization, and the Android `R` vs CMP `Res` comparison — see **[Multiplatform Resources](resources.md)**.
-
-### Default rules
-
-- Keep static UI strings in shared resources
-- Keep semantic message keys in state
-- Resolve strings close to UI
-- Use theme/localization qualifiers
-- Keep icons/images/fonts in shared resources when shared
-- Keep platform-only assets platform-side
-
-### Resource access pattern
+CMP shared resources (strings, images, fonts, qualifiers, localization, Gradle setup). Full API surface: **[Multiplatform Resources](resources.md)**.
 
 ```kotlin
 enum class ValidationMessageKey { Required, InvalidNumber, MustBePositive }
@@ -298,36 +200,24 @@ fun ValidationMessage(messageKey: ValidationMessageKey?) {
 }
 ```
 
-This keeps reducer state semantic, resources in UI, and tests simpler.
-
-## Accessibility
-
-Treat accessibility as a first-class part of shared UI:
-
-- Error communication must not rely on color only
-- Important controls need semantic labels
-- Result changes that matter should be accessible
-- Focus order must remain logical
-- Dense calculator/forms still need usable touch targets
-
 ## Code Examples
 
-### GOOD: shared calculator domain logic
+### GOOD: shared calculator
 
 ```kotlin
 class PriceCalculator {
-    fun calculate(draft: PriceDraft): PriceDerived {
-        val wasteMultiplier = if (draft.includeWaste) 1.10 else 1.0
-        val materialCost = draft.area * draft.materialRate * wasteMultiplier
-        val laborCost = draft.area * draft.laborRate
-        val subtotal = materialCost + laborCost
-        val tax = subtotal * (draft.taxPercent / 100.0)
-        return PriceDerived(materialCost = materialCost, laborCost = laborCost, subtotal = subtotal, tax = tax, total = subtotal + tax)
+    fun calculate(d: PriceDraft): PriceDerived {
+        val w = if (d.includeWaste) 1.10 else 1.0
+        val mat = d.area * d.materialRate * w
+        val lab = d.area * d.laborRate
+        val sub = mat + lab
+        val tax = sub * (d.taxPercent / 100.0)
+        return PriceDerived(mat, lab, sub, tax, sub + tax)
     }
 }
 ```
 
-### BAD: platform concerns in shared reducer state
+### BAD: platform leakage in state
 
 ```kotlin
 @Immutable
@@ -339,4 +229,4 @@ data class ProductState(
 )
 ```
 
-That is platform leakage.
+Platform leakage.

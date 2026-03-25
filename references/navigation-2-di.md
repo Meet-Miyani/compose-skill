@@ -1,14 +1,9 @@
 # Navigation 2 + Dependency Injection
 
-DI wiring patterns for Navigation Compose (Nav 2) with Hilt and Koin. Covers destination-scoped ViewModels, graph-scoped shared ViewModels, and Koin's Nav 2 extensions. Examples here focus on **DI mechanics** — how to obtain and scope ViewModels. How you wire state, events, and effects between the ViewModel and the Screen depends on your project's architecture — the MVI Route/Screen pattern (state via `collectAsStateWithLifecycle`, effects via `CollectEffect`, `onEvent` callback) applies inside composable destinations.
+DI wiring for Nav 2 destinations: destination-scoped and graph-scoped ViewModels with Hilt and Koin.
 
 For Nav 2 core reference (NavHost, tabs, deep links, animations), see [navigation-2.md](navigation-2.md).
 For shared navigation concepts and anti-patterns, see [navigation.md](navigation.md).
-
-## Table of Contents
-
-- [Hilt Integration](#hilt-integration)
-- [Koin Integration](#koin-integration)
 
 ## Hilt Integration
 

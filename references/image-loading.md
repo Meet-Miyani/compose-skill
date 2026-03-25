@@ -12,21 +12,6 @@ References:
 - [Coil Recipes](https://coil-kt.github.io/coil/recipes/)
 - [Coil 3 upgrade notes](https://coil-kt.github.io/coil/upgrading_to_coil3/)
 
-## Table of Contents
-
-- [Setup and Dependencies](#setup-and-dependencies)
-- [Choose the Right API](#choose-the-right-api)
-- [Default AsyncImage Pattern](#default-asyncimage-pattern)
-- [ImageLoader Configuration](#imageloader-configuration)
-- [Extended Pipeline](#extended-pipeline)
-- [Caching Strategy](#caching-strategy)
-- [Transformations](#transformations)
-- [SVG](#svg)
-- [Compose Multiplatform Resources](#compose-multiplatform-resources)
-- [List and Shared-Element Patterns](#list-and-shared-element-patterns)
-- [Preview, Testing, and Debugging](#preview-testing-and-debugging)
-- [Do / Don't](#do--dont)
-
 ## Setup and Dependencies
 
 Coil 3 does not include network loading by default. Add `coil-compose` and exactly one network integration.
@@ -132,119 +117,36 @@ val imageLoader = ImageLoader.Builder(context)
 
 | Need | Customize | Why |
 |---|---|---|
-| Add request retry/short-circuit/global policy | `Interceptor` | Wraps entire pipeline and can modify/proceed/return early |
-| Accept custom model type in `.data(...)` | `Mapper` | Maps domain model to supported data type (URI/String/etc.) |
-| Keep custom data memory-cacheable | `Keyer` | Produces stable memory cache key segment for custom model |
-| Support custom source/protocol | `Fetcher.Factory<T>` | Fetches bytes/image for unsupported data source |
-| Decode custom encoded data/format | `Decoder.Factory` | Converts fetched source to renderable image |
-| Add auth headers for all image requests | Network fetcher + client interceptor | Centralized networking behavior |
-| Per-request dynamic headers | `ImageRequest.httpHeaders(...)` | Scoped request-level networking metadata |
-
-### Component responsibilities
-
-- `Interceptor`: cross-cutting behavior (timeouts, retries, custom cache layer, metrics).
-- `Mapper`: data normalization (for example, `ProductImage -> String` URL).
-- `Keyer`: stable keys for custom data to improve memory cache hits.
-- `Fetcher`: data transport (custom scheme, signed URLs, alternate client).
-- `Decoder`: format handling (custom binary/image format decode).
-
-If your custom `Fetcher` introduces a new data type, add a matching `Keyer` so memory caching is effective.
-
-### Mapper + Keyer pattern
-
-```kotlin
-data class ItemImage(val id: String, val url: String)
-
-class ItemImageMapper : Mapper<ItemImage, String> {
-    override fun map(data: ItemImage, options: Options): String = data.url
-}
-
-class ItemImageKeyer : Keyer<ItemImage> {
-    override fun key(data: ItemImage, options: Options): String = "item-image-${data.id}"
-}
-```
-
-### Custom fetcher pattern
-
-Use a custom `Fetcher` when image location requires pre-resolution (for example: one request to obtain a signed URL, then fetch the image).
-
-```kotlin
-data class PartialUrl(val baseUrl: String)
-
-class PartialUrlFetcher(
-    private val data: PartialUrl,
-    private val options: Options,
-    private val imageLoader: ImageLoader,
-) : Fetcher {
-    override suspend fun fetch(): FetchResult? {
-        // Resolve final URL from partial endpoint, then delegate to standard fetchers.
-        val resolvedUrl: String = resolveImageUrl(data.baseUrl)
-        val mapped = imageLoader.components.map(resolvedUrl, options)
-        val output = imageLoader.components.newFetcher(mapped, options, imageLoader)
-        val (fetcher) = checkNotNull(output) { "No supported fetcher" }
-        return fetcher.fetch()
-    }
-
-    class Factory : Fetcher.Factory<PartialUrl> {
-        override fun create(
-            data: PartialUrl,
-            options: Options,
-            imageLoader: ImageLoader,
-        ): Fetcher = PartialUrlFetcher(data, options, imageLoader)
-    }
-}
-```
-
-### Network fetcher customization
-
-```kotlin
-val imageLoader = ImageLoader.Builder(context)
-    .components {
-        add(
-            OkHttpNetworkFetcherFactory(
-                callFactory = { baseOkHttpClient.newBuilder().build() },
-            )
-        )
-    }
-    .build()
-```
-
-For HTTP cache semantics, register `CacheControlCacheStrategy` with the network fetcher if your app needs response `Cache-Control` behavior.
+| Add request retry/short-circuit/global policy | `Interceptor` | Wraps entire pipeline; can modify/proceed/return early. Cross-cutting: timeouts, retries, custom cache layer, metrics. |
+| Accept custom model type in `.data(...)` | `Mapper` | Normalizes domain data to a supported type (for example `ProductImage` → URL string). |
+| Keep custom data memory-cacheable | `Keyer` | Stable memory cache key segment for custom models. If a custom `Fetcher` introduces a new data type, add a matching `Keyer` so memory caching works. |
+| Support custom source/protocol | `Fetcher.Factory<T>` | Data transport: custom scheme, signed URLs, alternate client. |
+| Decode custom encoded data/format | `Decoder.Factory` | Converts fetched source to a renderable image. |
+| Add auth headers for all image requests | Network fetcher + client interceptor | Centralized networking behavior. |
+| Per-request dynamic headers | `ImageRequest.httpHeaders(...)` | Scoped request-level networking metadata. |
 
 ### Compose Multiplatform placement
 
-- Keep domain-level model wrappers (`ItemImage`, mapping intent) in `commonMain`.
-- Put platform networking client specifics (OkHttp setup, Android-only pieces) in platform source sets.
-- Prefer Ktor network module for broad CMP support.
-- Keep one shared `ImageLoader` configuration per app entry point.
+- Domain-level model wrappers and mapping intent in `commonMain`; OkHttp/Android-only client setup in platform source sets; prefer Ktor network for broad CMP.
+- One shared `ImageLoader` configuration per app entry point.
 
 ### Pipeline anti-patterns
 
-- Registering custom components per screen/composable instead of once in app-level `ImageLoader`.
-- Adding custom `Fetcher` for new data without adding a stable `Keyer`, which degrades memory cache hit rate.
-- Doing heavy blocking work inside `Interceptor` without clear bounds/timeouts.
-- Encoding volatile data (timestamps/random values) into cache keys, causing constant cache misses.
-- Duplicating behavior already solved by request options (`httpHeaders`, cache policy, size resolver).
-- Mixing platform-only types into `commonMain` custom pipeline contracts.
+| Anti-pattern | Problem |
+|---|---|
+| Registering pipeline components per screen/composable; duplicating what request options already cover (`httpHeaders`, cache policy, size resolver) | Fragments caches; redundant complexity |
+| Custom `Fetcher` without a stable `Keyer`; volatile data (timestamps, random values) in cache keys | Poor memory cache hit rate |
+| Heavy blocking work in `Interceptor` without bounds/timeouts; platform-only types in `commonMain` pipeline contracts | Jank; wrong layering for CMP |
+
+For HTTP cache semantics with OkHttp, register `CacheControlCacheStrategy` with the network fetcher when you need response `Cache-Control` behavior.
 
 ## Caching Strategy
 
-### Request-level cache controls
-
-Use request policies only when you intentionally need behavior different from app defaults.
-
-```kotlin
-ImageRequest.Builder(LocalPlatformContext.current)
-    .data(url)
-    .memoryCachePolicy(CachePolicy.ENABLED)
-    .diskCachePolicy(CachePolicy.ENABLED)
-    .networkCachePolicy(CachePolicy.ENABLED)
-    .build()
-```
+Default request cache policies are enabled; override `memoryCachePolicy` / `diskCachePolicy` / `networkCachePolicy` only when you need non-default behavior.
 
 ### Stable keys for smooth transitions
 
-Use stable keys when the same logical image appears in multiple places (list -> detail, shared element).
+Use stable keys when the same logical image appears in multiple places (list → detail, shared element).
 
 ```kotlin
 ImageRequest.Builder(LocalPlatformContext.current)
@@ -258,36 +160,15 @@ ImageRequest.Builder(LocalPlatformContext.current)
 
 ## Transformations
 
-Use image transformations only when you need pixel-level mutation of decoded output.
-
-```kotlin
-ImageRequest.Builder(LocalPlatformContext.current)
-    .data(url)
-    .transformations(RoundedCornersTransformation(16f))
-    .build()
-```
-
-In Compose, prefer modifier-based visual shaping (for example `Modifier.clip(CircleShape)`) over decode-time transformations when possible. It is usually simpler and more efficient for UI-only presentation.
-
-Important: transformations convert output to bitmap data; for animated images this can reduce output to a single frame.
+Use `.transformations(...)` (for example `RoundedCornersTransformation`) only for pixel-level changes to decoded output. Prefer `Modifier.clip` / shapes for UI-only effects; transformations materialize bitmaps and can collapse animated images to one frame.
 
 ## SVG
-
-Add SVG support with the `coil-svg` artifact:
 
 ```kotlin
 implementation("io.coil-kt.coil3:coil-svg:<version>")
 ```
 
-Coil can auto-detect and decode SVGs after adding the dependency. If needed, you can explicitly register:
-
-```kotlin
-ImageLoader.Builder(context)
-    .components {
-        add(SvgDecoder.Factory())
-    }
-    .build()
-```
+Coil auto-detects and decodes SVGs after this dependency is on the classpath. Register `SvgDecoder.Factory()` explicitly only if you need non-default wiring.
 
 ## Compose Multiplatform Resources
 
@@ -315,23 +196,3 @@ Use string URIs from `Res.getUri`. Direct compile-safe handles like `Res.drawabl
 - Compose preview has no network access by default. Use `LocalAsyncImagePreviewHandler` to inject deterministic preview images.
 - Enable `DebugLogger` only in debug builds when diagnosing request/decoder/cache behavior.
 - For testability in large apps, inject a custom/fake `ImageLoader` instead of relying on global singleton state.
-
-## Do / Don't
-
-### Do
-
-- Prefer `AsyncImage` for most rendering use cases.
-- Use one shared `ImageLoader`.
-- Tune memory/disk cache once at loader creation.
-- Use stable cache keys for list/detail/shared-element continuity.
-- Provide meaningful `contentDescription` for non-decorative images.
-- Use `Res.getUri(...)` for CMP bundled assets.
-
-### Don't
-
-- Create a new `ImageLoader` per screen or composable.
-- Use `SubcomposeAsyncImage` everywhere, especially in large scrolling lists.
-- Default to transformations for simple clipping/shape effects.
-- Forget that Coil 3 needs an explicit network module.
-- Disable caches globally without a measured reason.
-- Treat error/fallback as optional for user-facing network images.

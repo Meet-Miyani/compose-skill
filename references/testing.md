@@ -1,13 +1,5 @@
 # Testing Strategy
 
-## Table of Contents
-
-- [What to Test in commonMain](#what-to-test-in-commonmain)
-- [Compose UI Tests](#compose-ui-tests)
-- [Platform Tests](#platform-tests)
-- [Snapshot Testing Caveats](#snapshot-testing-caveats)
-- [Lean Default Test Matrix](#lean-default-test-matrix)
-
 ## What to Test in commonMain
 
 ### ViewModel Tests with Turbine (highest ROI)
@@ -195,11 +187,9 @@ Test:
 
 ## Snapshot Testing Caveats
 
-- Per-platform rendering differences are real
-- Typography, antialiasing, and layout can differ slightly
-- Shared golden tests across Android/iOS are brittle
+Per-platform rendering, typography, and layout differ; shared Android/iOS goldens are brittle.
 
-**Default:** prefer semantic assertions and interaction tests. Use per-platform visual goldens only for a few high-value screens.
+**Default:** prefer semantic assertions and interaction tests; use per-platform visual goldens only for a few high-value screens.
 
 ## Lean Default Test Matrix
 
@@ -230,32 +220,3 @@ Some reference files contain their own testing sections with domain-specific pat
 | Paging 3 | [paging-mvi-testing.md](paging-mvi-testing.md) | PagingSource unit tests, `asSnapshot`, `TestPager` transformations |
 | Room Database | [room-database.md](room-database.md) | In-memory DB tests, migration tests, fake DAOs |
 | Networking | [networking-ktor-testing.md](networking-ktor-testing.md) | MockEngine, API response testing, DI integration |
-
-## Recommendations by App Scale
-
-### Small App
-
-- One shared module, feature packages inside it
-- Direct feature ViewModel, contract can live in same file if small
-- Modules: `shared`, `androidApp`, `iosApp`
-- Low abstraction level
-- Testing: ViewModel tests with Turbine, validator/calculator tests, a few shared UI tests
-- Avoid: multi-module explosion, base MVI framework, use case per repository call
-
-### Medium App
-
-- `core` shared module + shared feature modules
-- Separated contract/ViewModel/screen/route files, shared validators/calculators/services
-- Modules: `core`, `feature-estimate`, `feature-settings`, `feature-history`
-- Moderate abstraction, extract only reusable logic and UI
-- Testing: strong `commonTest` coverage, shared UI tests for high-value screens, platform tests for bindings
-- Avoid: app-wide god ViewModel, root feature contract hierarchies
-
-### Large App
-
-- Feature-first modules, shared core primitives only
-- Screen ViewModel as default, sub-flow ViewModel only where independently complex
-- Strict no-op emission guards, explicit async cancellation policies
-- `core-*` for stable cross-feature primitives, many vertical feature modules
-- Testing: ViewModel/domain tests mandatory, more shared UI tests, platform integration tests, performance audits on hot screens
-- Avoid: framework worship, generic base ViewModel inheritance trees, premature cross-feature DSLs

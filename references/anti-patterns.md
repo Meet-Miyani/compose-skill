@@ -27,6 +27,56 @@ For overengineering patterns (bloated base classes, unnecessary use cases, 4-typ
 | Forcing MVI migration on existing codebase | churn without value, team friction | respect existing patterns, introduce MVI for new features only | [clean-code.md](clean-code.md) |
 | Inline fully qualified package paths | hurts readability, clutters business logic, hides intent behind package noise | import at file top; use `import ... as ...` for name clashes | [clean-code.md](clean-code.md) |
 
+## Examples
+
+### Business logic inside composables
+
+```kotlin
+// BAD — logic in composable; untestable, reruns on every recomposition
+@Composable
+fun CheckoutScreen(viewModel: CheckoutViewModel) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val total = state.items.sumOf { it.price * it.qty } // business logic here
+    val tax = total * 0.08
+    Text("Total: $${"$"}total  Tax: $${"$"}tax")
+}
+
+// GOOD — derive in ViewModel/state, composable only renders
+data class CheckoutState(
+    val items: List<LineItem> = emptyList(),
+    val total: Double = 0.0,
+    val tax: Double = 0.0,
+)
+
+@Composable
+fun CheckoutScreen(state: CheckoutState, onEvent: (CheckoutEvent) -> Unit) {
+    Text("Total: ${state.total}  Tax: ${state.tax}")
+}
+```
+
+### One-off events as consumable state booleans
+
+```kotlin
+// BAD — event replays on config change, race between read and reset
+data class UiState(val showSnackbar: Boolean = false)
+
+LaunchedEffect(state.showSnackbar) {
+    if (state.showSnackbar) {
+        snackbarHostState.showSnackbar("Saved")
+        viewModel.onEvent(DismissSnackbar)   // consumer must remember to reset
+    }
+}
+
+// GOOD — Channel delivers exactly once, survives config change
+sealed interface Effect { data class ShowSnackbar(val msg: String) : Effect }
+
+CollectEffect(viewModel.effects) { effect ->
+    when (effect) {
+        is Effect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.msg)
+    }
+}
+```
+
 ## Domain-Specific Anti-Patterns
 
 These reference files contain their own anti-pattern sections with detailed BAD/GOOD code examples:

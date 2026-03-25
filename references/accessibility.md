@@ -1,17 +1,5 @@
 # Accessibility
 
-## Table of Contents
-
-- [Content Descriptions](#content-descriptions)
-- [Semantics API](#semantics-api)
-- [Grouping and Overriding Semantics](#grouping-and-overriding-semantics)
-- [Touch Targets](#touch-targets)
-- [Color and Contrast](#color-and-contrast)
-- [Custom Interactive Elements](#custom-interactive-elements)
-- [Custom Accessibility Actions](#custom-accessibility-actions)
-- [MVI Integration](#mvi-integration)
-- [Do / Don't](#do--dont)
-
 ## Content Descriptions
 
 Every `Image` and `Icon` composable must have an explicit `contentDescription`:
