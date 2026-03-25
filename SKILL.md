@@ -23,12 +23,12 @@ This skill covers the full Compose app development lifecycle — from architectu
 
 When helping with Jetpack Compose or Compose Multiplatform code, follow this process:
 
-1. **Read the existing code first** — understand the project's current conventions, base classes, naming, and file layout before writing anything.
+1. **Read the existing code first for context** — check conventions, base classes, and layout. For small UI or logic asks, restrict your reading to the immediately relevant files to save time. Do not map out the entire project architecture unless a structural refactor is requested.
 2. **Identify the concern** — is this architecture, state modeling, performance, navigation, DI, animation, cross-platform, or testing?
 3. **Apply the core rules below** — the decision heuristics and defaults in this file cover most cases.
 4. **Consult the right reference** — load the relevant file from `references/` only when deeper guidance is needed. Use the [Quick Routing](#quick-routing) in the Detailed References section to pick the right file.
 5. **Verify dependencies before recommending** — before adding or upgrading any dependency, verify coordinates, target support, and API shape via a documentation MCP tool or official docs (see [Dependency Verification Rule](#dependency-verification-rule)).
-6. **Flag anti-patterns** — if the user's code violates architectural best practices, call it out and suggest the correct pattern.
+6. **Flag anti-patterns contextually** — if the user's code violates best practices, call it out for production code. For quick prototypes or minor UI tweaks, prioritize answering their specific question over lecturing them on strict rules.
 7. **Write the minimal correct solution** — do not over-engineer. Prefer feature-specific code over generic frameworks.
 
 ## Dependency Verification Rule
@@ -44,7 +44,7 @@ When helping with Jetpack Compose or Compose Multiplatform code, follow this pro
 - **Official docs** — Search the library's official documentation or release notes.
 - **Maven Central / Google Maven** — Check artifact availability and supported platforms.
 
-**If verification is not possible** (no documentation tool, no network access, docs unavailable), state this explicitly and note that coordinates or APIs may need adjustment.
+**If verification is not possible** (no documentation tool, no network access, docs unavailable), **provide the standard or latest known dependency snippet anyway.** Add a brief comment (e.g., `// Verify latest version`) so the user isn't blocked.
 
 ## Fetching Up-to-Date Documentation
 
@@ -121,7 +121,7 @@ Apply these unless the project already follows a different coherent pattern.
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, update state on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
 | Resource access | Semantic keys/enums in state; resolve strings/icons close to UI. CMP uses `Res.string` / `Res.drawable` (not Android `R`). See [Resources](references/resources.md) |
-| Platform separation | CMP: share in `commonMain`, `expect/actual` or interfaces for platform APIs, Koin DI by default. Android-only: standard package structure, Hilt DI by default (Koin also valid) |
+| Platform separation | CMP: share in `commonMain`, `expect/actual` (verify Kotlin 1.9 vs 2.0+ via `build.gradle.kts` or ask user) or interfaces, Koin DI by default. Android-only: standard package, Hilt or Koin DI |
 | Navigation | ViewModel emits semantic navigation effect; route/navigation layer executes it |
 | Persistence (settings) | DataStore Preferences in `commonMain` for key-value settings; Typed DataStore (JSON) for structured settings objects; Room for relational/queried data. See [DataStore](references/datastore.md) |
 | Testing | ViewModel event→state→effect tests via Turbine in `commonTest`; validators/calculators tested as pure functions; platform bindings tested per target |
@@ -157,7 +157,7 @@ Apply these unless the project already follows a different coherent pattern.
 
 ## Detailed References
 
-**Load exactly one reference file when the task needs knowledge beyond the core rules above.** Pick the right file using the routing below — do not load files speculatively.
+**Do not load reference files for basic Compose usage.** If you already know how to build the required UI or logic, write the code immediately. **Load exactly one reference file only when the task involves advanced concepts** (e.g., Paging 3, Nav 3 setup). Pick the right file below — do not load files speculatively.
 
 ### Quick Routing
 
