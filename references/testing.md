@@ -221,6 +221,16 @@ Do not sink weeks into screenshot infrastructure before you have ViewModel test 
 | Testing derived/computed properties in isolation from ViewModel | duplicates logic, drifts from real behavior | test derived values through ViewModel state assertions |
 | Sharing mutable test fixtures across tests | hidden coupling, order-dependent failures | fresh state per test, explicit setup in each test function |
 
+## Domain-Specific Testing
+
+Some reference files contain their own testing sections with domain-specific patterns:
+
+| Domain | Reference | What it covers |
+|---|---|---|
+| Paging 3 | [paging-mvi-testing.md](paging-mvi-testing.md) | PagingSource unit tests, `asSnapshot`, `TestPager` transformations |
+| Room Database | [room-database.md](room-database.md) | In-memory DB tests, migration tests, fake DAOs |
+| Networking | [networking-ktor-testing.md](networking-ktor-testing.md) | MockEngine, API response testing, DI integration |
+
 ## Recommendations by App Scale
 
 ### Small App

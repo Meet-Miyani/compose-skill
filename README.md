@@ -64,7 +64,7 @@ The skill covers **Android**, **iOS**, **Desktop**, and **Web** targets with the
   </tr>
   <tr>
     <td valign="top">
-      Navigation 3 (NavDisplay)<br>
+      Navigation 3 &amp; Nav 2<br>
       Tabs, scenes, deep links<br>
       Koin (CMP) & Hilt (Android)<br>
       ViewModel scoping
@@ -95,7 +95,7 @@ The skill covers **Android**, **iOS**, **Desktop**, and **Web** targets with the
 | **One-shot actions** | Boolean flags in state | `Channel<Effect>` for navigation, snackbar |
 | **Recomposition** | Frequent, hard to diagnose | Minimized via state shape and read boundaries |
 | **Navigation** | Ad-hoc calls from composables | Semantic effects, route layer executes |
-| **Networking** | Inconsistent error handling | Ktor + `ApiResponse` sealed wrapper, DTO mappers |
+| **Networking** | Inconsistent error handling | Ktor + `Result`/`ApiResult` wrapper, DTO mappers |
 | **Persistence** | Raw SharedPreferences | DataStore + Room with MVI integration |
 | **Accessibility** | Missing or incorrect semantics | `contentDescription`, touch targets, WCAG contrast |
 | **Cross-platform** | Android-only or inconsistent | `commonMain` with `expect/actual` for platform APIs |
@@ -181,7 +181,7 @@ compose-skill/
 ├── SKILL.md                            # Skill definition — agent reads this
 ├── agents/
 │   └── openai.yaml                     # Codex UI metadata
-└── references/                         # 26 deep-dive reference files
+└── references/                         # 37 deep-dive reference files
     │                                   #   (loaded on-demand by SKILL.md)
     ├── architecture.md
     ├── coroutines-flow.md
@@ -190,7 +190,14 @@ compose-skill/
     ├── image-loading.md
     ├── lists-grids.md
     ├── paging.md
+    ├── paging-offline.md
+    ├── paging-mvi-testing.md
     ├── navigation.md
+    ├── navigation-3.md
+    ├── navigation-2.md
+    ├── navigation-3-di.md
+    ├── navigation-2-di.md
+    ├── navigation-migration.md
     ├── performance.md
     ├── animations.md
     ├── ui-ux.md
@@ -198,6 +205,9 @@ compose-skill/
     ├── room-database.md
     ├── datastore.md
     ├── networking-ktor.md
+    ├── networking-ktor-auth.md
+    ├── networking-ktor-testing.md
+    ├── networking-ktor-architecture.md
     ├── dependency-injection.md
     ├── koin.md
     ├── hilt.md
@@ -221,7 +231,7 @@ compose-skill/
 
 ## Reference Guide
 
-The `references/` directory contains 26 deep-dive files that the skill loads on-demand. Here's what each one covers in detail:
+The `references/` directory contains 37 deep-dive files that the skill loads on-demand. Here's what each one covers in detail:
 
 <details>
 <summary><strong>Kotlin Foundations</strong></summary>
@@ -252,8 +262,15 @@ The `references/` directory contains 26 deep-dive files that the skill loads on-
 | **image-loading.md** | Coil 3 setup for Compose/CMP, `AsyncImage`/`rememberAsyncImagePainter`/`SubcomposeAsyncImage` decision guide, placeholder/error/fallback/crossfade, memory/disk/network cache policy, transformations vs `Modifier.clip`, SVG (`coil-svg`), `Res.getUri` resource loading |
 | **compose-essentials.md** | Three phases model, state primitives, side effects (`LaunchedEffect`, `DisposableEffect`, `rememberUpdatedState`), modifier ordering, `graphicsLayer`, slot pattern, `CompositionLocal`, `collectAsStateWithLifecycle` |
 | **lists-grids.md** | LazyColumn/LazyRow, keys, `contentType`, grids, pager, scroll state, nested scrolling, list anti-patterns |
-| **paging.md** | PagingSource, Pager + ViewModel setup (PagingData as separate Flow, never in UiState), `cachedIn`, filter/search with `flatMapLatest`, `LazyPagingItems`, LoadState handling, RemoteMediator offline-first, MVI integration, testing |
-| **navigation.md** | Complete Nav 3 reference: route definition, back stack persistence, `NavDisplay` full API, top-level tabs (Now in Android pattern), ViewModel scoping with entry decorators, Scenes (dialog, bottom sheet, list-detail, Material Adaptive), animations, modularization (api/impl split, Hilt multibindings, Koin), deep links, CMP polymorphic serialization |
+| **paging.md** | PagingSource, Pager + ViewModel setup (PagingData as separate Flow, never in UiState), `cachedIn`, filter/search with `flatMapLatest`, `LazyPagingItems` (all lazy layouts), LoadState handling, PagingData transformations, `PagingSource.invalidate()` |
+| **paging-offline.md** | RemoteMediator offline-first with Room, `initialize()` (`LAUNCH_INITIAL_REFRESH` vs `SKIP_INITIAL_REFRESH`), remote keys, Pager wiring |
+| **paging-mvi-testing.md** | MVI dual-flow pattern (PagingData separate from UiState), route collection, PagingSource unit tests, `asSnapshot`, `TestPager`, anti-patterns table |
+| **navigation.md** | Shared navigation concepts: Nav 2 vs Nav 3 decision guide, MVI navigation rules (both versions), anti-patterns table, routing to version-specific files |
+| **navigation-3.md** | Nav 3 full reference: route definition, back stack persistence, `NavDisplay` full API, top-level tabs (`NavigationSuiteScaffold`), ViewModel scoping with entry decorators, Scenes (dialog, bottom sheet, list-detail, Material Adaptive), animations, back stack manipulation, deep links, CMP polymorphic serialization |
+| **navigation-2.md** | Nav 2 full reference: `NavHost`/`NavController`, type-safe routes (2.8+), string routes, top-level tabs (`NavigationBar` + `currentBackStackEntryAsState` + `saveState`/`restoreState`), deep links (`NavDeepLink`), navigate with results (`SavedStateHandle`), nested graphs, animations (`enterTransition`/`exitTransition`), conditional navigation (auth guards), predictive back |
+| **navigation-3-di.md** | Nav 3 + DI wiring: Hilt `hiltViewModel` in entry blocks + `@AssistedInject` + multibinding entry providers, Koin `navigation<T>` DSL + `koinEntryProvider()`, modularization api/impl split, entry-scoped VMs via decorators |
+| **navigation-2-di.md** | Nav 2 + DI wiring: Hilt `hiltViewModel` in composable destinations + graph-scoped VMs via `getBackStackEntry` + `SavedStateHandle`, Koin `koinViewModel` + `koinNavViewModel` + `sharedKoinViewModel` for graph-scoped sharing |
+| **navigation-migration.md** | Nav 2 to Nav 3 migration: conceptual shift table, step-by-step migration (routes → NavKey, controller → backStack, NavHost → NavDisplay, graph VMs → entry decorators, deep links, tabs), incremental strategy, coexistence |
 
 </details>
 
@@ -285,7 +302,10 @@ The `references/` directory contains 26 deep-dive files that the skill loads on-
 
 | Reference | What's Inside |
 |:----------|:-------------|
-| **networking-ktor.md** | HttpClient configuration, platform engines, DTOs and `@Serializable` models, DTO-to-domain mappers, API service layer, `ApiResponse` sealed wrapper, repository pattern, bearer token auth with refresh, WebSockets, MockEngine testing, Koin/Hilt DI integration |
+| **networking-ktor.md** | HttpClient configuration, platform engines, plugins (ContentNegotiation, Retry, Timeout, Logging, ContentEncoding), custom plugins (`createClientPlugin`), DTOs, mappers, API service (CRUD, multipart), repository pattern, proxy/SSL |
+| **networking-ktor-auth.md** | Bearer token auth with refresh, WebSockets (frames, serialization converter, session), SSE (Server-Sent Events) |
+| **networking-ktor-testing.md** | MockEngine setup (success, error, request assertions, multiple responses), engine injection, Koin/Hilt DI integration, testing anti-patterns |
+| **networking-ktor-architecture.md** | `Result` vs `ApiResult` decision, `safeRequest` wrapper, exception classification, plugin composition strategy, client factory design, response observation plugin, debug vs production, architecture anti-patterns |
 | **dependency-injection.md** | DI decision guide (Hilt vs Koin), shared concepts |
 | **koin.md** | Koin setup for CMP and Android, module organization, `koinViewModel`, `koinInject`, Koin + Nav 3 (`navigation<T>`, `koinEntryProvider`), scoped navigation, MVI ViewModel integration, testing |
 | **hilt.md** | Android-only Hilt setup, `@HiltViewModel`, `hiltViewModel()`, modules (`@Provides`/`@Binds`), scopes, Navigation Compose integration, MVI pattern with Hilt, testing |

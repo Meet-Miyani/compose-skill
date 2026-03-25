@@ -15,7 +15,8 @@ References:
 | Error detection | Build-time | Runtime — use `verify()` in tests; KSP annotations add compile-time checks |
 | Setup complexity | Higher (Gradle plugins, annotations) | Lower (DSL modules); annotations optional |
 | Compose Multiplatform | Not supported | Full support |
-| Navigation 3 | `hiltViewModel()` in `entry<T>` blocks; multibinding entry providers for modularization — see [navigation.md](navigation.md) | `navigation<T>` DSL + `koinEntryProvider()` — see [koin.md](koin.md) |
+| Navigation 3 | `hiltViewModel()` in `entry<T>` blocks; multibinding entry providers — see [navigation-3-di.md](navigation-3-di.md) | `navigation<T>` DSL + `koinEntryProvider()` — see [navigation-3-di.md](navigation-3-di.md) |
+| Navigation 2 | `hiltViewModel()` in composable destinations; graph-scoped VMs — see [navigation-2-di.md](navigation-2-di.md) | `koinViewModel()`, `koinNavViewModel()`, `sharedKoinViewModel()` — see [navigation-2-di.md](navigation-2-di.md) |
 
 **Default recommendation:**
 - **Android-only projects**: Hilt is the default recommendation. Koin is also valid if the team prefers it or the project may become multiplatform later.
@@ -62,8 +63,8 @@ Over-scoping wastes memory; under-scoping creates redundant instances. Match the
 Organize DI modules by feature, not by type. Each feature module declares its own dependencies:
 
 ```text
-feature-estimate/
-    EstimateModule        → repository, calculator, validator, ViewModel
+feature-product/
+    ProductModule         → repository, calculator, validator, ViewModel
 feature-settings/
     SettingsModule        → repository, ViewModel
 core/

@@ -92,7 +92,7 @@ abstract class RepositoryModule {
     
     @Binds
     @Singleton
-    abstract fun bindEstimateRepository(impl: EstimateRepositoryImpl): EstimateRepository
+    abstract fun bindProductRepository(impl: ProductRepositoryImpl): ProductRepository
 }
 ```
 
@@ -103,14 +103,14 @@ Use `ViewModelComponent` when dependencies are only needed within a ViewModel an
 ```kotlin
 @Module
 @InstallIn(ViewModelComponent::class)
-object EstimateModule {
+object ProductModule {
     @Provides
     @ViewModelScoped
-    fun provideEstimateCalculator(): EstimateCalculator = EstimateCalculator()
+    fun provideProductCalculator(): ProductCalculator = ProductCalculator()
     
     @Provides
     @ViewModelScoped
-    fun provideEstimateValidator(): EstimateValidator = EstimateValidator()
+    fun provideProductValidator(): ProductValidator = ProductValidator()
 }
 ```
 
@@ -120,9 +120,9 @@ object EstimateModule {
 
 ```kotlin
 @HiltViewModel
-class EstimateViewModel @Inject constructor(
-    private val calculator: EstimateCalculator,
-    private val repository: EstimateRepository,
+class ProductViewModel @Inject constructor(
+    private val calculator: ProductCalculator,
+    private val repository: ProductRepository,
 ) : ViewModel() {
     // StateFlow<State>, Channel<Effect>, onEvent() — see architecture.md
 }
@@ -181,17 +181,17 @@ Prefer `SavedStateHandle` for navigation arguments (simpler, survives process de
 class MainActivity : ComponentActivity() { /* setContent { ... } */ }
 
 @Composable
-fun EstimateRoute(viewModel: EstimateViewModel = hiltViewModel()) {
+fun ProductRoute(viewModel: ProductViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    EstimateScreen(state = state, onEvent = viewModel::onEvent)
+    ProductScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 
-Every Activity hosting Hilt-injected composables requires `@AndroidEntryPoint`. For effect collection and MVI routing, see [architecture.md](architecture.md).
+Every Activity hosting Hilt-injected composables requires `@AndroidEntryPoint`. Use the standard MVI Route/Screen pattern: collect state via `collectAsStateWithLifecycle()`, collect effects via `CollectEffect`, pass `onEvent` to Screen.
 
 ## Navigation Integration
 
-**For Nav 3 + Hilt patterns** (entry-scoped ViewModels, multibinding entry providers), see [navigation.md](navigation.md) — that is the preferred approach for new projects.
+**For Nav 3 + Hilt patterns** (entry-scoped ViewModels, multibinding entry providers), see [navigation-3-di.md](navigation-3-di.md) — that is the preferred approach for new projects. For Nav 2 + Hilt patterns (graph-scoped VMs, `@AssistedInject`), see [navigation-2-di.md](navigation-2-di.md).
 
 The patterns below apply to **Navigation Compose (Nav 2)** projects that use Hilt. They remain valid for existing codebases but should not be the starting point for new work.
 
@@ -232,7 +232,7 @@ SingletonComponent
 
 ## Hilt in MVI
 
-The only Hilt-specific wiring is `@HiltViewModel` + `@Inject constructor`. The MVI pattern (Event/State/Effect, `onEvent()`) is framework-agnostic — see [architecture.md](architecture.md).
+The only Hilt-specific wiring is `@HiltViewModel` + `@Inject constructor`. The MVI pattern (Event/State/Effect, `onEvent()`) is framework-agnostic — DI only affects constructor injection and injection-site calls.
 
 ## Testing
 

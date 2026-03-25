@@ -246,9 +246,9 @@ interface Haptics {
     fun perform(type: HapticType)
 }
 
-sealed interface EstimateEffect {
-    data class TriggerHaptic(val type: HapticType) : EstimateEffect
-    data class ShareQuote(val text: String) : EstimateEffect
+sealed interface ProductEffect {
+    data class TriggerHaptic(val type: HapticType) : ProductEffect
+    data class ShareQuote(val text: String) : ProductEffect
 }
 ```
 
@@ -264,7 +264,7 @@ interface ShareText {
 
 Reducers emit semantic navigation effects; the route/navigation layer executes them.
 
-Good: `EstimateEffect.NavigateBack`, `EstimateEffect.OpenDetails(id)`
+Good: `ProductEffect.NavigateBack`, `ProductEffect.OpenDetails(id)`
 
 Bad: reducer calling navigation controller directly, composable deciding destination rules ad hoc.
 
@@ -315,14 +315,14 @@ Treat accessibility as a first-class part of shared UI:
 ### GOOD: shared calculator domain logic
 
 ```kotlin
-class EstimateCalculator {
-    fun calculate(draft: EstimateDraft): EstimateDerived {
+class PriceCalculator {
+    fun calculate(draft: PriceDraft): PriceDerived {
         val wasteMultiplier = if (draft.includeWaste) 1.10 else 1.0
         val materialCost = draft.area * draft.materialRate * wasteMultiplier
         val laborCost = draft.area * draft.laborRate
         val subtotal = materialCost + laborCost
         val tax = subtotal * (draft.taxPercent / 100.0)
-        return EstimateDerived(materialCost = materialCost, laborCost = laborCost, subtotal = subtotal, tax = tax, total = subtotal + tax)
+        return PriceDerived(materialCost = materialCost, laborCost = laborCost, subtotal = subtotal, tax = tax, total = subtotal + tax)
     }
 }
 ```
@@ -331,8 +331,8 @@ class EstimateCalculator {
 
 ```kotlin
 @Immutable
-data class EstimateState(
-    val input: EstimateInput = EstimateInput(),
+data class ProductState(
+    val input: ProductInput = ProductInput(),
     val iosKeyboardInsetHack: Int = 0,
     val androidHapticPattern: String = "",
     val shareSheetPresented: Boolean = false,

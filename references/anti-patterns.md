@@ -41,9 +41,10 @@ These reference files contain their own anti-pattern sections with detailed BAD/
 | Animations | [animations.md](animations.md) | ViewModel animation state, graphicsLayer misuse, over-animating |
 | Lists & Grids | [lists-grids.md](lists-grids.md) | keys, nested scrolling, contentType |
 | UI/UX | [ui-ux.md](ui-ux.md) | disappearing content, layout jumps, loading states |
-| Navigation | [navigation.md](navigation.md) | route design, back stack, ViewModel scoping |
-| Paging | [paging.md](paging.md) | PagingData in UiState, key misuse, LoadState handling |
-| Networking | [networking-ktor.md](networking-ktor.md) | client config, error handling, auth |
+| Navigation (shared) | [navigation.md](navigation.md) | MVI navigation rules, anti-patterns for both Nav 2 and Nav 3 |
+| Paging | [paging-mvi-testing.md](paging-mvi-testing.md) | PagingData in UiState, key misuse, LoadState handling |
+| Networking | [networking-ktor-testing.md](networking-ktor-testing.md) | MockEngine, DI integration, testing anti-patterns |
+| Network Architecture | [networking-ktor-architecture.md](networking-ktor-architecture.md) | plugin composition, error strategy, client lifecycle, result wrapper choice |
 | Room Database | [room-database.md](room-database.md) | entity design, DAO patterns, migrations |
 | DataStore | [datastore.md](datastore.md) | singleton enforcement, blocking reads, corruption |
 | DI (Koin) | [koin.md](koin.md) | module organization, scoping, ViewModel injection |
