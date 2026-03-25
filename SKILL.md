@@ -55,24 +55,25 @@ When adding a new dependency, upgrading major versions, or verifying latest API 
 
 **Alternative**: Users can add `use context7` (or equivalent) to their prompt. Bundled references remain the primary source for architectural patterns and MVI guidance; use documentation tools for API-specific and version-specific queries.
 
-## Core Architecture: MVI with Event, State, Effect
+## Core Architecture: MVI or MVVM
 
-**This is the recommended architecture for all Compose work.** If the project already uses a different pattern, suggest MVI as the preferred approach but do not force-migrate working code — follow [Existing Project Policy](#existing-project-policy).
+Both MVI and MVVM use **unidirectional data flow**: UI renders state → user acts → ViewModel updates state → UI re-renders. The difference is how UI actions reach the ViewModel.
 
-MVI (Model-View-Intent) enforces **unidirectional data flow**: UI renders state → user acts → event dispatched → new state computed → UI re-renders. Every feature defines 3 types:
+- **MVI**: `sealed interface Event` + single `onEvent()` entry point
+- **MVVM**: Named public functions (`onTitleChanged()`, `save()`)
 
-- **Event** — user actions and lifecycle signals (`sealed interface`). The **only** input from the UI to the ViewModel.
-- **State** — immutable data class that fully describes the screen. Owned by the ViewModel via `StateFlow`.
-- **Effect** — one-shot commands (navigate, snackbar, share) delivered via `Channel`. Not state — fire and forget.
+Both patterns use:
+- **State** — immutable data class that fully describes the screen, owned via `StateFlow`
+- **Effect** — one-shot commands (navigate, snackbar, share) delivered via `Channel`
 
-The ViewModel owns `StateFlow<State>`, `Channel<Effect>`, and a single `onEvent(event: Event)` entry point. All event handling, state transitions, effect emissions, and async launches happen inside `onEvent()`.
-
-For detailed rationale (why 3 types not 4, data flow diagrams, ViewModel internals, file structure) see [Architecture & State Management](references/architecture.md).
+**Default recommendation:** Preserve the project's existing pattern when it is coherent. For new projects, choose based on team preference and screen complexity. See [Architecture & State Management](references/architecture.md) for the decision guide, then [mvi.md](references/mvi.md) or [mvvm.md](references/mvvm.md) for implementation details.
 
 ### UI Rendering Boundary
 
+These boundaries apply to both MVI and MVVM:
+
 - **Route** composable: obtains ViewModel, collects state via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (see [compose-essentials.md](references/compose-essentials.md)), binds navigation/snackbar/platform APIs
-- **Screen** composable: stateless renderer — receives state and `onEvent` callback, renders the screen, adapts callbacks for leaf composables
+- **Screen** composable: stateless renderer — receives state and callbacks (MVI: `onEvent`, MVVM: individual callbacks), renders the screen, adapts callbacks for leaf composables
 - **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state (focus, scroll, animation)
 
 ## Decision Heuristics
@@ -83,7 +84,7 @@ For detailed rationale (why 3 types not 4, data flow diagrams, ViewModel interna
 - UI-local state is acceptable only for ephemeral visual concerns: focus, scroll, animation progress, expansion toggles
 - Do not push animation-only flags into global screen state unless business logic depends on them
 - Pass the narrowest possible state to leaf composables
-- Implement `onEvent()` in the ViewModel — the single entry point from the UI for all user actions
+- MVI: implement `onEvent()` as the single entry point; MVVM: implement named functions for user actions
 - Do not introduce a use case for every repository call
 - Cross-platform sharing prioritizes business logic and presentation state before platform behavior
 - Least recomposition is achieved by state shape and read boundaries first, Compose APIs second
@@ -113,9 +114,9 @@ Apply these unless the project already follows a different coherent pattern.
 
 | Concern | Default |
 |---|---|
-| ViewModel | One ViewModel per screen with `onEvent(Event)` entry point (`commonMain` for CMP, feature package for Android-only) |
+| ViewModel | One ViewModel per screen (`commonMain` for CMP, feature package for Android-only). MVI: `onEvent(Event)` entry point; MVVM: named functions |
 | State source of truth | `StateFlow<FeatureState>` owned by the ViewModel |
-| Event handling | `onEvent(event)` — single `when` expression mapping events to state updates, effect emissions, and async launches |
+| Event handling | MVI: `onEvent(event)` with `when` expression; MVVM: named functions. Both map user actions to state updates, effect emissions, and async launches |
 | Side effects | `Effect` sent via `Channel<Effect>(Channel.BUFFERED)` for UI-consumed one-shots (navigate, snackbar). Async work (network, persistence) launched in `viewModelScope` |
 | Async loading | Keep previous content, flip loading flag, cancel outdated jobs, update state on completion |
 | Dumb UI contract | Render props, emit explicit callbacks, keep only ephemeral visual state local |
@@ -180,7 +181,9 @@ Apply these unless the project already follows a different coherent pattern.
 - **Code review or anti-pattern detection** → [anti-patterns.md](references/anti-patterns.md) first, then domain-specific files as needed
 - **Exposing Kotlin to Swift, SKIE, or Flow→AsyncSequence** → [ios-swift-interop.md](references/ios-swift-interop.md)
 - **ViewModel pipeline, state modeling, domain layer, or inter-feature communication** → [architecture.md](references/architecture.md)
-- **File organization, naming conventions, or disciplined vs bloated MVI** → [clean-code.md](references/clean-code.md)
+- **MVI pipeline, Event/State/Effect, onEvent pattern, or effect delivery** → [mvi.md](references/mvi.md)
+- **MVVM pipeline, ViewModel named functions, or direct-callback UI wiring** → [mvvm.md](references/mvvm.md)
+- **File organization, naming conventions, or disciplined screen architecture** → [clean-code.md](references/clean-code.md)
 - **Three phases, state primitives, side effects, or modifiers** → [compose-essentials.md](references/compose-essentials.md)
 - **M3 theme, dynamic color, M3 components, or adaptive layouts** → [material-design.md](references/material-design.md)
 - **AsyncImage, image cache, SVG, or Coil 3** → [image-loading.md](references/image-loading.md)

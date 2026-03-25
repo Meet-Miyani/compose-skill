@@ -1,9 +1,17 @@
 # Architecture & State Management
 
+Shared architecture reference for Jetpack Compose and Compose Multiplatform. This file covers concepts and rules that apply to both MVI and MVVM patterns. Load this file first for any architecture question, then follow the routing below to the pattern-specific reference.
+
+Preservation rule: if the project already has a coherent screen architecture pattern (MVI, MVVM, or variant), preserve it unless the user explicitly asks to migrate or the current pattern cannot satisfy a required constraint.
+
+For pattern-specific implementation details, see [mvi.md](mvi.md) or [mvvm.md](mvvm.md).
+
 ## Table of Contents
 
 - [Source of Truth](#source-of-truth)
-- [MVI Pipeline](#mvi-pipeline)
+- [Choosing a State Owner](#choosing-a-state-owner)
+- [MVI vs MVVM Decision Guide](#mvi-vs-mvvm-decision-guide)
+- [When to Use Lighter Patterns](#when-to-use-lighter-patterns)
 - [Domain Layer](#domain-layer)
 - [Inter-Feature Communication](#inter-feature-communication)
 - [Module Dependency Rules](#module-dependency-rules)
@@ -14,91 +22,74 @@
 - [Props and Callbacks](#props-and-callbacks)
 - [Adapting to Existing Projects](#adapting-to-existing-projects)
 - [Scaling Notes](#scaling-notes)
-- [Code Examples](#code-examples)
+- [Pattern-Specific References](#pattern-specific-references)
 
 ## Source of Truth
 
 Per screen:
 
-- **Screen behavior:** `StateFlow<ScreenState>` owned by the ViewModel
+- **Screen behavior:** `StateFlow<ScreenState>` owned by the screen state holder, often a ViewModel
 - **Persisted data:** repository / database / remote service
 - **Local visual-only concerns:** local Compose state in the route or leaf composable
 
 Do not mix them.
 
-## MVI Pipeline
+## Choosing a State Owner
 
-### The 3 MVI Types
+Use the lightest state owner that cleanly fits the problem.
 
-Every feature defines 3 types: `Event`, `State`, `Effect`.
+| Situation | Default owner | Why |
+|---|---|---|
+| Visual state used by one composable subtree | Local Compose state | Smallest scope, easiest reuse, no extra architecture |
+| Complex UI logic inside the composition with no business/data responsibilities | Plain state holder class | Keeps UI logic testable without pushing everything into a screen ViewModel |
+| Screen-level business rules, async work, persistence, or one-shot effects | ViewModel or existing screen state holder | Best place for orchestration, lifecycle integration, and screen state ownership |
 
-### Event
+A ViewModel is one implementation of a screen state holder, not a requirement for every composable. In KMP codebases, use interfaces or plain state holders when that fits the module boundaries better.
 
-User actions from UI: button clicks, field changes, lifecycle-start, retry, refresh, back press. Events are the **only** input from the UI into the ViewModel, processed by a single `onEvent()` function.
+## MVI vs MVVM Decision Guide
 
-Events should be named from the **user's perspective** — what happened, not what should happen. `OnSaveClick` describes a user action; `SaveCategory` describes an imperative command. Prefer the former.
+Both patterns use unidirectional data flow with `StateFlow<State>` and `Channel<Effect>`. The difference is how UI actions reach the ViewModel.
 
-### State
+| Criterion | MVI (Event/State/Effect) | MVVM (named functions) |
+|---|---|---|
+| UI-to-ViewModel contract | `sealed interface Event` + single `onEvent()` | Named public functions (`onTitleChanged()`, `save()`) |
+| Event traceability | All events enumerated in one sealed type | Implicit in function signatures |
+| Boilerplate | Higher — sealed class + when-dispatch | Lower — direct function calls |
+| Testing input surface | Single `onEvent()` entry point | Multiple function entry points |
+| IDE navigation | Jump to Event subclass | Jump to function definition |
+| Best for | Complex screens with many events, teams wanting exhaustive event logging/analytics, projects with MVI base classes | Simpler screens, teams preferring less ceremony, existing MVVM codebases |
 
-Immutable data class that fully describes what the screen should render. Given the same state, the screen always looks the same. One state per screen, owned by the ViewModel via `StateFlow<State>`.
+**When to use MVI:**
 
-State should be **equality-friendly** — use `data class` with immutable collections. Computed properties (`val hasRequiredFields get() = name.isNotBlank()`) are acceptable for trivial derivations. Store canonical values; derive display values at the UI boundary.
+- Project already uses MVI with a base class or convention
+- Screen has many user actions and you want them enumerated in one place
+- Team values explicit event contracts for debugging, analytics, or time-travel debugging
+- You need exhaustive `when` handling for all UI actions
 
-### Effect
+**When to use MVVM:**
 
-One-off UI commands that don't belong in state: navigate, show snackbar, trigger haptic, copy/share, open browser. Sent via `Channel<Effect>(Channel.BUFFERED)`, consumed once via `receiveAsFlow()`.
+- Project already uses MVVM conventions
+- Screen is straightforward with few actions
+- Team prefers less boilerplate and direct function calls
+- Migrating from Android View-based MVVM to Compose
 
-**Why effects are not state:** if you model "show snackbar" as a boolean in state, you need "consume" logic to flip it back — a classic source of bugs. Effects fire once and are gone.
+**Default recommendation:**
 
-### Effect Delivery: Channel vs SharedFlow
+- Preserve the project's existing pattern when it is coherent
+- For new projects with no existing pattern, either is valid — choose based on team preference and screen complexity
 
-`Channel<Effect>(Channel.BUFFERED)` with `receiveAsFlow()` is the default for effects:
+## When to Use Lighter Patterns
 
-- **Buffers for reliable delivery**: buffered channel holds effects even if the collector is temporarily inactive (e.g., during recomposition, rapid lifecycle transitions, or — on Android — configuration changes)
-- **Single consumer**: only one collector receives each effect — no accidental double-handling
-- **No replay**: new collectors don't receive stale effects
+Do not force a full screen architecture pattern onto every UI problem.
 
-`SharedFlow(replay=0)` drops effects when no collector is active. This is acceptable for truly fire-and-forget signals but risks losing effects during brief collector gaps. Prefer `Channel` unless you have a specific reason.
+Use lighter patterns for:
 
-### Event Processing Flow
+- Purely presentational or one-off leaf composables
+- Small screens with trivial local state and no async, persistence, or navigation effects
+- Complex UI-element logic better handled by a plain state holder inside the composition
+- Prototypes or spike code unless the user asks to formalize the architecture
 
-```text
-UI gesture / lifecycle signal
-    → Event dispatched via onEvent()
-    → ViewModel processes the event in a when() block
-    → Synchronous events: updateState { copy(...) }
-    → Side effects: sendEffect(effect)
-    → Async work: viewModelScope.launch { ... }
-    → On async completion: updateState { copy(...) } + sendEffect(...)
-```
-
-The key insight: **`onEvent()` is the single decision point**. It decides what happens for each event — update state, send an effect, launch async work, or some combination. This keeps all event→reaction logic in one place, readable top-to-bottom.
-
-### ViewModel Anatomy
-
-A feature ViewModel has three responsibilities:
-
-1. **State ownership** — holds `MutableStateFlow<State>`, exposes `StateFlow<State>`
-2. **Effect delivery** — holds `Channel<Effect>`, exposes `Flow<Effect>`
-3. **Event processing** — implements `onEvent()` to handle all events
-
-State is updated via a thread-safe `update` function (e.g., `MutableStateFlow.update { it.copy(...) }` or a wrapper like `updateState { copy(...) }`). Effects are sent via `channel.trySend(effect)` or a wrapper like `sendEffect(effect)`.
-
-If the project uses a base class or interface (like `MviHost<Event, State, Effect>`), the ViewModel implements/extends it. If not, the ViewModel directly manages `MutableStateFlow` and `Channel`. The pattern is the same either way.
-
-### UI Rendering Boundary
-
-- **Route** composable: obtains ViewModel (via `koinViewModel()`, `hiltViewModel()`, or manual construction), collects state once via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (lifecycle-aware effect collector — see compose-essentials.md if implementing from scratch), binds navigation/snackbar/sheet/platform APIs
-- **Screen** composable: render screen from state, adapt to smaller callbacks for leaf composables. Stateless — receives state and event callback
-- **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state
-
-### Domain Logic Boundary
-
-Lives outside UI: validators, calculators, rounding rules, eligibility rules, submit enablement rules, derived result engines, formatting rules with business meaning.
-
-### Data Layer Boundary
-
-Lives outside the ViewModel's event handling: repositories, local persistence, remote APIs, DTO mapping, caching policies.
+Do not invent reducers, result types, global base frameworks, or one ViewModel per row unless the project already uses them and they are clearly earning their keep.
 
 ## Domain Layer
 
@@ -291,23 +282,27 @@ Do **not** make leaf composables observe the ViewModel directly by default.
 
 Good: `AmountField(value, error, onValueChange)`, `ResultCard(result, isRefreshing, onShare)`
 
-Bad: `AmountField(state, onEvent)`
+Bad: `AmountField(state, onEvent)` (MVI) or `AmountField(state, viewModel)` (MVVM)
 
-### Stable Callbacks vs Generic Event Dispatchers
+### Callbacks at Boundaries
 
-- `onEvent(Event)` is fine at the route/screen boundary
-- Leaf composables should prefer specific callbacks
-- Reusable components should not know your feature event contract
+- MVI: `onEvent(Event)` is fine at the route/screen boundary; leaf composables prefer specific callbacks
+- MVVM: individual callbacks (`onTitleChange`, `onSave`) at the screen boundary; same narrowing for leaves
+- Reusable components should not know your feature's event contract or ViewModel type
 
 ## Adapting to Existing Projects
 
 ### Project already has MVI with a base class
 
-Use it. If the project has `MviHost<Event, State, Effect>` or `BaseViewModel<Event, State, Effect>`, extend/implement it. Don't introduce a competing base class.
+Use it. If the project has `MviHost<Event, State, Effect>` or `BaseViewModel<Event, State, Effect>`, extend/implement it. Don't introduce a competing base class. See [mvi.md](mvi.md) for implementation details.
 
 ### Project uses MVVM without strict MVI
 
-If it works and the team is productive, don't rewrite it. If asked to add a new feature, follow the project's conventions. If asked to introduce MVI, do it incrementally — start with new features, don't rewrite existing ones.
+Preserve it. Follow the project's conventions — ViewModel with named functions, `StateFlow<State>`, optional `Channel<Effect>`. If asked to add a new feature, match the existing style. See [mvvm.md](mvvm.md) for implementation details.
+
+### Project uses plain state holder classes
+
+That is valid. Keep the pattern when it already fits the screen and the codebase. Only move to a ViewModel when the screen genuinely needs screen-level business logic, async orchestration, persistence, or platform lifecycle integration.
 
 ### Project has 4-type MVI (Event, Result, State, Effect)
 
@@ -315,7 +310,7 @@ That's fine — it's a valid MVI variant. Use `Result` as the project expects. D
 
 ### Project has no architecture
 
-When building from scratch, use the 3-type MVI pattern described in this skill. It's the simplest correct approach.
+When building from scratch, choose MVI or MVVM based on the decision guide above. For trivial UI-only screens, local state or a plain state holder can be the simpler correct approach.
 
 ## Scaling Notes
 
@@ -325,216 +320,9 @@ When building from scratch, use the 3-type MVI pattern described in this skill. 
 - Do **not** create nested state holders for every card or section by default
 - Create nested state holders only when the section has independent lifecycle, independent async behavior, independent tests, and real reuse
 
-## Code Examples
+## Pattern-Specific References
 
-### BAD: business logic inside composables
+Load the file that matches your task:
 
-```kotlin
-@Composable
-fun LoanCalculatorScreen() {
-    var amountText by rememberSaveable { mutableStateOf("") }
-    var rateText by rememberSaveable { mutableStateOf("") }
-    var yearsText by rememberSaveable { mutableStateOf("") }
-
-    val amount = amountText.toDoubleOrNull() ?: 0.0
-    val rate = rateText.toDoubleOrNull() ?: 0.0
-    val years = yearsText.toIntOrNull() ?: 0
-
-    val isValid = amount > 0.0 && rate > 0.0 && years > 0
-    val monthlyPayment = if (isValid) {
-        val monthlyRate = rate / 1200.0
-        val months = years * 12
-        (amount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months.toDouble()))
-    } else 0.0
-
-    Column {
-        OutlinedTextField(value = amountText, onValueChange = { amountText = it })
-        OutlinedTextField(value = rateText, onValueChange = { rateText = it })
-        OutlinedTextField(value = yearsText, onValueChange = { yearsText = it })
-        Text("Monthly payment: $monthlyPayment")
-        Button(enabled = isValid, onClick = { /* repository.save(...) */ }) { Text("Calculate") }
-    }
-}
-```
-
-Problems: state forked between UI and domain logic, validation in UI, calculation in UI, side effects in UI, impossible to test cleanly, recomputation tied to composition.
-
-### GOOD: MVI contract — Event, State, Effect
-
-```kotlin
-sealed interface CreateItemEvent {
-    data class OnTitleChanged(val title: String) : CreateItemEvent
-    data class OnAmountChanged(val amount: String) : CreateItemEvent
-    data object OnSaveClick : CreateItemEvent
-    data object OnBackClick : CreateItemEvent
-}
-
-data class CreateItemState(
-    val title: String = "",
-    val amount: String = "",
-    val isSaving: Boolean = false,
-    val errors: Map<String, String> = emptyMap()
-) {
-    val canSave: Boolean get() = title.isNotBlank() && amount.isNotBlank()
-}
-
-sealed interface CreateItemEffect {
-    data object NavigateBack : CreateItemEffect
-    data class ShowMessage(val text: String) : CreateItemEffect
-}
-```
-
-Clean separation: events describe what the user did, state describes what to render, effects describe what to do once.
-
-### GOOD: ViewModel with onEvent — state updates and effects in one place
-
-```kotlin
-class CreateItemViewModel(
-    private val repository: ItemRepository,
-) : ViewModel() {
-    private val _state = MutableStateFlow(CreateItemState())
-    val state: StateFlow<CreateItemState> = _state.asStateFlow()
-
-    private val _effect = Channel<CreateItemEffect>(Channel.BUFFERED)
-    val effect: Flow<CreateItemEffect> = _effect.receiveAsFlow()
-
-    fun onEvent(event: CreateItemEvent) {
-        when (event) {
-            is CreateItemEvent.OnTitleChanged -> {
-                _state.update { it.copy(title = event.title, errors = it.errors - "title") }
-            }
-            is CreateItemEvent.OnAmountChanged -> {
-                _state.update { it.copy(amount = event.amount, errors = it.errors - "amount") }
-            }
-            CreateItemEvent.OnSaveClick -> save()
-            CreateItemEvent.OnBackClick -> _effect.trySend(CreateItemEffect.NavigateBack)
-        }
-    }
-
-    private fun save() {
-        val current = _state.value
-        val errors = buildMap {
-            if (current.title.isBlank()) put("title", "Title is required")
-            if (current.amount.toDoubleOrNull() == null) put("amount", "Enter a valid number")
-        }
-
-        if (errors.isNotEmpty()) {
-            _state.update { it.copy(errors = errors) }
-            return
-        }
-
-        _state.update { it.copy(isSaving = true, errors = emptyMap()) }
-
-        viewModelScope.launch {
-            try {
-                repository.create(current.title.trim(), current.amount.toDouble())
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Saved"))
-                _effect.trySend(CreateItemEffect.NavigateBack)
-            } catch (e: Exception) {
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Failed: ${e.message}"))
-            }
-        }
-    }
-}
-```
-
-Key observations:
-- **`onEvent()` is the single entry point** — every user action enters here
-- **State updates are inline** — right where the decision happens
-- **Effects are sent immediately** — no indirection through a reducer
-- **Async work lives in the ViewModel** — `viewModelScope.launch` with try/catch
-- **No `Result` type needed** — the event handler directly updates state and sends effects
-
-### GOOD: same pattern with a base class or interface
-
-```kotlin
-class CreateItemViewModel(
-    private val repository: ItemRepository,
-) : ViewModel(), MviHost<CreateItemEvent, CreateItemState, CreateItemEffect> {
-    override val store = MviStore(CreateItemState())
-
-    override fun onEvent(event: CreateItemEvent) {
-        when (event) {
-            is CreateItemEvent.OnTitleChanged -> {
-                updateState { copy(title = event.title, errors = errors - "title") }
-            }
-            is CreateItemEvent.OnAmountChanged -> {
-                updateState { copy(amount = event.amount, errors = errors - "amount") }
-            }
-            CreateItemEvent.OnSaveClick -> save()
-            CreateItemEvent.OnBackClick -> sendEffect(CreateItemEffect.NavigateBack)
-        }
-    }
-
-    private fun save() {
-        // validation, async work, state updates — same pattern as standalone
-    }
-}
-```
-
-Both approaches are valid. The base class/interface reduces boilerplate across many features; standalone is fine for smaller projects or when the team prefers explicitness.
-
-### GOOD: UI emits events only — route/screen/leaf split
-
-```kotlin
-@Composable
-fun CreateItemRoute(
-    viewModel: CreateItemViewModel = koinViewModel(),
-    snackbarHostState: SnackbarHostState,
-    onNavigateBack: () -> Unit,
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    CollectEffect(viewModel.effect) { effect ->
-        when (effect) {
-            CreateItemEffect.NavigateBack -> onNavigateBack()
-            is CreateItemEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
-        }
-    }
-
-    CreateItemScreen(state = state, onEvent = viewModel::onEvent)
-}
-
-@Composable
-fun CreateItemScreen(state: CreateItemState, onEvent: (CreateItemEvent) -> Unit) {
-    Column {
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = { onEvent(CreateItemEvent.OnTitleChanged(it)) },
-            isError = state.errors.containsKey("title"),
-            label = { Text("Title") },
-        )
-        OutlinedTextField(
-            value = state.amount,
-            onValueChange = { onEvent(CreateItemEvent.OnAmountChanged(it)) },
-            isError = state.errors.containsKey("amount"),
-            label = { Text("Amount") },
-        )
-        Button(
-            onClick = { onEvent(CreateItemEvent.OnSaveClick) },
-            enabled = !state.isSaving && state.canSave,
-        ) {
-            Text(if (state.isSaving) "Saving..." else "Save")
-        }
-    }
-}
-```
-
-### GOOD: event model for form-heavy screens
-
-```kotlin
-enum class FormField { Area, MaterialRate, LaborRate, TaxPercent, Notes }
-
-sealed interface FormEvent {
-    data class FieldChanged(val field: FormField, val raw: String) : FormEvent
-    data class IncludeWasteChanged(val enabled: Boolean) : FormEvent
-    data object SubmitClicked : FormEvent
-    data object RetryClicked : FormEvent
-    data object ScreenShown : FormEvent
-    data object ClearClicked : FormEvent
-}
-```
-
-Pragmatic default for large forms: specific intent names for screen-level actions, generic `FieldChanged(field, raw)` only when many fields are structurally similar.
+- **MVI pipeline, Event/State/Effect, onEvent pattern, or effect delivery** → [mvi.md](mvi.md)
+- **MVVM pipeline, ViewModel named functions, or direct-callback UI wiring** → [mvvm.md](mvvm.md)
