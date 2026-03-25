@@ -88,7 +88,7 @@ If the project uses a base class or interface (like `MviHost<Event, State, Effec
 
 ### UI Rendering Boundary
 
-- **Route** composable: obtains ViewModel (via `koinViewModel()`, `hiltViewModel()`, or manual construction), collects state once via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (see [compose-essentials.md](compose-essentials.md)), binds navigation/snackbar/sheet/platform APIs
+- **Route** composable: obtains ViewModel (via `koinViewModel()`, `hiltViewModel()`, or manual construction), collects state once via `collectAsStateWithLifecycle()`, collects effects via `CollectEffect` (lifecycle-aware effect collector — see compose-essentials.md if implementing from scratch), binds navigation/snackbar/sheet/platform APIs
 - **Screen** composable: render screen from state, adapt to smaller callbacks for leaf composables. Stateless — receives state and event callback
 - **Leaf** composables: render sub-state, emit specific callbacks, keep only tiny visual-local state
 
@@ -110,7 +110,7 @@ Pure business logic and abstraction contracts. Zero platform or framework depend
 | Domain models are never DTOs or entities | Decouples from API contract and DB schema |
 | Repository interfaces declared here, impls in data | Dependency inversion — domain defines the contract |
 | Mappers live at the data boundary, not in domain | Domain ignores serialization formats (see [networking-ktor.md](networking-ktor.md) DTO-to-Domain Mappers) |
-| Use cases only for multi-step orchestration | Avoid ceremony — see [clean-code.md](clean-code.md) "When a use case is ceremony" |
+| Use cases only for multi-step orchestration | Avoid ceremony — don't wrap single repository calls in use-case classes |
 
 ```kotlin
 data class Item(val id: String, val name: String, val status: ItemStatus)
@@ -163,7 +163,7 @@ init {
 
 ### Pattern 2: Feature API Contract (navigation/callbacks)
 
-Each feature exposes a thin `:api` module with an interface; other features depend only on that API, never the implementation. Wire via DI. For the full api/impl split pattern with code, see [navigation.md](navigation.md) Modularization section.
+Each feature exposes a thin `:api` module with an interface; other features depend only on that API, never the implementation. Wire via DI. For the full api/impl split pattern with code, see [navigation-3-di.md](navigation-3-di.md) Modularization section.
 
 ### When to Use Which
 
@@ -525,15 +525,15 @@ fun CreateItemScreen(state: CreateItemState, onEvent: (CreateItemEvent) -> Unit)
 ### GOOD: event model for form-heavy screens
 
 ```kotlin
-enum class EstimateField { Area, MaterialRate, LaborRate, TaxPercent, Notes }
+enum class FormField { Area, MaterialRate, LaborRate, TaxPercent, Notes }
 
-sealed interface EstimateEvent {
-    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateEvent
-    data class IncludeWasteChanged(val enabled: Boolean) : EstimateEvent
-    data object SubmitClicked : EstimateEvent
-    data object RetryClicked : EstimateEvent
-    data object ScreenShown : EstimateEvent
-    data object ClearClicked : EstimateEvent
+sealed interface FormEvent {
+    data class FieldChanged(val field: FormField, val raw: String) : FormEvent
+    data class IncludeWasteChanged(val enabled: Boolean) : FormEvent
+    data object SubmitClicked : FormEvent
+    data object RetryClicked : FormEvent
+    data object ScreenShown : FormEvent
+    data object ClearClicked : FormEvent
 }
 ```
 

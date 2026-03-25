@@ -132,8 +132,8 @@ fun App() {
 ```kotlin
 val appModule = module {
     single<UserRepositoryImpl>() bind UserRepository::class  // bind exposes impl as its interface
-    single<EstimateCalculator>()
-    viewModel<EstimateViewModel>()
+    single<ProductCalculator>()
+    viewModel<ProductViewModel>()
 }
 ```
 
@@ -145,13 +145,13 @@ Requires the Koin Compiler Plugin. Auto-resolves constructor params at compile t
 val appModule = module {
     // single — one shared instance for the app lifetime (API clients, repos, DB)
     single<UserRepository> { UserRepositoryImpl() }
-    single { EstimateCalculator() }
+    single { ProductCalculator() }
 
     // factory — new instance every call (stateful helpers, validators, formatters)
-    factory { EstimateValidator() }
+    factory { ProductValidator() }
 
     // viewModelOf — lifecycle-aware ViewModel, survives recomposition + config changes
-    viewModelOf(::EstimateViewModel)
+    viewModelOf(::ProductViewModel)
 }
 ```
 
@@ -235,14 +235,14 @@ class AppModule {
 ### Feature-first module organization
 
 ```kotlin
-val estimateModule = module {
-    single<EstimateRepository> { EstimateRepositoryImpl(get()) }
-    single { EstimateCalculator() }
-    viewModelOf(::EstimateViewModel)
+val productModule = module {
+    single<ProductRepository> { ProductRepositoryImpl(get()) }
+    single { ProductCalculator() }
+    viewModelOf(::ProductViewModel)
 }
 
 val appModule = module {
-    includes(estimateModule, settingsModule, coreModule)
+    includes(productModule, settingsModule, coreModule)
 }
 ```
 
@@ -334,7 +334,7 @@ val featureModule = module {
 
 ## Navigation 3 Integration
 
-**Nav 3 is the preferred navigation library for new Compose projects.** Nav 2 (`NavHost`/`NavController`) is still supported and not deprecated, but Nav 3 is the official migration target and the default recommendation in this skill. Use Nav 2 only when working on existing Nav 2 codebases or when a project has specific reasons to stay on Nav 2. For Nav 2 compatibility patterns and migration steps, see [navigation.md](navigation.md).
+**Nav 3 is the preferred navigation library for new Compose projects.** Nav 2 (`NavHost`/`NavController`) is still supported and not deprecated, but Nav 3 is the official migration target and the default recommendation in this skill. Use Nav 2 only when working on existing Nav 2 codebases or when a project has specific reasons to stay on Nav 2. For Nav 2 patterns, see [navigation-2.md](navigation-2.md). For Koin + Nav 2 wiring (including `koinNavViewModel` and `sharedKoinViewModel`), see [navigation-2-di.md](navigation-2-di.md). For migration steps, see [navigation-migration.md](navigation-migration.md).
 
 Two approaches — pick one per project:
 
@@ -404,14 +404,14 @@ val appModule = module {
 The MVI pattern itself is framework-agnostic — see [architecture.md](architecture.md). The only Koin-specific part is constructor injection (no annotations needed) and `koinViewModel()` at the injection site:
 
 ```kotlin
-class EstimateViewModel(
-    private val repository: EstimateRepository,
+class ProductViewModel(
+    private val repository: ProductRepository,
 ) : ViewModel() {
     // StateFlow<State>, Channel<Effect>, onEvent() — see architecture.md
 }
 
-// Module: viewModelOf(::EstimateViewModel)
-// Route:  val viewModel = koinViewModel<EstimateViewModel>()
+// Module: viewModelOf(::ProductViewModel)
+// Route:  val viewModel = koinViewModel<ProductViewModel>()
 ```
 
 ### Quick reference — injection functions

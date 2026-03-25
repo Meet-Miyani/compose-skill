@@ -10,27 +10,9 @@
 - [Diagnostic Checklist](#diagnostic-checklist)
 - [Code Examples](#code-examples)
 
-## Three Phases
+## Three Phases and Primitive Specializations
 
-Every Compose frame executes three phases. State reads in each phase only trigger work for that phase and later ones:
-
-1. **Composition** — executes composable functions, evaluates state reads. Reads here trigger recomposition.
-2. **Layout** — `measure` and `layout` blocks. State reads here skip composition. Use `Modifier.offset { }` (lambda) instead of `Modifier.offset()`.
-3. **Drawing** — `Canvas`, `drawBehind`, `graphicsLayer`. Reads here skip composition and layout.
-
-Understanding this is key: moving state reads from Composition to Layout/Drawing eliminates recomposition entirely for those reads.
-
-## Primitive State Specializations
-
-Use type-specific state holders to avoid boxing:
-
-```kotlin
-val count = mutableIntStateOf(0)       // no boxing
-val progress = mutableFloatStateOf(0f) // no boxing
-val name = mutableStateOf("Alice")     // general-purpose (no primitive specialization for String/Boolean)
-```
-
-`mutableStateOf<Int>()` boxes on every read/write. Use `mutableIntStateOf()` and `mutableFloatStateOf()` instead.
+Compose executes Composition, Layout, and Drawing phases per frame. State reads in later phases skip earlier phases — moving reads from Composition to Layout/Drawing eliminates recomposition for those reads. Use `Modifier.offset { }` (lambda) instead of `Modifier.offset()`. Use `mutableIntStateOf()`/`mutableFloatStateOf()` instead of `mutableStateOf<Int>()` to avoid boxing. See [compose-essentials.md](compose-essentials.md) for full explanation and code examples.
 
 ## Main Performance Mistakes
 
@@ -206,7 +188,7 @@ Use this in review or profiling:
 
 ```kotlin
 @Composable
-fun EstimateResult(state: EstimateState) {
+fun CalculatorResult(state: CalculatorState) {
     val area = state.input.areaText.toDoubleOrNull() ?: 0.0
     val materialRate = state.input.materialRateText.toDoubleOrNull() ?: 0.0
     val laborRate = state.input.laborRateText.toDoubleOrNull() ?: 0.0
@@ -219,7 +201,7 @@ fun EstimateResult(state: EstimateState) {
 
 ```kotlin
 @Composable
-fun EstimateResult(derived: EstimateDerived?) {
+fun CalculatorResult(derived: CalculatorDerived?) {
     Text(text = derived?.subtotal?.toString() ?: "—")
 }
 ```
@@ -228,10 +210,10 @@ fun EstimateResult(derived: EstimateDerived?) {
 
 ```kotlin
 @Composable
-fun EstimateScreen(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
+fun CalculatorScreen(state: CalculatorState, onEvent: (CalculatorEvent) -> Unit) {
     Column {
         Header(state, onEvent)
-        EstimateForm(state, onEvent)
+        CalculatorForm(state, onEvent)
         ResultCard(state, onEvent)
         HistoryList(state, onEvent)
     }
@@ -242,14 +224,14 @@ fun EstimateScreen(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
 
 ```kotlin
 @Composable
-fun EstimateScreen(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
+fun CalculatorScreen(state: CalculatorState, onEvent: (CalculatorEvent) -> Unit) {
     Header(title = "Estimator")
-    EstimateForm(
+    CalculatorForm(
         input = state.input,
         validation = state.validation,
         enabled = !state.isRefreshingQuote,
-        onAreaChanged = { onEvent(EstimateEvent.FieldChanged(EstimateField.Area, it)) },
-        onSubmit = { onEvent(EstimateEvent.SubmitClicked) },
+        onAreaChanged = { onEvent(CalculatorEvent.FieldChanged(FormField.Area, it)) },
+        onSubmit = { onEvent(CalculatorEvent.SubmitClicked) },
     )
     ResultCard(derived = state.derived, quote = state.quote, isRefreshing = state.isRefreshingQuote)
 }
@@ -335,10 +317,10 @@ Just write: `Text(if (canSubmit) "Submit" else "Fix errors")`
 
 ```kotlin
 @Composable
-fun AreaField(state: EstimateState, onEvent: (EstimateEvent) -> Unit) {
+fun AreaField(state: CalculatorState, onEvent: (CalculatorEvent) -> Unit) {
     OutlinedTextField(
         value = state.input.areaText,
-        onValueChange = { onEvent(EstimateEvent.FieldChanged(EstimateField.Area, it)) },
+        onValueChange = { onEvent(CalculatorEvent.FieldChanged(FormField.Area, it)) },
         isError = state.validation.area != null,
     )
 }

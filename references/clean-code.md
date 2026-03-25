@@ -79,16 +79,16 @@ That is usually ceremony.
 
 | Area | Good architecture | Overengineering |
 |---|---|---|
-| ViewModel | `EstimateViewModel` with `onEvent()` | `BaseMviViewModel<State, Intent, Effect, Result>` with `handleEvent()` + `reduce()` |
+| ViewModel | `ProductViewModel` with `onEvent()` | `BaseMviViewModel<State, Intent, Effect, Result>` with `handleEvent()` + `reduce()` |
 | Events | one feature sealed interface | multi-layer intent taxonomy |
 | State updates | inline `updateState { copy(...) }` in `onEvent()` | separate `Result` type + pure `reduce()` function for simple screens |
 | Effects | only for impure one-shot actions | effects for trivial synchronous transitions |
 | UI | route + dumb screen + meaningful leaves | every row has its own ViewModel/presenter |
 | Use cases | used for real domain logic | one wrapper per repository call |
-| Modules | feature-first (see [architecture.md](architecture.md) Module Dependency Rules for multi-module arrows) | giant "domain/data/presentation" package islands |
+| Modules | feature-first (see Module Dependency Rules in architecture.md for multi-module arrows) | giant "domain/data/presentation" package islands |
 | Platform abstractions | introduced when needed | abstracted preemptively everywhere |
 | Navigation | semantic effect + route binding | global command bus + abstract navigator hierarchy |
-| Naming | `EstimateState`, `EstimateEvent` | `FeatureContract.State`, `FeatureContract.Action` |
+| Naming | `ProductState`, `ProductEvent` | `FeatureContract.State`, `FeatureContract.Action` |
 
 ## File Organization
 
@@ -103,19 +103,19 @@ shared/
       formatting/
       ui/
       test/
-  feature-estimate/
-    src/commonMain/kotlin/com/acme/feature/estimate/
-      EstimateContract.kt
-      EstimateViewModel.kt
-      EstimateRoute.kt
-      EstimateScreen.kt
+  feature-product/
+    src/commonMain/kotlin/com/acme/feature/product/
+      ProductContract.kt
+      ProductViewModel.kt
+      ProductRoute.kt
+      ProductScreen.kt
       components/
-        EstimateForm.kt
+        ProductForm.kt
         ResultCard.kt
-    src/androidMain/kotlin/com/acme/feature/estimate/
-      AndroidEstimateBindings.kt
-    src/iosMain/kotlin/com/acme/feature/estimate/
-      IosEstimateBindings.kt
+    src/androidMain/kotlin/com/acme/feature/product/
+      AndroidProductBindings.kt
+    src/iosMain/kotlin/com/acme/feature/product/
+      IosProductBindings.kt
 androidApp/
 iosApp/
 ```
@@ -127,7 +127,7 @@ iosApp/
 Good:
 
 ```text
-feature-estimate/
+feature-product/
   domain/
   data/
   presentation/
@@ -138,15 +138,15 @@ Bad:
 
 ```text
 presentation/
-  estimate/
+  product/
   settings/
   history/
 domain/
-  estimate/
+  product/
   settings/
   history/
 data/
-  estimate/
+  product/
   settings/
   history/
 ```
@@ -157,14 +157,14 @@ The second form becomes a horizontal maze fast.
 
 | Concept | Recommended | Avoid |
 |---|---|---|
-| Event | `EstimateEvent` | `EstimateActionEventIntent` |
-| State | `EstimateState` | `EstimateViewState`, `Contract.State` |
-| Effect | `EstimateEffect` | `EstimateCommandEffectSideEffect`, `SingleLiveEvent` |
-| Contract file | `EstimateContract.kt` | separate files per type for small screens |
-| ViewModel | `EstimateViewModel` | `BaseEstimateViewModel` |
-| Route | `EstimateRoute` | `EstimateContainerFragmentLikeThing` |
-| Screen | `EstimateScreen` | `EstimateView` |
-| Leaf component | `ResultCard`, `EstimateForm` | `EstimateFormWidgetComponentView` |
+| Event | `ProductEvent` | `ProductActionEventIntent` |
+| State | `ProductState` | `ProductViewState`, `Contract.State` |
+| Effect | `ProductEffect` | `ProductCommandEffectSideEffect`, `SingleLiveEvent` |
+| Contract file | `ProductContract.kt` | separate files per type for small screens |
+| ViewModel | `ProductViewModel` | `BaseProductViewModel` |
+| Route | `ProductRoute` | `ProductContainerFragmentLikeThing` |
+| Screen | `ProductScreen` | `ProductView` |
+| Leaf component | `ResultCard`, `ProductForm` | `ProductFormWidgetComponentView` |
 
 ## Import Hygiene
 
@@ -305,62 +305,13 @@ Direct, readable, testable. No intermediate type.
 
 ### GOOD: MVI ViewModel with async work
 
-```kotlin
-class CreateItemViewModel(
-    private val repository: ItemRepository,
-) : ViewModel() {
-    private val _state = MutableStateFlow(CreateItemState())
-    val state: StateFlow<CreateItemState> = _state.asStateFlow()
-
-    private val _effect = Channel<CreateItemEffect>(Channel.BUFFERED)
-    val effect: Flow<CreateItemEffect> = _effect.receiveAsFlow()
-
-    fun onEvent(event: CreateItemEvent) {
-        when (event) {
-            is CreateItemEvent.OnTitleChanged -> {
-                _state.update { it.copy(title = event.title, errors = it.errors - "title") }
-            }
-            is CreateItemEvent.OnAmountChanged -> {
-                _state.update { it.copy(amount = event.amount, errors = it.errors - "amount") }
-            }
-            CreateItemEvent.OnSaveClick -> save()
-            CreateItemEvent.OnBackClick -> _effect.trySend(CreateItemEffect.NavigateBack)
-        }
-    }
-
-    private fun save() {
-        val current = _state.value
-        val errors = buildMap {
-            if (current.title.isBlank()) put("title", "Title is required")
-            if (current.amount.toDoubleOrNull() == null) put("amount", "Enter a valid number")
-        }
-
-        if (errors.isNotEmpty()) {
-            _state.update { it.copy(errors = errors) }
-            return
-        }
-
-        _state.update { it.copy(isSaving = true, errors = emptyMap()) }
-        viewModelScope.launch {
-            try {
-                repository.create(current.title.trim(), current.amount.toDouble())
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Saved"))
-                _effect.trySend(CreateItemEffect.NavigateBack)
-            } catch (e: Exception) {
-                _state.update { it.copy(isSaving = false) }
-                _effect.trySend(CreateItemEffect.ShowMessage("Failed: ${e.message}"))
-            }
-        }
-    }
-}
-```
+Full annotated example with `CreateItemViewModel` (standalone and base-class variants): see [architecture.md](architecture.md) Code Examples section.
 
 ### BAD: one giant intent hierarchy
 
 ```kotlin
 sealed interface AppIntent {
-    sealed interface EstimateIntent : AppIntent
+    sealed interface ProductIntent : AppIntent
     sealed interface SettingsIntent : AppIntent
     sealed interface HistoryIntent : AppIntent
     sealed interface NavigationIntent : AppIntent
@@ -370,26 +321,26 @@ sealed interface AppIntent {
 ### GOOD: pragmatic event model
 
 ```kotlin
-sealed interface EstimateEvent {
-    data class FieldChanged(val field: EstimateField, val raw: String) : EstimateEvent
-    data object SubmitClicked : EstimateEvent
-    data object RetryClicked : EstimateEvent
+sealed interface ProductEvent {
+    data class FieldChanged(val field: ProductField, val raw: String) : ProductEvent
+    data object SubmitClicked : ProductEvent
+    data object RetryClicked : ProductEvent
 }
 ```
 
 ### BAD: too many tiny composables
 
 ```kotlin
-@Composable fun EstimateTitleText(text: String) = Text(text)
-@Composable fun EstimateSpacer() = Spacer(Modifier.height(8.dp))
-@Composable fun EstimatePrimaryButton(text: String, onClick: () -> Unit) = Button(onClick = onClick) { Text(text) }
+@Composable fun TitleText(text: String) = Text(text)
+@Composable fun FeatureSpacer() = Spacer(Modifier.height(8.dp))
+@Composable fun FeaturePrimaryButton(text: String, onClick: () -> Unit) = Button(onClick = onClick) { Text(text) }
 ```
 
 ### GOOD: composables with meaningful boundaries
 
 ```kotlin
 @Composable
-fun EstimateHeader(title: String, subtitle: String) {
+fun SectionHeader(title: String, subtitle: String) {
     Column {
         Text(title, style = MaterialTheme.typography.headlineSmall)
         Text(subtitle, style = MaterialTheme.typography.bodyMedium)
@@ -400,20 +351,20 @@ fun EstimateHeader(title: String, subtitle: String) {
 ### BAD: redundant use case wrappers
 
 ```kotlin
-class SaveEstimateUseCase(private val repository: EstimateRepository) {
-    suspend operator fun invoke(estimate: Estimate) { repository.save(estimate) }
+class SaveProductUseCase(private val repository: ProductRepository) {
+    suspend operator fun invoke(product: Product) { repository.save(product) }
 }
 ```
 
 ### GOOD: direct domain service usage
 
 ```kotlin
-class EstimateViewModel(
-    private val repository: EstimateRepository,
-    private val calculator: EstimateCalculator,
-    private val validator: EstimateValidator,
+class ProductViewModel(
+    private val repository: ProductRepository,
+    private val calculator: ProductCalculator,
+    private val validator: ProductValidator,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(EstimateState())
+    private val _state = MutableStateFlow(ProductState())
     val state = _state.asStateFlow()
     // ...
 }

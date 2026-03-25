@@ -17,11 +17,8 @@ References:
 - [Structured Concurrency and Scopes](#structured-concurrency-and-scopes)
 - [Exception Handling](#exception-handling)
 - [stateIn and shareIn](#statein-and-sharein)
-- [Backpressure](#backpressure)
-- [callbackFlow and channelFlow](#callbackflow-and-channelflow)
-- [Concurrency Primitives](#concurrency-primitives)
-- [Testing with Turbine](#testing-with-turbine)
 - [Anti-Patterns](#anti-patterns)
+- [Advanced Patterns](#advanced-patterns)
 
 ## StateFlow vs SharedFlow vs Channel
 
@@ -38,14 +35,14 @@ References:
 ### MVI mapping
 
 ```kotlin
-class EstimateViewModel : ViewModel() {
+class ProductViewModel : ViewModel() {
     // State -> StateFlow (always holds current screen state)
-    private val _state = MutableStateFlow(EstimateState())
-    val state: StateFlow<EstimateState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(ProductState())
+    val state: StateFlow<ProductState> = _state.asStateFlow()
 
     // Effects -> Channel (one-off: navigation, snackbar, haptics)
-    private val _effects = Channel<EstimateEffect>(Channel.BUFFERED)
-    val effects: Flow<EstimateEffect> = _effects.receiveAsFlow()
+    private val _effects = Channel<ProductEffect>(Channel.BUFFERED)
+    val effects: Flow<ProductEffect> = _effects.receiveAsFlow()
 }
 ```
 
@@ -162,31 +159,31 @@ The callee is responsible for switching dispatchers, not the caller:
 
 ```kotlin
 // GOOD: repository handles its own dispatcher
-class EstimateRepository(private val api: EstimateApi) {
-    suspend fun getEstimates(): List<Estimate> = withContext(Dispatchers.IO) {
-        api.getEstimates().toDomain()
+class ProductRepository(private val api: ProductApi) {
+    suspend fun getProducts(): List<Product> = withContext(Dispatchers.IO) {
+        api.getProducts().toDomain()
     }
 }
 
 // Caller doesn't need to worry about threads
 viewModelScope.launch {
-    val estimates = repository.getEstimates() // safe to call from Main
+    val products = repository.getProducts() // safe to call from Main
 }
 ```
 
 ### Inject dispatchers for testability
 
 ```kotlin
-class EstimateRepository(
-    private val api: EstimateApi,
+class ProductRepository(
+    private val api: ProductApi,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    suspend fun getEstimates(): List<Estimate> = withContext(ioDispatcher) {
-        api.getEstimates().toDomain()
+    suspend fun getProducts(): List<Product> = withContext(ioDispatcher) {
+        api.getProducts().toDomain()
     }
 }
 
-// In tests: EstimateRepository(mockApi, testDispatcher)
+// In tests: ProductRepository(mockApi, testDispatcher)
 ```
 
 ### BAD: blocking on Dispatchers.Default
@@ -354,9 +351,9 @@ Convert cold `Flow` to hot `StateFlow`/`SharedFlow` for sharing with multiple co
 ### stateIn
 
 ```kotlin
-class EstimateListViewModel(repository: EstimateRepository) : ViewModel() {
+class ProductListViewModel(repository: ProductRepository) : ViewModel() {
 
-    val estimates: StateFlow<List<Estimate>> = repository.observeEstimates()
+    val products: StateFlow<List<Product>> = repository.observeProducts()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -390,187 +387,12 @@ val events: SharedFlow<AnalyticsEvent> = eventBus.events()
 
 ```kotlin
 // BAD: every call creates a new hot flow — leaked coroutines
-fun getEstimates(): StateFlow<List<Estimate>> =
-    repository.observeEstimates().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+fun getProducts(): StateFlow<List<Product>> =
+    repository.observeProducts().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
 // GOOD: store as val, created once
-val estimates: StateFlow<List<Estimate>> =
-    repository.observeEstimates().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-```
-
-## Backpressure
-
-When producer emits faster than consumer processes:
-
-| Strategy | Behavior | Use when |
-|---|---|---|
-| Default (no buffer) | Producer suspends until consumer processes | Simple sequential work |
-| `buffer(capacity)` | Queue between producer and consumer | Smooth speed spikes, process every item |
-| `conflate()` | Drop old values, keep only latest | UI updates, progress bars — stale data unnecessary |
-| `collectLatest { }` | Cancel previous processing when new value arrives | Search — only final result matters |
-
-```kotlin
-// Search with collectLatest: only the last query completes
-queryFlow
-    .debounce(300)
-    .distinctUntilChanged()
-    .collectLatest { query ->
-        val results = repository.search(query) // cancelled if new query arrives
-        _state.update { it.copy(results = results) }
-    }
-```
-
-### flowOn
-
-`flowOn` changes the dispatcher for upstream operators and automatically buffers at the context switch:
-
-```kotlin
-repository.observeEstimates()        // runs on IO
-    .map { it.toDomain() }           // runs on IO
-    .flowOn(Dispatchers.IO)           // everything above runs on IO
-    .collect { updateUi(it) }         // runs on caller's dispatcher (Main)
-```
-
-## callbackFlow and channelFlow
-
-### callbackFlow — bridge listener APIs to Flow
-
-Use `callbackFlow` to convert callback-based platform APIs into a `Flow`. In CMP, place these wrappers in `expect/actual` declarations or platform source sets.
-
-```kotlin
-// Android example — LocationManager (place in androidMain for CMP)
-fun LocationManager.locationUpdates(): Flow<Location> = callbackFlow {
-    val listener = LocationListener { location ->
-        trySend(location) // non-blocking, thread-safe
-    }
-    requestLocationUpdates(GPS_PROVIDER, 1000L, 0f, listener)
-    awaitClose { removeUpdates(listener) } // mandatory cleanup
-}
-```
-
-**Rules:**
-- Use `trySend()` (non-blocking) not `send()` (suspending) from callbacks
-- `awaitClose { }` is mandatory — omitting it throws `IllegalStateException`
-- The cleanup block in `awaitClose` unregisters the listener
-
-### channelFlow — concurrent production
-
-```kotlin
-fun loadDashboard(): Flow<DashboardSection> = channelFlow {
-    launch { send(DashboardSection.Profile(fetchProfile())) }
-    launch { send(DashboardSection.Stats(fetchStats())) }
-    launch { send(DashboardSection.Feed(fetchFeed())) }
-}
-```
-
-Use `channelFlow` when producing values from multiple concurrent coroutines. Use `callbackFlow` specifically for wrapping external callback APIs.
-
-## Concurrency Primitives
-
-### Mutex — mutual exclusion
-
-```kotlin
-private val mutex = Mutex()
-private var tokenCache: String? = null
-
-suspend fun getToken(): String = mutex.withLock {
-    tokenCache ?: refreshToken().also { tokenCache = it }
-}
-```
-
-Use Mutex for: token refresh synchronization, shared mutable state protection, sequential access to resources.
-
-### Semaphore — limited concurrency
-
-```kotlin
-private val semaphore = Semaphore(permits = 3)
-
-suspend fun downloadFile(url: String): ByteArray = semaphore.withPermit {
-    httpClient.get(url).body()
-}
-```
-
-Use Semaphore for: rate-limiting concurrent network calls, limiting parallel file operations.
-
-### Why not synchronized?
-
-`synchronized` blocks the thread. Coroutines suspend — blocking a thread holding a coroutine defeats the purpose. Use `Mutex.withLock` instead of `synchronized` in coroutine code.
-
-## Testing with Turbine
-
-### Setup
-
-```kotlin
-testImplementation("app.cash.turbine:turbine:1.2.0")
-testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-```
-
-### Testing StateFlow emissions
-
-```kotlin
-@Test
-fun `filter change updates estimates`() = runTest {
-    val viewModel = EstimateListViewModel(FakeRepository())
-
-    viewModel.state.test {
-        val initial = awaitItem()
-        assertEquals(FilterType.ALL, initial.selectedFilter)
-
-        viewModel.onEvent(EstimateListEvent.FilterChanged(FilterType.SENT))
-
-        val updated = awaitItem()
-        assertEquals(FilterType.SENT, updated.selectedFilter)
-
-        cancelAndIgnoreRemainingEvents()
-    }
-}
-```
-
-### Testing Channel effects
-
-```kotlin
-@Test
-fun `submit emits navigation effect`() = runTest {
-    val viewModel = EstimateViewModel(FakeRepository())
-
-    viewModel.effects.test {
-        viewModel.onEvent(EstimateEvent.SubmitClicked)
-
-        val effect = awaitItem()
-        assertTrue(effect is EstimateEffect.NavigateToResult)
-
-        cancelAndIgnoreRemainingEvents()
-    }
-}
-```
-
-### Turbine API quick reference
-
-| Function | Purpose |
-|---|---|
-| `flow.test { }` | Start collecting and asserting |
-| `awaitItem()` | Wait for next emission, fail if timeout |
-| `awaitComplete()` | Assert flow completes |
-| `awaitError()` | Assert flow throws |
-| `expectNoEvents()` | Assert no emissions pending |
-| `cancelAndIgnoreRemainingEvents()` | Clean up after assertions |
-| `cancelAndConsumeRemainingEvents()` | Cancel and return remaining events |
-
-### runTest
-
-`runTest` from `kotlinx-coroutines-test` provides deterministic coroutine execution. Delays are skipped automatically. Use `advanceUntilIdle()` to process all pending coroutines.
-
-```kotlin
-@Test
-fun `debounced search triggers after delay`() = runTest {
-    val viewModel = SearchViewModel(FakeSearchRepository())
-
-    viewModel.onEvent(SearchEvent.QueryChanged("kotlin"))
-    advanceUntilIdle() // skip debounce delay
-
-    val state = viewModel.state.value
-    assertTrue(state.results.isNotEmpty())
-}
+val products: StateFlow<List<Product>> =
+    repository.observeProducts().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 ```
 
 ## Anti-Patterns
@@ -587,3 +409,7 @@ fun `debounced search triggers after delay`() = runTest {
 | Hardcoded `Dispatchers.IO` | Untestable, can't substitute test dispatcher | Inject dispatcher as constructor parameter |
 | Collecting Flow in `init` without lifecycle | Runs forever even when UI is gone | Collect in `viewModelScope` or use `stateIn` with `WhileSubscribed` |
 | `combine` without realizing it waits | Silently produces no output until every upstream emits once | Provide initial values or use `onStart { emit(default) }` |
+
+## Advanced Patterns
+
+For backpressure strategies, callbackFlow/channelFlow, Mutex/Semaphore, and Turbine testing mechanics, see [coroutines-flow-advanced.md](coroutines-flow-advanced.md).

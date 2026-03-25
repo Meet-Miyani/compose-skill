@@ -202,18 +202,18 @@ Usage at the route level:
 
 ```kotlin
 @Composable
-fun EstimateRoute(viewModel: EstimateViewModel) {
+fun ProductRoute(viewModel: ProductViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     CollectEffect(viewModel.effect) { effect ->
         when (effect) {
-            is EstimateEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
-            is EstimateEffect.NavigateBack -> navigator.goBack()
+            is ProductEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+            is ProductEffect.NavigateBack -> navigator.goBack()
         }
     }
 
-    EstimateScreen(state = state, onEvent = viewModel::onEvent)
+    ProductScreen(state = state, onEvent = viewModel::onEvent)
 }
 ```
 
@@ -265,7 +265,7 @@ Use for: scale, rotation, translation, alpha animations. Much more efficient tha
 ```kotlin
 // GOOD: composable accepts modifier for caller customization
 @Composable
-fun ResultCard(derived: EstimateDerived?, modifier: Modifier = Modifier) {
+fun ResultCard(derived: ProductDerived?, modifier: Modifier = Modifier) {
     Card(modifier = modifier) { /* ... */ }
 }
 ```
@@ -293,7 +293,7 @@ fun SectionCard(
 // Usage
 SectionCard(
     title = { Text("Breakdown", style = MaterialTheme.typography.titleMedium) },
-    content = { EstimateBreakdownContent(derived) },
+    content = { ProductBreakdownContent(derived) },
 )
 ```
 

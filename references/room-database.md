@@ -262,7 +262,7 @@ Wrapping delete + insert in `@Transaction` ensures atomicity and coalesces disk 
 
 - Always use `:paramName` bind parameters — never concatenate strings into SQL. Compiled statements are cached and reused.
 - For collection parameters (`WHERE id IN (:ids)`), Room auto-expands at runtime.
-- Use `LIMIT :limit` for bounded result sets. For unbounded scrolling, use Paging (see [paging.md](paging.md)).
+- Use `LIMIT :limit` for bounded result sets. For unbounded scrolling, use Paging (see [paging.md](paging.md)). For offline-first paging with Room, see [paging-offline.md](paging-offline.md).
 
 ## Relationships
 
@@ -395,7 +395,7 @@ Room `Flow` queries automatically re-emit when data changes — the ViewModel re
 
 Map entities to domain models at the repository boundary with extension functions (`TaskEntity.toDomain()` / `Task.toEntity()`). Keep `@Entity` classes as data-layer types — never pass them to the UI.
 
-For DI wiring, see [koin.md](koin.md) or [hilt.md](hilt.md).
+Provide `RoomDatabase` and DAOs as singletons through your project's DI framework (Koin `single` or Hilt `@Singleton`).
 
 ## Testing
 
