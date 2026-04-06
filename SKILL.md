@@ -2,13 +2,10 @@
 name: compose-skill
 license: MIT
 description: >
-  Build, refactor, and review apps with Jetpack Compose and Compose Multiplatform (KMP/CMP)
-  using MVI architecture. Covers coroutines, StateFlow, SharedFlow, Channel, ViewModels,
-  state modeling, recomposition, Navigation 3/2, Koin/Hilt DI, Ktor networking, Paging 3,
-  Room, DataStore, animations, Coil, accessibility, multiplatform resources, iOS/Swift interop,
-  Gradle/AGP configuration, CI/CD, and desktop distribution. Use when working with @Composable,
-  ViewModel, StateFlow, Flow, KMP, Ktor, Koin, Hilt, DataStore, Room, PagingData, recomposition,
-  Xcode/iOS interop, Gradle build config, performance, testing, cross-platform, or code review.
+  Jetpack Compose and Compose Multiplatform (KMP/CMP) architecture skill.
+  Only use when the user explicitly mentions "compose-skill", "@compose-skill",
+  or "use compose skill" in their message. Do NOT auto-activate based on
+  keyword matching — this skill should only be triggered by direct user request.
 ---
 
 # Jetpack Compose & Compose Multiplatform
