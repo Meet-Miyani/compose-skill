@@ -1,0 +1,51 @@
+version: 2
+
+project_name: composekit
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+    - ./scripts/validate-skill.sh --quick --score-only
+
+builds:
+  - id: composekit
+    main: .
+    binary: composekit
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: binaries
+    builds:
+      - composekit
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+
+release:
+  draft: false
+  prerelease: auto

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "name": "compose",
+      "path": "skills/compose",
+      "displayName": "Compose Multiplatform",
+      "description": "Production-grade Jetpack Compose and Compose Multiplatform guidance for Kotlin, KMP, CMP, architecture, state management, navigation, networking, persistence, performance, accessibility, testing, previews, and cross-platform UI delivery.",
+      "keywords": [
+        "compose",
+        "jetpack-compose",
+        "compose-multiplatform",
+        "cmp",
+        "kmp",
+        "kotlin",
+        "kotlin-multiplatform",
+        "android",
+        "ios",
+        "desktop",
+        "navigation",
+        "ui",
+        "state",
+        "mvi",
+        "mvvm",
+        "ktor",
+        "room",
+        "datastore",
+        "sql",
+        "testing",
+        "performance",
+        "accessibility"
+      ]
+    }
+  ]
+}
