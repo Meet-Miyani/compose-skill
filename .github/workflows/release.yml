@@ -1,98 +1,52 @@
-name: Release
+name: release
 
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-  workflow_dispatch:
-    inputs:
-      version_bump:
-        description: 'Version bump type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  validate:
-    uses: ./.github/workflows/validate.yml
-
   release:
-    needs: validate
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-            echo "new_tag=$TAG" >> "$GITHUB_OUTPUT"
-            echo "Using pushed tag: $TAG"
-          else
-            LATEST=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
-            if [ -z "$LATEST" ]; then
-              MAJOR=1; MINOR=0; PATCH=0
-            else
-              VERSION="${LATEST#v}"
-              MAJOR=$(echo "$VERSION" | cut -d. -f1)
-              MINOR=$(echo "$VERSION" | cut -d. -f2)
-              PATCH=$(echo "$VERSION" | cut -d. -f3)
-
-              case "${{ inputs.version_bump }}" in
-                major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-                minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-                patch) PATCH=$((PATCH + 1)) ;;
-              esac
-            fi
-            NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
-            echo "new_tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
-            echo "Computed next version: $NEW_TAG (bump: ${{ inputs.version_bump }})"
-          fi
-
-      - name: Get release info
-        id: release_info
-        run: |
-          MSG=$(git log -1 --pretty=format:'%s')
-          echo "msg=$MSG" >> "$GITHUB_OUTPUT"
-
-          DELIMITER="EOF_$(openssl rand -hex 8)"
-          BODY=$(git log -1 --pretty=format:'%b')
-          {
-            echo "body<<$DELIMITER"
-            printf '%s' "$BODY"
-            echo ""
-            echo "$DELIMITER"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Create tag (manual dispatch only)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "${{ steps.version.outputs.new_tag }}"
-          git push origin "${{ steps.version.outputs.new_tag }}"
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          tag_name: ${{ steps.version.outputs.new_tag }}
-          name: ${{ steps.version.outputs.new_tag }}
-          body: |
-            **Commit:** `${{ github.sha }}`
-            **Branch:** `${{ github.ref_name }}`
-            **Author:** ${{ github.actor }}
+          go-version: stable
 
-            ${{ steps.release_info.outputs.body }}
-          draft: false
-          prerelease: false
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package skills bundle
+        run: ./scripts/package-skills.sh "${GITHUB_REF_NAME}"
+
+      - name: Generate skills bundle checksum
+        run: |
+          cd dist
+          sha256sum "composekit-skills_${GITHUB_REF_NAME}.tar.gz" >> checksums.txt
+          cat checksums.txt
+
+      - name: Upload checksums (updated)
+        run: gh release upload "${GITHUB_REF_NAME}" "dist/checksums.txt" --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload skills bundle
+        run: gh release upload "${GITHUB_REF_NAME}" "dist/composekit-skills_${GITHUB_REF_NAME}.tar.gz" --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Compose Multiplatform"
+  short_description: "Production-grade Jetpack Compose and Compose Multiplatform guidance for Kotlin, KMP, CMP, architecture, state management, navigation, networking, persistence, performance, accessibility, testing, previews, and cross-platform UI delivery."
+  default_prompt: "Use $compose to build, refactor, or review Compose/CMP features, adapting to the project's architecture (MVI recommended for new work), and verifying dependencies before recommending them."

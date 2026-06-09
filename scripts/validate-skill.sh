@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT/skills/compose"
+
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║  Agent Skill Scanner v4                                         ║
 # ║  Validates skill packages against the agentskills.io spec       ║
@@ -21,8 +24,8 @@ set -euo pipefail
 # ╚══════════════════════════════════════════════════════════════════╝
 #
 # Usage:
-#   ./scripts/validate.sh              # full scan
-#   ./scripts/validate.sh --help       # show usage
+#   ./scripts/validate-skill.sh              # full scan
+#   ./scripts/validate-skill.sh --help       # show usage
 #
 # Environment:
 #   CI=true    — emits GitHub Actions annotations (auto-detected)
@@ -39,6 +42,7 @@ CURRENT_SECTION=""
 CI="${CI:-false}"
 NO_COLOR="${NO_COLOR:-0}"
 OUTPUT_MODE="terminal"
+QUICK_MODE=false
 SKILL_FILE="SKILL.md"
 SKILL_DIR="$(basename "$(pwd)")"
 
@@ -2061,11 +2065,11 @@ show_help() {
   echo "  Computes a quality score (0-100) across 5 dimensions."
   echo ""
   echo "  $(_bold "Usage:")"
-  echo "    ./scripts/validate.sh                Run full scan (terminal)"
-  echo "    ./scripts/validate.sh --json        Output as JSON"
-  echo "    ./scripts/validate.sh --md          Output as Markdown report"
-  echo "    ./scripts/validate.sh --score-only  Print score and grade only"
-  echo "    ./scripts/validate.sh --help        Show this help"
+  echo "    ./scripts/validate-skill.sh                Run full scan (terminal)"
+  echo "    ./scripts/validate-skill.sh --json        Output as JSON"
+  echo "    ./scripts/validate-skill.sh --md          Output as Markdown report"
+  echo "    ./scripts/validate-skill.sh --score-only  Print score and grade only"
+  echo "    ./scripts/validate-skill.sh --help        Show this help"
   echo ""
   echo "  $(_bold "Output Modes:")"
   echo "    $(_cyan "--json")         Machine-readable JSON (pipe to jq, feed to web tools)"
@@ -2140,6 +2144,7 @@ main() {
       --json) OUTPUT_MODE="json"; NO_COLOR=1 ;;
       --md|--markdown) OUTPUT_MODE="markdown"; NO_COLOR=1 ;;
       --score-only|--score) OUTPUT_MODE="score-only" ;;
+      --quick) QUICK_MODE=true ;;
       *) echo "Unknown flag: $1"; echo "Run with --help for usage."; exit 2 ;;
     esac
     shift
@@ -2174,16 +2179,18 @@ main() {
   check_frontmatter
   check_body
   check_links
-  check_references
+  if [ "$QUICK_MODE" = false ]; then
+    check_references
+    check_reference_depth
+    check_token_budget
+    check_content_quality
+    check_heading_hierarchy
+  fi
   check_markdown
-  check_reference_depth
   check_scripts
   check_repo_hygiene
-  check_token_budget
-  check_content_quality
   check_agents_metadata
   check_security
-  check_heading_hierarchy
   compute_quality_score
 
   if [ "$OUTPUT_MODE" != "terminal" ]; then

@@ -1,1 +1,24 @@
 .DS_Store
+__MACOSX/
+
+# Go build output
+bin/
+dist/
+tmp/
+tmp-*/
+*.test
+*.out
+
+# Local smoke-test output
+tmp-smoke/
+tmp-skills/
+tmp-home/
+
+# Editor/local
+.idea/
+.vscode/
+.env
+.env.*
+
+# OS
+Thumbs.db

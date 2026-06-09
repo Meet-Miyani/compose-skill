@@ -1,11 +1,11 @@
 ---
-name: compose-skill
-license: MIT
+name: compose
 description: >
-  Jetpack Compose and Compose Multiplatform (KMP/CMP) architecture skill.
-  Only use when the user explicitly mentions "compose-skill", "@compose-skill",
-  or "use compose skill" in their message. Do NOT auto-activate based on
-  keyword matching — this skill should only be triggered by direct user request.
+  production-grade jetpack compose and compose multiplatform guidance for kotlin, kmp, cmp,
+  architecture, state management, navigation, networking, persistence, performance,
+  accessibility, testing, previews, and cross-platform ui delivery. use when the user
+  explicitly asks for compose guidance, compose multiplatform help, kotlin multiplatform ui
+  guidance, or requests the compose skill.
 ---
 
 # Jetpack Compose & Compose Multiplatform
