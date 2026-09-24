@@ -55,3 +55,21 @@ Rules:
 - Style preferences that are not in STANDARDS are notes, not required changes.
 - A phase with a failing tool check, a boundary violation, house names in the output, or invented
   (unverified) facts is always CHANGES REQUIRED.
+
+## Eval gate procedure (skill phases)
+
+1. Run the weak models with the skill:
+   `handoff/tools/run-evals-api.py --model <m> --skill-mode full --only <IDs> --out handoff/work/scratch/gate-<phase>/<m>`
+   for `deepseek-v4.1-flash` and `muse-spark-1.3-contributor`.
+2. Build blind packets that mix both weak answers with the Opus reference
+   (`handoff/work/scratch/m2/claude-opus/`):
+   `handoff/tools/make-gate-packets.py --out handoff/work/scratch/gate-<phase> --ids <IDs>
+   --answer deepseek=… --answer muse=… --answer opus=…`
+3. Launch Sonnet graders on the packets (the grader prompt is written into the gate dir).
+4. Score them with `handoff/tools/score-gate.py handoff/work/scratch/gate-<phase> --report
+   evals-v2/results/<date>-gate-<phase>.md`.
+5. Check by hand that every M2 "no model passed" item for this skill now passes.
+
+**Opus references to regenerate before their gate** (the prompt or context changed after M2):
+FEAT-02, UI-03, PROJ-05 and PROJ-06 (new). PROJ-01 to PROJ-04 reuse MOD-01 to MOD-04 only where the
+prompt and context are unchanged (checked at their gate).

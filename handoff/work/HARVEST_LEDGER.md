@@ -74,10 +74,10 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-02 | 13 | lifecycle-viewmodel, lifecycle-runtime-compose, datastore-preferences publish multiplatform artifacts but availability and API surface vary by version | GOTCHA | DROP: optional depth — artifact-availability enumeration | https://developer.android.com/kotlin/multiplatform/viewmodel |
 | SKL-03 | 17 | Do not force migration: respect a coherent existing MVI/MVVM pattern, adapt to project conventions | DUP | DROP: dup of ARCH-01 | — |
 | SKL-04 | 17 | The architecture pattern (unidirectional data flow with Event, State, Effect) matters, not a specific base class or framework | DUP | DROP: dup of ARCH-01 | — |
-| SKL-05 | 17 | Suggest structural changes only when asked or on clear violations (business logic in composables, scattered state mutations) | RULE | compose-architecture/references/existing-projects.md#policy | — |
+| SKL-05 | 17 | Suggest structural changes only when asked or on clear violations (business logic in composables, scattered state mutations) | RULE | compose-architecture/references/existing-projects.md#policy | ✓ landed |
 | SKL-06 | 23 | Read existing code first; for small asks restrict reading to immediately relevant files, do not map whole architecture unless a structural refactor is requested | WORKFLOW | compose-feature/SKILL.md#workflow | — |
-| SKL-07 | 24 | Identify the task concern, then route to the owning skill | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
-| SKL-08 | 26 | Load exactly one reference file only when the task involves advanced concepts; do not load speculatively | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
+| SKL-07 | 24 | Identify the task concern, then route to the owning skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
+| SKL-08 | 26 | Load exactly one reference file only when the task involves advanced concepts; do not load speculatively | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-09 | 27 | Flag anti-patterns contextually for production code; for prototypes or minor tweaks answer the question first | RULE | compose-feature/references/review-mode.md#tone | — |
 | SKL-10 | 29 | Write the minimal correct solution; prefer feature-specific code over generic frameworks | RULE | compose-feature/SKILL.md#non-negotiables | — |
 | SKL-11 | 35-37 | Before recommending a dependency verify coordinates, target support, and API shape in that version | RULE | compose-project/references/version-catalog.md#verify | — |
@@ -86,7 +86,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-14 | 48-53 | Documentation MCP usage pattern: resolve library ID first, then query with a specific question; bundled references stay primary for architecture | WORKFLOW | compose-project/references/version-catalog.md#verify | — |
 | SKL-15 | 59-60 | MVI uses sealed interface Event plus single onEvent() entry point; MVVM uses named public functions | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit mandates MVI with UiAction plus onAction for new work |
 | SKL-16 | 64 | Effects are one-shot commands (navigate, snackbar, share) delivered via Channel | DUP | DROP: dup of SKL-34 | — |
-| SKL-17 | 66 | Preserve the project's existing pattern when coherent; the kit default for new work is MVI | RULE | compose-architecture/references/existing-projects.md#policy | — |
+| SKL-17 | 66 | Preserve the project's existing pattern when coherent; the kit default for new work is MVI | RULE | compose-architecture/references/existing-projects.md#policy | ✓ landed |
 | SKL-18 | 72 | Route composable obtains ViewModel, collects state via collectAsStateWithLifecycle(), collects effects via CollectEffect, binds navigation/snackbar/platform APIs | DUP | DROP: dup of MVI-07 | — |
 | SKL-19 | 73 | Screen composable is a stateless renderer receiving state and callbacks | DUP | DROP: dup of MVI-16 | — |
 | SKL-20 | 74 | Leaf composables render sub-state, emit specific callbacks, keep only tiny visual-local state (focus, scroll, animation) | DUP | DROP: dup of MVI-17 | — |
@@ -94,10 +94,10 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-22 | 79 | If a value can be derived from state, do not store it redundantly unless async/persistence/performance justifies it | DUP | DROP: dup of ANTI-05 | — |
 | SKL-23 | 80 | Event handling in the ViewModel owns state transitions; composables do not mutate state | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | SKL-24 | 81-82 | UI-local state only for ephemeral visual concerns (focus, scroll, animation progress, expansion); animation-only flags stay out of screen state unless business logic depends on them | DUP | DROP: split into SKL-46–SKL-47 | — |
-| SKL-46 | 81-82 | UI-local state is acceptable only for ephemeral visual concerns: focus, scroll, animation progress, expansion toggles | RULE | compose-architecture/references/state-ownership.md#local | — |
+| SKL-46 | 81-82 | UI-local state is acceptable only for ephemeral visual concerns: focus, scroll, animation progress, expansion toggles | RULE | compose-architecture/references/state-ownership.md#local | ✓ landed |
 | SKL-47 | 81-82 | Animation-only flags stay out of screen state unless business logic depends on them | DUP | DROP: dup of ANIM-01 | — |
-| SKL-25 | 83 | Pass the narrowest possible state to leaf composables | RULE | compose-architecture/references/state-ownership.md#slicing | — |
-| SKL-26 | 85 | Do not introduce a use case for every repository call | RULE | compose-architecture/references/naming-and-packages.md#packages | — |
+| SKL-25 | 83 | Pass the narrowest possible state to leaf composables | RULE | compose-architecture/references/state-ownership.md#slicing | ✓ landed |
+| SKL-26 | 85 | Do not introduce a use case for every repository call | RULE | compose-architecture/references/naming-and-packages.md#packages | ✓ landed |
 | SKL-27 | 86 | Cross-platform sharing prioritizes business logic and presentation state before platform behavior | RULE | compose-platform/references/sharing-and-bridges.md#placement | — |
 | SKL-28 | 87 | Least recomposition is achieved by state shape and read boundaries first, Compose APIs second | GENERIC | DROP: model already knows (Opus test) | — |
 | SKL-29 | 88 | When a project has an existing MVI base class or pattern, use it; do not introduce a competing abstraction | DUP | DROP: dup of ARCH-01 | — |
@@ -110,12 +110,12 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-52 | 99-106 | One-off UI commands travel as Effect via Channel, never as state | DUP | DROP: dup of SKL-34 | — |
 | SKL-53 | 99-106 | Scroll, focus, and animation status stay in local Compose state | DUP | DROP: dup of SKL-46 | — |
 | SKL-32 | 114 | One ViewModel per screen (commonMain for CMP, feature package for Android-only) | DUP | DROP: dup of ANTI-02 | — |
-| SKL-33 | 115 | StateFlow<FeatureState> owned by the ViewModel is the state source of truth | RULE | compose-architecture/references/mvi-contract.md#holder | — |
-| SKL-34 | 117 | Effect sent via Channel(BUFFERED) for UI-consumed one-shots; async work launched in viewModelScope | RULE | compose-architecture/references/mvi-contract.md#effects | — |
+| SKL-33 | 115 | StateFlow<FeatureState> owned by the ViewModel is the state source of truth | RULE | compose-architecture/references/mvi-contract.md#holder | ✓ landed |
+| SKL-34 | 117 | Effect sent via Channel(BUFFERED) for UI-consumed one-shots; async work launched in viewModelScope | RULE | compose-architecture/references/mvi-contract.md#effects | ✓ landed |
 | SKL-35 | 118 | Async loading keeps previous content, flips loading flag, cancels outdated jobs, updates state on completion | DUP | DROP: split into SKL-54–SKL-57 | — |
 | SKL-54 | 118 | Async loading keeps previous content on screen | DUP | DROP: dup of UX-17 | — |
 | SKL-55 | 118 | Async loading flips a loading flag instead of replacing content | DUP | DROP: dup of ARCH-21 | — |
-| SKL-56 | 118 | Async loading cancels outdated in-flight jobs when a new load starts | GOTCHA | compose-architecture/references/mvi-contract.md#collect | — |
+| SKL-56 | 118 | Async loading cancels outdated in-flight jobs when a new load starts | GOTCHA | compose-architecture/references/mvi-contract.md#collect | ✓ landed |
 | SKL-57 | 118 | Async loading updates state on completion | GENERIC | DROP: model already knows | — |
 | SKL-36 | 120 | Resource access via semantic keys/enums in state; resolve strings/icons close to UI; CMP uses Res not Android R | DUP | DROP: split into SKL-58–SKL-60 | — |
 | SKL-58 | 120 | State carries semantic keys or enums for resources, never resolved strings | DUP | DROP: dup of RES-14 | — |
@@ -123,8 +123,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-60 | 120 | CMP code uses Res accessors, never Android R | GENERIC | DROP: model already knows (Opus test) | — |
 | SKL-37 | 121 | CMP platform separation via expect/actual (verify Kotlin 1.9 vs 2.0+ via build.gradle.kts or ask) or interfaces, Koin DI by default | DUP | DROP: split into SKL-93–SKL-94 | UNVERIFIED: Kotlin 1.9 vs 2.0 expect/actual difference not re-checked against current docs |
 | SKL-93 | 121 | Separate CMP platform code via expect/actual or interfaces | DUP | DROP: covered by CB-110 (kept in EXTERNAL_LEDGER) | UNVERIFIED: Kotlin 1.9 vs 2.0 expect/actual difference not re-checked against current docs |
-| SKL-94 | 121 | Use Koin DI by default for platform bindings | RULE | compose-architecture/references/dependency-injection.md#rules | — |
-| SKL-38 | 122 | ViewModel emits semantic navigation effect; route/navigation layer executes it | RULE | compose-architecture/references/navigation.md#mvi-rules | — |
+| SKL-94 | 121 | Use Koin DI by default for platform bindings | RULE | compose-architecture/references/dependency-injection.md#rules | ✓ landed |
+| SKL-38 | 122 | ViewModel emits semantic navigation effect; route/navigation layer executes it | RULE | compose-architecture/references/navigation.md#mvi-rules | ✓ landed |
 | SKL-39 | 123 | Persistence defaults: DataStore Preferences for key-value, Typed DataStore (JSON) for structured settings, Room for relational/queried data | DUP | DROP: covered by CMP-106 (kept in EXTERNAL_LEDGER) | UNVERIFIED: official KMP guide states only Preferences DataStore is supported in KMP projects, see https://developer.android.com/kotlin/multiplatform/datastore |
 | SKL-40 | 124 | ViewModel event-to-state-to-effect tests via Turbine in commonTest; validators/calculators as pure functions; platform bindings per target | DUP | DROP: split into SKL-61–SKL-63 | — |
 | SKL-61 | 124 | ViewModel event-to-state-to-effect tests run via Turbine in commonTest | DUP | DROP: dup of brief §9.1 | — |
@@ -137,7 +137,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-67 | 130-140 | Emit semantic effects instead of making platform calls from event handling | DUP | DROP: dup of SKL-38 | — |
 | SKL-68 | 130-140 | Preserve old content during refresh | DUP | DROP: dup of UX-17 | — |
 | SKL-69 | 130-140 | Map domain data to UI state close to the presentation boundary | RULE | compose-data/references/boundaries-and-mapping.md#mapping | — |
-| SKL-70 | 130-140 | Use feature-specific ViewModel names | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
+| SKL-70 | 130-140 | Use feature-specific ViewModel names | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
 | SKL-71 | 130-140 | Key list items by stable domain ID | DUP | DROP: dup of LIST-03 | — |
 | SKL-72 | 130-140 | Import all types at the top of the file with import-as aliases for name clashes | DUP | DROP: dup of CLEAN-14 | — |
 | SKL-73 | 130-140 | Guard no-op state emissions | DUP | DROP: dup of PERF-10 | — |
@@ -153,16 +153,16 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-82 | 144-153 | Never wipe the screen with a full-screen spinner during refresh | DUP | DROP: dup of UX-17 | — |
 | SKL-83 | 144-153 | Never force-migrate a working codebase to a different architecture | DUP | DROP: dup of SKL-17 | — |
 | SKL-84 | 144-153 | Never use fully qualified package paths inline | DUP | DROP: dup of CLEAN-14 | — |
-| SKL-43 | 157 | Do not load reference files for basic Compose usage; write the code immediately | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
+| SKL-43 | 157 | Do not load reference files for basic Compose usage; write the code immediately | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-44 | 161-200 | Quick-routing intents (performance, flow, nav, paging, ktor, DI, a11y, animation, review, interop, architecture, files, essentials, M3, images, lists, ux, testing, datastore, room, resources, gradle, CI) feed the kit routing table and per-skill trigger phrases | DUP | DROP: split into SKL-85–SKL-92 | — |
-| SKL-85 | 161-200 | State-management triggers (ViewModel, StateFlow, UiState, onEvent) route to the compose-architecture skill | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
+| SKL-85 | 161-200 | State-management triggers (ViewModel, StateFlow, UiState, onEvent) route to the compose-architecture skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-86 | 161-200 | Review and anti-pattern triggers route to the compose-feature skill | WORKFLOW | compose-feature/SKILL.md#workflow | — |
 | SKL-87 | 161-200 | UI triggers (@Composable, LazyColumn, animation, accessibility) route to the compose-ui skill | WORKFLOW | compose-ui/SKILL.md#workflow | — |
 | SKL-88 | 161-200 | Data triggers (repository, Ktor, Room, Paging) route to the compose-data skill | WORKFLOW | compose-data/SKILL.md#workflow | — |
 | SKL-89 | 161-200 | Build triggers (Gradle, version catalog, build-logic, CI, packaging) route to the compose-project skill | WORKFLOW | compose-project/SKILL.md#workflow | — |
 | SKL-90 | 161-200 | Platform triggers (commonMain, expect/actual, iOS, desktop, web) route to the compose-platform skill | WORKFLOW | compose-platform/SKILL.md#workflow | — |
-| SKL-91 | 161-200 | DI triggers (Koin, module, ViewModel injection) route to compose-architecture dependency-injection | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
-| SKL-92 | 161-200 | Navigation triggers (NavKey, NavDisplay, back stack, deep link) route to compose-architecture navigation | WORKFLOW | compose-architecture/SKILL.md#workflow | — |
+| SKL-91 | 161-200 | DI triggers (Koin, module, ViewModel injection) route to compose-architecture dependency-injection | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
+| SKL-92 | 161-200 | Navigation triggers (NavKey, NavDisplay, back stack, deep link) route to compose-architecture navigation | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-45 | 204 | Run a skill-package validator against the agentskills.io spec for budgets, links, structure, quality | GENERIC | DROP: skill-repo tooling, not kit content | — |
 
 ## references/accessibility.md
@@ -292,20 +292,20 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
 | ANTI-01 | 11 | Business logic inside composables forks source of truth, hurts testability, reruns during composition; move into ViewModel/domain | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
-| ANTI-02 | 12 | Giant god-ViewModel has too large a blast radius; one ViewModel per screen or independent flow | RULE | compose-architecture/references/mvi-contract.md#holder | — |
-| ANTI-03 | 13 | Scattered updateState/sendEffect with no structure hides transitions; disciplined onEvent() as single entry point | RULE | compose-architecture/references/mvi-contract.md#flow | — |
+| ANTI-02 | 12 | Giant god-ViewModel has too large a blast radius; one ViewModel per screen or independent flow | RULE | compose-architecture/references/mvi-contract.md#holder | ✓ landed |
+| ANTI-03 | 13 | Scattered updateState/sendEffect with no structure hides transitions; disciplined onEvent() as single entry point | RULE | compose-architecture/references/mvi-contract.md#flow | ✓ landed |
 | ANTI-04 | 14 | Unstable state models (mutable collections, lambdas in state) defeat skipping; immutable data classes plus immutable collections | RULE | compose-ui/references/state-reads-and-stability.md#models | — |
-| ANTI-05 | 15 | Duplicated derived data (total, formattedTotal, hasTotal) drifts; keep canonical value plus computed property | RULE | compose-architecture/references/mvi-contract.md#modeling | — |
+| ANTI-05 | 15 | Duplicated derived data (total, formattedTotal, hasTotal) drifts; keep canonical value plus computed property | RULE | compose-architecture/references/mvi-contract.md#modeling | ✓ landed |
 | ANTI-06 | 16 | Broad state reads in parents cascade recomposition; slice state and pass only required props to each child | DUP | DROP: dup of SKL-25 | — |
-| ANTI-07 | 17 | Mutable state passed deep into tree hides writes; explicit props plus callbacks | RULE | compose-architecture/references/state-ownership.md#slicing | — |
-| ANTI-08 | 18 | One-off events as consumable state causes replay on config change; separate Effect via Channel | RULE | compose-architecture/references/mvi-contract.md#effects | — |
+| ANTI-07 | 17 | Mutable state passed deep into tree hides writes; explicit props plus callbacks | RULE | compose-architecture/references/state-ownership.md#slicing | ✓ landed |
+| ANTI-08 | 18 | One-off events as consumable state causes replay on config change; separate Effect via Channel | RULE | compose-architecture/references/mvi-contract.md#effects | ✓ landed |
 | ANTI-09 | 19 | No-op state emissions waste recomposition; guard unchanged values before updating | DUP | DROP: dup of PERF-10 | — |
 | ANTI-10 | 20 | Full-screen loading wiping content is bad UX; keep old content plus inline refresh indicator | RULE | compose-ui/references/ux-states.md#loading | — |
-| ANTI-11 | 21 | ViewModel doing platform work directly (share, analytics, navigation) breaks testability; emit effects handled in Route | RULE | compose-architecture/references/mvi-contract.md#logic | — |
+| ANTI-11 | 21 | ViewModel doing platform work directly (share, analytics, navigation) breaks testability; emit effects handled in Route | RULE | compose-architecture/references/mvi-contract.md#logic | ✓ landed |
 | ANTI-12 | 22 | Animation state in ViewModel without reason pollutes business state; local composable animation state | DUP | DROP: dup of ANIM-01 | — |
 | ANTI-13 | 23 | Display strings stored too early hurt locale flexibility; keep canonical values until presentation boundary | DUP | DROP: dup of SKL-69 | — |
 | ANTI-14 | 24 | Poor lazy list keys corrupt row state; stable key by domain ID | RULE | compose-ui/references/lists.md#keys | — |
-| ANTI-15 | 25 | Too many trivial composables fragment reading; extract only meaningful boundaries | RULE | compose-architecture/references/naming-and-packages.md#extraction | — |
+| ANTI-15 | 25 | Too many trivial composables fragment reading; extract only meaningful boundaries | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | ANTI-16 | 26 | Platform abstraction too early adds indirection; share business logic first, abstract only real platform capabilities | DUP | DROP: dup of SKL-27 | — |
 | ANTI-17 | 27 | Forcing MVI migration on an existing codebase causes churn; respect existing patterns, MVI for new features only | DUP | DROP: dup of SKL-17 | — |
 | ANTI-18 | 28 | Inline fully qualified package paths hurt readability; import at file top with import-as aliases for clashes | DUP | DROP: dup of CLEAN-14 | — |
@@ -317,8 +317,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| ARCH-01 | 5 | Preservation rule: keep a coherent existing screen architecture unless asked to migrate or it cannot satisfy a required constraint | RULE | compose-architecture/references/existing-projects.md#policy | — |
-| ARCH-02 | 9-15 | Separate sources of truth per screen: ScreenState StateFlow for behavior, repository/database/remote for persisted data, local Compose state for visual-only concerns; do not mix | RULE | compose-architecture/references/state-ownership.md#sources | — |
+| ARCH-01 | 5 | Preservation rule: keep a coherent existing screen architecture unless asked to migrate or it cannot satisfy a required constraint | RULE | compose-architecture/references/existing-projects.md#policy | ✓ landed |
+| ARCH-02 | 9-15 | Separate sources of truth per screen: ScreenState StateFlow for behavior, repository/database/remote for persisted data, local Compose state for visual-only concerns; do not mix | RULE | compose-architecture/references/state-ownership.md#sources | ✓ landed |
 | ARCH-03 | 19-25 | State-owner decision: local Compose state for one-subtree visuals, plain holder for complex UI logic without data duties, ViewModel for business rules plus async plus persistence plus effects | DUP | DROP: covered by CB-05 (kept in EXTERNAL_LEDGER) | — |
 | ARCH-04 | 25 | A ViewModel is one implementation of a screen state holder, not a requirement for every composable | GENERIC | DROP: model already knows | — |
 | ARCH-05 | 29-40 | MVI vs MVVM decision guide (contract, boilerplate, testing input, best-for) plus choose/preserve rules | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit mandates MVI for new work |
@@ -333,11 +333,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ARCH-09 | 61-78 | Domain example code (Item model, ItemRepository interface, CreateItemUseCase with Result) | API | DROP: tutorial code | CONFLICT: Result wrapper conflicts with kit launchGuarded contract |
 | ARCH-10 | 82-87 | Legacy inter-feature patterns sample (event bus, api modules, shared core repository) | OUTOFKIT | DROP: conflicts with kit module graph (shared state lives in :data:, cross-feature navigation is an effect, no api/impl split, no event bus) | CONFLICT: kit module-graph seeds replace all four patterns |
 | ARCH-11 | 89 | Never import another feature's ViewModel; never share cross-feature data via CompositionLocal | DUP | DROP: split into ARCH-45–ARCH-46 | CONFLICT: resolved — event-bus pattern removed, kit forbids cross-feature state except via shared :data: modules |
-| ARCH-45 | 89 | Never import another feature's ViewModel | RULE | compose-architecture/references/module-graph.md#forbidden | — |
-| ARCH-46 | 89 | Never share cross-feature data via CompositionLocal | RULE | compose-architecture/references/module-graph.md#forbidden | — |
+| ARCH-45 | 89 | Never import another feature's ViewModel | RULE | compose-architecture/references/module-graph.md#forbidden | ✓ landed |
+| ARCH-46 | 89 | Never share cross-feature data via CompositionLocal | RULE | compose-architecture/references/module-graph.md#forbidden | ✓ landed |
 | ARCH-12 | 95-107 | Module dependency arrows plus forbidden list (impl-to-impl, api-to-feature, core-to-feature/app, domain-to-data) | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: legacy api/impl split has no kit equivalent |
 | ARCH-13 | 111-126 | Four-bucket form state modeling plus concern table (raw text, parsed, validation map, totals, flags, effects, local) | DUP | DROP: split into ARCH-21–ARCH-28 | — |
-| ARCH-21 | 111-126 | Split form state into editable input, derived/computed, persisted snapshot, transient UI-only buckets | RULE | compose-architecture/references/mvi-contract.md#modeling | — |
+| ARCH-21 | 111-126 | Split form state into editable input, derived/computed, persisted snapshot, transient UI-only buckets | RULE | compose-architecture/references/mvi-contract.md#modeling | ✓ landed |
 | ARCH-22 | 111-126 | Raw field text lives in state | DUP | DROP: dup of ARCH-21 | — |
 | ARCH-23 | 111-126 | Parsed, validated, and calculated values are derived or computed | DUP | DROP: dup of ARCH-21 | — |
 | ARCH-24 | 111-126 | Validation errors live in a state map | DUP | DROP: dup of ARCH-21 | — |
@@ -350,7 +350,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ARCH-35 | 130-140 | Never store duplicated state where one value implies another | DUP | DROP: dup of ANTI-05 | — |
 | ARCH-15 | 146-154 | Where-logic-belongs table: validation/calculations/async/side-effects in ViewModel/domain, local UI state in composable; validation, totals, loading, enablement, decisions never in composables | DUP | DROP: split into ARCH-36–ARCH-41 | — |
 | ARCH-36 | 146-154 | Validation runs in the ViewModel or domain, never in the composable body | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
-| ARCH-37 | 146-154 | Calculations run in a pure calculator or domain service called by the ViewModel | RULE | compose-architecture/references/mvi-contract.md#logic | — |
+| ARCH-37 | 146-154 | Calculations run in a pure calculator or domain service called by the ViewModel | RULE | compose-architecture/references/mvi-contract.md#logic | ✓ landed |
 | ARCH-38 | 146-154 | Async orchestration (launch, cancel, debounce, stale-result handling) lives in the ViewModel | GENERIC | DROP: model already knows | — |
 | ARCH-39 | 146-154 | Side effects travel via Effect from the ViewModel | DUP | DROP: dup of SKL-34 | — |
 | ARCH-40 | 146-154 | LazyListState, focus, animation, and expansion toggles stay local to composables | DUP | DROP: dup of SKL-46 | — |
@@ -365,11 +365,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ARCH-46 | 176-187 | The Route collects the screen StateFlow once | DUP | DROP: dup of MVI-07 | — |
 | ARCH-47 | 176-187 | The Screen receives the collected state | DUP | DROP: dup of MVI-16 | — |
 | ARCH-48 | 176-187 | Leaves receive only the slice they render | DUP | DROP: dup of MVI-17 | — |
-| ARCH-49 | 176-187 | Leaves never observe the ViewModel directly | RULE | compose-architecture/references/state-ownership.md#slicing | — |
+| ARCH-49 | 176-187 | Leaves never observe the ViewModel directly | RULE | compose-architecture/references/state-ownership.md#slicing | ✓ landed |
 | ARCH-50 | 176-187 | Leaves receive specific callbacks adapted from onEvent, never the raw onEvent | DUP | DROP: dup of MVI-18 | — |
-| ARCH-51 | 176-187 | Reusable components never depend on a feature event contract or ViewModel type | RULE | compose-architecture/references/state-ownership.md#slicing | — |
-| ARCH-19 | 191-197 | If a project uses Result wrappers or its own base class consistently, follow it for the change at hand | OUTOFKIT | compose-architecture/references/existing-projects.md#policy | — |
-| ARCH-20 | 201-204 | Scaling notes: one file for small screens, split contract/VM/screen/route for medium, extract collaborators for large; no nested holders per card by default | RULE | compose-architecture/references/naming-and-packages.md#layout | — |
+| ARCH-51 | 176-187 | Reusable components never depend on a feature event contract or ViewModel type | RULE | compose-architecture/references/state-ownership.md#slicing | ✓ landed |
+| ARCH-19 | 191-197 | If a project uses Result wrappers or its own base class consistently, follow it for the change at hand | OUTOFKIT | compose-architecture/references/existing-projects.md#policy | ✓ landed |
+| ARCH-20 | 201-204 | Scaling notes: one file for small screens, split contract/VM/screen/route for medium, extract collaborators for large; no nested holders per card by default | RULE | compose-architecture/references/naming-and-packages.md#layout | ✓ landed |
 
 ## references/ci-cd-distribution.md
 
@@ -409,18 +409,18 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-18 | 7-15 | Disciplined MVI uses one clear state model | DUP | DROP: dup of SKL-33 | — |
 | CLEAN-19 | 7-15 | Disciplined MVI uses one onEvent function | DUP | DROP: dup of MVI-05 | — |
 | CLEAN-20 | 7-15 | Disciplined MVI keeps a small number of effects | DUP | DROP: dup of SKL-34 | — |
-| CLEAN-21 | 7-15 | Disciplined MVI names contracts directly after the feature | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
+| CLEAN-21 | 7-15 | Disciplined MVI names contracts directly after the feature | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
 | CLEAN-22 | 7-15 | Bloated MVI shows as tiny sealed types and double-wrapped actions | GOTCHA | compose-feature/references/review-mode.md#smells | — |
 | CLEAN-23 | 7-15 | Overengineered MVI replaces feature code with generic frameworks | GOTCHA | compose-feature/references/review-mode.md#smells | — |
 | CLEAN-24 | 7-15 | Trivial repository calls need no use-case wrapper | DUP | DROP: dup of SKL-26 | — |
 | CLEAN-25 | 7-15 | Mandatory 4-type MVI on simple screens is overengineering | OUTOFKIT | DROP: out-of-kit stack | — |
-| CLEAN-02 | 21 | One sealed interface Event per feature is enough, almost always | RULE | compose-architecture/references/mvi-contract.md#events | — |
-| CLEAN-03 | 25 | Excessive event hierarchies signal (UserEvent, UiEvent, SystemEvent wrappers before any feature logic; children needing root events) | GOTCHA | compose-architecture/references/mvi-contract.md#events | — |
+| CLEAN-02 | 21 | One sealed interface Event per feature is enough, almost always | RULE | compose-architecture/references/mvi-contract.md#events | ✓ landed |
+| CLEAN-03 | 25 | Excessive event hierarchies signal (UserEvent, UiEvent, SystemEvent wrappers before any feature logic; children needing root events) | GOTCHA | compose-architecture/references/mvi-contract.md#events | ✓ landed |
 | CLEAN-04 | 29 | Model effects separately only when the action leaves state-management scope (network, persistence, delay, navigation, snackbar, haptics, share, analytics); no effect for plain synchronous state changes | DUP | DROP: split into CLEAN-26–CLEAN-27 | — |
-| CLEAN-26 | 29 | Model effects separately only when the action leaves state-management scope | RULE | compose-architecture/references/mvi-contract.md#effects | — |
+| CLEAN-26 | 29 | Model effects separately only when the action leaves state-management scope | RULE | compose-architecture/references/mvi-contract.md#effects | ✓ landed |
 | CLEAN-27 | 29 | Never create an effect for plain synchronous state changes | DUP | DROP: dup of CLEAN-26 | — |
 | CLEAN-05 | 33 | Fourth Result/PartialState type only when many sources trigger the same transition and one pure function must centralize them; onEvent updates directly otherwise | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit never uses Result wrappers; launchGuarded is the async contract |
-| CLEAN-06 | 37 | Generic base ViewModel helps at 10+ features for genuinely repetitive StateFlow plus Channel plus onEvent boilerplate; handleEvent plus reduce plus dispatch stacks are overengineering without team agreement | RULE | compose-architecture/references/mvi-contract.md#base | CONFLICT: kit mandates BaseViewModel unconditionally, not only at 10+ features |
+| CLEAN-06 | 37 | Generic base ViewModel helps at 10+ features for genuinely repetitive StateFlow plus Channel plus onEvent boilerplate; handleEvent plus reduce plus dispatch stacks are overengineering without team agreement | RULE | compose-architecture/references/mvi-contract.md#base | CONFLICT: kit mandates BaseViewModel unconditionally, not only at 10+ features ✓ landed |
 | CLEAN-07 | 41 | Dedicated ViewModel per screen with async data, multi-field editing, validation, derived calculations, navigation effects, retry/refresh, draft comparison | DUP | DROP: split into CLEAN-28–CLEAN-34 | — |
 | CLEAN-28 | 41 | A screen with async data earns a dedicated ViewModel | RULE | DROP: optional depth — owner-ladder elaboration (CB-05 is the kept decision line) | — |
 | CLEAN-29 | 41 | A screen with multi-field editing and validation earns a dedicated ViewModel | RULE | DROP: optional depth — owner-ladder elaboration (CB-05 is the kept decision line) | — |
@@ -431,13 +431,13 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-34 | 41 | Purely visual tab selection and expansion stay local UI state | DUP | DROP: dup of SKL-46 | — |
 | CLEAN-08 | 45 | Lighter state holder suffices for tab selection, expansion, scroll affordance, tooltip/menu visibility | DUP | DROP: dup of SKL-46 | — |
 | CLEAN-09 | 49-53 | Extract reusable UI only with real reuse, stable API, meaningful boundary (MoneyField, ResultCard, ValidationMessage, SettingsToggleRow); never one-line Text wrappers, modifier forwarders, single-use theoretical reuse, or props harder than inline code | DUP | DROP: split into CLEAN-35–CLEAN-40 | — |
-| CLEAN-35 | 49-53 | Extract a reusable UI component only with real reuse across screens | RULE | compose-architecture/references/naming-and-packages.md#extraction | — |
+| CLEAN-35 | 49-53 | Extract a reusable UI component only with real reuse across screens | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | CLEAN-36 | 49-53 | Extracted components need a stable API and a meaningful boundary | GENERIC | DROP: model already knows | — |
-| CLEAN-37 | 49-53 | Never extract one-line wrappers around Text or Spacer | RULE | compose-architecture/references/naming-and-packages.md#extraction | — |
-| CLEAN-38 | 49-53 | Never extract wrappers that only forward modifiers | RULE | compose-architecture/references/naming-and-packages.md#extraction | — |
+| CLEAN-37 | 49-53 | Never extract one-line wrappers around Text or Spacer | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
+| CLEAN-38 | 49-53 | Never extract wrappers that only forward modifiers | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | CLEAN-39 | 49-53 | Never extract components reusable only in theory but used once | GENERIC | DROP: model already knows | — |
 | CLEAN-40 | 49-53 | Never extract when props are harder to understand than inline code | GENERIC | DROP: model already knows | — |
-| CLEAN-10 | 57-67 | Use case earns its keep for multi-step, reused, policy-heavy, independently test-worthy logic; single repository pass-through (GetSettingsUseCase sample) is ceremony | RULE | compose-architecture/references/naming-and-packages.md#packages | — |
+| CLEAN-10 | 57-67 | Use case earns its keep for multi-step, reused, policy-heavy, independently test-worthy logic; single repository pass-through (GetSettingsUseCase sample) is ceremony | RULE | compose-architecture/references/naming-and-packages.md#packages | ✓ landed |
 | CLEAN-11 | 71-82 | Good-vs-overengineering comparison table (feature VM with onEvent, one sealed interface, inline updateState, effects for one-shots, route plus dumb screen, real-logic use cases, feature-first modules, on-demand abstractions, semantic-effect navigation, ProductState naming) | DUP | DROP: split into CLEAN-41–CLEAN-50 | — |
 | CLEAN-41 | 71-82 | A feature ViewModel keeps onEvent as its entry point | DUP | DROP: dup of MVI-05 | — |
 | CLEAN-42 | 71-82 | A feature keeps one sealed event interface | DUP | DROP: dup of CLEAN-02 | — |
@@ -449,17 +449,17 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-48 | 71-82 | Platform abstractions arrive on demand, never preemptively | DUP | DROP: dup of SKL-27 | — |
 | CLEAN-49 | 71-82 | Navigation travels as a semantic effect with route-layer binding | DUP | DROP: dup of SKL-38 | — |
 | CLEAN-50 | 71-82 | Types carry direct feature-specific names | DUP | DROP: dup of SKL-70 | — |
-| CLEAN-12 | 86-115 | Feature-first organization: feature/product folders containing domain/data/presentation/ui beats horizontal presentation/domain/data islands which become a maze | RULE | compose-architecture/references/naming-and-packages.md#layout | CONFLICT: kit fixes feature packages to data/, domain/, presentation/, navigation/, di/ only |
+| CLEAN-12 | 86-115 | Feature-first organization: feature/product folders containing domain/data/presentation/ui beats horizontal presentation/domain/data islands which become a maze | RULE | compose-architecture/references/naming-and-packages.md#layout | CONFLICT: kit fixes feature packages to data/, domain/, presentation/, navigation/, di/ only ✓ landed |
 | CLEAN-13 | 119-128 | Naming table: ProductEvent over ActionEventIntent, ProductState over ViewState/Contract.State, ProductEffect over CommandEffectSideEffect, ProductContract.kt over per-type files, ProductViewModel/Route/Screen over Base/Container/View/Widget names | DUP | DROP: split into CLEAN-51–CLEAN-58 | CONFLICT: kit Contract.kt holds exactly UiState, UiAction, UiEffect |
-| CLEAN-51 | 119-128 | Name event, state, and effect types directly after the feature without taxonomic compounds | RULE | compose-architecture/references/naming-and-packages.md#naming | CONFLICT: resolved — kit type names are UiAction, UiState, UiEffect per destination |
+| CLEAN-51 | 119-128 | Name event, state, and effect types directly after the feature without taxonomic compounds | RULE | compose-architecture/references/naming-and-packages.md#naming | CONFLICT: resolved — kit type names are UiAction, UiState, UiEffect per destination ✓ landed |
 | CLEAN-52 | 119-128 | Name state types directly after the feature | DUP | DROP: dup of CLEAN-51 | — |
 | CLEAN-53 | 119-128 | Name effect types directly after the feature | DUP | DROP: dup of CLEAN-51 | — |
-| CLEAN-54 | 119-128 | Keep the three contract types in one Contract.kt per destination | RULE | compose-architecture/references/naming-and-packages.md#naming | CONFLICT: resolved — kit file is Contract.kt with exactly UiState, UiAction, UiEffect |
+| CLEAN-54 | 119-128 | Keep the three contract types in one Contract.kt per destination | RULE | compose-architecture/references/naming-and-packages.md#naming | CONFLICT: resolved — kit file is Contract.kt with exactly UiState, UiAction, UiEffect ✓ landed |
 | CLEAN-55 | 119-128 | Name ViewModels directly after the feature | DUP | DROP: dup of SKL-70 | — |
-| CLEAN-56 | 119-128 | Name the route composable <Feature>Route | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
-| CLEAN-57 | 119-128 | Name the screen composable <Feature>Screen | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
+| CLEAN-56 | 119-128 | Name the route composable <Feature>Route | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
+| CLEAN-57 | 119-128 | Name the screen composable <Feature>Screen | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
 | CLEAN-58 | 119-128 | Name leaf components directly after their content | DUP | DROP: dup of CLEAN-51 | — |
-| CLEAN-14 | 132-159 | Import hygiene: never inline fully qualified paths, always import at top, alias clashing layers with Db/Domain/Ui/Api/Dto affixes | RULE | compose-architecture/references/naming-and-packages.md#imports | — |
+| CLEAN-14 | 132-159 | Import hygiene: never inline fully qualified paths, always import at top, alias clashing layers with Db/Domain/Ui/Api/Dto affixes | RULE | compose-architecture/references/naming-and-packages.md#imports | ✓ landed (D0-7 canonical) |
 | CLEAN-15 | 166-184 | BAD 4-type MVI currency-picker example (1:1 Event-to-Result mapping adds nothing) | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit never teaches 4-type MVI |
 | CLEAN-16 | 188-206 | GOOD 3-type MVI currency example (sealed Event, data-class State, sealed Effect, StateFlow plus Channel plus onEvent) | EXAMPLE | compose-feature/examples.md#pairs | CONFLICT: naming lands as UiAction/UiState/UiEffect in kit code |
 
@@ -475,7 +475,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-18 | 42-51 | Prefer immutable collections in state models | DUP | DROP: dup of ANTI-04 | — |
 | CESS-19 | 42-51 | Reserve SnapshotStateList for UI-local state only | DUP | DROP: dup of SKL-46 | — |
 | CESS-05 | 55-68 | Custom Saver pattern for rememberSaveable with non-Parcelable types | API | DROP: tutorial code | — |
-| CESS-06 | 70 | rememberSaveable is multiplatform and works in CMP commonMain; still only for small UI-local state, business state belongs in ViewModel | RULE | compose-architecture/references/state-ownership.md#saveable | — |
+| CESS-06 | 70 | rememberSaveable is multiplatform and works in CMP commonMain; still only for small UI-local state, business state belongs in ViewModel | RULE | compose-architecture/references/state-ownership.md#saveable | ✓ landed |
 | CESS-07 | 76-89 | LaunchedEffect keyed execution and cancellation semantics; belongs at route level for effect collection, never business logic in leaves | RULE | DROP: out of scope — effect-collection placement (architecture/feature scope) | — |
 | CESS-08 | 93-101 | DisposableEffect registration must pair with onDispose cleanup | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-09 | 105-114 | Prefer dispatching events to ViewModel over rememberCoroutineScope; scope only for UI-local async (scroll, snackbar); rememberUpdatedState for latest callbacks; SideEffect sparingly; produceState defers to ViewModel StateFlow in MVI | DUP | DROP: split into CESS-20–CESS-23 | — |
@@ -484,7 +484,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-22 | 105-114 | Capture latest callbacks with rememberUpdatedState in long-running effects | GENERIC | DROP: model already knows | — |
 | CESS-23 | 105-114 | Prefer ViewModel StateFlow over produceState in MVI screens | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-10 | 124-130 | collectAsStateWithLifecycle over collectAsState to collect only in STARTED; available in CMP via lifecycle-runtime-compose with version-dependent KMP surface | GOTCHA | compose-ui/references/state-reads-and-stability.md#collect | https://developer.android.com/jetpack/androidx/releases/lifecycle |
-| CESS-11 | 136-146 | CollectEffect lifecycle-aware effect collector (repeatOnLifecycle STARTED); collect one-offs at route level | RULE | compose-architecture/templates/core/CollectEffect.kt#collect | — |
+| CESS-11 | 136-146 | CollectEffect lifecycle-aware effect collector (repeatOnLifecycle STARTED); collect one-offs at route level | RULE | compose-architecture/templates/core/mvi/CollectEffect.kt#collect | ✓ landed |
 | CESS-12 | 150-158 | Modifier order matters left-to-right; background/padding/size ordering sample | GENERIC | DROP: model already knows | — |
 | CESS-13 | 162-168 | Every reusable composable accepts a Modifier parameter defaulted to Modifier | GENERIC | DROP: model already knows | — |
 | CESS-14 | 172-197 | Slot pattern: accept @Composable lambdas not pre-composed values so composition stays deferred and scope-aware | GENERIC | DROP: model already knows (Opus test) | — |
@@ -495,28 +495,28 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-26 | 210-232 | Reserve CompositionLocal for theming, density, and platform owners | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-27 | 210-232 | Never publish frequently-changing values through CompositionLocal | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-28 | 210-232 | Never thread 1-2-level values through CompositionLocal | GENERIC | DROP: model already knows | — |
-| CESS-29 | 210-232 | Never resolve dependencies through CompositionLocal | RULE | compose-architecture/references/state-ownership.md#composition-local | — |
-| CESS-30 | 210-232 | Never carry feature state in custom CompositionLocals | RULE | compose-architecture/references/state-ownership.md#composition-local | — |
+| CESS-29 | 210-232 | Never resolve dependencies through CompositionLocal | RULE | compose-architecture/references/state-ownership.md#composition-local | ✓ landed |
+| CESS-30 | 210-232 | Never carry feature state in custom CompositionLocals | RULE | compose-architecture/references/state-ownership.md#composition-local | ✓ landed |
 
 ## references/coroutines-flow.md
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| CF-01 | 12-18 | StateFlow vs SharedFlow vs Channel table: current-value holding, new-collector behavior, delivery fan-out, duplicate filtering, canonical uses | DECISION | compose-architecture/references/coroutines-flow.md#which | CONFLICT: resolved — Channel mandated for UI effects per SKL-34, table kept only for primitive comparison |
+| CF-01 | 12-18 | StateFlow vs SharedFlow vs Channel table: current-value holding, new-collector behavior, delivery fan-out, duplicate filtering, canonical uses | DECISION | compose-architecture/references/coroutines-flow.md#which | CONFLICT: resolved — Channel mandated for UI effects per SKL-34, table kept only for primitive comparison ✓ landed |
 | CF-02 | 23-30 | MVI mapping code: MutableStateFlow plus asStateFlow for state, Channel(BUFFERED) plus receiveAsFlow for effects | DUP | DROP: split into CF-15–CF-16 | — |
 | CF-15 | 23-30 | Screen state maps to MutableStateFlow exposed as asStateFlow | DUP | DROP: dup of SKL-33 | — |
 | CF-16 | 23-30 | Screen effects map to Channel(BUFFERED) exposed as receiveAsFlow | DUP | DROP: dup of SKL-34 | — |
-| CF-03 | 34-37 | Screen state to StateFlow, one-off UI effects to Channel(BUFFERED) with CollectEffect, broadcasts to SharedFlow, search streams to cold Flow via stateIn | DECISION | compose-architecture/references/coroutines-flow.md#which | CONFLICT: resolved — Channel mandated for UI effects per SKL-34, SharedFlow kept only for multi-collector broadcast signals |
-| CF-04 | 41-43 | Common mistakes: StateFlow one-offs replay on config change, SharedFlow(replay=0) loses detached-UI effects, RENDEZVOUS Channel suspends sender so use BUFFERED | GOTCHA | compose-architecture/references/coroutines-flow.md#mistakes | — |
+| CF-03 | 34-37 | Screen state to StateFlow, one-off UI effects to Channel(BUFFERED) with CollectEffect, broadcasts to SharedFlow, search streams to cold Flow via stateIn | DECISION | compose-architecture/references/coroutines-flow.md#which | CONFLICT: resolved — Channel mandated for UI effects per SKL-34, SharedFlow kept only for multi-collector broadcast signals ✓ landed |
+| CF-04 | 41-43 | Common mistakes: StateFlow one-offs replay on config change, SharedFlow(replay=0) loses detached-UI effects, RENDEZVOUS Channel suspends sender so use BUFFERED | GOTCHA | compose-architecture/references/coroutines-flow.md#mistakes | ✓ landed |
 | CF-05 | 49-92 | Flow operator quick reference (map/filter/take, flatMapLatest/Concat/Merge, combine/zip/merge, debounce/sample/distinct/catch/retry, collect/stateIn/shareIn) | API | DROP: tutorial code | — |
 | CF-06 | 72 | combine waits until every upstream emits at least once before producing output | GENERIC | DROP: model already knows (Opus test) | — |
 | CF-07 | 96-100 | Dispatcher table: Main for UI updates, IO for network/database/files, Default for CPU work; IO on all targets since 1.7+ | GENERIC | DROP: model already knows (Opus test) | https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-i-o.html |
-| CF-08 | 102-114 | Main-safe rule: callee switches dispatchers via withContext, caller launches plainly; inject dispatchers as constructor params for testability | RULE | compose-architecture/references/coroutines-flow.md#dispatchers | — |
+| CF-08 | 102-114 | Main-safe rule: callee switches dispatchers via withContext, caller launches plainly; inject dispatchers as constructor params for testability | RULE | compose-architecture/references/coroutines-flow.md#dispatchers | ✓ landed |
 | CF-09 | 120-128 | Scope table: viewModelScope for VMs (CMP commonMain since lifecycle 2.8+), lifecycleScope Android-only, rememberCoroutineScope for handlers, coroutineScope vs supervisorScope for joint vs independent work | DECISION | DROP: optional depth — scope catalog beyond the one kit boundary rule (CB-98) | https://developer.android.com/kotlin/multiplatform/viewmodel |
 | CF-10 | 128 | Never GlobalScope (leak) and never unbound CoroutineScope(Job()) without lifecycle management | GENERIC | DROP: model already knows (Opus test) | — |
 | CF-11 | 134-145 | launch propagates immediately while async defers to await; try/catch around repository fetch mapping IOException to error state | API | DROP: tutorial code | CONFLICT: kit routes all VM async through launchGuarded(onError) instead of hand-rolled try/catch |
 | CF-12 | 149-155 | Never swallow CancellationException: rethrow explicitly, never catch Exception broadly around suspending work | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
-| CF-13 | 161-170 | stateIn/shareIn as declared vals never per-call; WhileSubscribed(5000) for VM state, Lazily for expensive shared resources, Eagerly for pre-collector data | DECISION | compose-architecture/references/coroutines-flow.md#statein | — |
+| CF-13 | 161-170 | stateIn/shareIn as declared vals never per-call; WhileSubscribed(5000) for VM state, Lazily for expensive shared resources, Eagerly for pre-collector data | DECISION | compose-architecture/references/coroutines-flow.md#statein | ✓ landed |
 | CF-14 | 174-184 | Anti-patterns table: GlobalScope, runBlocking on Main, swallowed CancellationException, blocking IO on Default, loops without ensureActive, per-call stateIn, catch Throwable, hardcoded IO dispatcher, combine without initial values | DUP | DROP: split into CF-17–CF-25 | — |
 | CF-17 | 174-184 | Never launch from GlobalScope | GENERIC | DROP: model already knows | — |
 | CF-18 | 174-184 | Never block the Main thread with runBlocking | GENERIC | DROP: model already knows | — |
@@ -771,37 +771,37 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | KOIN-21 | 35-41 | Include koin-core, koin-compose, and koin-compose-viewmodel for the injection surface | GENERIC | DROP: model already knows (Opus test) | UNVERIFIED: package list not re-checked against current Koin docs |
 | KOIN-22 | 35-41 | Koin supports Android, iOS, and Desktop fully with Web experimental | GENERIC | DROP: model already knows (Opus test) | UNVERIFIED: not re-checked against current Koin docs |
 | KOIN-03 | 49-65 | Shared initKoin with platform config; Android Application wiring; iOS do-prefixed Swift call; Compose-managed alternative | DUP | DROP: split into KOIN-23–KOIN-26 | — |
-| KOIN-23 | 49-65 | Start Koin once from a shared initKoin with an optional platform config lambda | RULE | compose-architecture/references/dependency-injection.md#setup | — |
+| KOIN-23 | 49-65 | Start Koin once from a shared initKoin with an optional platform config lambda | RULE | compose-architecture/references/dependency-injection.md#setup | ✓ landed |
 | KOIN-24 | 49-65 | Wire androidContext and androidLogger in the Android Application class | GENERIC | DROP: model already knows | — |
-| KOIN-25 | 49-65 | Call doInitKoin from Swift on iOS | RULE | compose-architecture/references/dependency-injection.md#setup | — |
+| KOIN-25 | 49-65 | Call doInitKoin from Swift on iOS | RULE | compose-architecture/references/dependency-injection.md#setup | ✓ landed |
 | KOIN-26 | 49-65 | Manage Koin from Compose with KoinApplication as an alternative | GENERIC | DROP: model already knows | — |
 | KOIN-04 | 82-101 | Koin DSL lifecycles: single for app-lifetime services, factory for short-lived state, scoped for flow-bound state, viewModelOf for lifecycle-aware VMs | DUP | DROP: split into KOIN-27–KOIN-30 | — |
-| KOIN-27 | 82-101 | Declare app-lifetime services with single | DECISION | compose-architecture/references/dependency-injection.md#dsl | — |
-| KOIN-28 | 82-101 | Declare stateful short-lived objects with factory | DECISION | compose-architecture/references/dependency-injection.md#dsl | — |
-| KOIN-29 | 82-101 | Bind flow-shared state with scoped scopes | DECISION | compose-architecture/references/dependency-injection.md#dsl | — |
+| KOIN-27 | 82-101 | Declare app-lifetime services with single | DECISION | compose-architecture/references/dependency-injection.md#dsl | ✓ landed |
+| KOIN-28 | 82-101 | Declare stateful short-lived objects with factory | DECISION | compose-architecture/references/dependency-injection.md#dsl | ✓ landed |
+| KOIN-29 | 82-101 | Bind flow-shared state with scoped scopes | DECISION | DROP: no kit scope story — flow-bound state lives in repository streams (brief §6) | — |
 | KOIN-30 | 82-101 | Declare ViewModels with viewModelOf for lifecycle awareness | DUP | DROP: dup of KOIN-33 | — |
 | KOIN-05 | 104-138 | KSP annotations setup plus annotation-to-DSL table (Single, Factory, KoinViewModel, InjectedParam, Module plus ComponentScan) plus generated .module wiring | API | DROP: tutorial code | UNVERIFIED: annotation setup and KSP args not re-checked against current Koin docs |
-| KOIN-06 | 142-148 | Feature-first module organization with includes aggregation at app module | RULE | compose-architecture/references/dependency-injection.md#modules | — |
+| KOIN-06 | 142-148 | Feature-first module organization with includes aggregation at app module | RULE | compose-architecture/references/dependency-injection.md#modules | ✓ landed |
 | KOIN-07 | 152-167 | expect/actual platform modules for per-platform bindings registered alongside app module; KoinComponent inject() justified only where constructors must match across platforms | DUP | DROP: dup of XPLAT-07 | — |
 | KOIN-08 | 171-194 | Injection function table: koinInject for plain deps, koinViewModel lifecycle-aware, koinActivityViewModel Android sharing, koinEntryProvider for Nav3, parametersOf for runtime values, get() inside modules only never composables | DUP | DROP: split into KOIN-15–KOIN-20 | UNVERIFIED: function list not re-checked against current Koin docs |
 | KOIN-15 | 171-194 | Resolve plain dependencies in composables with koinInject | CONFLICT | DROP: conflicts with brief §6.4 — koinInject in composables prohibited | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-16 | 171-194 | Resolve ViewModels lifecycle-aware with koinViewModel | DECISION | compose-architecture/references/dependency-injection.md#inject | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-17 | 171-194 | Share ViewModels across an Activity with koinActivityViewModel on Android | DECISION | compose-architecture/references/dependency-injection.md#inject | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-18 | 171-194 | Wire NavDisplay entries through koinEntryProvider | DECISION | compose-architecture/references/dependency-injection.md#inject | UNVERIFIED: not re-checked against current Koin docs |
+| KOIN-16 | 171-194 | Resolve ViewModels lifecycle-aware with koinViewModel | DECISION | compose-architecture/references/dependency-injection.md#inject | ✓ landed — verified https://insert-koin.io/docs/reference/koin-annotations/annotations-inventory |
+| KOIN-17 | 171-194 | Share ViewModels across an Activity with koinActivityViewModel on Android | DECISION | compose-architecture/references/dependency-injection.md#inject | ✓ landed as one-line existing-project note (Android-only API) |
+| KOIN-18 | 171-194 | Wire NavDisplay entries through koinEntryProvider | DECISION | compose-architecture/references/dependency-injection.md#inject | ✓ landed as one-line deferral to android/skills navigation-3 (Nav 3 mechanics, D0-8) |
 | KOIN-19 | 171-194 | Pass runtime values with parametersOf | DUP | DROP: dup of KOIN-34 | UNVERIFIED: not re-checked against current Koin docs |
 | KOIN-20 | 171-194 | Call get() inside module blocks only, never in composables | CONFLICT | DROP: conflicts with Koin-annotations decision (O-1) — get() is DSL-only | UNVERIFIED: not re-checked against current Koin docs |
 | KOIN-09 | 185 | Inject as default parameters for testability (service = koinInject()) | GENERIC | DROP: model already knows | — |
 | KOIN-10 | 198-209 | Nav3 Koin DSL (navigation<T> entries in modules plus koinEntryProvider) with pointer to navigation-3-di for full patterns | RULE | DROP: deferred to Koin navigation-3 docs | UNVERIFIED: Nav3 DSL shape not re-checked against current Koin docs |
 | KOIN-11 | 213-222 | scope<T> works on all platforms; activityRetainedScope covers Android config changes | DUP | DROP: split into KOIN-31–KOIN-32 | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-31 | 213-222 | Scope flow-bound dependencies with scope<T> on all platforms | DUP | DROP: dup of KOIN-29 | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-32 | 213-222 | Survive Android config changes with activityRetainedScope | DECISION | compose-architecture/references/dependency-injection.md#scopes | UNVERIFIED: not re-checked against current Koin docs |
-| KOIN-12 | 226-234 | Koin-specific MVI surface is constructor injection plus koinViewModel(); pattern itself stays framework-agnostic | RULE | compose-architecture/references/dependency-injection.md#framework-split | — |
+| KOIN-31 | 213-222 | Scope flow-bound dependencies with scope<T> on all platforms | DECISION | DROP: no kit scope story — same scope topic as KOIN-29 (brief §6) | UNVERIFIED: not re-checked against current Koin docs |
+| KOIN-32 | 213-222 | Survive Android config changes with activityRetainedScope | DECISION | compose-architecture/references/dependency-injection.md#scopes | ✓ landed as one-line existing-project note (Android-only API) |
+| KOIN-12 | 226-234 | Koin-specific MVI surface is constructor injection plus koinViewModel(); pattern itself stays framework-agnostic | RULE | compose-architecture/references/dependency-injection.md#framework-split | ✓ landed |
 | KOIN-13 | 238-248 | verify() dry-run module check with SavedStateHandle extraTypes plus koin-test in commonTest | RULE | compose-feature/references/testing.md#koin-verify | — |
 | KOIN-14 | 254-260 | Koin anti-patterns: factory() for ViewModels, missing parametersOf, compose-without-viewmodel artifact, repeated startKoin, Android Context in commonMain modules | DUP | DROP: split into KOIN-33–KOIN-37 | — |
-| KOIN-33 | 254-260 | Never declare ViewModels with factory(); use viewModelOf | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | — |
-| KOIN-34 | 254-260 | Never skip parametersOf for runtime constructor params | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | — |
+| KOIN-33 | 254-260 | Never declare ViewModels with factory(); use viewModelOf | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | ✓ landed |
+| KOIN-34 | 254-260 | Never skip parametersOf for runtime constructor params | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | ✓ landed |
 | KOIN-35 | 254-260 | Never call startKoin more than once | DUP | DROP: dup of KOIN-23 | — |
-| KOIN-36 | 254-260 | Never reference Android Context in commonMain modules | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | — |
+| KOIN-36 | 254-260 | Never reference Android Context in commonMain modules | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | ✓ landed |
 | KOIN-37 | 254-260 | Never use koin-compose without koin-compose-viewmodel for ViewModels | GENERIC | DROP: model already knows (Opus test) | — |
 
 ## references/lists-grids.md
@@ -885,32 +885,32 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
 | MVI-01 | 9-13 | MVI screens define three types: Event as the only UI input, State as the render description, Effect as the one-off command | DUP | DROP: split into MVI-21–MVI-23 | — |
-| MVI-21 | 9-13 | Events are the only input from the UI into the screen holder | RULE | compose-architecture/references/mvi-contract.md#contract | — |
+| MVI-21 | 9-13 | Events are the only input from the UI into the screen holder | RULE | compose-architecture/references/mvi-contract.md#contract | ✓ landed |
 | MVI-22 | 9-13 | State fully describes what the screen renders | GENERIC | DROP: model already knows | — |
 | MVI-23 | 9-13 | Effects carry one-off UI commands outside state | DUP | DROP: dup of MVI-03 | — |
 | MVI-02 | 19 | State stays equality-friendly; trivial derivations compute; canonical values store with display derived at the UI boundary | DUP | DROP: split into MVI-24–MVI-26 | — |
 | MVI-24 | 19 | Model state as equality-friendly data classes with immutable collections | DUP | DROP: dup of ANTI-04 | — |
 | MVI-25 | 19 | Derive trivial values with computed properties | GENERIC | DROP: model already knows | — |
 | MVI-26 | 19 | Store canonical values and derive display values at the UI boundary | DUP | DROP: dup of SKL-69 | — |
-| MVI-03 | 23-25 | Effects are not state: consume-boolean modeling needs reset logic and breeds bugs; effects fire once and are gone | RULE | compose-architecture/references/mvi-contract.md#effects | — |
-| MVI-04 | 29-38 | Event naming from the user perspective (OnSaveClick not SaveCategory, OnTitleChanged not UpdateTitle, OnRetryClick not RetryRequest, OnBackClick not NavigateBack); ViewModel decides handling | RULE | compose-architecture/references/naming-and-packages.md#events | — |
-| MVI-05 | 50-60 | Event processing flow: gesture to onEvent when() to sync updateState or sendEffect or viewModelScope launch to completion update plus effect; onEvent is the single decision point | WORKFLOW | compose-architecture/references/mvi-contract.md#flow | — |
+| MVI-03 | 23-25 | Effects are not state: consume-boolean modeling needs reset logic and breeds bugs; effects fire once and are gone | RULE | compose-architecture/references/mvi-contract.md#effects | ✓ landed |
+| MVI-04 | 29-38 | Event naming from the user perspective (OnSaveClick not SaveCategory, OnTitleChanged not UpdateTitle, OnRetryClick not RetryRequest, OnBackClick not NavigateBack); ViewModel decides handling | RULE | compose-architecture/references/naming-and-packages.md#events | ✓ landed |
+| MVI-05 | 50-60 | Event processing flow: gesture to onEvent when() to sync updateState or sendEffect or viewModelScope launch to completion update plus effect; onEvent is the single decision point | WORKFLOW | compose-architecture/references/mvi-contract.md#flow | ✓ landed |
 | MVI-06 | 64-70 | Screen holder owns MutableStateFlow state, Channel effects, and onEvent processing with thread-safe update and trySend | DUP | DROP: split into MVI-27–MVI-31 | — |
 | MVI-27 | 64-70 | The holder owns MutableStateFlow state exposed as StateFlow | DUP | DROP: dup of SKL-33 | — |
 | MVI-28 | 64-70 | The holder delivers effects through a Channel exposed as Flow | DUP | DROP: dup of SKL-34 | — |
 | MVI-29 | 64-70 | The holder processes every event through onEvent | DUP | DROP: dup of MVI-05 | — |
 | MVI-30 | 64-70 | State updates go through a thread-safe update function | GENERIC | DROP: model already knows | — |
 | MVI-31 | 64-70 | Effects emit with channel trySend | GENERIC | DROP: model already knows | — |
-| MVI-07 | 76 | Route obtains holder, collects state once lifecycle-aware, collects effects via CollectEffect, binds navigation/snackbar/sheet/platform | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | — |
+| MVI-07 | 76 | Route obtains holder, collects state once lifecycle-aware, collects effects via CollectEffect, binds navigation/snackbar/sheet/platform | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | ✓ landed |
 | MVI-08 | 80-84 | Screen is a stateless render of state plus onEvent; leaves render sub-state with specific callbacks and tiny local state; never pass onEvent to reusable leaves | DUP | DROP: split into MVI-16–MVI-18 | — |
-| MVI-16 | 80-84 | The Screen is a stateless render function of state plus onEvent | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | — |
-| MVI-17 | 80-84 | Leaves render sub-state with specific callbacks and tiny visual-local state | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | — |
-| MVI-18 | 80-84 | Never pass onEvent to reusable leaves; adapt to specific callbacks | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | — |
+| MVI-16 | 80-84 | The Screen is a stateless render function of state plus onEvent | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | ✓ landed |
+| MVI-17 | 80-84 | Leaves render sub-state with specific callbacks and tiny visual-local state | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | ✓ landed |
+| MVI-18 | 80-84 | Never pass onEvent to reusable leaves; adapt to specific callbacks | RULE | compose-architecture/references/mvi-contract.md#ui-boundary | ✓ landed |
 | MVI-09 | 92-96 | MVI fits: existing MVI base, many enumerable actions, explicit contracts for debugging/analytics/time-travel, exhaustive when, interrelated transitions | GENERIC | DROP: model already knows (Opus test) | CONFLICT: kit mandates MVI for new work regardless; guidance kept for reading existing code |
 | MVI-10 | 102-119 | BAD business-logic-in-composable loan-calculator sample (rememberSaveable field state with inline validation) | EXAMPLE | compose-feature/examples.md#pairs | — |
 | MVI-11 | 123-143 | GOOD MVI contract sample (CreateItemEvent/State/Effect with canSave derivation) | EXAMPLE | compose-feature/examples.md#pairs | CONFLICT: kit names land as UiAction/UiState/UiEffect in Contract.kt |
 | MVI-12 | 146-172 | GOOD onEvent ViewModel sample (field updates clearing per-field errors, save/back dispatch, shared save() body) | EXAMPLE | compose-feature/examples.md#pairs | — |
-| MVI-13 | 176 | Base-class/interface variant shares the same onEvent/save shape with host-provided updateState/sendEffect | RULE | compose-architecture/references/mvi-contract.md#base | — |
+| MVI-13 | 176 | Base-class/interface variant shares the same onEvent/save shape with host-provided updateState/sendEffect | RULE | compose-architecture/references/mvi-contract.md#base | ✓ landed |
 | MVI-14 | 183-203 | GOOD Route/Screen/Leaf sample (collectAsStateWithLifecycle plus CollectEffect routing plus field callbacks) | EXAMPLE | compose-feature/examples.md#pairs | — |
 | MVI-15 | 207-220 | Form-heavy event model: FormField enum plus FieldChanged(field, raw) for structurally similar fields, specific intents for screen-level actions | DUP | DROP: split into MVI-19–MVI-20 | — |
 | MVI-19 | 207-220 | Model structurally similar fields with a generic FieldChanged(field, raw) event | RULE | DROP: optional depth — form-shape elaboration | — |
@@ -985,7 +985,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 |---|---|---|---|---|---|
 | NTHR-01 | 3 | Nav3 model: you own the back stack as state, the library renders it; verify artifact maturity before production use | DUP | DROP: dup of brief §7.1 | — |
 | NTHR-02 | 17-39 | Four building blocks (Keys, SnapshotStateList stack, NavEntry with metadata, NavDisplay with SceneStrategy, decorators) plus interaction flow | API | DROP: tutorial code | — |
-| NTHR-03 | 43-52 | Define route keys as @Serializable types grouped in one sealed hierarchy per feature | RULE | compose-architecture/references/navigation.md#keys | — |
+| NTHR-03 | 43-52 | Define route keys as @Serializable types grouped in one sealed hierarchy per feature | RULE | compose-architecture/references/navigation.md#keys | ✓ landed |
 | NTHR-04 | 56-62 | rememberNavBackStack for persisted stacks (keys must be @Serializable NavKey) vs plain mutableStateListOf for prototypes only | DUP | DROP: covered by AND-01 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current Nav3 docs |
 | NTHR-05 | 66 | Non-JVM CMP targets need SavedStateConfiguration plus SerializersModule with polymorphic NavKey subclasses | DUP | DROP: covered by CMP-26 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/guide/navigation/navigation-3/save-state |
 | NTHR-06 | 73-94 | NavDisplay configuration sample (decorators, sceneStrategy, transition specs, entryProvider with metadata) | API | DROP: tutorial code | — |
@@ -997,7 +997,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NTHR-12 | 180-183 | Strategy chaining with then(); first match wins, SinglePane fallback implicit | GOTCHA | DROP: deferred to android/skills navigation-3 | UNVERIFIED: not re-checked against current Nav3 docs |
 | NTHR-13 | 187-201 | Global NavDisplay transition specs plus per-entry metadata overrides | API | DROP: deferred to android/skills navigation-3 | UNVERIFIED: transition-spec metadata API not re-checked against current Nav3 docs |
 | NTHR-14 | 205-210 | Back-stack manipulation patterns: forward add, back remove, duplicate replace, synthetic deep-link stack, tab root swap | GENERIC | DROP: model already knows (Opus test) | — |
-| NTHR-15 | 214-229 | Nav3 parses no deep links: parse URIs in platform entry points, build synthetic stacks; registration stays platform-native while construction logic can live in commonMain | RULE | compose-architecture/references/navigation.md#deep-links | — |
+| NTHR-15 | 214-229 | Nav3 parses no deep links: parse URIs in platform entry points, build synthetic stacks; registration stays platform-native while construction logic can live in commonMain | RULE | compose-architecture/references/navigation.md#deep-links | ✓ landed |
 
 ## references/navigation-migration.md
 
@@ -1011,7 +1011,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NAVMIG-06 | 55-72 | Step 4: graph-scoped VMs become entry decorators; sharing lifts to parent or DI scope | WORKFLOW | DROP: deferred to android/skills navigation-3 (official migration guide) | — |
 | NAVMIG-07 | 77-91 | Step 5: deep-link integration becomes manual URI parsing plus synthetic stack construction | WORKFLOW | DROP: deferred to android/skills navigation-3 (official migration guide) | — |
 | NAVMIG-08 | 95-106 | Step 6: tab navigation becomes pop-to-root plus root-key swap | WORKFLOW | DROP: deferred to android/skills navigation-3 (official migration guide) | — |
-| NAVMIG-09 | 110-120 | Migrate incrementally: leaf screens first, shared ViewModels last | RULE | compose-architecture/references/existing-projects.md#migration-steps | — |
+| NAVMIG-09 | 110-120 | Migrate incrementally: leaf screens first, shared ViewModels last | RULE | compose-architecture/references/existing-projects.md#migration-steps | ✓ landed |
 
 ## references/navigation.md
 

@@ -1,0 +1,148 @@
+# Navigation
+
+Load this reference when defining NavKeys, registering entries, owning the back stack, passing results, or opening sheets and dialogs.
+
+Contents
+- One sealed key hierarchy per feature (#keys)
+- Serializers and back-stack persistence (#persistence)
+- The composition root owns NavDisplay (#root-ownership)
+- Entry registration and per-entry ViewModels (#viewmodels)
+- Back-stack verbs, tabs, and back handling (#back-stack)
+- Cross-feature travel through effects (#cross-feature)
+- Results through the repository (#results)
+- Sheets and dialogs as destinations; scenes deferred (#scenes)
+- Deep links built by your code (#deeplinks)
+- Red flags and verification
+
+## Keys
+
+One feature owns exactly one key hierarchy. Declare a `@Serializable sealed interface <Name>NavKey : NavKey` in `navigation/` with concrete subtypes per destination. (NTHR-03; CONTRACT_BRIEF §7.2)
+
+```kotlin
+@Serializable sealed interface NotesNavKey : NavKey
+
+@Serializable data object NoteListKey : NotesNavKey
+
+@Serializable data class NoteDetailKey(val noteId: Long) : NotesNavKey
+```
+
+Keys carry identity, never records. A key holds an identifier, an enum, or a short hint. A key never holds a `*UiModel` or a large aggregate. The detail destination re-fetches its record by identity. (CONTRACT_BRIEF §7.4)
+
+A domain enum a key needs is mirrored at the route boundary. The domain enum stays framework-free with no `@Serializable`. The navigation-owned mirror carries the annotation. (CONTRACT_BRIEF §7.4)
+
+Multi-module projects repeat the pattern: each module declares its own sealed hierarchy, and the composition root aggregates them. A single global hierarchy for all features is forbidden. The kotlinconf-app sample keeps one global hierarchy; the kit requires one per feature. That divergence is known and intentional. (CMP-28; CONTRACT_BRIEF §7.2)
+
+## Persistence
+
+Each feature exposes its own serializers module derived from its sealed hierarchy. Use `subclassesOfSealed`, never a hand-maintained subclass list. A hand list drifts when a subtype is added. (CONTRACT_BRIEF §7.2)
+
+```kotlin
+@OptIn(ExperimentalSerializationApi::class)
+val notesNavSerializers = SerializersModule {
+    polymorphic(NavKey::class) { subclassesOfSealed<NotesNavKey>() }
+}
+```
+
+The composition root aggregates every feature module with `include(notesNavSerializers)` into one `appNavSerializersModule`. (CONTRACT_BRIEF §1.3, §7.2)
+
+Non-JVM targets have no reflection serializers. Pass a `SavedStateConfiguration` carrying the explicit `SerializersModule` to the back-stack holder. Verify the call shape against https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-3.html and https://developer.android.com/guide/navigation/navigation-3/save-state. (CMP-26; CONTRACT_BRIEF §7.2)
+
+Hold the stack with `rememberNavBackStack`, never with a plain state list. A plain list loses the stack on process death. Persist hand-rolled top-level holders with `rememberSerializable` plus `NavKeySerializer`, never with `rememberSaveable`. (AND-01)
+
+## Root ownership
+
+The composition root owns `NavDisplay` and the owning back stack. It builds the entry provider from every feature entry and handles back navigation in one place. No feature owns a display. (SMP-30; CONTRACT_BRIEF §1.3)
+
+Ownership split across the codebase: (CONTRACT_BRIEF §7.4)
+
+| Piece | Lives in |
+|---|---|
+| `<Name>NavKey` hierarchy plus `<name>NavSerializers` | feature `navigation/` |
+| `<Dest>Route`, `<Dest>Screen`, `<Dest>Sheet` | feature `presentation/<dest>/` |
+| Owning back stack plus `entry<DestKey>` builders that resolve the ViewModel | composition root |
+| `include(<name>NavSerializers)` aggregation | composition root |
+
+Key types live in the feature. Entry builder functions live in the composition root. The kit has no api/impl module split; adapt any sample that splits them. (SMP-31; CONTRACT_BRIEF §7.4)
+
+## Viewmodels
+
+Each nav entry is built once in the composition root. Resolve the nav-scoped ViewModel inside the entry builder with `koinViewModel()` and pass it into the Route. Routes take the ViewModel as a parameter and resolve nothing themselves. (CONTRACT_BRIEF §7.3)
+
+One bare injected param is fine. Two or more construction values travel as one `Params` class through `parametersOf`. Koin matches injected params by type, so two raw strings silently rebind. (CONTRACT_BRIEF §6.3)
+
+Every `NavDisplay` carries both entry decorators: the saveable-state-holder decorator and the view-model-store decorator. One decorator alone leaves distinct keys sharing a single store, and ViewModels fall back to activity scope. For decorator mechanics, the android/skills `navigation-3` skill goes deeper, if installed. (AND-03; CMP-30)
+
+## Back stack
+
+Mutate the stack with list verbs: `add` pushes, `remove` pops, remove-then-`add` replaces. ViewModels never touch the stack; the Route translates effects into stack calls. (CONTRACT_BRIEF §7.5)
+
+Each top-level destination keeps its own `rememberNavBackStack` holder. Separate holders keep each tab's history independent across switches. (AND-04)
+
+Guard navigation click handlers with `dropUnlessResumed`. Rapid taps double-push while the entry is not resumed. (AND-02)
+
+Prefer Navigation 3 built-in back support over hand-rolled dispatchers. Never bind one navigation-event state to two active handlers. For predictive-back recipes, the android/skills `navigation-3` skill goes deeper, if installed. (AND-12)
+
+Each `NavEntry` is its own `LifecycleOwner`. A covered entry rests at `STARTED`, not destroyed. Put resume-scoped work in `LifecycleResumeEffect`. (AND-09)
+
+## Cross-feature
+
+Cross-feature travel is an effect. The source ViewModel emits a semantic `UiEffect` such as `OpenNoteDetail(noteId)`. The composition root maps the effect to the destination feature's key and pushes it. A feature never imports another feature's keys or ViewModels. (SKL-38; CONTRACT_BRIEF §1.4, §7.5)
+
+State two features share lives in a `:data:<domain>` module both features depend on. Movement between features lives in effects, never in shared state. (CONTRACT_BRIEF §1.4)
+
+## Results
+
+Results travel through a repository write. The child destination commits a real domain write. The parent observes the committed state through its repository stream. (CONTRACT_BRIEF §7.6)
+
+Never pass a result through a file-level mutable. A file-level callback leaks the parent, is null after process-death restore, is shared by two panes on wide screens, and is not thread-safe. (CONTRACT_BRIEF §7.6)
+
+A value that is genuinely navigational belongs in the nav key as identity. Everything else belongs in the repository. (CONTRACT_BRIEF §7.6)
+
+```kotlin
+// WRONG because: the editor reaches into the back stack for another entry's ViewModel.
+val tags = backStack.previousEntry?.viewModel<TagPickerViewModel>()?.pickedTags
+// RIGHT: the picker writes through the repository; the editor observes the stream.
+tagsRepository.savePickedTags(ids)         // picker ViewModel, inside launchGuarded
+tagsRepository.getPickedTagsStream()       // editor ViewModel collects this
+```
+
+## Scenes
+
+Sheets and dialogs are destinations, not nullable state fields. Open them with `entryBottomSheet<Key>` and `entryDialog<Key>` through `backStack.add`. Never gate them on a nullable state field. (CONTRACT_BRIEF §7.7)
+
+Sheet and dialog chrome (handle, close, scrim) belongs to the scene, not to the sheet content. (CONTRACT_BRIEF §7.7)
+
+Hosting litmus test with three outcomes: a sheet the user intentionally navigated to (Back, deep link, or restore must reach it) is a destination; a transient reactive status overlay with no navigational meaning is a shell-hosted sibling; a small local toggle is an inline control. (CONTRACT_BRIEF §7.7)
+
+Scene mechanics stay deferred: dialog metadata, bottom-sheet metadata, list-detail and two-pane strategies, strategy chaining, custom scenes, and transition specs. For each of these, the android/skills `navigation-3` skill goes deeper, if installed. (CONTRACT_BRIEF §7.1)
+
+## Deeplinks
+
+Navigation 3 parses no deep links. Parse each URI in the platform entry point and build a synthetic stack from the parsed identity. Registration stays platform-native; construction logic may live in `commonMain`. (NTHR-15)
+
+Deep-link recipes (static URIs, matchers per key, fallback on no match) stay deferred. For those recipes, the android/skills `navigation-3` skill goes deeper, if installed. (CONTRACT_BRIEF §7.1)
+
+Navigation 2 is not taught.
+
+## Red flags
+
+| Thought | Reality |
+|---|---|
+| "I'll pass the whole `NoteUiModel` in the key so detail skips the fetch." | No. Rule 15: keys carry identity; detail re-fetches by identity, or restore breaks on a cold cache. |
+| "I'll import the tags feature's key; it is only one screen." | No. Rules 1 and 3: cross-feature travel is a `UiEffect` mapped in the composition root. |
+| "A file-level `var` is the simplest result callback." | No. Rule 13: results travel through a repository write; a file-level callback leaks and dies on restore. |
+| "I'll grab the result from the previous entry/ViewModel." | No. Rule 13: the picker writes through the repository; the editor observes it via a `getXStream`. |
+| "I'll hold the stack in a plain state list; it recomposes fine." | No. Rule 15: `rememberNavBackStack` persists the stack; a plain list loses it on process death. |
+| "I'll pass the back-stack handle into the ViewModel to keep routing simple." | No. Rules 4 and 15: the ViewModel emits semantic effects; the Route translates them into stack calls. |
+| "One decorator is enough; the screens look right." | No. Rule 15: both decorators are required, or distinct keys share one store. |
+| "I'll add the new destination to the shared global key hierarchy." | No. Rule 15: one sealed hierarchy per feature, aggregated in the root. |
+
+## Verification
+
+- [ ] `grep -rn "sealed interface.*NavKey" --include="*.kt" feature/` shows exactly one hierarchy per feature.
+- [ ] `grep -rn "include(.*NavSerializers)" --include="*.kt" app/` (or the composition root) lists every feature serializers module.
+- [ ] `grep -rn "mutableStateListOf" --include="*.kt" . | grep -iv test | grep -i "key\|stack"` returns nothing.
+- [ ] `grep -rn "^private var \|^var \|^internal var " --include="*.kt" feature/*/navigation/ feature/*/presentation/` returns nothing.
+- [ ] `grep -rn "import com.example.feature" --include="*.kt" feature/` returns no cross-feature navigation import (shared `:data:` imports are fine).
+- [ ] Every key carries only identifiers, enums, or short hints; no key references a `*UiModel` or aggregate: yes or no.
+- [ ] Every `NavDisplay` call site applies both entry decorators: yes or no.

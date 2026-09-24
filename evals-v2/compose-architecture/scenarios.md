@@ -12,11 +12,11 @@ Load this file during M2 baseline runs and P3 skill writing.
 **Rubric:**
 1. Names `compose-feature` as the owning skill before any code or exploration plan [SPEC §1 Workflow] [kit]
 2. States existing-project case 1 (new feature work follows the kit strictly) explicitly [STANDARDS §6 case 1; SPEC §1 Workflow]
-3. Defers feature-layer detail to the owning skill instead of re-deciding it here [SPEC §1 Workflow]
+3. Names `compose-feature` as the owner and gives only the plan, deferring file-level implementation to that skill [SPEC §1 Workflow]
 4. Keeps the new tags state out of `:feature:catalog` and out of either feature's private store, pointing at the shared `:data:` owner [SPEC §1 seed 2]
 5. Requires the slice to follow the MVI contract (`BaseViewModel`, single `onAction` entry, one `Contract.kt`) [SPEC §1 seed 4] [kit]
 6. Requires the slice to use the five feature packages and no other top-level package [SPEC §1 seed 10]
-7. Verifies named helpers against the project before answering rather than recalling them [SPEC §1 seed 14]
+7. Names the helpers and APIs it relies on that must be verified in the project, and invents no method or signature [SPEC §1 seed 14]
 **Guard scripts that must pass:** `check-layering.sh`, `check-contract-shape.sh` (both prospective, Phase 5)
 
 ## ARCH-02 Review a change where :feature:notes imports from :feature:catalog or the composition root
