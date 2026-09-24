@@ -14,6 +14,7 @@ before that.
 handoff/tools/ledger-check.sh                        # ledger covers all legacy files; rows complete
 handoff/tools/budget.sh [skills-v2/<skill>]          # sizes, code share, content-policy scan
 handoff/tools/validate-v2.sh [--score-only] [skills-v2/<skill>]   # agentskills.io validator
+handoff/tools/dest-load.py                           # kept rows per destination across both ledgers (caps)
 ```
 
 ```
@@ -300,6 +301,9 @@ the house app may be wrong, so do not impose strictness on a wrong structure.
 - official docs, fetched as needed
 
 **Tasks.**
+0. **Carry-over D2.5-1:** resolve every dup chain reported by `handoff/tools/ledger-check.sh` (rules in
+   `handoff/reviews/phase-2.5.md`). The phase does not pass while a chain remains or while
+   `handoff/tools/dest-load.py` exits non-zero.
 1. Write `handoff/work/DECISION_AUDIT.md`: one row per numbered decision in the brief (all `[house]`,
    `[legacy]` and `[kit]` tags). Columns:
    - ID (brief § number)

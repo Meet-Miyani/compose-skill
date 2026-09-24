@@ -37,13 +37,13 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 - Resolves the detail note only from a shared in-memory cache, so the restored destination shows nothing after process death.
 
 **Rubric:**
-1. PASS if the one-shot read is declared suspend fun getNote(id) returning the domain Note. [BRIEF §2.4]
-2. PASS if the continuous read is declared fun getNotesStream() returning Flow of domain notes. [BRIEF §2.4]
-3. PASS if no single name is overloaded for both suspend and Flow, and the names observeX, getXFlow, and getXPager do not appear. [BRIEF §2.4]
+1. PASS if the one-shot read is declared suspend fun getNote(id) returning the domain Note. [BRIEF §2.4] [kit]
+2. PASS if the continuous read is declared fun getNotesStream() returning Flow of domain notes. [BRIEF §2.4] [kit]
+3. PASS if no single name is overloaded for both suspend and Flow, and the names observeX, getXFlow, and getXPager do not appear. [BRIEF §2.4] [kit]
 4. PASS if the read names use the domain (notes, note) and never name the mechanism (pager, pagingSource, pagination). [BRIEF §2.4]
 5. PASS if the detail destination fetches by identity from the key (noteId) through the repository rather than only from an in-memory cache. [BRIEF §5.5]
 6. PASS if the repository contract exposes domain types only, with no DTO, Ktor, Room, or Compose types in its signatures. [BRIEF §5.5]
-7. PASS if streams for filtered aggregates are disambiguated by domain (for example getActiveNotesStream and getArchivedNotesStream) rather than one hidden-filter stream. [BRIEF §2.4]
+7. PASS if streams for filtered aggregates are disambiguated by domain (for example getActiveNotesStream and getArchivedNotesStream) rather than one hidden-filter stream. [BRIEF §2.4] [kit]
 
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers repository naming); check-data-boundary.sh (prospective) still applies to the DTO/domain types touched.
 
@@ -59,12 +59,12 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 - Surfaces only the refresh failure and leaves append failures silent, or shows a failure as an empty list with no retry.
 
 **Rubric:**
-1. PASS if PagingData is exposed as a separate Flow and never stored as a UiState field. [SPEC §4 seed 5]
+1. PASS if PagingData is exposed as a separate Flow and never stored as a UiState field. [SPEC §4 seed 5] [kit]
 2. PASS if Pager, PagingSource, PagingConfig, and load keys stay internal to data while only PagingData of the domain model crosses the repository contract. [BRIEF §5.5]
-3. PASS if LoadState.Error is mapped to AppError at the boundary and surfaced to the user instead of being dropped. [BRIEF §4.5]
+3. PASS if LoadState.Error is mapped to AppError at the boundary and surfaced to the user instead of being dropped. [BRIEF §4.5] [kit]
 4. PASS if both refresh and append errors are surfaced with a retry path. [BRIEF §4.5]
-5. PASS if the paging path does not enter launchGuarded; the ViewModel does not treat the paging Flow as a guarded one-shot call. [BRIEF §8.4]
-6. PASS if failure and business state stay separate: an empty Catalog is a successful zero-row result, never rendered from an AppError. [BRIEF §4.6]
+5. PASS if the paging path does not enter launchGuarded; the ViewModel does not treat the paging Flow as a guarded one-shot call. [BRIEF §8.4] [kit]
+6. PASS if failure and business state stay separate: an empty Catalog is a successful zero-row result, never rendered from an AppError. [BRIEF §4.6] [kit]
 
 **Guard scripts that must pass:** check-error-handling.sh (prospective), check-data-boundary.sh (prospective)
 
@@ -80,12 +80,12 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 - Treats the pressure request as a local simplification with no stated consequence or alternative.
 
 **Rubric:**
-1. PASS if the answer is a verified no to catching NetworkException in the repository to keep the stale list silently. [BRIEF §4.4]
+1. PASS if the answer is a verified no to catching NetworkException in the repository to keep the stale list silently. [BRIEF §4.4] [kit]
 2. PASS if the answer states that nothing swallows a failure on the way to the user and names the stale-with-no-retry outcome this catch would cause. [BRIEF §10 F-10]
 3. PASS if the answer is a verified no to mapping a timeout into isMissing to show the empty state. [BRIEF §4.6]
-4. PASS if the answer states that failure and business state are separate fields and that collapsing an AppError into isMissing discards the failure. [BRIEF §10 F-14]
-5. PASS if the correct approach lets transport failures propagate to the shared async handler, which decides popup, inline message, or silent handling. [SPEC §4 seed 4]
-6. PASS if the correct approach keeps error: AppError? and isMissing as separate UiState fields, with retry holding the AppError it retries. [BRIEF §4.6]
-7. PASS if silent handling is allowed only for a background poll and is named as such, never for a user-visible list refresh. [BRIEF §4.4]
+4. PASS if the answer states that failure and business state are separate fields and that collapsing an AppError into isMissing discards the failure. [BRIEF §10 F-14] [kit]
+5. PASS if the correct approach lets transport failures propagate to the shared async handler, which decides popup, inline message, or silent handling. [SPEC §4 seed 4] [kit]
+6. PASS if the correct approach keeps error: AppError? and isMissing as separate UiState fields, with retry holding the AppError it retries. [BRIEF §4.6] [kit]
+7. PASS if silent handling is allowed only for a background poll and is named as such, never for a user-visible list refresh. [BRIEF §4.4] [kit]
 
 **Guard scripts that must pass:** check-error-handling.sh (prospective), check-data-boundary.sh (prospective)

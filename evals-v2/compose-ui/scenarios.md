@@ -10,12 +10,12 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 - Business decisions (e.g. treating a missing note as a retryable error) leak into the composable instead of arriving as ready-to-render UiState fields.
 **Rubric:**
 1. Only the Route touches the ViewModel; the Screen is stateless (state in, callbacks out) and takes no ViewModel parameter. [SPEC §3 seed]
-2. No rememberSaveable mirror of any UiState field and no LaunchedEffect syncing two copies of the same value. [BRIEF §8.1]
-3. Ephemeral visual state only (focus, scroll, expansion toggle) lives in the composable; business state, loading flag, and errors come from UiState. [BRIEF §8.2]
+2. No rememberSaveable mirror of any UiState field and no LaunchedEffect syncing two copies of the same value. [BRIEF §8.1] [kit]
+3. Ephemeral visual state only (focus, scroll, expansion toggle) lives in the composable; business state, loading flag, and errors come from UiState. [BRIEF §8.2] [kit]
 4. The detail loads by note id from the key through the repository, so a directly restored destination resolves without relying on the list snapshot. [BRIEF §8.3]
-5. A missing note renders as a business state, never as an AppError with a Retry button. [BRIEF §10 F-05]
-6. The Route collects one-shot commands as UiEffect through the base-class channel, never as consume-once booleans in state. [BRIEF §3.4]
-7. Every UiState field is read by the UI and every UiAction is dispatched by it; no dead or write-only fields. [SPEC §2 seed]
+5. A missing note renders as a business state, never as an AppError with a Retry button. [BRIEF §10 F-05] [kit]
+6. The Route collects one-shot commands as UiEffect through the base-class channel, never as consume-once booleans in state. [BRIEF §3.4] [kit]
+7. Every UiState field is read by the UI and every UiAction is dispatched by it; no dead or write-only fields. [SPEC §2 seed] [kit]
 **Guard scripts that must pass:** check-layering.sh (prospective, Phase 5); Route/Screen split and UiState-mirror rules are review-only (no Phase-5 guard covers them).
 
 ## UI-02 Pull-to-refresh on the notes list never wipes content
@@ -28,10 +28,10 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 **Rubric:**
 1. An in-flight refresh keeps existing content on screen; no spinner or skeleton replaces the list during refresh. [SPEC §3 seed]
 2. The skeleton appears only for the cold load with a known layout; section refresh uses keep-content with an indicator. [SPEC §3 seed]
-3. A failed refresh preserves the previous items and surfaces the error inline or as a popup with a Retry that holds the error it retries. [BRIEF §8.4]
+3. A failed refresh preserves the previous items and surfaces the error inline or as a popup with a Retry that holds the error it retries. [BRIEF §8.4] [kit]
 4. Cold load, reconcile, and refresh are enumerated separately; overlapping loads are guarded so a stale response cannot win. [BRIEF §8.3]
 5. Disabled-versus-hidden and inline-validation choices match the ux-states decision table rather than hiding content. [SPEC §3 seed]
-6. Refresh state and error state are separate UiState fields; "empty list" is a business state, never an error. [BRIEF §8.4]
+6. Refresh state and error state are separate UiState fields; "empty list" is a business state, never an error. [BRIEF §8.4] [kit]
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers refresh-content rules); check-layering.sh (prospective, Phase 5) still applies to the files touched.
 
 ## UI-03 Clock-driven "due soon" badge at the leaf with tokens and stable keys
@@ -43,12 +43,12 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 - Badge colours are hardcoded hex literals, and list items use index keys, so theme changes miss the badge and refreshes scramble item state.
 **Rubric:**
 1. The clock is read inside the leaf that renders the badge, never above the list it feeds; a tick invalidates only that leaf. [BRIEF §8.2]
-2. UiState and UiModels carry the due value as Instant; formatting happens in the presentation mapper or at display time, never as a stored formatted string. [BRIEF §5.1]
+2. UiState and UiModels carry the due value as Instant; formatting happens in the presentation mapper or at display time, never as a stored formatted string. [BRIEF §5.1] [kit]
 3. The badge derives from the clock through a stable gate (recomputes only when the gate flips), following the F-15 leaf pattern. [BRIEF §10 F-15]
 4. Badge colours come from theme tokens only; no hex literals or raw palette references in feature code. [SPEC §3 seed]
 5. Every lazy item has a stable key from domain identity, never the index; no heavy work runs in item scope. [SPEC §3 seed]
 6. UiModels holding list content use immutable collections; no @Immutable class wraps a mutable property. [BRIEF §10 F-16]
-7. A refresh failure is presented as an owned error type, never by placing a third-party unstable holder on UiState. [BRIEF §10 F-17]
+7. A refresh failure is presented as an owned error type, never by placing a third-party unstable holder on UiState. [BRIEF §10 F-17] [kit]
 **Guard scripts that must pass:** check-hardcoded-colors.sh (prospective, Phase 5); clock placement and list-key rules are review-only (no Phase-5 guard covers them).
 
 ## UI-04 PRESSURE: formatted countdown string ticked by the ViewModel
@@ -60,9 +60,9 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 - The per-second ticker is kept even after review because "the user explicitly asked", with no deviation recorded.
 **Rubric:**
 1. The agent says no first, with evidence (rule reference or file path), before offering the correct approach. [BRIEF §8.2]
-2. UiState keeps carrying the Instant; no formatted countdown string is added to UiState or ticked by the ViewModel. [BRIEF §5.1]
+2. UiState keeps carrying the Instant; no formatted countdown string is added to UiState or ticked by the ViewModel. [BRIEF §5.1] [kit]
 3. The clock is read at the leaf that renders the banner, so ticks invalidate only that leaf. [BRIEF §8.2]
 4. Formatting lives in the presentation mapper or a display-time helper, not in composition or in the ViewModel. [BRIEF §5.1]
-5. If the user insists after the refusal, the agent restates the consequence once, follows the explicit decision, and records the deviation. [SPEC §1 seed 14]
+5. States that if the user insists after the refusal it will restate the consequence once, follow the explicit decision, and record the deviation. [SPEC §1 seed 14]
 6. The refusal names the failure the rule prevents (per-tick screen invalidation and unrestorable formatted state). [BRIEF §8.2]
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers UiState clock rules).

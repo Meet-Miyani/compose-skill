@@ -10,11 +10,11 @@ Load this file during M2 baseline runs and P3 skill writing.
 - Never states the existing-project case, so the kit-vs-project-pattern decision stays implicit.
 - Describes the plan in tutorial terms instead of the owning skill's workflow steps.
 **Rubric:**
-1. Names `compose-feature` as the owning skill before any code or exploration plan [SPEC §1 Workflow]
+1. Names `compose-feature` as the owning skill before any code or exploration plan [SPEC §1 Workflow] [kit]
 2. States existing-project case 1 (new feature work follows the kit strictly) explicitly [STANDARDS §6 case 1; SPEC §1 Workflow]
 3. Defers feature-layer detail to the owning skill instead of re-deciding it here [SPEC §1 Workflow]
 4. Keeps the new tags state out of `:feature:catalog` and out of either feature's private store, pointing at the shared `:data:` owner [SPEC §1 seed 2]
-5. Requires the slice to follow the MVI contract (`BaseViewModel`, single `onAction` entry, one `Contract.kt`) [SPEC §1 seed 4]
+5. Requires the slice to follow the MVI contract (`BaseViewModel`, single `onAction` entry, one `Contract.kt`) [SPEC §1 seed 4] [kit]
 6. Requires the slice to use the five feature packages and no other top-level package [SPEC §1 seed 10]
 7. Verifies named helpers against the project before answering rather than recalling them [SPEC §1 seed 14]
 **Guard scripts that must pass:** `check-layering.sh`, `check-contract-shape.sh` (both prospective, Phase 5)
@@ -32,7 +32,7 @@ Load this file during M2 baseline runs and P3 skill writing.
 2. Rejects the `:feature:notes` to `:feature:catalog` dependency because features never depend on features [SPEC §1 seed 1]
 3. Rejects the composition-root widget import because nothing depends on the composition root [BRIEF §1.2]
 4. Routes shared tag state to a `:data:` module both features depend on [SPEC §1 seed 2]
-5. Routes cross-feature movement (notes editor to Catalog list) through a semantic `UiEffect` mapped by the composition root, never a direct key or ViewModel import [SPEC §1 seed 3]
+5. Routes cross-feature movement (notes editor to Catalog list) through a semantic `UiEffect` mapped by the composition root, never a direct key or ViewModel import [SPEC §1 seed 3] [kit]
 6. Names the composition-root widget failure and its fix (own the content in the feature or move it to the design-system module) [BRIEF §10 F-01]
 7. Names the sibling-feature failure and its fix (both features depend on `:data:`, neither on each other) [BRIEF §10 F-02]
 **Guard scripts that must pass:** `check-layering.sh` (prospective, Phase 5)
@@ -46,14 +46,14 @@ Load this file during M2 baseline runs and P3 skill writing.
 - Swallows the failure (empty list, no message, no retry) or models "no notes" as an `AppError`.
 - Omits the sensitive-access escalation, leaving an inline retry that can never succeed when verification is required.
 **Rubric:**
-1. Chooses the inline tier for the first load with no content: `UiState.error` holds the `AppError` and the screen shows an error state with a Retry holding that error [BRIEF §4.4 D2-1]
-2. Runs the load through `launchGuarded(onError = ...)` with no hand-rolled `try/catch` chain and no `Result` wrapper [SPEC §1 seed 6]
-3. Calls `inlineUnlessSensitiveAccess` once before `updateState` so a sensitive-access failure escalates to the popup tier instead of an inline retry that can never succeed [BRIEF §4.5]
-4. Keeps "no notes" as a `UiState` business field, never a synthetic `AppError` [SPEC §1 seed 7]
-5. Never collapses an `AppError` into a business flag and keeps the retry bound to the error it retries [BRIEF §4.6]
-6. Does not route the first-load failure to the popup host; popup is reserved for refresh-while-visible and user-initiated actions under D2-1 [BRIEF §4.4 D2-1]
-7. Holds only `AppError` in the ViewModel and `UiState`, converted via the single transport-to-presentation mapping [BRIEF §4.3]
-8. Leaves no silent handler on this screen; silent handling stays limited to named background polls [SPEC §1 seed 8]
+1. Chooses the inline tier for the first load with no content: `UiState.error` holds the `AppError` and the screen shows an error state with a Retry holding that error [BRIEF §4.4 D2-1] [kit]
+2. Runs the load through `launchGuarded(onError = ...)` with no hand-rolled `try/catch` chain and no `Result` wrapper [SPEC §1 seed 6] [kit]
+3. Calls `inlineUnlessSensitiveAccess` once before `updateState` so a sensitive-access failure escalates to the popup tier instead of an inline retry that can never succeed [BRIEF §4.5] [kit]
+4. Keeps "no notes" as a `UiState` business field, never a synthetic `AppError` [SPEC §1 seed 7] [kit]
+5. Never collapses an `AppError` into a business flag and keeps the retry bound to the error it retries [BRIEF §4.6] [kit]
+6. Does not route the first-load failure to the popup host; popup is reserved for refresh-while-visible and user-initiated actions under D2-1 [BRIEF §4.4 D2-1] [kit]
+7. Holds only `AppError` in the ViewModel and `UiState`, converted via the single transport-to-presentation mapping [BRIEF §4.3] [kit]
+8. Leaves no silent handler on this screen; silent handling stays limited to named background polls [SPEC §1 seed 8] [kit]
 **Guard scripts that must pass:** `check-error-handling.sh`, `check-contract-shape.sh` (both prospective, Phase 5)
 
 ## ARCH-04 PRESSURE: mix kit MVI into a coherent MVVM/Hilt feature to save time
@@ -70,6 +70,6 @@ Load this file during M2 baseline runs and P3 skill writing.
 3. States the project diverges from the kit and refuses migration-by-stealth inside the feature slice [STANDARDS §6 case 2; SPEC §1 Workflow]
 4. Gives the correct approach: build the screen in the feature's MVVM/Hilt pattern, and propose kit migration as a separate task [STANDARDS §6 case 2; SPEC §1 Workflow]
 5. Rejects precedent-as-permission: copying a neighboring file that violates a non-negotiable copies the defect [STANDARDS §6 case 4; SPEC §1 seed 14]
-6. Keeps one DI pattern per feature: no Koin module or Koin ViewModel injected into the Hilt feature [SPEC §1 seed 12]
-7. Keeps one architecture per feature: no `BaseViewModel`/`Contract.kt` screen beside MVVM ViewModels in the same feature [SPEC §1 seed 4]
+6. Keeps one DI pattern per feature: no Koin module or Koin ViewModel injected into the Hilt feature [SPEC §1 seed 12] [kit]
+7. Keeps one architecture per feature: no `BaseViewModel`/`Contract.kt` screen beside MVVM ViewModels in the same feature [SPEC §1 seed 4] [kit]
 **Guard scripts that must pass:** `check-layering.sh` (prospective, Phase 5)

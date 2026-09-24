@@ -12,8 +12,8 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 - Fires loads with no overlap guard, so a refresh landing on an in-flight reconcile lets the stale response win.
 **Rubric:**
 1. Restates the slice and every observable state (cold load, reconcile, error, retry, empty, not-found, overlapping loads, process-death restore) before writing code [SPEC §2 seed]
-2. Contract.kt holds exactly UiState, UiAction and UiEffect and nothing else [BRIEF §3.2]
-3. All ViewModel async work goes through launchGuarded with an explicit onError and rethrows CancellationException [BRIEF §3.6]
+2. Contract.kt holds exactly UiState, UiAction and UiEffect and nothing else [BRIEF §3.2] [kit]
+3. All ViewModel async work goes through launchGuarded with an explicit onError and rethrows CancellationException [BRIEF §3.6] [kit]
 4. First ON_START is the cold load and later ON_STARTs are reconcile with prior data kept, with no init-plus-lifecycle double owner [BRIEF §8.3]
 5. Note detail resolves by identity from the nav key and re-fetches from the repository on a cold cache [BRIEF §8.3]
 6. ViewModel tests cover the seven house rows plus process-death restore using hand-written fakes and advanceUntilIdle [BRIEF §9.3]
@@ -26,8 +26,34 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 ## FEAT-02 Review a Contract.kt with five declarations and a TODO
 **Prompt:** Review this note-tags Contract.kt: it holds NoteTagsUiState, NoteTagsUiAction, NoteTagsUiEffect, plus a TagStep enum, a MAX_TAGS constant, and a TODO for an unfinished migration. Is it shippable?
 **Context given to the agent:**
-The same `:feature:notes` module as FEAT-01, with the file at `presentation/notetags/NoteTagsContract.kt` shown in full.
+The same `:feature:notes` module as FEAT-01, with the file at `presentation/notetags/NoteTagsContract.kt` shown in full below.
 A `presentation/notetags/model/` directory exists for display models, and the project rule is one Contract.kt per destination.
+The full file text:
+
+```kotlin
+package com.example.feature.notes.presentation.notetags
+
+// TODO: migrate tag display models to model/ (leftover from the catalog merge)
+
+const val MAX_TAGS = 5
+
+enum class TagStep { PICK, REVIEW }
+
+data class NoteTagsUiState(
+    val tags: List<String> = emptyList(),
+    val step: TagStep = TagStep.PICK,
+)
+
+sealed interface NoteTagsUiAction {
+    data class TagToggled(val tag: String) : NoteTagsUiAction
+    data object Continue : NoteTagsUiAction
+}
+
+sealed interface NoteTagsUiEffect {
+    data object TagsSaved : NoteTagsUiEffect
+}
+```
+
 **Hypothesised baseline defects:**
 - Approves the file as shippable because it compiles, missing the exactly-three-declarations rule.
 - Moves the enum but leaves the TODO in place and still marks the review passed.
@@ -35,10 +61,10 @@ A `presentation/notetags/model/` directory exists for display models, and the pr
 **Rubric:**
 1. Verdict is not shippable and names the five-declaration violation first [BRIEF §3.2]
 2. Requires the TagStep enum to move to presentation/notetags/model/ or its own file [BRIEF §3.2]
-3. Requires the constant to move out of Contract.kt with the display models [BRIEF §10 F-22]
+3. Requires the constant to move out of Contract.kt to model/ or its own file (any location outside Contract.kt that matches the brief) [BRIEF §10 F-22] [kit]
 4. Requires the TODO to be resolved before done; no placeholder reaches done [SPEC §2 seed]
 5. Emits exactly one corrected file version with no alternatively-style drafts [SPEC §2 seed]
-6. Checks that every UiState field is read by the UI and every UiAction is dispatched by it [SPEC §2 seed]
+6. Checks that every UiState field is read by the UI and every UiAction is dispatched by it [SPEC §2 seed] [kit]
 7. Verifies helpers against the project before answering instead of recalling names [SPEC §2 seed]
 **Guard scripts that must pass:**
 - scripts/check-contract-shape.sh (prospective Phase-5 name)
@@ -58,7 +84,7 @@ The Screen collects state with collectAsStateWithLifecycle and offers pull-to-re
 2. Adds an explicit guard so the first load owns the response and later overlapping loads are skipped or cancelled [BRIEF §8.3]
 3. Gives the first load exactly one owner: first ON_START is cold load, later ON_STARTs are reconcile [BRIEF §10 F-12]
 4. Hooks reconcile-fetch to LifecycleStartEffect, reserving resume effects for interactive-top concerns [BRIEF §8.3]
-5. Refresh keeps prior notes visible and wires failures to launchGuarded onError with a retry holding its error [BRIEF §3.5]
+5. Refresh keeps prior notes visible and wires failures to launchGuarded onError with a retry holding its error [BRIEF §3.5] [kit]
 6. ViewModel tests add an overlapping-loads row plus retry-after-error using fakes [BRIEF §9.3]
 7. Every repository method called is declared on its interface [SPEC §2 seed]
 **Guard scripts that must pass:** none — review-only; verified through ViewModel tests covering the matrix row (BRIEF §9.3)
@@ -78,7 +104,7 @@ The project gates require a placeholder grep over changed files to be empty and 
 3. Names the correct approach: implement the repository, clear the TODOs, then re-run the gates [SPEC §2 seed]
 4. Requires the placeholder grep over changed files to be empty before done [SPEC §2 seed]
 5. Requires ViewModel tests covering the full state matrix with hand-written fakes [BRIEF §9.3]
-6. Records the deviation explicitly if the user insists after the warning instead of silently complying [SPEC §2 seed]
+6. States that if the user insists after the warning it will follow the explicit decision and record the deviation, instead of silently complying [SPEC §2 seed]
 **Guard scripts that must pass:**
 - scripts/check-placeholders.sh (prospective Phase-5 name)
 - scripts/run-checks.sh (prospective Phase-5 name)

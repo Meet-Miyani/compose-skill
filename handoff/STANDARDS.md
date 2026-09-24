@@ -256,6 +256,30 @@ Rules for the anatomy:
 - **No duplicated content across skills.** A rule has exactly one home. Other skills link to that
   skill by name. The harvest ledger tracks the home.
 
+
+### 4.1 Enforcement techniques (harvested in Phase 2.5 → `handoff/work/STYLE_NOTES.md`)
+
+Use these deliberately; they are how a skill makes a mid-tier model behave like a senior engineer.
+
+| Technique | Use it for | How |
+|---|---|---|
+| **Iron law** | The one rule per skill that must never bend | One sentence, set apart at the top of Non-negotiables, with what to do on violation ("delete it and restart from the template") |
+| **Spirit over letter** | Every Operating stance | One line: "Satisfying the wording while defeating the purpose is a violation." Closes "pragmatic" evasions |
+| **Loophole closers** | Rules with known workarounds (DTO leakage, state copying, placeholders) | After the rule, a "No exceptions:" list naming each observed workaround |
+| **Rationalization table** | Red flags | "Excuse" → one-sentence rebuttal + rule number. Build it from real eval transcripts, not imagination |
+| **Red-flag self-talk** | Red flags | First-person thoughts ("I'll verify later") → the corrective action |
+| **Ladder with stop rule** | Every "how should I build this" decision (anti-over-engineering) | Reuse existing code → stdlib/platform → the kit template → minimal new code. Take the first rung that holds, then stop |
+| **Carve-outs** | The ladder and every simplification rule | Name what simplicity never removes: validation at trust boundaries, error paths, accessibility, security, tests |
+| **Match form to failure** | Choosing how to phrase a rule | Wrong *shape* of output → give a recipe or template. Omissions → give a slot or checklist. Defiance → give a prohibition with a reason |
+| **Conditionals on observables** | Version- and project-dependent rules | "If `libs.versions.toml` shows X below Y, stop and report", never "in some cases" |
+| **One canonical default** | Every decision inside kit scope | One option, plus at most one narrowly named escape hatch |
+| **Degrees of freedom** | Scaffolding, migrations, verification | Fragile steps give exact commands ("run exactly this"); judgment steps give decision tables |
+| **Solve, don't punt** | Anything a script can do | Ship a script that does it and handles errors; the agent only runs it |
+| **Feedback loops** | Verification | Run → read → fix → rerun until the stated pass condition; never "should work" |
+| **Debt markers** | Accepted deviations | A code comment naming the limit and the trigger that forces a revisit; recorded in the report |
+| **Discovery-only descriptions** | §5 descriptions | Describe triggers and symptoms only, never the workflow; the body carries the workflow |
+| **Meta-testing** | Eval debriefs | When a model fails, ask "which sentence would have changed its choice?" and fix that sentence |
+
 ---
 
 ## 5. Descriptions (the only always-loaded text)
@@ -294,7 +318,7 @@ enforce. External sets are **sources**, harvested in Phase 2.5 into `handoff/wor
 and **optional depth**, never a prerequisite.
 
 - **Absorb:** their best rules and gotchas land in our skills, paraphrased in our voice and fitted to
-  our stack. Attribution goes in `skills-v2/NOTICE.md` (all of the sources below are Apache-2.0).
+  our stack. Attribution goes in `skills-v2/NOTICE.md`, using each source's actual license (skydoves, chrisbanes, android, JetBrains/Kotlin samples and anthropics/skills are Apache-2.0; superpowers and ponytail are MIT, and only their techniques are used).
   Never copy more than 2 consecutive lines. External code never lands; only the rule it illustrates.
 - **Conflicts:** where an external source contradicts a kit decision (STANDARDS §1 or the brief), the
   kit wins. Record it as `CONFLICT` in the external ledger.

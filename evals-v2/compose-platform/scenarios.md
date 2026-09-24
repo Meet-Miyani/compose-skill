@@ -8,13 +8,13 @@ Load this file during M2 baseline runs and P8 skill writing to score platform-pl
 - Creates two DataStore instances for the same settings file or points Desktop storage at a shared temp directory.
 - Drops ViewModels or repository interfaces into platform source sets instead of commonMain.
 **Rubric:**
-1. PASS if the notes and tags ViewModels and their UiState, UiAction, and UiEffect contracts live in commonMain. [SPEC §6]
+1. PASS if the notes and tags ViewModels and their UiState, UiAction, and UiEffect contracts live in commonMain. [SPEC §6] [kit]
 2. PASS if repository interfaces for notes, tags, and settings live in commonMain, not in a platform source set. [SPEC §6]
 3. PASS if note settings use Preferences DataStore in commonMain with structured settings stored as one JSON string key. [BRIEF §13.3]
 4. PASS if the DataStore factory is defined once in commonMain with a path lambda and file paths are defined per platform source set. [BRIEF §13.3]
-5. PASS if exactly one DataStore instance per file is bound as a Koin single. [BRIEF §13.3]
+5. PASS if exactly one DataStore instance per file is bound as a Koin single. [BRIEF §13.3] [kit]
 6. PASS if Desktop storage uses an app-specific folder and never a shared temp directory. [BRIEF §13.3]
-7. PASS if a local note-file write failure is surfaced through launchGuarded recovery and never swallowed into a fake success effect. [BRIEF §10]
+7. PASS if a local note-file write failure is surfaced through launchGuarded recovery and never swallowed into a fake success effect. [BRIEF §10] [kit]
 **Guard scripts that must pass:** none — platform placement is review-only.
 ## PLAT-02 Secure note-lock storage via interface plus DI
 **Prompt:** Add a note-lock feature to the Notes app: locking a note needs a secret kept in secure platform storage, Keychain on iOS and an encrypted file on Android.
@@ -25,9 +25,9 @@ Load this file during M2 baseline runs and P8 skill writing to score platform-pl
 - Binds the concrete class in Koin instead of binding the adapter as the port interface.
 **Rubric:**
 1. PASS if the note-lock port is declared as an interface in commonMain, not as an expect declaration. [SPEC §6]
-2. PASS if each platform implementation lives in the composition root adapter package and is bound in a platform Koin module. [BRIEF §6.5]
+2. PASS if each platform implementation lives in the composition root adapter package and is bound in a platform Koin module. [BRIEF §6.5] [kit]
 3. PASS if adapters are named after the implementation, e.g. KeychainNoteLockStorage and DataStoreNoteLockStorage, with no generic prefix. [BRIEF §6.5]
-4. PASS if Koin binds each adapter as the port interface, with the factory returning the interface. [BRIEF §6.5]
+4. PASS if Koin binds each adapter as the port interface, with the factory returning the interface. [BRIEF §6.5] [kit]
 5. PASS if no expect/actual is used for this stateful service; expect/actual is reserved for tiny stateless hooks. [SPEC §6]
 6. PASS if commonMain holds no platform imports and the port is testable with a hand-written fake. [SPEC §6]
 **Guard scripts that must pass:** none — platform placement is review-only.
