@@ -337,7 +337,11 @@ the house app may be wrong, so do not impose strictness on a wrong structure.
    - the DataStore rule (Preferences only in KMP): re-verify against the **current** official docs
      (decision O-6) and cite the page and date
 5. A summary table at the top: counts per recommendation, and the 10 changes with the most impact.
-6. Do **not** edit the brief. The moderator rules on every row in `handoff/reviews/phase-2.6.md`, and
+6. **Eval impact column.** For every row recommended SIMPLIFY or DROP, list the rubric items in
+   `evals-v2/*/scenarios.md` (by ID and number) that test the old rule. In the review-fix pass, those
+   items are rewritten to the ruled version or removed, and `evals.json` is updated in step. Gates
+   must never grade against a dropped rule.
+7. Do **not** edit the brief. The moderator rules on every row in `handoff/reviews/phase-2.6.md`, and
    the worker applies the rulings to the brief in the review-fix pass.
 
 **Acceptance.** Every numbered brief decision has a row. Every KEEP and SIMPLIFY has at least one
