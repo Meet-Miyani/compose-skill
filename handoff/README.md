@@ -31,6 +31,7 @@
 | `SKILL_SPECS.md` | moderator | Per-skill scope, files, sources, seed rules |
 | `PLAN.md` | moderator | Phases P0–P9, tasks, acceptance criteria |
 | `tools/*.sh` | moderator | `ledger-check.sh`, `budget.sh`, `validate-v2.sh` |
+| `tools/run-evals-api.py` | moderator | Eval runner: OpenCode Go models via direct API (baseline, skill, full, triggers) |
 | `templates/*.md` | moderator | Ledger and report formats |
 | `opencode.json` | moderator | Worker permissions (copy to repo root while working) |
 | `work/**` | worker | Ledger, contract brief, phase reports, scratch |
@@ -91,13 +92,15 @@ phase.
 |---|---|---|
 | P0 | Harvest ledger for all 41 legacy files | Nothing valuable dropped; DROP reasons honest |
 | P1 | Contract brief (house architecture, genericized) | Line-by-line: correctness, no house names, open decisions |
-| P2 | Eval scenarios, triggers | Scenarios test the rules that matter; then baseline runs |
+| P2 | Eval scenarios, triggers | Scenarios test the rules that matter |
+| P2.5 | External harvest (skydoves, chrisbanes, android/skills, JetBrains docs + samples, NiA) | Absorbed not vendored; attribution; CMP coverage; then baseline runs |
+| P2.6 | Decision audit: every house decision checked against official evidence and the simplicity ladder | Moderator rules keep / simplify / drop; brief updated before any skill |
 | P3 | `compose-architecture` + core templates | Contract fidelity, leanness (entry skill) |
 | P4 | `compose-feature` + templates + scaffold | Workflow and gates; templates obey every rule |
 | P5 | Guard scripts + tests | Every check proven on good/bad fixtures; bash 3.2 |
 | P6 | `compose-ui` | Gotchas are real; deferrals correct |
 | P7 | `compose-data` | Error contract consistent; gotchas verified |
-| P8 | `compose-module` + `compose-platform` | build-logic correctness; enforcement snippets |
+| P8 | `compose-project` + `compose-platform` | build-logic correctness; enforcement snippets |
 | P9 | Integration | No duplication, triggers, final evals |
 | P10 | (later) cut-over to `skills/`, catalog, CLI | Planned after P9 sign-off |
 

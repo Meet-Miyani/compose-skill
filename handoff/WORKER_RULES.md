@@ -27,6 +27,8 @@ Never create files at the repo root. Never edit `README.md`, `catalog/`, `main.g
 - **Forbidden:** `git commit`, `git push`, `git reset`, `git checkout`, `git stash`, `git clean`,
   `git rebase`, `rm -rf` outside `handoff/work/scratch/`, package installs, and anything that touches
   the network except fetching documentation pages.
+- **Phase 2.5 exception:** `git clone --depth 1 <public repo> handoff/work/scratch/external/<name>` for
+  the sources listed in PLAN.md Phase 2.5, and nothing else.
 - **Web access** is only for reading official documentation to verify an API fact. Record every URL
   you rely on in the harvest ledger or the phase report.
 

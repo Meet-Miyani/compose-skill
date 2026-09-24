@@ -300,8 +300,8 @@ The base class owns two channels and exposes their `Flow`:
   sequencing (no per-effect coroutine, no reliance on `Dispatchers.Main.immediate` eagerly
   starting `launch`), buffers while the UI is stopped, and replays on resume.
 - `errors: Flow<AppError>` — a second `Channel<AppError>(BUFFERED)` exposed via
-  `receiveAsFlow()`. Use `emitError(error)` (`onError = ::emitError` is the Tier 1 wiring) or
-  `inlineUnlessSensitiveAccess(error)` for Tier 2/3.
+`receiveAsFlow()`. Use `emitError(error)` (`onError = ::emitError` is the popup-tier wiring) or
+`inlineUnlessSensitiveAccess(error)` for the inline tier.
 
 The Route collects `effect` once, lifecycle-aware, in the design-system module's `CollectEffect`
 helper (`repeatOnLifecycle(STARTED) { effect.collect { … } }`). Effects carry intent, not
@@ -319,10 +319,10 @@ consume-once booleans in `UiState` for these.
 The base class provides two paths; the ViewModel chooses one per call site, never a
 hand-rolled `try / catch`:
 
-- `launchGuarded(onError = ::emitError, onStart = …, onComplete = …) { … }` — Tier 1 (global popup).
+- `launchGuarded(onError = ::emitError, onStart = …, onComplete = …) { … }` — popup tier (global popup).
   The Route calls `HandleAppErrors(viewModel.errors)` to forward to the app popup host.
-- `launchGuarded(onError = { updateState { copy(error = it) } }, …) { … }` — Tier 2/3 (inline or
-  screen-owned popup). `error: AppError?` stays on `UiState`; a `Retry` action holds the error
+- `launchGuarded(onError = { updateState { copy(error = it) } }, …) { … }` — inline tier (screen-owned
+  error state or field message). `error: AppError?` stays on `UiState`; a `Retry` action holds the error
   it retries.
 
 `HandleAppErrors` is the **kit's** name for the design-system helper that collects a
@@ -334,8 +334,8 @@ provides a single app-level instance and hosts it above `NavDisplay`; every Rout
 Any `Throwable` outside the network taxonomy propagates as a programming defect.
 
 `inlineUnlessSensitiveAccess(error: AppError): AppError?` returns `null` for
-`AppErrorType.SensitiveAccessRequired` and emits the error to Tier 1, otherwise returns the
-error unchanged. Tier 2/3 handlers call it once before `updateState` so a sensitive-access failure
+`AppErrorType.SensitiveAccessRequired` and emits the error to the popup tier, otherwise returns the
+error unchanged. Inline-tier handlers call it once before `updateState` so a sensitive-access failure
 becomes a modal popup instead of an inline retry button that can never succeed.
 
 **Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:120-171` (inlineUnlessSensitiveAccess, launchGuarded).
@@ -470,19 +470,38 @@ presentation. ViewModels call it via `launchGuarded(onError = …)`; repositorie
 **Citations.** `house:core/network/src/commonMain/kotlin/com/haat/core/network/error/NetworkErrorMapper.kt:14-40`,
 `house:core/network/src/commonMain/kotlin/com/haat/core/network/sensitive/SensitiveAccess.kt` (sensitive-access detection).
 
-### 4.4 The three tiers [house]
+### 4.4 The three tiers [house options; kit selection]
 
-| Tier | What it is | When to use it | Wiring |
+The house source lists three wirings and names **no default**. The kit keeps
+the house wirings, names the tiers `popup` / `inline` / `silent` (never
+numbers), and selects exactly one per situation with the D2-1 rule `[kit]`
+below.
+
+| Tier | What it is | Wiring | Tag |
 |---|---|---|---|
-| **Tier 1** | Global popup, app shell | Default for screen-level async work; a screen-level read with one observable error | `launchGuarded(onError = ::emitError, …)` + `HandleAppErrors(viewModel.errors)` at the Route |
-| **Tier 2** | Screen-owned inline message or popup, with a CTA callback | An action-required error that the screen knows how to recover from; user can fix and retry | `launchGuarded(onError = { updateState { copy(error = it) } }, …)`, then call `inlineUnlessSensitiveAccess` once before `updateState` for Tier 2/3 screens that might see a 428 |
-| **Tier 3** | Silent fire-and-forget | Background polls, non-blocking reads where the user does not need to see the failure (the poll retries on its own clock) | `launchGuarded(onError = {}, …)`; this is the **only** acceptable silent handler |
+| **popup** | Global popup, app shell | `launchGuarded(onError = ::emitError, …)` + `HandleAppErrors(viewModel.errors)` at the Route | `[house]` |
+| **inline** | Screen-owned error state or field message, with a Retry holding the error | `launchGuarded(onError = { updateState { copy(error = it) } }, …)`, then call `inlineUnlessSensitiveAccess` once before `updateState` on screens that might see a 428 | `[house]` |
+| **silent** | Silent fire-and-forget | `launchGuarded(onError = {}, …)`; this is the **only** acceptable silent handler | `[house]` |
+
+**D2-1 — tier selection rule `[kit]`** (moderator decision; rationale: a popup
+over an empty screen leaves nothing to retry in place; wiping visible content
+for a refresh error loses the user's context; one rule removes the
+sibling-screen inconsistency of §12.5):
+
+| Situation | Tier | Wiring |
+|---|---|---|
+| First load and nothing to show (no content yet) | **inline** | `UiState.error` holds the `AppError`; the screen shows an error state with Retry holding that error |
+| Refresh or reconcile fails while content is visible | **popup** | Keep the content; `onError = ::emitError`, shown by the app error host |
+| A user-initiated action fails (save, delete, toggle, submit) | **popup**, unless the screen owns a field-level recovery (form validation from the server) → **inline** at that field | `::emitError`, or `updateState { copy(fieldError = …) }` |
+| Background poll or non-blocking reconcile the user did not trigger | **silent** (named as a poll) | `onError = {}`; only for polls |
+| Sensitive-access / step-up auth required | **popup**, always (escalation overrides inline) | `inlineUnlessSensitiveAccess` before `updateState` |
+| Session expired (401) | **none**; handled by the session sign-out path | suppressed at the app error host |
 
 The composition root hosts **one** app-level error host (a `HandleAppErrors` collector wired to
-the Tier 1 popup). Every screen's Route calls `HandleAppErrors(viewModel.errors)`. The host
+the popup tier). Every screen's Route calls `HandleAppErrors(viewModel.errors)`. The host
 itself is a kit API name (D1-8); the underlying mechanism is `collectAsStateWithLifecycle` on
 each ViewModel's `errors` channel, rendered as a single shared popup surface that pops the
-guard screen on CTA. [house] Tier 1 prerequisite: one host, every Route forwards, every screen
+guard screen on CTA. [house] Popup-tier prerequisite: one host, every Route forwards, every screen
 inherits it for free.
 
 **Nothing swallows a failure on the way to the user.** No `catch (_: NetworkException) {}` in
@@ -495,14 +514,14 @@ drops the error on the floor — that leaves a screen with no data, no message, 
 
 A 428 sensitive-access precondition means the user did not complete verification. The
 guarded screen has no data to show; an inline retry cannot succeed because the call needs the
-fresh grant. Tier 2/3 must therefore route this error to the Tier 1 popup via
+fresh grant. The inline tier must therefore route this error to the popup tier via
 `inlineUnlessSensitiveAccess`, which:
 
 - returns the error unchanged for every other `AppErrorType`;
-- for `AppErrorType.SensitiveAccessRequired`, emits it to the Tier 1 channel and returns `null`.
+- for `AppErrorType.SensitiveAccessRequired`, emits it to the popup-tier channel and returns `null`.
 
 The popup is modal, its CTA pops the guarded screen, and the user signs in to complete the
-verification. Tier 1 screens (`onError = ::emitError`) need nothing.
+verification. Popup-tier call sites (`onError = ::emitError`) need nothing.
 
 A paged list surfaces `LoadState.Error`, never `launchGuarded` — the Paging path does not enter
 `BaseViewModel.launchGuarded`. The Compose mirror `AppError?.inlineUnlessSensitiveAccess()`
@@ -530,8 +549,8 @@ collapse into one field.
 
 An HTTP 401 (session expired) is not an in-screen failure the user can fix. The session
 layer's sign-out path handles it: the unauthenticated client retries the refresh path; on
-failure, the session controller signs the user out at the app shell. Tier 1 / Tier 2 / Tier 3
-are for transient, recoverable, and silent failures, respectively; session expiry is none of
+failure, the session controller signs the user out at the app shell. The popup, inline and
+silent tiers are for transient, recoverable, and silent failures, respectively; session expiry is none of
 those — it is an authentication lifecycle transition, and the kit suppresses 401 in the
 app-shell error host by mapping it to the session sign-out handler, not to a popup.
 
@@ -1816,9 +1835,9 @@ module preamble.
 ### 12.5 Inconsistent error-tier wiring across sibling screens [house]
 
 The house has screens where the same failure (`NoNetwork`) is rendered three different ways
-across three sibling destinations: one Tier 1 popup, one inline message, one silent retry. The
-kit fixes the contract per §4: every screen-level async work uses Tier 1 by default; Tier 2/3
-are explicit opt-ins documented in the ViewModel.
+across three sibling destinations: one popup, one inline message, one silent retry. The
+kit fixes the contract per §4: the D2-1 selection rule picks exactly one tier per situation,
+so sibling screens can no longer diverge by habit.
 
 **Citation.** `house:AGENTS.md#error-handling-strict` (uniform contract), observed
 inconsistency documented in `house:docs/gap-report/REFERENCE_APP_GAP_REPORT.md` (referenced).
@@ -1999,13 +2018,13 @@ values from this Flow and represents its latest value via State in a lifecycle-a
 `jvmMain`. `collectAsStateWithLifecycle` is the only acceptable collector at the Route
 boundary. `collectAsState` is for non-lifecycle-aware hosts only.
 
-### 13.7 `onError` presentation policy for inline screens (Tier 2/3) [house]
+### 13.7 `onError` presentation policy for inline-tier screens [house]
 
 When `onError = { updateState { copy(error = it) } }` is used, the Route reads the `AppError`
 on `UiState` and presents it inline. The kit's rule:
 
-- Tier 2/3 routes call `inlineUnlessSensitiveAccess(error)` **once** before `updateState` to
-  redirect sensitive-access failures to Tier 1.
+- Inline-tier routes call `inlineUnlessSensitiveAccess(error)` **once** before `updateState` to
+  redirect sensitive-access failures to the popup tier.
 - A non-sensitive-access `AppError` is rendered with its `serverTitle` / `serverMessage` (when
   non-blank) over the per-type default copy; the illustration and CTA derive from
   `AppErrorType`.
@@ -2044,7 +2063,8 @@ preamble.
   `coroutines-flow.md` dispatcher rule, the `testing.md` matrix). Each `[legacy]` cite is
   preserved so the writing phases can cross-check against the legacy skill.
 - `[kit]` decisions are the additions the moderator explicitly required or the brief
-  synthesised from the rule set (the eight-row state matrix, the Tier 1 prerequisite, the
+  synthesised from the rule set (the eight-row state matrix, the popup-tier prerequisite, the
+  D2-1 error-tier selection rule with named tiers, the
   adapter naming without a prefix, the design-system module rename, the size heuristics as
   review triggers, F-18 and F-19 as `synthesized from rules` rather than observed
   failures, the two new F-21 / F-22 failure sketches). Each `[kit]` decision cites its

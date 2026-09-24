@@ -5,7 +5,7 @@
 `APPROVED` or `CHANGES REQUIRED`. A phase is done only when it is APPROVED. The next phase never starts
 before that.
 
-**Read first, every session:** `handoff/WORKER_RULES.md` → `handoff/STANDARDS.md` →
+**Read first, every session:** `handoff/reviews/DECISIONS.md` (binding decisions log) → `handoff/WORKER_RULES.md` → `handoff/STANDARDS.md` →
 `handoff/SKILL_SPECS.md` → this phase's section below → any review file for this phase.
 
 **Self-check tools** (run from the repo root):
@@ -17,9 +17,10 @@ handoff/tools/validate-v2.sh [--score-only] [skills-v2/<skill>]   # agentskills.
 ```
 
 ```
-P0 Harvest ledger ─► P1 Contract brief ─► P2 Eval scenarios ─► [M: baseline runs]
+P0 Harvest ledger ─► P1 Contract brief ─► P2 Eval scenarios ─► P2.5 External harvest
+   ─► P2.6 Decision audit ─► [M: rulings + brief update]
    ─► P3 compose-architecture ─► P4 compose-feature ─► P5 Guard + scaffold scripts
-   ─► P6 compose-ui ─► P7 compose-data ─► P8 compose-module + compose-platform
+   ─► P6 compose-ui ─► P7 compose-data ─► P8 compose-project + compose-platform
    ─► P9 Integration pass ─► [M: final eval runs + sign-off]      (P10 cut-over/CLI: later scope)
 ```
 
@@ -64,6 +65,7 @@ turn (moderator-verified). Use this to go faster **without** losing consistency.
 |---|---|---|
 | P1 | up to 6 readers over house sources by topic (module graph / MVI + error / data + DI / navigation + state / UI + design / skills + guards); each writes `handoff/work/brief-notes/<topic>.md` with citations | Writes `CONTRACT_BRIEF.md` from the notes. The brief itself is never split |
 | P2 | one per skill → `evals-v2/<skill>/scenarios.md` | `evals.json`, `triggers.json`, README; the consistency pass |
+| P2.5 | one per source group G1–G6 → `handoff/work/external-notes/<group>.md` | Merges into `EXTERNAL_LEDGER.md`; evals rename; NOTICE |
 | P3, P6, P7, P8 | one per `references/*.md` file (batches of ≤ 6) | `SKILL.md` first (so references follow its rule numbering), then templates, then the reconcile pass |
 | P4 | `examples.md`, `references/testing.md`, `references/review-mode.md`; the templates in one subagent | `SKILL.md`, `new-feature.sh`, and the scaffold dry run |
 | P5 | two batches of ≤ 5: one check script plus its good/bad fixtures each | `composekit.conf.example`, `run-checks.sh`, `install-guards.sh`, `tests/run-tests.sh`; runs the full suite |
@@ -209,6 +211,154 @@ tells you which rules to emphasise in P3–P8.
 
 ---
 
+## Phase 2.5 — External harvest (skydoves, chrisbanes, android/skills, JetBrains, NiA)
+
+**Goal.** Make the kit **self-sufficient**. The best rules and gotchas from mature public skill sets,
+official Compose Multiplatform docs and official samples are absorbed into our six skills,
+paraphrased in our voice with attribution. Nothing is vendored wholesale (owner decision 2026-09-24;
+STANDARDS §7).
+
+**Sources (read each in full, the relevant parts only).** Clone repos with `git clone --depth 1 <url>
+handoff/work/scratch/external/<name>` (allowed), and fetch docs with webfetch.
+
+| Group | Source | Read |
+|---|---|---|
+| G1 performance | https://github.com/skydoves/compose-performance-skills (Apache-2.0) | All 26 skills: stability, recomposition, lists, modifiers, side-effects, measurement, R8, audit |
+| G2 testing | https://github.com/skydoves/android-testing-skills (Apache-2.0) | `compose/*`, `jvm-tests/*`, `fundamentals/*`, `kotlin/*`; skip adb and legacy platform |
+| G3 Compose craft | https://github.com/chrisbanes/skills (Apache-2.0) | `compose-state-and-effects`, `compose-performance`, `compose-component-design`, `compose-animations`, `compose-focus-navigation`, `compose-ui-testing-patterns`, `kotlin-concurrency-and-flow`, `kotlin-api-design` (with their references) |
+| G4 Android official | https://github.com/android/skills (Apache-2.0) | `navigation-3`, `adaptive`, `styles`, `edge-to-edge`, `testing-setup`, `agp-9-upgrade`, `migrate-xml-views-to-jetpack-compose` |
+| G5 CMP official docs | https://kotlinlang.org/docs/multiplatform/ (the Compose Multiplatform section) and https://developer.android.com/kotlin/multiplatform | Resources, navigation (Nav 3 in CMP), lifecycle and ViewModel, iOS integration (UIKit/SwiftUI interop, Swift export), testing, previews, desktop, web (wasm), Compose Hot Reload, KMP library setup (Android-KMP library plugin), Room/DataStore/Paging KMP pages |
+| G7 skill-writing style | https://github.com/obra/superpowers (`skills/writing-skills/**`, `skills/test-driven-development`, `skills/systematic-debugging`, `using-superpowers`), https://github.com/DietrichGebert/ponytail (all skills), https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices, https://github.com/anthropics/skills (`skill-creator`) | **Techniques only**: how they enforce behaviour on models (iron laws, rationalization tables, red-flag self-talk, ladders with stop rules, carve-outs, checklists, persuasion principles, pressure testing). Output goes to `handoff/work/STYLE_NOTES.md` (technique, one-line how, short example ≤ 15 words, source URL, and where our kit should use it), not to the ledger |
+| G6 official samples | https://github.com/JetBrains/kotlinconf-app, https://github.com/Kotlin/KMP-App-Template, https://github.com/JetBrains/compose-multiplatform (examples), https://github.com/android/nowinandroid | Module layout, `build-logic`, DI wiring, navigation, resources, testing setup, CI; how official code structures a real CMP/Android app |
+
+**Tasks.**
+1. Fan out one subagent per group (G1–G7; G7 writes `STYLE_NOTES.md` instead of ledger rows). Each writes `handoff/work/external-notes/<group>.md`
+   containing ledger rows in the **same format** as `HARVEST_LEDGER.md`.
+   - Prefix per source (e.g. `SKY-`, `SKT-`, `CB-`, `AND-`, `CMP-`, `SMP-`).
+   - Evidence = the source URL (file or doc page) plus its license, e.g.
+     `https://github.com/skydoves/…/SKILL.md (Apache-2.0)`.
+   - Classes are the same as in Phase 0. Add a class `CONFLICT` for items that contradict a kit
+     decision (STANDARDS §1 or the brief): record them with the reason and drop them.
+2. Merge the notes into `handoff/work/EXTERNAL_LEDGER.md`:
+   - one section per source
+   - duplicates against `HARVEST_LEDGER.md` or `CONTRACT_BRIEF.md` marked `DUP` → `DROP: dup of <ID>`
+     (cross-ledger IDs allowed)
+   - a **Findings** section:
+     - top 25 items that the kit must absorb
+     - gaps in SKILL_SPECS (topics no spec covers; propose a destination file)
+     - conflicts with kit decisions, and what we keep
+     - CMP-specific facts the kit was missing
+3. **Skill set change.** `compose-module` is replaced by `compose-project` (SKILL_SPECS §5).
+   - In `evals-v2/`:
+     - rename the directory
+     - update the `skill` field in `evals.json`
+     - rename the key in `triggers.json`
+   - Add 2 scenarios:
+     - `PROJ-05`: bootstrap a new CMP Notes app with the kit
+     - `PROJ-06`: adopt the kit in an existing Android Compose app. This is the pressure scenario: the
+       user demands an immediate full rewrite. Expected: an incremental plan, guards in WARN mode,
+       and no big-bang rewrite.
+   - Add 4 trigger queries to each set for the new bootstrap/adopt triggers.
+4. **Eval fixes from M2** (`evals-v2/results/2026-09-24-M2-baseline.md`, conclusion 5):
+   - (a) Rewrite every rubric item that needs a second turn ("if the user insists …", "records the
+     deviation …") into a single-turn check. For example: "states that if the user insists it will
+     follow the decision and record the deviation".
+   - (b) FEAT-02: add the full `NoteTagsContract.kt` text to the scenario context.
+   - (c) FEAT-02 item 3: accept the constant moving to `model/` or its own file (any location outside
+     `Contract.kt` that matches the brief).
+   - (d) Tag every rubric item that tests *kit knowledge* (skill names, script names, house API
+     names) with `[kit]` at the end of the item, so reports can separate kit knowledge from general
+     engineering.
+   - (e) Update `evals.json` to match.
+5. Write `skills-v2/NOTICE.md`: every external source the ledger will draw on, with its license and
+   URL, and a one-line statement that content is paraphrased and adapted.
+6. **Copying rule:** never copy more than 2 consecutive lines verbatim from any external source into
+   notes destined for skills. Paraphrase in our voice. Code from external sources never lands; only
+   the rule it illustrates does.
+
+**Acceptance.**
+- All seven groups covered; each G1–G6 source has a ledger section; `STYLE_NOTES.md` exists (G7).
+- Every row has a class, a destination and a URL.
+- The Findings sections are present.
+- `python3 -m json.tool` passes on both eval JSON files.
+- `grep -rn "compose-module" evals-v2 skills-v2` returns nothing.
+- `NOTICE.md` lists every source used.
+
+---
+
+
+## Phase 2.6 — Decision audit (house decisions are candidates, not law)
+
+**Goal.** Every decision in `CONTRACT_BRIEF.md` is verified against evidence and the simplicity test
+(STANDARDS §1.5, "Evidence over precedent") **before** any skill is written. The owner's direction:
+the house app may be wrong, so do not impose strictness on a wrong structure.
+
+**Inputs.**
+- `CONTRACT_BRIEF.md`
+- `EXTERNAL_LEDGER.md` and `STYLE_NOTES.md` (Phase 2.5)
+- `evals-v2/results/2026-09-24-M2-baseline.md`
+- official docs, fetched as needed
+
+**Tasks.**
+1. Write `handoff/work/DECISION_AUDIT.md`: one row per numbered decision in the brief (all `[house]`,
+   `[legacy]` and `[kit]` tags). Columns:
+   - ID (brief § number)
+   - decision (≤ 20 words)
+   - evidence for (URL or source, with a one-line summary)
+   - evidence against (URL or source)
+   - what official samples and mature skills do
+   - ponytail ladder result (needed? simplest version?)
+   - scalability note
+   - recommendation: **KEEP**, **SIMPLIFY** (state the simpler rule), **DROP** or **OPEN** (needs the
+     owner)
+   - confidence (high / medium / low)
+2. **Already decided — do not re-audit** (`DECISIONS.md`):
+   - Koin annotations (O-1): audit only whether the brief's setup is correct against current Koin docs.
+   - `inlineUnlessSensitiveAccess` / HTTP 428 escalation is dropped (O-2): mark it DROP and cite O-2.
+3. **Business-logic filter (O-3):** any decision that exists only because of the house app's domain
+   (backend contract, business flow, vendor SDK, brand pack, OTP flow) → DROP, cite O-3. Keep only
+   what every Compose / CMP app needs.
+4. Give special scrutiny to these; the moderator doubts them:
+   - no `SavedStateHandle` (typed input lost on process death)
+   - the cold-load / reconcile lifecycle rule (is `LifecycleStartEffect`-based reconcile the simplest
+     correct form?)
+   - guard implementation: bash + ripgrep text-search scripts (the house approach) vs Konsist
+     (Kotlin-aware architecture tests) vs detekt custom rules. Recommend one for the kit with
+     evidence, weighing accuracy against setup cost and weak-model usability.
+   - the two-channel base class (`effect` + `errors`)
+   - size heuristics
+   - feature-owned `data`/`domain` vs `:data:*` modules
+   - named error tiers
+   - `expectSuccess = true`
+   - the DataStore rule (Preferences only in KMP): re-verify against the **current** official docs
+     (decision O-6) and cite the page and date
+5. A summary table at the top: counts per recommendation, and the 10 changes with the most impact.
+6. Do **not** edit the brief. The moderator rules on every row in `handoff/reviews/phase-2.6.md`, and
+   the worker applies the rulings to the brief in the review-fix pass.
+
+**Acceptance.** Every numbered brief decision has a row. Every KEEP and SIMPLIFY has at least one
+official or sample source. Every DROP states what replaces the failure it used to prevent.
+
+---
+
+**Eval gate (all skill phases P3, P4, P6, P7, P8).** After the worker's report, the moderator runs the
+skill's scenarios with `handoff/tools/run-evals-api.py --skill-mode full` on the weak target models
+(DeepSeek V4.1 Flash and Muse Spark 1.3). Blind graders score them against the rubrics. The phase is
+APPROVED only when **both** weak models:
+
+1. pass **≥ 90%** of that skill's rubric items;
+2. hold **every** pressure scenario;
+3. pass **every** item that no model passed in the M2 baseline
+   (`evals-v2/results/2026-09-24-M2-baseline.md`: the kit's core payload);
+4. have **no invented API** among the graders' critical defects;
+5. match or beat the **Claude Opus reference** (no skill) on a blind side-by-side **engineering
+   quality** grade: correctness, compile safety, completeness, no over-engineering. This is the owner's
+   bar: weak models plus the kit must write code at Opus level.
+
+The M2 baseline showed a Claude reference without the kit scoring no better than the weak models
+(52% vs 54–56%). "Match Claude" was too low a bar, and these absolute targets replace it. Failing
+items come back as required changes that name the rule the model missed.
+
 ## Phase 3 — `compose-architecture`
 
 **Inputs.** SKILL_SPECS §1, CONTRACT_BRIEF §1–§8 and §12–§13, ledger rows destined for
@@ -300,7 +450,7 @@ non-negotiables of P3 and P4.
    - Copies the scripts to `<root>/scripts/composekit/`.
    - Writes `.composekit.conf` if absent.
    - Prints the CI snippet and hook snippets (content lives in
-     `compose-module/references/enforcement.md`, P8).
+     `compose-project/references/enforcement.md`, P8).
 5. `scripts/tests/`:
    - `fixtures/good/` and `fixtures/bad/<check>/` mini project trees (non-compiling stubs are fine).
    - `run-tests.sh` asserts every check passes on `good` and fails on its own `bad` fixture with the
@@ -328,7 +478,7 @@ marked landed; the report lists deferral pointers used.
 Follows SKILL_SPECS §4. Resolve the `expectSuccess` policy from the approved brief. Every library
 gotcha carries a verified URL in the ledger. **Acceptance:** as P6.
 
-## Phase 8 — `compose-module` and `compose-platform`
+## Phase 8 — `compose-project` and `compose-platform`
 
 Follows SKILL_SPECS §5–§6. Write `templates/build-logic/**`; verify the plugin APIs against current
 Gradle/KMP/AGP docs (cite URLs in the report). `references/enforcement.md` must contain working CI and

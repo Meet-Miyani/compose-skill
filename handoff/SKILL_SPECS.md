@@ -21,7 +21,7 @@ skills-v2/
 ├── compose-feature/        workflow to add/change/review a destination; scaffold + feature templates
 ├── compose-ui/             composables: state reads, UX states, lists, motion, a11y, design system
 ├── compose-data/           repositories, Ktor, Room, DataStore, Paging, offline-first, data tests
-├── compose-module/         Gradle modules, build-logic convention plugins, CI/hook enforcement
+├── compose-project/        new-project bootstrap, adopt-existing, modules, build-logic, CI/hooks
 └── compose-platform/       commonMain vs platform code, expect/actual, iOS/Swift, desktop/web
 evals-v2/
 └── <skill>/scenarios.md + evals.json
@@ -39,7 +39,7 @@ skill, so SKILL.md is the leanest (target ≤ 3,000 tokens); detail goes to refe
 **Description intent.** "Use at the start of any task that writes, changes or reviews Kotlin in a
 Jetpack Compose or Compose Multiplatform project — before exploring or answering…" It lists the routing
 keywords (ViewModel, StateFlow, UiState, Koin, NavKey, commonMain). "Do NOT use for Gradle-only or
-build-only work (use compose-module)."
+build-only work (use compose-project)."
 
 **Required files.**
 
@@ -58,7 +58,7 @@ references/
 templates/core/            the kit's own base code (the one place where full code is expected)
   mvi/BaseViewModel.kt, UiState.kt, UiAction.kt, UiEffect.kt, CollectEffect.kt
   error/AppError.kt, AppErrorType.kt, NetworkException.kt (+ classification notes)
-  README.md                how to create :core:mvi / :core:error from these (links compose-module)
+  README.md                how to create :core:mvi / :core:error from these (links compose-project)
 scripts/                   guard scripts (Phase 5) — installed into a project by install-guards.sh
 ```
 
@@ -96,12 +96,16 @@ scripts/                   guard scripts (Phase 5) — installed into a project 
     appear only for real orchestration.
 11. No file-level or module-level mutable state. Results travel through a repository write or the
     nav key.
-12. Koin: exactly one module file per feature under `di/`, ViewModels are `@KoinViewModel`, and
-    composables never resolve dependencies except the Route's ViewModel.
+12. Koin (annotations, decision O-1): exactly one module file per feature under `di/`, ViewModels are
+    `@KoinViewModel`, and composables never resolve dependencies except the Route's ViewModel.
 13. Navigation 3: one `@Serializable sealed interface <Feature>NavKey : NavKey` per feature, registered
     for polymorphic serialization (required on non-JVM targets). Keys carry identity, not records.
     The composition root owns `NavDisplay` and the back stack.
 14. Validate before you answer (STANDARDS §2.1, in full here).
+15. Fresh docs before new library code (decision O-6): read `libs.versions.toml` and the current
+    official docs before setting up DataStore, Navigation 3, Room, Ktor, Paging, Koin, Coil or any
+    new SDK. *Prevents:* code written against a remembered API that no longer exists. In M2, models
+    invented a `PullToRefreshBox` parameter and non-existent icon imports.
 
 **Workflow.** Route the task to the owning skill (routing table). State the existing-project policy
 case (§6 case 1/2/3). Read the owning skill in full. Follow its workflow.
@@ -120,7 +124,7 @@ is the generic successor of the house skill `implementing-a-feature`.
 
 **Description intent.** Triggers: "add a screen", "new feature", "new ViewModel", "new destination",
 "list/detail", "form screen", "review this feature". Do NOT use for pure refactors, Gradle-only work
-(compose-module) or recomposition problems (compose-ui).
+(compose-project) or recomposition problems (compose-ui).
 
 **Required files.**
 
@@ -256,7 +260,7 @@ references/
 
 **Description intent.** Triggers: repository, data source, DTO, mapper, Ktor, HttpClient, bearer
 token, WebSocket, SSE, Room, DAO, migration, DataStore, Paging, PagingSource, RemoteMediator, offline,
-cache. Do NOT use for ViewModel/UI wiring (compose-feature) or module setup (compose-module).
+cache. Do NOT use for ViewModel/UI wiring (compose-feature) or module setup (compose-project).
 
 **Required files.**
 
@@ -297,28 +301,59 @@ references/
 
 ---
 
-## 5. `compose-module`
+## 5. `compose-project` (replaces `compose-module`; owner decision 2026-09-24)
 
-**Scope.**
+**Scope.** Everything at the project and build level, as four workflows in one skill:
 
-- creating or extracting a Gradle module
-- `build-logic/` convention plugins (the kit's answer to copy-pasted target blocks)
-- version-catalog rules
-- `api` vs `implementation`
-- typesafe project accessors
-- the composition-root module
-- wiring the guard scripts into CI and agent hooks
-- desktop packaging, signing and distribution gotchas
+1. **Bootstrap a new project.**
+   - Targets: a CMP app (Android, iOS, Desktop, Web as chosen) or an Android-only Compose app.
+   - It gets the kit layout from day one:
+     - `build-logic/` convention plugins
+     - version catalog
+     - `:core:mvi` / `:core:error` from the architecture templates
+     - `:core:designsystem`
+     - `:app` composition root
+     - the guard scripts installed, plus CI
+2. **Adopt the kit in an existing project.**
+   - Audit it against the kit and produce a gap report: module graph, contract, error handling,
+     build config, guards.
+   - Classify the project as existing-project case 1, 2 or 3 (STANDARDS §6).
+   - Produce an incremental adoption plan: guards first in WARN mode, then convention plugins, then the
+     base contract for new features. There is never a big-bang rewrite, and never mixed patterns
+     inside one feature.
+3. **Add or extract a module.**
+   - Covers:
+     - convention plugins
+     - `api` vs `implementation`
+     - typesafe accessors
+     - the composition-root rules
+     - updating `.composekit.conf`
+4. **Wire CI and agent hooks.**
+   - Covers:
+     - `install-guards.sh`
+     - a CI job
+     - Claude Code / OpenCode / Cursor hooks that run `run-checks.sh`
+     - desktop packaging, signing and distribution gotchas
 
-**Description intent.** Triggers: new module, `settings.gradle.kts`, `build.gradle.kts`,
-`build-logic`, convention plugin, `libs.versions.toml`, KMP targets, CI, GitHub Actions, packaging.
-Do NOT use for feature code.
+**Description intent.** Triggers:
+
+- new project, start a Compose Multiplatform app, set up a KMP project
+- adopt the kit, migrate a project to this architecture, audit a project's architecture
+- new module, `settings.gradle.kts`, `build.gradle.kts`, `build-logic`, convention plugin,
+  `libs.versions.toml`, KMP targets
+- CI, GitHub Actions, packaging
+
+Do NOT use for feature code (compose-feature) or `commonMain` vs platform code (compose-platform).
 
 **Required files.**
 
 ```
-SKILL.md
+SKILL.md                   routes to the four workflows; each workflow is a numbered checklist
 references/
+  bootstrap.md             new-project workflow: wizard/template choice, target selection, the kit
+                           module skeleton, first feature via compose-feature's scaffold, verification
+  adopt-existing.md        audit checklist, gap-report format, incremental adoption order, what never
+                           to force-migrate, WARN-mode guards
   convention-plugins.md    plugin set and what each owns; why modules must not repeat target blocks
   dependency-rules.md      api vs implementation (leaks through api), direction checks, composition root
   version-catalog.md       naming, bundles, no versions in module files, how to verify versions
@@ -327,14 +362,23 @@ references/
 templates/build-logic/     settings.gradle.kts, convention/build.gradle.kts, plugins:
                            composekit.kmp.library, composekit.kmp.compose, composekit.kmp.feature,
                            composekit.koin; README.md explaining ids and parameters
-templates/modules/         build.gradle.kts for core / data / feature modules using those plugins
+templates/modules/         build.gradle.kts for core / data / feature / designsystem / app modules
+templates/project/         root settings.gradle.kts, root build.gradle.kts, gradle.properties,
+                           .composekit.conf, CI workflow; README.md with the bootstrap order
+scripts/audit-project.sh   read-only audit: module list, dependency edges, missing convention plugins,
+                           guard status; prints the gap-report skeleton for adopt-existing.md
 ```
 
 **Sources.**
 - `legacy:` gradle-build.md, ci-cd-distribution.md.
 - `house:` docs/MODULARIZATION.md, settings.gradle.kts, scripts/ci-checks.sh (structure only).
-- The house app lacks convention plugins; the kit adds them. Verify the pattern against the Now in
-  Android `build-logic` docs and the current KMP / Android-KMP-library plugin docs, and cite the URLs.
+- `external:` (Phase 2.5 ledger):
+  - Now in Android `build-logic` and modularization docs
+  - JetBrains KMP wizard and KMP-App-Template
+  - kotlinconf-app build setup
+  - android/skills `agp-9-upgrade`
+- The house app lacks convention plugins; the kit adds them. Verify the pattern against the NiA
+  `build-logic` docs and the current KMP / Android-KMP-library plugin docs, and cite the URLs.
 
 **Seed non-negotiables.**
 - Module build files contain no target, SDK or toolchain configuration; convention plugins own it.
@@ -343,6 +387,9 @@ templates/modules/         build.gradle.kts for core / data / feature modules us
 - No module depends on the composition root.
 - Every new module is added to the guard config (`.composekit.conf` module prefixes) and passes
   `run-checks.sh`.
+- Adoption is incremental. Guards start in WARN mode on an existing project and become blocking
+  only after the baseline is clean. Never rewrite working features to the kit as a side effect of
+  another task.
 
 ---
 
@@ -360,7 +407,7 @@ templates/modules/         build.gradle.kts for core / data / feature modules us
 
 **Description intent.** Triggers: `commonMain`, `expect`, `actual`, iosMain, Swift, SKIE,
 Flow to Swift, desktop, wasm, web target, platform-specific. Do NOT use for Gradle target setup
-(compose-module).
+(compose-project).
 
 **Required files.**
 

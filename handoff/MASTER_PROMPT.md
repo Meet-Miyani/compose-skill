@@ -18,6 +18,7 @@ PHASE TO EXECUTE: Phase <N>
 
 Before doing anything else, read these files completely, in this order. Do not skim; the rules that
 matter are spread through them:
+  0. handoff/reviews/DECISIONS.md — binding owner/moderator decisions; they override older docs
   1. handoff/WORKER_RULES.md   — hard boundaries (where you may write, forbidden commands)
   2. handoff/STANDARDS.md      — how every skill is written (voice, code policy, anatomy, budgets)
   3. handoff/SKILL_SPECS.md    — what each of the six skills contains, sources, seed rules

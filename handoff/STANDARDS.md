@@ -21,14 +21,14 @@ APIs. What they do not know is:
 
 Every sentence must serve one of those three. Anything else is cut.
 
-### The fixed stack (not up for debate inside a skill)
+### The fixed stack (audited in Phase 2.6; once the moderator has ruled, not up for debate inside a skill)
 
 | Concern | Kit decision |
 |---|---|
 | UI | Jetpack Compose (Android-only) and Compose Multiplatform (Android, iOS, Desktop/JVM, Web). The same rules apply to both; CMP adds `commonMain` constraints |
 | Architecture | MVI on one `BaseViewModel<Action, State, Effect>` contract. A `Contract.kt` per destination with exactly `UiState`, `UiAction`, `UiEffect` |
 | Async failure contract | `launchGuarded(onError, …)` in the base class. Error tiers: popup / inline / silent-poll. No `Result`/`NetworkResult`/`safeApiCall` wrappers |
-| DI | Koin (annotations flavor, `@KoinViewModel`, one module file per feature) |
+| DI | Koin annotations + the Koin compiler plugin (`@KoinViewModel`, one module file per feature). Owner decision O-1. DSL only in existing projects that already use it |
 | Navigation | Navigation 3 only. One sealed `NavKey` hierarchy per feature. The composition root owns `NavDisplay`. Navigation 2 is **not taught**; its only mention is a short "migrating from Navigation 2" note |
 | Modules | `:core:*`, `:data:*`, `:feature:*`, one composition root. Features never depend on features. Convention plugins in `build-logic/` |
 | Feature packages | `data/`, `domain/`, `presentation/`, `navigation/`, `di/`, and nothing else |
@@ -37,6 +37,90 @@ Every sentence must serve one of those three. Anything else is cut.
 
 **Not taught:** MVVM, Hilt, Navigation 2, `Result` wrappers, use-case-per-call, and XML views. If a user's
 existing project uses one of these, the kit follows §6 (Existing-project policy). It does not teach it.
+
+---
+
+## 1.5 The target reader is the weakest model we support (owner goal 2026-09-24)
+
+The kit is written so that a **mid-tier model** produces the same production-grade code a frontier
+Claude model would. Mid-tier here means DeepSeek V4.1 Flash, Muse Spark 1.3, MiniMax M3 or similar.
+Frontier models already do well unaided. The kit exists for the models that don't.
+
+**Measurable bar** (enforced by the moderator's eval gates, `handoff/tools/run-evals-api.py`):
+- Setup:
+  - a weak model is given the skill (`--skill-mode full`)
+  - a Claude reference model is given no skill
+  - both answer the same skill's scenarios
+- The weak model with the skill must **match or beat** the reference model's rubric score on that
+  skill's scenarios.
+- It must pass **every pressure scenario**.
+
+**What this means for writing:**
+
+1. **Procedures over judgment.** Wherever a weak model must choose, give it the rule, never "use
+   your judgment". Decision tables must have exactly one row per situation, and the rows must cover
+   every situation.
+2. **One canonical way.** Inside kit scope, never write "either X or Y". Pick one; the alternative
+   appears only in `existing-projects.md`.
+3. **Low freedom where consistency matters.** Templates, the scaffold script and exact file layouts
+   are *copied*, not reinvented. Weak models copy reliably and invent badly.
+4. **A worked example for every convention.** Each non-negotiable has a WRONG/RIGHT pair in
+   `examples.md` or its reference (our conventions only; §3).
+5. **Front-load what matters.** Non-negotiables come first in the body, before the workflow. Weak
+   models weight the start of a document most.
+6. **Explicit stop conditions.** Every workflow ends with gates that say exactly what to run and what
+   "pass" looks like. "Make sure it works" is not a gate.
+7. **Define every term once.** `compose-architecture` carries a short glossary: composition root,
+   reconcile, cold load, tier, owner, destination. Other skills use the terms exactly as defined
+   there.
+8. **Short sentences, concrete nouns.** One idea per sentence, and name the file, the type, the call.
+   No "it", "this" or "the above" across paragraphs.
+
+### Scope: the foundation, not the house app (decision O-3)
+
+The kit teaches what every Compose / CMP app needs:
+
+- base structure and module architecture
+- problem-solving workflows
+- coding standards and naming conventions
+- state, error and data handling
+- testing
+- mobile best practice (performance, accessibility, lifecycle, offline, platform integration)
+
+It never teaches the house app's business logic: backend contracts, business flows, vendor SDKs,
+brand packs, OTP escalation and the like. A rule that only makes sense for one app's domain stays out
+of the kit.
+
+### Evidence over precedent; the simplest correct option wins (owner direction 2026-09-24)
+
+The house app is a **source of candidate decisions, not an authority**. It was built with AI help and
+may contain mistakes, quirks or over-engineering. A kit rule is kept only when it survives this test,
+in this order:
+
+1. **Evidence.** Official guidance (Android architecture guide, Now in Android, JetBrains/Kotlin docs,
+   library docs) or the patterns mature public skills and official samples use supports it, or a real
+   failure on record justifies it.
+2. **The ponytail ladder.** Does this need to exist at all? Can the platform or an existing kit rule
+   already cover it? What is the simplest version that still prevents the failure? Stop at the
+   first rung that holds.
+3. **Scalability.** Does it still hold at 50 modules and 10 developers, without adding ceremony at
+   2 modules?
+
+A house decision that fails the test is simplified or dropped, whatever the house app does. Phase 2.6
+applies this to every decision in the brief. **No over-engineering** is a non-negotiable of the
+kit itself: no abstraction without a second real use, no layer "for future flexibility", no
+framework where a function does, and no pattern a mid-tier model cannot apply correctly.
+
+### Persona (every SKILL.md)
+
+Every SKILL.md's **Operating stance** opens with the persona, adapted to the skill:
+
+> You are acting as a **senior staff mobile engineer** who owns this codebase's architecture. You are
+> accountable for how it looks in two years, not for pleasing the requester today.
+
+That frames the behaviour that follows. Senior engineers verify before answering, refuse shortcuts
+that create debt, name trade-offs, push back on weak requests, and never ship placeholders. §2.1 is
+that behaviour made explicit.
 
 ---
 
@@ -79,6 +163,16 @@ stance** section includes this contract, adapted to its domain (the full text li
    you would need to check. Never present a guess as a fact.
 5. **Challenge the request, not just the code.** If the request itself is weak, risky or conflicts with
    the architecture, raise it before building.
+6. **Fresh docs before new library code (decision O-6).** Before setting up or writing code against a
+   library, API or SDK from scratch (DataStore, Navigation 3, Room, Ktor, Paging, Koin, Coil, any new
+   SDK):
+   - read the project's versions in `gradle/libs.versions.toml`
+   - read the **current official docs** for that version (a docs MCP such as Context7 if available,
+     otherwise the official site)
+   - write code that matches them
+
+   The kit's gotchas say *what to watch for*; the docs say *what the API is today*. If the docs
+   cannot be reached, say so and mark the code "unverified against current docs".
 
 ---
 
@@ -193,19 +287,30 @@ Rules for the anatomy:
 
 ---
 
-## 7. Deferral to external skill sets (do not duplicate them)
+## 7. External skill sets and docs: absorb, don't depend (owner decision 2026-09-24)
 
-These are maintained by others and cover API mechanics well. Our skills **point to them** for mechanics
-and keep only our conventions. Always phrase the pointer conditionally: "If the android/skills
-`navigation-3` skill is available, use it for API mechanics; otherwise fetch the official guide."
+The kit is **self-sufficient**. A user who installs only this kit gets every rule it claims to
+enforce. External sets are **sources**, harvested in Phase 2.5 into `handoff/work/EXTERNAL_LEDGER.md`,
+and **optional depth**, never a prerequisite.
 
-| Topic | Defer to | We keep |
+- **Absorb:** their best rules and gotchas land in our skills, paraphrased in our voice and fitted to
+  our stack. Attribution goes in `skills-v2/NOTICE.md` (all of the sources below are Apache-2.0).
+  Never copy more than 2 consecutive lines. External code never lands; only the rule it illustrates.
+- **Conflicts:** where an external source contradicts a kit decision (STANDARDS §1 or the brief), the
+  kit wins. Record it as `CONFLICT` in the external ledger.
+- **Depth pointers** stay conditional and optional, e.g. "for compiler-report internals, the
+  skydoves `diagnosing-compose-stability` skill goes deeper, if installed". A skill must never
+  *require* an external skill to be correct.
+
+| Topic | Primary external sources | What the kit owns |
 |---|---|---|
-| Navigation 3 APIs (NavDisplay, scenes, decorators, deep links, recipes) | Google `android/skills` → `navigation-3` | Our key-naming, sealed-per-feature keys, effect-driven navigation, results through repositories, composition-root ownership, CMP serializer registration |
-| Edge-to-edge, AGP 9 upgrade, M3 styles/theming mechanics, adaptive layout APIs | Google `android/skills` (`edge-to-edge`, `agp-9-upgrade`, `styles`, `adaptive`) | Our theming-token rules and design-system module placement |
-| Compose compiler stability internals, recomposition tracing, baseline-profile mechanics | `skydoves/compose-performance-skills` | Our state-read placement rules for MVI screens and the handful of gotchas agents still get wrong |
-| Compose UI test mechanics (finders, semantics, sync) | `skydoves/android-testing-skills` | Our ViewModel-test conventions and state matrix |
-| Generic Kotlin idiom / general Compose state and effects | `chrisbanes/skills` | Our MVI-specific ownership rules |
+| Navigation 3 (APIs, scenes, deep links, CMP support) | android/skills `navigation-3`; the JetBrains CMP navigation docs | Key naming, sealed-per-feature keys, effect-driven navigation, results through repositories, composition-root ownership, CMP serializer registration, **and** the API gotchas agents get wrong |
+| Edge-to-edge, AGP 9, M3 styles, adaptive layouts | android/skills | Theming-token rules, design-system placement, adaptive decision rules, the gotchas |
+| Stability, recomposition, lists, R8, baseline profiles | skydoves `compose-performance-skills`; chrisbanes `compose-performance` | The state-read and stability rules for MVI screens, plus every high-value performance gotcha |
+| UI and unit test mechanics | skydoves `android-testing-skills`; chrisbanes `compose-ui-testing-patterns` | ViewModel test conventions, the state matrix, the essential Compose UI test rules |
+| State and effects, component API design, Kotlin concurrency | chrisbanes/skills | MVI-specific ownership rules and component API conventions |
+| CMP platform specifics | JetBrains docs and samples (kotlinconf-app, KMP-App-Template) | `commonMain` rules, iOS interop, resources, desktop and web gotchas |
+| **How skills are written** (style, not content) | obra/superpowers (`writing-skills`, TDD for skills, rationalization tables, iron laws, red-flag self-talk); DietrichGebert/ponytail (ladders with a stop rule, explicit carve-outs, intensity levels); Anthropic's skill best practices and `skill-creator` (degrees of freedom, evals first, checklists) | Techniques are adopted into this STANDARDS file by the moderator (Phase 2.5 G7 → `STYLE_NOTES.md`). No content is copied |
 
 ---
 
