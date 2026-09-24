@@ -56,6 +56,26 @@ sealed interface NoteTagsUiEffect {
 }
 ```
 
+The screen at `presentation/notetags/NoteTagsScreen.kt` is shown in full:
+
+```kotlin
+package com.example.feature.notes.presentation.notetags
+
+@Composable
+fun NoteTagsScreen(
+    state: NoteTagsUiState,
+    onTagToggled: (String) -> Unit,
+    onContinue: () -> Unit,
+) {
+    TagPicker(
+        tags = state.tags,
+        step = state.step,
+        onTagToggled = onTagToggled,
+        onContinue = onContinue,
+    )
+}
+```
+
 **Hypothesised baseline defects:**
 - Approves the file as shippable because it compiles, missing the exactly-three-declarations rule.
 - Moves the enum but leaves the TODO in place and still marks the review passed.
@@ -77,6 +97,17 @@ sealed interface NoteTagsUiEffect {
 **Context given to the agent:**
 The `:feature:notes` notes-list destination with a ViewModel whose load() calls launchGuarded directly and whose init block fetches while onScreenStarted also gates on a hasStarted flag.
 The Screen collects state with collectAsStateWithLifecycle and offers pull-to-refresh over kept content.
+The repository interface at `domain/repository/NotesRepository.kt` declares:
+
+```kotlin
+package com.example.feature.notes.domain.repository
+
+public interface NotesRepository {
+    public suspend fun getNote(id: Long): Note?
+    public fun getNotesStream(): Flow<List<Note>>
+    public suspend fun deleteNote(id: Long)
+}
+```
 **Hypothesised baseline defects:**
 - Adds a second fetch call instead of a guard, keeping two in-flight loads where the stale response can win.
 - Keeps the init-plus-lifecycle double owner for the first load and only renames the flag.

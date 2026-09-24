@@ -189,7 +189,7 @@ def main():
     ap.add_argument("--triggers", action="store_true")
     ap.add_argument("--only", default="")
     ap.add_argument("--jobs", type=int, default=6)
-    ap.add_argument("--max-out", type=int, default=48000)
+    ap.add_argument("--max-out", type=int, default=64000)
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     if a.triggers:

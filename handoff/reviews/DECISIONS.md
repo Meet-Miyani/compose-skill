@@ -20,3 +20,5 @@ disagree, this log wins. The worker reads it at the start of every phase.
 | M-7 | 2026-09-24 | moderator | DataStore: Preferences in `commonMain`, structured values as one JSON string key; the false "typed DataStore supported in commonMain" claim is removed. |
 | M-8 | 2026-09-24 | moderator | Use `kotlin.time.Instant` (`kotlinx.datetime.Instant` is deprecated). |
 | M-9 | 2026-09-24 | moderator | Guards v1 = bash + ripgrep scripts; Konsist/detekt re-evaluated in the later tools/CLI scope. |
+| O-7 | 2026-09-25 | owner | **Gate models from Phase 4 on:** DeepSeek V4.1 Flash, Muse Spark 1.3 and **MiniMax M3** (each with the skill), plus MiniMax M3 *without* the skill in the same blind packets, so MiniMax gets a measured "before". Opus 5.5 (no kit) stays the reference. |
+| O-8 | 2026-09-25 | owner | **Final eval panel (after Phase 9), every model before and after the kit:** DeepSeek V4.1 Flash, DeepSeek V4 Pro, Muse Spark 1.3, MiniMax M3, Kimi K3, Qwen 3.8 Max, GLM 5.3, with Claude Opus 5.5 and Sonnet as references. The models not tuned on act as a held-out test against overfitting the skills. Results feed `evals-v2/results/SCOREBOARD.md` and the README. |

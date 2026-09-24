@@ -69,6 +69,7 @@ Rules:
 4. Score them with `handoff/tools/score-gate.py handoff/work/scratch/gate-<phase> --report
    evals-v2/results/<date>-gate-<phase>.md`.
 5. Check by hand that every M2 "no model passed" item for this skill now passes.
+6. Add the gate rows to `evals-v2/results/SCOREBOARD.md` (the README quotes only these measured numbers).
 
 **Opus references to regenerate before their gate** (the prompt or context changed after M2):
 FEAT-02, UI-03, PROJ-05 and PROJ-06 (new). PROJ-01 to PROJ-04 reuse MOD-01 to MOD-04 only where the

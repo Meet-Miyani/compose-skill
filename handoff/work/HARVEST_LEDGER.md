@@ -75,11 +75,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-03 | 17 | Do not force migration: respect a coherent existing MVI/MVVM pattern, adapt to project conventions | DUP | DROP: dup of ARCH-01 | — |
 | SKL-04 | 17 | The architecture pattern (unidirectional data flow with Event, State, Effect) matters, not a specific base class or framework | DUP | DROP: dup of ARCH-01 | — |
 | SKL-05 | 17 | Suggest structural changes only when asked or on clear violations (business logic in composables, scattered state mutations) | RULE | compose-architecture/references/existing-projects.md#policy | ✓ landed |
-| SKL-06 | 23 | Read existing code first; for small asks restrict reading to immediately relevant files, do not map whole architecture unless a structural refactor is requested | WORKFLOW | compose-feature/SKILL.md#workflow | — |
+| SKL-06 | 23 | Read existing code first; for small asks restrict reading to immediately relevant files, do not map whole architecture unless a structural refactor is requested | WORKFLOW | compose-feature/SKILL.md#workflow | ✓ landed |
 | SKL-07 | 24 | Identify the task concern, then route to the owning skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-08 | 26 | Load exactly one reference file only when the task involves advanced concepts; do not load speculatively | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
-| SKL-09 | 27 | Flag anti-patterns contextually for production code; for prototypes or minor tweaks answer the question first | RULE | compose-feature/references/review-mode.md#tone | — |
-| SKL-10 | 29 | Write the minimal correct solution; prefer feature-specific code over generic frameworks | RULE | compose-feature/SKILL.md#non-negotiables | — |
+| SKL-09 | 27 | Flag anti-patterns contextually for production code; for prototypes or minor tweaks answer the question first | RULE | compose-feature/references/review-mode.md#tone | ✓ landed |
+| SKL-10 | 29 | Write the minimal correct solution; prefer feature-specific code over generic frameworks | RULE | compose-feature/SKILL.md#non-negotiables | ✓ landed |
 | SKL-11 | 35-37 | Before recommending a dependency verify coordinates, target support, and API shape in that version | RULE | compose-project/references/version-catalog.md#verify | — |
 | SKL-12 | 40-42 | Prefer a documentation MCP tool (verify exact tool name and schema first) or official docs or Maven Central for verification | RULE | compose-project/references/version-catalog.md#verify | — |
 | SKL-13 | 44 | If verification is impossible, provide the standard snippet anyway with a `Verify latest version` comment so the user is not blocked | RULE | DROP: conflicts with STANDARDS §2.1 | CONFLICT: D0-1, STANDARDS §2.1 wins, the kit never presents an unverified snippet as fact |
@@ -156,7 +156,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-43 | 157 | Do not load reference files for basic Compose usage; write the code immediately | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-44 | 161-200 | Quick-routing intents (performance, flow, nav, paging, ktor, DI, a11y, animation, review, interop, architecture, files, essentials, M3, images, lists, ux, testing, datastore, room, resources, gradle, CI) feed the kit routing table and per-skill trigger phrases | DUP | DROP: split into SKL-85–SKL-92 | — |
 | SKL-85 | 161-200 | State-management triggers (ViewModel, StateFlow, UiState, onEvent) route to the compose-architecture skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
-| SKL-86 | 161-200 | Review and anti-pattern triggers route to the compose-feature skill | WORKFLOW | compose-feature/SKILL.md#workflow | — |
+| SKL-86 | 161-200 | Review and anti-pattern triggers route to the compose-feature skill | WORKFLOW | compose-feature/SKILL.md#workflow | ✓ landed |
 | SKL-87 | 161-200 | UI triggers (@Composable, LazyColumn, animation, accessibility) route to the compose-ui skill | WORKFLOW | compose-ui/SKILL.md#workflow | — |
 | SKL-88 | 161-200 | Data triggers (repository, Ktor, Room, Paging) route to the compose-data skill | WORKFLOW | compose-data/SKILL.md#workflow | — |
 | SKL-89 | 161-200 | Build triggers (Gradle, version catalog, build-logic, CI, packaging) route to the compose-project skill | WORKFLOW | compose-project/SKILL.md#workflow | — |
@@ -410,8 +410,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-19 | 7-15 | Disciplined MVI uses one onEvent function | DUP | DROP: dup of MVI-05 | — |
 | CLEAN-20 | 7-15 | Disciplined MVI keeps a small number of effects | DUP | DROP: dup of SKL-34 | — |
 | CLEAN-21 | 7-15 | Disciplined MVI names contracts directly after the feature | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
-| CLEAN-22 | 7-15 | Bloated MVI shows as tiny sealed types and double-wrapped actions | GOTCHA | compose-feature/references/review-mode.md#smells | — |
-| CLEAN-23 | 7-15 | Overengineered MVI replaces feature code with generic frameworks | GOTCHA | compose-feature/references/review-mode.md#smells | — |
+| CLEAN-22 | 7-15 | Bloated MVI shows as tiny sealed types and double-wrapped actions | GOTCHA | compose-feature/references/review-mode.md#smells | ✓ landed |
+| CLEAN-23 | 7-15 | Overengineered MVI replaces feature code with generic frameworks | GOTCHA | compose-feature/references/review-mode.md#smells | ✓ landed |
 | CLEAN-24 | 7-15 | Trivial repository calls need no use-case wrapper | DUP | DROP: dup of SKL-26 | — |
 | CLEAN-25 | 7-15 | Mandatory 4-type MVI on simple screens is overengineering | OUTOFKIT | DROP: out-of-kit stack | — |
 | CLEAN-02 | 21 | One sealed interface Event per feature is enough, almost always | RULE | compose-architecture/references/mvi-contract.md#events | ✓ landed |
@@ -796,7 +796,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | KOIN-31 | 213-222 | Scope flow-bound dependencies with scope<T> on all platforms | DECISION | DROP: no kit scope story — same scope topic as KOIN-29 (brief §6) | UNVERIFIED: not re-checked against current Koin docs |
 | KOIN-32 | 213-222 | Survive Android config changes with activityRetainedScope | DECISION | compose-architecture/references/dependency-injection.md#scopes | ✓ landed as one-line existing-project note (Android-only API) |
 | KOIN-12 | 226-234 | Koin-specific MVI surface is constructor injection plus koinViewModel(); pattern itself stays framework-agnostic | RULE | compose-architecture/references/dependency-injection.md#framework-split | ✓ landed |
-| KOIN-13 | 238-248 | verify() dry-run module check with SavedStateHandle extraTypes plus koin-test in commonTest | RULE | compose-feature/references/testing.md#koin-verify | — |
+| KOIN-13 | 238-248 | verify() dry-run module check with SavedStateHandle extraTypes plus koin-test in commonTest | RULE | compose-feature/references/testing.md#koin-verify | ✓ landed |
 | KOIN-14 | 254-260 | Koin anti-patterns: factory() for ViewModels, missing parametersOf, compose-without-viewmodel artifact, repeated startKoin, Android Context in commonMain modules | DUP | DROP: split into KOIN-33–KOIN-37 | — |
 | KOIN-33 | 254-260 | Never declare ViewModels with factory(); use viewModelOf | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | ✓ landed |
 | KOIN-34 | 254-260 | Never skip parametersOf for runtime constructor params | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | ✓ landed |
@@ -1385,13 +1385,13 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | TEST-13 | 190-192 | Snapshot testing defaults to semantic assertions; per-platform goldens cover few high-value screens | DUP | DROP: split into TEST-41–TEST-42 | — |
 | TEST-41 | 190-192 | Default to semantic and interaction assertions over shared goldens | DUP | DROP: dup of brief §9.6 | — |
 | TEST-42 | 190-192 | Keep per-platform visual goldens to a few high-value screens | DUP | DROP: dup of brief §9.6 | — |
-| TEST-14 | 196-201 | Lean matrix: Turbine VM tests per feature, pure validator/calculator tests per rule-heavy feature, UI tests for high-risk screens, platform tests for real platform behavior; no screenshot infrastructure before VM coverage | WORKFLOW | compose-feature/references/testing.md#matrix | — |
+| TEST-14 | 196-201 | Lean matrix: Turbine VM tests per feature, pure validator/calculator tests per rule-heavy feature, UI tests for high-risk screens, platform tests for real platform behavior; no screenshot infrastructure before VM coverage | WORKFLOW | compose-feature/references/testing.md#matrix | ✓ landed |
 | TEST-15 | 205-212 | Testing anti-patterns: UI-only testing, private-implementation testing, DI-framework mocking, screenshots before VM coverage, isolated derived-property tests, shared mutable fixtures | DUP | DROP: split into TEST-35–TEST-40 | — |
 | TEST-35 | 205-212 | Never test ViewModels through UI tests alone | DUP | DROP: dup of brief §9.7 | — |
 | TEST-36 | 205-212 | Never test private functions and internals; test through the public event API | DUP | DROP: dup of brief §9.1 | — |
 | TEST-37 | 205-212 | Never mock the DI framework; swap fakes via constructor injection | DUP | DROP: dup of brief §9.1 | — |
 | TEST-38 | 205-212 | Never build screenshot infrastructure before ViewModel coverage | DUP | DROP: dup of TEST-14 | — |
-| TEST-39 | 205-212 | Never test derived values in isolation from ViewModel state | RULE | compose-feature/references/testing.md#anti-patterns | — |
+| TEST-39 | 205-212 | Never test derived values in isolation from ViewModel state | RULE | compose-feature/references/testing.md#anti-patterns | ✓ landed |
 | TEST-40 | 205-212 | Never share mutable test fixtures across tests | GENERIC | DROP: model already knows | — |
 | TEST-16 | 218-222 | Domain testing pointers (paging, Room, networking) are legacy-internal indexing | GENERIC | DROP: legacy index, superseded by kit routing table | — |
 

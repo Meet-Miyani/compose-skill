@@ -351,8 +351,9 @@ official or sample source. Every DROP states what replaces the failure it used t
 
 **Eval gate (all skill phases P3, P4, P6, P7, P8).** After the worker's report, the moderator runs the
 skill's scenarios with `handoff/tools/run-evals-api.py --skill-mode full` on the weak target models
-(DeepSeek V4.1 Flash and Muse Spark 1.3). Blind graders score them against the rubrics. The phase is
-APPROVED only when **both** weak models:
+(DeepSeek V4.1 Flash, Muse Spark 1.3 and, from Phase 4 on, MiniMax M3, decision O-7; MiniMax M3 without the
+skill also joins the blind packets as its measured 'before'). Blind graders score them against the rubrics. The phase is
+APPROVED only when **every** weak model:
 
 1. pass **≥ 90%** of that skill's rubric items;
 2. hold **every** pressure scenario;
@@ -506,6 +507,10 @@ templates are internally consistent (plugin ids referenced by module templates e
 5. `skills-v2/README.md`: the kit's purpose, the six skills, installing the guards, the deferral list,
    and the existing-project policy (short).
 6. Run `budget.sh` and `validate-v2.sh` on everything; paste full output.
+7. **Eval split (D4-1/D4-2):** replace FEAT-01 with FEAT-01a (Contract + ViewModel + ViewModel tests)
+   and FEAT-01b (Route + Screen + DI/nav wiring), each with its own rubric carrying over the FEAT-01
+   items, in `evals-v2/compose-feature/scenarios.md` and `evals.json`. The moderator regenerates the
+   Opus references.
 
 **Moderator step M9.** The moderator runs the scenarios with the skills (compared with the M2
 baselines), reviews end to end, and signs off. Then Phase 10 (cut-over to `skills/`, catalog and CLI
