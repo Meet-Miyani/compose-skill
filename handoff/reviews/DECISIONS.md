@@ -14,3 +14,9 @@ disagree, this log wins. The worker reads it at the start of every phase.
 | M-1 | 2026-09-24 | moderator | Six task-shaped skills; `compose-project` replaces `compose-module` (owner-approved). |
 | M-2 | 2026-09-24 | moderator | External sets are absorbed, not vendored (owner-approved; STANDARDS §7). |
 | M-3 | 2026-09-24 | moderator | Evals run over the direct OpenCode Go API (`handoff/tools/run-evals-api.py`), not the OpenCode CLI. |
+| M-4 | 2026-09-24 | moderator | **`SavedStateHandle` is allowed** (reverses the house rule): user-entered, not-yet-persisted input survives process death via the multiplatform `androidx.savedstate` / `lifecycle-viewmodel-savedstate` APIs; identity on the nav key, records re-fetched; `UiState` derived from the handle (one owner). Verified: savedstate is KMP from 1.3.0. |
+| M-5 | 2026-09-24 | moderator | **Keep two base-class channels** (`effect` + `errors`) as a `[kit]` decision: a generic error channel gives one-line popup wiring per Route without per-feature `ShowError` boilerplate. |
+| M-6 | 2026-09-24 | moderator | **Keep `getXStream`** for every `Flow`-returning repository read (`getX` for suspend one-shots) as an unambiguous `[kit]` rule; the NiA `getX(): Flow` divergence is known and intentional. |
+| M-7 | 2026-09-24 | moderator | DataStore: Preferences in `commonMain`, structured values as one JSON string key; the false "typed DataStore supported in commonMain" claim is removed. |
+| M-8 | 2026-09-24 | moderator | Use `kotlin.time.Instant` (`kotlinx.datetime.Instant` is deprecated). |
+| M-9 | 2026-09-24 | moderator | Guards v1 = bash + ripgrep scripts; Konsist/detekt re-evaluated in the later tools/CLI scope. |

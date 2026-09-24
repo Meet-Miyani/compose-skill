@@ -61,8 +61,8 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 **Rubric:**
 1. PASS if PagingData is exposed as a separate Flow and never stored as a UiState field. [SPEC §4 seed 5] [kit]
 2. PASS if Pager, PagingSource, PagingConfig, and load keys stay internal to data while only PagingData of the domain model crosses the repository contract. [BRIEF §5.5]
-3. PASS if LoadState.Error is mapped to AppError at the boundary and surfaced to the user instead of being dropped. [BRIEF §4.5] [kit]
-4. PASS if both refresh and append errors are surfaced with a retry path. [BRIEF §4.5]
+3. PASS if LoadState.Error is mapped to AppError at the boundary and surfaced to the user instead of being dropped. [BRIEF §4.3] [kit]
+4. PASS if both refresh and append errors are surfaced with a retry path. [BRIEF §8.4]
 5. PASS if the paging path does not enter launchGuarded; the ViewModel does not treat the paging Flow as a guarded one-shot call. [BRIEF §8.4] [kit]
 6. PASS if failure and business state stay separate: an empty Catalog is a successful zero-row result, never rendered from an AppError. [BRIEF §4.6] [kit]
 

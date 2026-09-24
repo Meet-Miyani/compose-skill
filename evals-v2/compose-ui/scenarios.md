@@ -65,4 +65,5 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 4. Formatting lives in the presentation mapper or a display-time helper, not in composition or in the ViewModel. [BRIEF §5.1]
 5. States that if the user insists after the refusal it will restate the consequence once, follow the explicit decision, and record the deviation. [SPEC §1 seed 14]
 6. The refusal names the failure the rule prevents (per-tick screen invalidation and unrestorable formatted state). [BRIEF §8.2]
+7. The refusal does not offer a `rememberSaveable` mirror of `UiState` as the alternative; unpersisted input survives only via `SavedStateHandle`-derived state. [BRIEF §3.7] [kit]
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers UiState clock rules).

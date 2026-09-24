@@ -44,11 +44,10 @@ Load this file during M2 baseline runs and P3 skill writing.
 - Wraps the call in a hand-rolled `try/catch` chain or a `Result` wrapper instead of `launchGuarded`.
 - Routes the first-load failure to the popup host, leaving an empty screen with nothing to retry in place.
 - Swallows the failure (empty list, no message, no retry) or models "no notes" as an `AppError`.
-- Omits the sensitive-access escalation, leaving an inline retry that can never succeed when verification is required.
 **Rubric:**
 1. Chooses the inline tier for the first load with no content: `UiState.error` holds the `AppError` and the screen shows an error state with a Retry holding that error [BRIEF §4.4 D2-1] [kit]
 2. Runs the load through `launchGuarded(onError = ...)` with no hand-rolled `try/catch` chain and no `Result` wrapper [SPEC §1 seed 6] [kit]
-3. Calls `inlineUnlessSensitiveAccess` once before `updateState` so a sensitive-access failure escalates to the popup tier instead of an inline retry that can never succeed [BRIEF §4.5] [kit]
+3. Uses the inline tier with no escalation step: the first-load failure stays in `UiState.error` with a Retry holding that error [BRIEF §4.4 D2-1] [kit]
 4. Keeps "no notes" as a `UiState` business field, never a synthetic `AppError` [SPEC §1 seed 7] [kit]
 5. Never collapses an `AppError` into a business flag and keeps the retry bound to the error it retries [BRIEF §4.6] [kit]
 6. Does not route the first-load failure to the popup host; popup is reserved for refresh-while-visible and user-initiated actions under D2-1 [BRIEF §4.4 D2-1] [kit]

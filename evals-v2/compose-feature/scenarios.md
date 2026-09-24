@@ -10,6 +10,7 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 - Skips the restatement step and builds directly, so empty and not-found collapse into one generic error flag.
 - Fetches the note from an in-memory list instead of by identity, so the detail breaks on process-death restore.
 - Fires loads with no overlap guard, so a refresh landing on an in-flight reconcile lets the stale response win.
+- Loses typed editor input on process-death restore, or mirrors `UiState` into `rememberSaveable` instead of deriving it from `SavedStateHandle`.
 **Rubric:**
 1. Restates the slice and every observable state (cold load, reconcile, error, retry, empty, not-found, overlapping loads, process-death restore) before writing code [SPEC §2 seed]
 2. Contract.kt holds exactly UiState, UiAction and UiEffect and nothing else [BRIEF §3.2] [kit]
@@ -18,6 +19,7 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 5. Note detail resolves by identity from the nav key and re-fetches from the repository on a cold cache [BRIEF §8.3]
 6. ViewModel tests cover the seven house rows plus process-death restore using hand-written fakes and advanceUntilIdle [BRIEF §9.3]
 7. No TODO, stub, or noted-but-unfixed defect remains; a placeholder grep over changed files is empty [SPEC §2 seed]
+8. Typed editor input survives process-death restore via `SavedStateHandle` while the record itself is re-fetched by identity from the nav key [BRIEF §3.7] [kit]
 **Guard scripts that must pass:**
 - scripts/check-contract-shape.sh (prospective Phase-5 name)
 - scripts/check-placeholders.sh (prospective Phase-5 name)

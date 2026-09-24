@@ -90,9 +90,9 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-18 | 72 | Route composable obtains ViewModel, collects state via collectAsStateWithLifecycle(), collects effects via CollectEffect, binds navigation/snackbar/platform APIs | DUP | DROP: dup of MVI-07 | — |
 | SKL-19 | 73 | Screen composable is a stateless renderer receiving state and callbacks | DUP | DROP: dup of MVI-16 | — |
 | SKL-20 | 74 | Leaf composables render sub-state, emit specific callbacks, keep only tiny visual-local state (focus, scroll, animation) | DUP | DROP: dup of MVI-17 | — |
-| SKL-21 | 78 | Composable functions render state and emit events, never decide business rules | DUP | DROP: dup of ANTI-01 | — |
+| SKL-21 | 78 | Composable functions render state and emit events, never decide business rules | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | SKL-22 | 79 | If a value can be derived from state, do not store it redundantly unless async/persistence/performance justifies it | DUP | DROP: dup of ANTI-05 | — |
-| SKL-23 | 80 | Event handling in the ViewModel owns state transitions; composables do not mutate state | DUP | DROP: dup of ANTI-01 | — |
+| SKL-23 | 80 | Event handling in the ViewModel owns state transitions; composables do not mutate state | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | SKL-24 | 81-82 | UI-local state only for ephemeral visual concerns (focus, scroll, animation progress, expansion); animation-only flags stay out of screen state unless business logic depends on them | DUP | DROP: split into SKL-46–SKL-47 | — |
 | SKL-46 | 81-82 | UI-local state is acceptable only for ephemeral visual concerns: focus, scroll, animation progress, expansion toggles | RULE | compose-architecture/references/state-ownership.md#local | — |
 | SKL-47 | 81-82 | Animation-only flags stay out of screen state unless business logic depends on them | DUP | DROP: dup of ANIM-01 | — |
@@ -120,15 +120,15 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-36 | 120 | Resource access via semantic keys/enums in state; resolve strings/icons close to UI; CMP uses Res not Android R | DUP | DROP: split into SKL-58–SKL-60 | — |
 | SKL-58 | 120 | State carries semantic keys or enums for resources, never resolved strings | DUP | DROP: dup of RES-14 | — |
 | SKL-59 | 120 | Strings and icons resolve close to the UI at render time | DUP | DROP: dup of RES-14 | — |
-| SKL-60 | 120 | CMP code uses Res accessors, never Android R | DUP | DROP: dup of RES-23 | — |
+| SKL-60 | 120 | CMP code uses Res accessors, never Android R | GENERIC | DROP: model already knows (Opus test) | — |
 | SKL-37 | 121 | CMP platform separation via expect/actual (verify Kotlin 1.9 vs 2.0+ via build.gradle.kts or ask) or interfaces, Koin DI by default | DUP | DROP: split into SKL-93–SKL-94 | UNVERIFIED: Kotlin 1.9 vs 2.0 expect/actual difference not re-checked against current docs |
-| SKL-93 | 121 | Separate CMP platform code via expect/actual or interfaces | DUP | DROP: dup of CB-110 | UNVERIFIED: Kotlin 1.9 vs 2.0 expect/actual difference not re-checked against current docs |
+| SKL-93 | 121 | Separate CMP platform code via expect/actual or interfaces | DUP | DROP: covered by CB-110 (kept in EXTERNAL_LEDGER) | UNVERIFIED: Kotlin 1.9 vs 2.0 expect/actual difference not re-checked against current docs |
 | SKL-94 | 121 | Use Koin DI by default for platform bindings | RULE | compose-architecture/references/dependency-injection.md#rules | — |
 | SKL-38 | 122 | ViewModel emits semantic navigation effect; route/navigation layer executes it | RULE | compose-architecture/references/navigation.md#mvi-rules | — |
-| SKL-39 | 123 | Persistence defaults: DataStore Preferences for key-value, Typed DataStore (JSON) for structured settings, Room for relational/queried data | DUP | DROP: dup of CMP-106 | UNVERIFIED: official KMP guide states only Preferences DataStore is supported in KMP projects, see https://developer.android.com/kotlin/multiplatform/datastore |
+| SKL-39 | 123 | Persistence defaults: DataStore Preferences for key-value, Typed DataStore (JSON) for structured settings, Room for relational/queried data | DUP | DROP: covered by CMP-106 (kept in EXTERNAL_LEDGER) | UNVERIFIED: official KMP guide states only Preferences DataStore is supported in KMP projects, see https://developer.android.com/kotlin/multiplatform/datastore |
 | SKL-40 | 124 | ViewModel event-to-state-to-effect tests via Turbine in commonTest; validators/calculators as pure functions; platform bindings per target | DUP | DROP: split into SKL-61–SKL-63 | — |
-| SKL-61 | 124 | ViewModel event-to-state-to-effect tests run via Turbine in commonTest | DUP | DROP: dup of TEST-01 | — |
-| SKL-62 | 124 | Validators and calculators are tested as pure functions | DUP | DROP: dup of TEST-08 | — |
+| SKL-61 | 124 | ViewModel event-to-state-to-effect tests run via Turbine in commonTest | DUP | DROP: dup of brief §9.1 | — |
+| SKL-62 | 124 | Validators and calculators are tested as pure functions | DUP | DROP: dup of brief §9.5 | — |
 | SKL-63 | 124 | Platform bindings are tested per target | GENERIC | DROP: model already knows | — |
 | SKL-41 | 130-140 | Do list: model raw text separately, immutable equality-friendly state, reuse unchanged nested objects, semantic effects, preserve old content, map to UI state at presentation boundary, feature-specific VM names, stable list keys, top-of-file imports with aliases, guard no-op emissions, respect existing MVI conventions | DUP | DROP: split into SKL-64–SKL-74 | — |
 | SKL-64 | 130-140 | Model raw editable text separately from parsed values | DUP | DROP: dup of ARCH-21 | — |
@@ -143,8 +143,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-73 | 130-140 | Guard no-op state emissions | DUP | DROP: dup of PERF-10 | — |
 | SKL-74 | 130-140 | Respect the project's existing MVI conventions | DUP | DROP: dup of SKL-17 | — |
 | SKL-42 | 144-153 | Don't list: no number parsing in composables, no network in composables, no MutableState/controllers/lambdas/platform objects in state, no consume-once booleans, no trivial toggles in VM state, no whole-state passing, no use-case-per-call, no full-screen spinner on refresh, no forced migration, no inline fully-qualified paths | DUP | DROP: split into SKL-75–SKL-84 | — |
-| SKL-75 | 144-153 | Never parse numbers in composable bodies | DUP | DROP: dup of ANTI-01 | — |
-| SKL-76 | 144-153 | Never run network requests from composables | DUP | DROP: dup of ANTI-01 | — |
+| SKL-75 | 144-153 | Never parse numbers in composable bodies | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
+| SKL-76 | 144-153 | Never run network requests from composables | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | SKL-77 | 144-153 | Never store MutableState, controllers, lambdas, or platform objects in screen state | DUP | DROP: dup of ANTI-04 | — |
 | SKL-78 | 144-153 | Never encode snackbar or navigation as consume-once booleans in state | DUP | DROP: dup of MVI-03 | — |
 | SKL-79 | 144-153 | Never keep trivial visual toggles in ViewModel state | DUP | DROP: dup of ANIM-01 | — |
@@ -269,20 +269,20 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ANIM-51 | 127-142 | Delegate transition choice to children with Enter and Exit None on the parent | GENERIC | DROP: model already knows | — |
 | ANIM-14 | 146-166 | AnimatedContent directional transitionSpec with SizeTransform; always use the lambda target parameter never the outer variable | DUP | DROP: split into ANIM-52–ANIM-53 | — |
 | ANIM-52 | 146-166 | Control inter-state size animation with SizeTransform | RULE | compose-ui/references/motion.md#content | — |
-| ANIM-53 | 146-166 | Always read the lambda target parameter inside AnimatedContent | DUP | DROP: dup of ANIM-23 | — |
+| ANIM-53 | 146-166 | Always read the lambda target parameter inside AnimatedContent | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-15 | 170-175 | Performance rules: spring default, lambda offset for Layout phase, graphicsLayer for Drawing phase, drawBehind for animated colors, animateContentSize BEFORE size modifiers, lambda param in AnimatedContent/AnimatedVisibility | DUP | DROP: split into ANIM-18–ANIM-23 | — |
 | ANIM-18 | 170-175 | Prefer spring as the default spec for interruption-safe motion | DUP | DROP: dup of ANIM-06 | — |
-| ANIM-19 | 170-175 | Read offsets in the lambda overload so they resolve in the Layout phase | DUP | DROP: dup of CESS-01 | — |
+| ANIM-19 | 170-175 | Read offsets in the lambda overload so they resolve in the Layout phase | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-20 | 170-175 | Apply visual transforms in graphicsLayer so they resolve in the Drawing phase | DUP | DROP: dup of ANADV-18 | — |
 | ANIM-21 | 170-175 | Paint animated colors with drawBehind instead of background() | GOTCHA | compose-ui/references/motion.md#perf | — |
 | ANIM-22 | 170-175 | Place animateContentSize BEFORE size modifiers in the chain | RULE | compose-ui/references/motion.md#perf | — |
-| ANIM-23 | 170-175 | Use the lambda target parameter inside AnimatedContent and AnimatedVisibility | DUP | DROP: dup of CB-60 | — |
+| ANIM-23 | 170-175 | Use the lambda target parameter inside AnimatedContent and AnimatedVisibility | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-16 | 179-187 | Anti-patterns table: animation state in ViewModel, Modifier.scale/offset per frame, animating every change, animateContentSize after size modifiers, outer variable in AnimatedContent, tween-everywhere, animating padding/size per frame | DUP | DROP: split into ANIM-24–ANIM-30 | — |
 | ANIM-24 | 179-187 | Never keep animation state in the ViewModel | DUP | DROP: dup of ANIM-01 | — |
 | ANIM-25 | 179-187 | Never drive per-frame visuals with Modifier.scale() or eager offset() | DUP | DROP: dup of ANADV-18 | — |
 | ANIM-26 | 179-187 | Animate meaningful transitions only, not every change | GOTCHA | compose-ui/references/motion.md#anti-patterns | — |
 | ANIM-27 | 179-187 | Never place animateContentSize after size modifiers | DUP | DROP: dup of ANIM-22 | — |
-| ANIM-28 | 179-187 | Never read the outer variable inside AnimatedContent | DUP | DROP: dup of ANIM-23 | — |
+| ANIM-28 | 179-187 | Never read the outer variable inside AnimatedContent | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-29 | 179-187 | Never default to tween or snap everywhere | DUP | DROP: dup of ANIM-06 | — |
 | ANIM-30 | 179-187 | Never animate padding or size every frame; prefer graphicsLayer transforms | DUP | DROP: dup of ANADV-18 | — |
 | ANIM-17 | 183 | graphicsLayer misuse row inside ANIM-16 table duplicates the fuller ANADV-18 treatment | DUP | DROP: dup of ANADV-18 | — |
@@ -291,7 +291,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| ANTI-01 | 11 | Business logic inside composables forks source of truth, hurts testability, reruns during composition; move into ViewModel/domain | DUP | DROP: dup of CB-24 | — |
+| ANTI-01 | 11 | Business logic inside composables forks source of truth, hurts testability, reruns during composition; move into ViewModel/domain | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | ANTI-02 | 12 | Giant god-ViewModel has too large a blast radius; one ViewModel per screen or independent flow | RULE | compose-architecture/references/mvi-contract.md#holder | — |
 | ANTI-03 | 13 | Scattered updateState/sendEffect with no structure hides transitions; disciplined onEvent() as single entry point | RULE | compose-architecture/references/mvi-contract.md#flow | — |
 | ANTI-04 | 14 | Unstable state models (mutable collections, lambdas in state) defeat skipping; immutable data classes plus immutable collections | RULE | compose-ui/references/state-reads-and-stability.md#models | — |
@@ -319,10 +319,10 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 |---|---|---|---|---|---|
 | ARCH-01 | 5 | Preservation rule: keep a coherent existing screen architecture unless asked to migrate or it cannot satisfy a required constraint | RULE | compose-architecture/references/existing-projects.md#policy | — |
 | ARCH-02 | 9-15 | Separate sources of truth per screen: ScreenState StateFlow for behavior, repository/database/remote for persisted data, local Compose state for visual-only concerns; do not mix | RULE | compose-architecture/references/state-ownership.md#sources | — |
-| ARCH-03 | 19-25 | State-owner decision: local Compose state for one-subtree visuals, plain holder for complex UI logic without data duties, ViewModel for business rules plus async plus persistence plus effects | DUP | DROP: dup of CB-05 | — |
+| ARCH-03 | 19-25 | State-owner decision: local Compose state for one-subtree visuals, plain holder for complex UI logic without data duties, ViewModel for business rules plus async plus persistence plus effects | DUP | DROP: covered by CB-05 (kept in EXTERNAL_LEDGER) | — |
 | ARCH-04 | 25 | A ViewModel is one implementation of a screen state holder, not a requirement for every composable | GENERIC | DROP: model already knows | — |
 | ARCH-05 | 29-40 | MVI vs MVVM decision guide (contract, boilerplate, testing input, best-for) plus choose/preserve rules | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit mandates MVI for new work |
-| ARCH-06 | 44-46 | Lighter patterns for presentational leaves, trivial screens, prototypes; do not invent reducers, result types, or global frameworks unless they earn their keep | DUP | DROP: dup of CLEAN-08 | — |
+| ARCH-06 | 44-46 | Lighter patterns for presentational leaves, trivial screens, prototypes; do not invent reducers, result types, or global frameworks unless they earn their keep | DUP | DROP: dup of SKL-46 | — |
 | ARCH-07 | 51 | Domain layer runs zero-platform so it executes in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
 | ARCH-08 | 53-59 | Domain rules: zero platform imports, domain models differ from DTOs/entities, repository interfaces in domain with impls in data, mappers at data boundary, use cases only for multi-step orchestration | DUP | DROP: split into ARCH-29–ARCH-33 | — |
 | ARCH-29 | 53-59 | Domain code has zero platform imports so it runs in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
@@ -349,12 +349,12 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ARCH-34 | 130-140 | Trivial derivations live in computed properties | GENERIC | DROP: model already knows | — |
 | ARCH-35 | 130-140 | Never store duplicated state where one value implies another | DUP | DROP: dup of ANTI-05 | — |
 | ARCH-15 | 146-154 | Where-logic-belongs table: validation/calculations/async/side-effects in ViewModel/domain, local UI state in composable; validation, totals, loading, enablement, decisions never in composables | DUP | DROP: split into ARCH-36–ARCH-41 | — |
-| ARCH-36 | 146-154 | Validation runs in the ViewModel or domain, never in the composable body | DUP | DROP: dup of ANTI-01 | — |
+| ARCH-36 | 146-154 | Validation runs in the ViewModel or domain, never in the composable body | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | ARCH-37 | 146-154 | Calculations run in a pure calculator or domain service called by the ViewModel | RULE | compose-architecture/references/mvi-contract.md#logic | — |
 | ARCH-38 | 146-154 | Async orchestration (launch, cancel, debounce, stale-result handling) lives in the ViewModel | GENERIC | DROP: model already knows | — |
 | ARCH-39 | 146-154 | Side effects travel via Effect from the ViewModel | DUP | DROP: dup of SKL-34 | — |
 | ARCH-40 | 146-154 | LazyListState, focus, animation, and expansion toggles stay local to composables | DUP | DROP: dup of SKL-46 | — |
-| ARCH-41 | 146-154 | Validation, derived totals, data loading, submit enablement, and business decisions never live in composables | DUP | DROP: dup of ANTI-01 | — |
+| ARCH-41 | 146-154 | Validation, derived totals, data loading, submit enablement, and business decisions never live in composables | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | ARCH-16 | 158 | Effect delivery default Channel(BUFFERED) with receiveAsFlow; SharedFlow(replay=0) acceptable for fire-and-forget; preserve existing SharedFlow mechanism when consistent | DUP | DROP: dup of SKL-34 | CONFLICT: resolved — SharedFlow allowance removed, kit mandates base-class channel effects |
 | ARCH-17 | 163-172 | Reactive collection pattern: repository Flow with catch-to-effect plus collect-to-updateState; Room/DataStore Flows auto-re-emit; map to domain at repository boundary | DUP | DROP: split into ARCH-42–ARCH-45 | — |
 | ARCH-42 | 163-172 | Repository Flow failures convert to a shown effect via catch | GENERIC | DROP: model already knows | — |
@@ -381,7 +381,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CICD-04 | 59-110 | Desktop multi-OS matrix workflow (macos/windows/ubuntu runners, packageDmg/packageMsi/packageDeb, artifact paths) | API | DROP: tutorial code | — |
 | CICD-05 | 114-164 | Desktop app module Gradle config code including TargetFormat trio and nativeDistributions block | API | DROP: tutorial code | — |
 | CICD-06 | 138-141 | DataStore/serialization requires --add-opens java.base JVM args on desktop | GOTCHA | compose-project/references/distribution.md#desktop | UNVERIFIED: not re-checked against current docs |
-| CICD-07 | 150-157 | macOS bundleID plus icon files; Windows upgradeUuid must stay constant across versions | DUP | DROP: dup of CMP-87 | UNVERIFIED: not re-checked against current docs |
+| CICD-07 | 150-157 | macOS bundleID plus icon files; Windows upgradeUuid must stay constant across versions | DUP | DROP: covered by CMP-87 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current docs |
 | CICD-08 | 172-181 | iOS framework binaries config: iosArm64 plus iosSimulatorArm64 with baseName and isStatic true required for App Store | GOTCHA | compose-project/references/distribution.md#ios | — |
 | CICD-09 | 187-190 | Xcode Run Script phase calling embedAndSignAppleFrameworkForXcode before Compile Sources | GOTCHA | compose-project/references/distribution.md#ios | UNVERIFIED: task name not re-checked against current docs |
 | CICD-10 | 194-215 | Swift entry point calling doInitKoin plus ComposeViewControllerRepresentable wrapping MainViewController | API | DROP: tutorial code | — |
@@ -396,9 +396,9 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CICD-15 | 277-281 | Gradle task table per platform (assembleRelease/bundleRelease, jvmJar, package tasks, run, Xcode) | DECISION | DROP: optional depth — duplicates CICD-01 target table | UNVERIFIED: task names not re-checked against current docs |
 | CICD-16 | 285-290 | Desktop troubleshooting table: InaccessibleObjectException, macOS damaged-app signing, Xcode framework search paths, constant MSI upgradeUuid | DUP | DROP: split into CICD-21–CICD-24 | UNVERIFIED: not re-checked against current docs |
 | CICD-21 | 285-290 | Fix desktop InaccessibleObjectException with --add-opens JVM args | GOTCHA | DROP: optional depth — symptom-indexed restatement of CICD-06 | UNVERIFIED: not re-checked against current docs |
-| CICD-22 | 285-290 | Fix macOS damaged-app rejections with code signing | DUP | DROP: dup of CMP-86 | UNVERIFIED: not re-checked against current docs |
+| CICD-22 | 285-290 | Fix macOS damaged-app rejections with code signing | DUP | DROP: covered by CMP-86 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current docs |
 | CICD-23 | 285-290 | Fix Xcode framework-not-found errors through FRAMEWORK_SEARCH_PATHS | GOTCHA | DROP: optional depth — troubleshooting catalogue beyond top gotchas | UNVERIFIED: not re-checked against current docs |
-| CICD-24 | 285-290 | Keep the Windows MSI upgradeUuid constant across versions | DUP | DROP: dup of CMP-87 | UNVERIFIED: not re-checked against current docs |
+| CICD-24 | 285-290 | Keep the Windows MSI upgradeUuid constant across versions | DUP | DROP: covered by CMP-87 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current docs |
 
 ## references/clean-code.md
 
@@ -428,7 +428,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-31 | 41 | A screen with navigation effects earns a dedicated ViewModel | RULE | DROP: optional depth — owner-ladder elaboration (CB-05 is the kept decision line) | — |
 | CLEAN-32 | 41 | A screen with retry and refresh flow earns a dedicated ViewModel | RULE | DROP: optional depth — owner-ladder elaboration (CB-05 is the kept decision line) | — |
 | CLEAN-33 | 41 | A screen with persistent draft-versus-original comparison earns a dedicated ViewModel | RULE | DROP: optional depth — owner-ladder elaboration (CB-05 is the kept decision line) | — |
-| CLEAN-34 | 41 | Purely visual tab selection and expansion stay local UI state | DUP | DROP: dup of CLEAN-08 | — |
+| CLEAN-34 | 41 | Purely visual tab selection and expansion stay local UI state | DUP | DROP: dup of SKL-46 | — |
 | CLEAN-08 | 45 | Lighter state holder suffices for tab selection, expansion, scroll affordance, tooltip/menu visibility | DUP | DROP: dup of SKL-46 | — |
 | CLEAN-09 | 49-53 | Extract reusable UI only with real reuse, stable API, meaningful boundary (MoneyField, ResultCard, ValidationMessage, SettingsToggleRow); never one-line Text wrappers, modifier forwarders, single-use theoretical reuse, or props harder than inline code | DUP | DROP: split into CLEAN-35–CLEAN-40 | — |
 | CLEAN-35 | 49-53 | Extract a reusable UI component only with real reuse across screens | RULE | compose-architecture/references/naming-and-packages.md#extraction | — |
@@ -459,7 +459,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-56 | 119-128 | Name the route composable <Feature>Route | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
 | CLEAN-57 | 119-128 | Name the screen composable <Feature>Screen | RULE | compose-architecture/references/naming-and-packages.md#naming | — |
 | CLEAN-58 | 119-128 | Name leaf components directly after their content | DUP | DROP: dup of CLEAN-51 | — |
-| CLEAN-14 | 132-159 | Import hygiene: never inline fully qualified paths, always import at top, alias clashing layers with Db/Domain/Ui/Api/Dto affixes | GENERIC | DROP: model already knows | — |
+| CLEAN-14 | 132-159 | Import hygiene: never inline fully qualified paths, always import at top, alias clashing layers with Db/Domain/Ui/Api/Dto affixes | RULE | compose-architecture/references/naming-and-packages.md#imports | — |
 | CLEAN-15 | 166-184 | BAD 4-type MVI currency-picker example (1:1 Event-to-Result mapping adds nothing) | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit never teaches 4-type MVI |
 | CLEAN-16 | 188-206 | GOOD 3-type MVI currency example (sealed Event, data-class State, sealed Effect, StateFlow plus Channel plus onEvent) | EXAMPLE | compose-feature/examples.md#pairs | CONFLICT: naming lands as UiAction/UiState/UiEffect in kit code |
 
@@ -467,11 +467,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| CESS-01 | 7-23 | Three-phases model: Composition reads trigger recomposition; Layout reads (offset lambda) skip composition; Drawing reads (graphicsLayer) skip both | DUP | DROP: dup of SKY-37 | — |
-| CESS-02 | 17-21 | BAD/GOOD pair: Modifier.offset(dp values) recomposes per change vs Modifier.offset lambda reading in Layout phase | DUP | DROP: dup of CESS-01 | — |
+| CESS-01 | 7-23 | Three-phases model: Composition reads trigger recomposition; Layout reads (offset lambda) skip composition; Drawing reads (graphicsLayer) skip both | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
+| CESS-02 | 17-21 | BAD/GOOD pair: Modifier.offset(dp values) recomposes per change vs Modifier.offset lambda reading in Layout phase | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | CESS-03 | 29-38 | Primitive specializations mutableIntStateOf/mutableFloatStateOf avoid boxing; mutableStateOf<Int> boxes on every read/write | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-04 | 42-51 | SnapshotStateList triggers on structural change and indexed replace but not in-place field mutation; prefer immutable collections in state, SnapshotStateList for UI-local only | DUP | DROP: split into CESS-17–CESS-19 | — |
-| CESS-17 | 42-51 | SnapshotStateList recomposes on structural change, never on in-place field mutation | DUP | DROP: dup of CB-11 | — |
+| CESS-17 | 42-51 | SnapshotStateList recomposes on structural change, never on in-place field mutation | DUP | DROP: covered by CB-11 (kept in EXTERNAL_LEDGER) | — |
 | CESS-18 | 42-51 | Prefer immutable collections in state models | DUP | DROP: dup of ANTI-04 | — |
 | CESS-19 | 42-51 | Reserve SnapshotStateList for UI-local state only | DUP | DROP: dup of SKL-46 | — |
 | CESS-05 | 55-68 | Custom Saver pattern for rememberSaveable with non-Parcelable types | API | DROP: tutorial code | — |
@@ -480,9 +480,9 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-08 | 93-101 | DisposableEffect registration must pair with onDispose cleanup | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-09 | 105-114 | Prefer dispatching events to ViewModel over rememberCoroutineScope; scope only for UI-local async (scroll, snackbar); rememberUpdatedState for latest callbacks; SideEffect sparingly; produceState defers to ViewModel StateFlow in MVI | DUP | DROP: split into CESS-20–CESS-23 | — |
 | CESS-20 | 105-114 | Dispatch events to the ViewModel instead of launching from rememberCoroutineScope | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
-| CESS-21 | 105-114 | Reserve rememberCoroutineScope for UI-local async work | DUP | DROP: dup of CESS-20 | — |
+| CESS-21 | 105-114 | Reserve rememberCoroutineScope for UI-local async work | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-22 | 105-114 | Capture latest callbacks with rememberUpdatedState in long-running effects | GENERIC | DROP: model already knows | — |
-| CESS-23 | 105-114 | Prefer ViewModel StateFlow over produceState in MVI screens | DUP | DROP: dup of CESS-20 | — |
+| CESS-23 | 105-114 | Prefer ViewModel StateFlow over produceState in MVI screens | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-10 | 124-130 | collectAsStateWithLifecycle over collectAsState to collect only in STARTED; available in CMP via lifecycle-runtime-compose with version-dependent KMP surface | GOTCHA | compose-ui/references/state-reads-and-stability.md#collect | https://developer.android.com/jetpack/androidx/releases/lifecycle |
 | CESS-11 | 136-146 | CollectEffect lifecycle-aware effect collector (repeatOnLifecycle STARTED); collect one-offs at route level | RULE | compose-architecture/templates/core/CollectEffect.kt#collect | — |
 | CESS-12 | 150-158 | Modifier order matters left-to-right; background/padding/size ordering sample | GENERIC | DROP: model already knows | — |
@@ -493,7 +493,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-25 | 201-206 | Never extract single-use trivial wrappers or tighter-inline logic | DUP | DROP: dup of CLEAN-37 | — |
 | CESS-16 | 210-232 | CompositionLocal rules: theme and density owners only; never frequently-changing values, 1-2-level values, or DI duties; no custom CompositionLocal for feature state, use explicit VM-to-leaf parameters | DUP | DROP: split into CESS-26–CESS-30 | — |
 | CESS-26 | 210-232 | Reserve CompositionLocal for theming, density, and platform owners | GENERIC | DROP: model already knows (Opus test) | — |
-| CESS-27 | 210-232 | Never publish frequently-changing values through CompositionLocal | DUP | DROP: dup of CESS-26 | — |
+| CESS-27 | 210-232 | Never publish frequently-changing values through CompositionLocal | GENERIC | DROP: model already knows (Opus test) | — |
 | CESS-28 | 210-232 | Never thread 1-2-level values through CompositionLocal | GENERIC | DROP: model already knows | — |
 | CESS-29 | 210-232 | Never resolve dependencies through CompositionLocal | RULE | compose-architecture/references/state-ownership.md#composition-local | — |
 | CESS-30 | 210-232 | Never carry feature state in custom CompositionLocals | RULE | compose-architecture/references/state-ownership.md#composition-local | — |
@@ -515,18 +515,18 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CF-09 | 120-128 | Scope table: viewModelScope for VMs (CMP commonMain since lifecycle 2.8+), lifecycleScope Android-only, rememberCoroutineScope for handlers, coroutineScope vs supervisorScope for joint vs independent work | DECISION | DROP: optional depth — scope catalog beyond the one kit boundary rule (CB-98) | https://developer.android.com/kotlin/multiplatform/viewmodel |
 | CF-10 | 128 | Never GlobalScope (leak) and never unbound CoroutineScope(Job()) without lifecycle management | GENERIC | DROP: model already knows (Opus test) | — |
 | CF-11 | 134-145 | launch propagates immediately while async defers to await; try/catch around repository fetch mapping IOException to error state | API | DROP: tutorial code | CONFLICT: kit routes all VM async through launchGuarded(onError) instead of hand-rolled try/catch |
-| CF-12 | 149-155 | Never swallow CancellationException: rethrow explicitly, never catch Exception broadly around suspending work | DUP | DROP: dup of CB-99 | — |
+| CF-12 | 149-155 | Never swallow CancellationException: rethrow explicitly, never catch Exception broadly around suspending work | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
 | CF-13 | 161-170 | stateIn/shareIn as declared vals never per-call; WhileSubscribed(5000) for VM state, Lazily for expensive shared resources, Eagerly for pre-collector data | DECISION | compose-architecture/references/coroutines-flow.md#statein | — |
 | CF-14 | 174-184 | Anti-patterns table: GlobalScope, runBlocking on Main, swallowed CancellationException, blocking IO on Default, loops without ensureActive, per-call stateIn, catch Throwable, hardcoded IO dispatcher, combine without initial values | DUP | DROP: split into CF-17–CF-25 | — |
 | CF-17 | 174-184 | Never launch from GlobalScope | GENERIC | DROP: model already knows | — |
 | CF-18 | 174-184 | Never block the Main thread with runBlocking | GENERIC | DROP: model already knows | — |
-| CF-19 | 174-184 | Never swallow CancellationException | DUP | DROP: dup of CF-12 | — |
+| CF-19 | 174-184 | Never swallow CancellationException | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
 | CF-20 | 174-184 | Never run blocking IO on Dispatchers.Default | GENERIC | DROP: model already knows | — |
 | CF-21 | 174-184 | Never run non-suspending loops without ensureActive | GENERIC | DROP: model already knows (Opus test) | — |
 | CF-22 | 174-184 | Never create stateIn per function call | DUP | DROP: dup of CF-13 | — |
 | CF-23 | 174-184 | Never catch Throwable broadly | GENERIC | DROP: model already knows (Opus test) | — |
 | CF-24 | 174-184 | Never hardcode dispatchers; inject them as constructor params | DUP | DROP: dup of CF-08 | — |
-| CF-25 | 174-184 | Never combine Flows without initial values | DUP | DROP: dup of CF-06 | — |
+| CF-25 | 174-184 | Never combine Flows without initial values | GENERIC | DROP: model already knows (Opus test) | — |
 
 ## references/coroutines-flow-advanced.md
 
@@ -560,20 +560,20 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | XPLAT-27 | 17 | Manifest, delegate, and shell integration stay platform-specific | RULE | compose-platform/references/sharing-and-bridges.md#placement | — |
 | XPLAT-04 | 21-32 | Placement decision table (reducer/VM, validator, repository contract, haptics/share/clipboard, formatters, resource IDs, permission flow, safe-area/keyboard, nav binding, analytics) | DUP | DROP: split into XPLAT-28–XPLAT-31 | — |
 | XPLAT-28 | 21-32 | Pure logic and state models default to commonMain | DUP | DROP: dup of XPLAT-23 | — |
-| XPLAT-29 | 21-32 | Stateful platform capabilities default to interface plus platform implementation | DUP | DROP: dup of XPLAT-32 | — |
+| XPLAT-29 | 21-32 | Stateful platform capabilities default to interface plus platform implementation | DUP | DROP: covered by CB-110 (kept in EXTERNAL_LEDGER) | — |
 | XPLAT-30 | 21-32 | Shared UI and resource identifiers default to commonMain | DUP | DROP: dup of XPLAT-25 | — |
 | XPLAT-31 | 21-32 | OS shell bindings stay platform-specific | DUP | DROP: dup of XPLAT-27 | — |
 | XPLAT-05 | 36 | Before claiming commonMain confirm multiplatform artifacts exist (check -jvm/-iosarm64/-iosX64 on Maven or context7); if unverifiable say so and use platform placement or wrapper interfaces | RULE | compose-platform/references/sharing-and-bridges.md#verify | — |
 | XPLAT-06 | 42-49 | Interfaces for app capabilities (haptics, clipboard, share, URLs, analytics, formatting, file opener); expect/actual for thin platform facts; interface with lifetime/DI/fakes/multi-impl, expect/actual for tiny stateless hooks | DUP | DROP: split into XPLAT-32–XPLAT-33 | — |
-| XPLAT-32 | 42-49 | Capabilities with lifetime, DI, fakes, or multiple implementations use interfaces | DUP | DROP: dup of CB-110 | — |
+| XPLAT-32 | 42-49 | Capabilities with lifetime, DI, fakes, or multiple implementations use interfaces | DUP | DROP: covered by CB-110 (kept in EXTERNAL_LEDGER) | — |
 | XPLAT-33 | 42-49 | Tiny stateless platform hooks use expect/actual | DUP | DROP: dup of XPLAT-07 | — |
 | XPLAT-07 | 53 | Heavy/async/hardware services via commonMain interface plus Koin platform impls; expect/actual reserved for tiny sync primitives (UUID, dates, clipboard) | RULE | compose-platform/references/sharing-and-bridges.md#bridges | — |
-| XPLAT-08 | 61-65 | Bridge-choice table: interface plus DI for lifecycle/state/async services, expect fun for stateless facts, expect class plus actual typealias rarely for reused platform types | DUP | DROP: dup of CB-110 | — |
+| XPLAT-08 | 61-65 | Bridge-choice table: interface plus DI for lifecycle/state/async services, expect fun for stateless facts, expect class plus actual typealias rarely for reused platform types | DUP | DROP: covered by CB-110 (kept in EXTERNAL_LEDGER) | — |
 | XPLAT-09 | 67-101 | Interface plus DI pattern code (Player contract, Android/iOS impls, platform modules, ViewModel on interface) | API | DROP: tutorial code | — |
 | XPLAT-10 | 105-116 | expect/actual thin-primitive pattern code (randomUUID) | API | DROP: tutorial code | — |
 | XPLAT-11 | 120-137 | expect class plus actual typealias pattern code (PlatformDate) | API | DROP: tutorial code | — |
 | XPLAT-12 | 140-144 | Bridge anti-patterns: expect/actual for lifecycle/state/async, platform imports in commonMain, fat expect/actual, skipping interfaces when tests need fakes | GOTCHA | compose-platform/references/sharing-and-bridges.md#anti-patterns | — |
-| XPLAT-13 | 148-152 | lifecycle-viewmodel/runtime-compose expose ViewModel, viewModelScope, collectAsStateWithLifecycle in commonMain with version-dependent multiplatform surfaces; typical list needs re-verification | DUP | DROP: dup of CMP-36 | https://developer.android.com/jetpack/androidx/releases/lifecycle |
+| XPLAT-13 | 148-152 | lifecycle-viewmodel/runtime-compose expose ViewModel, viewModelScope, collectAsStateWithLifecycle in commonMain with version-dependent multiplatform surfaces; typical list needs re-verification | DUP | DROP: covered by CMP-36 (kept in EXTERNAL_LEDGER) | https://developer.android.com/jetpack/androidx/releases/lifecycle |
 | XPLAT-14 | 156-158 | rememberSaveable for tiny local UI only; cross-platform drafts rehydrate from persistence; serialize VM state only when product requires | DUP | DROP: dup of CESS-06 | — |
 | XPLAT-15 | 162-164 | iOS keyboard/focus quirks isolated at UI/platform edge on real hardware; no keyboard workaround flags in reducer state; shared UI uses inset/safe-area layout | RULE | compose-platform/references/desktop-and-web.md#input | — |
 | XPLAT-16 | 168 | Insets-aware shared layouts with verified safe areas and keyboard overlap; never put iOS safe-area hacks into feature state | RULE | compose-platform/references/desktop-and-web.md#layout | — |
@@ -610,7 +610,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | DS-15 | 165-170 | DI singleton wiring samples for Koin single and Hilt Provides Singleton | RULE | compose-data/references/datastore.md#di | CONFLICT: resolved — Hilt sample removed, DataStore provided as a Koin single |
 | DS-16 | 177-184 | DataStore test isolation: factory-built instances plus fake-backed ViewModel tests | DUP | DROP: split into DS-33–DS-34 | — |
 | DS-33 | 177-184 | Build test DataStores with the factory plus a per-test temp dir | RULE | compose-data/references/data-testing.md#datastore | — |
-| DS-34 | 177-184 | Bypass DataStore in ViewModel tests with fake repositories | DUP | DROP: dup of TEST-09 | — |
+| DS-34 | 177-184 | Bypass DataStore in ViewModel tests with fake repositories | DUP | DROP: dup of brief §9.2 | — |
 | DS-17 | 188-197 | Anti-patterns table: multi-instance same file, runBlocking on main, large objects in DataStore, missing catch, missing corruption handler, tmpdir on Desktop, preference reads in composables, raw Preferences to UI | DUP | DROP: split into DS-18–DS-25 | — |
 | DS-18 | 188-197 | Never create multiple DataStore instances for the same file | DUP | DROP: dup of DS-03 | — |
 | DS-19 | 188-197 | Never read DataStore with runBlocking on the main thread | GENERIC | DROP: model already knows | — |
@@ -648,8 +648,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | GRAD-03 | 78-85 | Bundles group always-together libs as one alias for convenience only; CMP projects rarely need them since commonMain already groups | RULE | compose-project/references/version-catalog.md#bundles | — |
 | GRAD-04 | 89-110 | settings.gradle.kts pattern: TYPESAFE_PROJECT_ACCESSORS, scoped google/mavenCentral repos, FAIL_ON_PROJECT_REPOS, module includes | API | DROP: tutorial code | — |
 | GRAD-05 | 114-125 | Root build file declares plugins with apply false; no allprojects/subprojects; convention plugins at scale | GENERIC | DROP: model already knows (Opus test) | — |
-| GRAD-06 | 131 | AGP 9 includes Kotlin; never apply org.jetbrains.kotlin.android in app modules | DUP | DROP: dup of AND-38 | UNVERIFIED: AGP 9 built-in Kotlin claim not re-checked against current AGP docs |
-| GRAD-07 | 143 | New KMP library plugin com.android.kotlin.multiplatform.library for Android-targeting KMP modules | DUP | DROP: dup of CMP-99 | https://developer.android.com/kotlin/multiplatform/plugin |
+| GRAD-06 | 131 | AGP 9 includes Kotlin; never apply org.jetbrains.kotlin.android in app modules | DUP | DROP: covered by AND-38 (kept in EXTERNAL_LEDGER) | UNVERIFIED: AGP 9 built-in Kotlin claim not re-checked against current AGP docs |
+| GRAD-07 | 143 | New KMP library plugin com.android.kotlin.multiplatform.library for Android-targeting KMP modules | DUP | DROP: covered by CMP-99 (kept in EXTERNAL_LEDGER) | https://developer.android.com/kotlin/multiplatform/plugin |
 | GRAD-08 | 155-167 | New compileSdk DSL release(35) for applications vs integer for KMP androidLibrary blocks | GOTCHA | DROP: optional depth — AGP-9 compileSdk DSL minutiae | UNVERIFIED: compileSdk DSL shape not re-checked against current AGP docs |
 | GRAD-09 | 171-180 | kotlin{} must not nest inside android{} on AGP 9+ | GOTCHA | compose-project/references/convention-plugins.md#agp9 | UNVERIFIED: not re-checked against current AGP docs |
 | GRAD-10 | 186-228 | CMP shared-module plus thin-Android-shell plus desktop-module patterns with plugin alias sets | API | DROP: tutorial code | — |
@@ -661,19 +661,19 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | GRAD-14 | 286 | Convention plugins at 3+ duplicated modules via build-logic included build; not needed at 3 or fewer modules | RULE | DROP: conflicts with kit decision | CONFLICT: kit mandates convention plugins for every module with zero target config in module files |
 | GRAD-15 | 290-298 | Do/Don't: catalog for all deps, caches plus TYPESAFE_PROJECT_ACCESSORS plus separate androidApp, apply-false at root, conditional includeBuild, plugins at 3+ modules; never hardcoded versions, buildSrc, allprojects blocks, kotlin-android on AGP9, nested kotlin{}, unconditional includeBuild, small-project over-engineering | DUP | DROP: split into GRAD-18–GRAD-31 | — |
 | GRAD-18 | 290-298 | Declare all dependencies in the version catalog | DUP | DROP: dup of GRAD-35 | — |
-| GRAD-19 | 290-298 | Enable build caches for every project | DUP | DROP: dup of GRAD-16 | — |
+| GRAD-19 | 290-298 | Enable build caches for every project | GENERIC | DROP: model already knows (Opus test) | — |
 | GRAD-20 | 290-298 | Enable TYPESAFE_PROJECT_ACCESSORS | RULE | compose-project/SKILL.md#non-negotiables | — |
 | GRAD-21 | 290-298 | Keep the Android app as a thin shell separate from the KMP shared module | DUP | DROP: dup of GRAD-33 | — |
-| GRAD-22 | 290-298 | Declare root plugins with apply false | DUP | DROP: dup of GRAD-05 | — |
+| GRAD-22 | 290-298 | Declare root plugins with apply false | GENERIC | DROP: model already knows (Opus test) | — |
 | GRAD-23 | 290-298 | Guard local includeBuilds with path-exists checks | DUP | DROP: dup of GRAD-13 | — |
-| GRAD-24 | 290-298 | Introduce convention plugins at 3+ duplicated modules | DUP | DROP: dup of GRAD-14 | — |
+| GRAD-24 | 290-298 | Introduce convention plugins at 3+ duplicated modules | RULE | DROP: conflicts with kit decision | — |
 | GRAD-25 | 290-298 | Never hardcode versions in build files | DUP | DROP: dup of GRAD-35 | — |
 | GRAD-26 | 290-298 | Never use buildSrc for versions | RULE | compose-project/references/version-catalog.md#structure | — |
-| GRAD-27 | 290-298 | Never use allprojects or subprojects blocks | DUP | DROP: dup of GRAD-05 | — |
-| GRAD-28 | 290-298 | Never apply kotlin-android on AGP 9+ | DUP | DROP: dup of GRAD-06 | — |
+| GRAD-27 | 290-298 | Never use allprojects or subprojects blocks | GENERIC | DROP: model already knows (Opus test) | — |
+| GRAD-28 | 290-298 | Never apply kotlin-android on AGP 9+ | DUP | DROP: covered by AND-38 (kept in EXTERNAL_LEDGER) | — |
 | GRAD-29 | 290-298 | Never nest kotlin{} inside android{} | DUP | DROP: dup of GRAD-09 | — |
 | GRAD-30 | 290-298 | Never use unconditional includeBuild for local development | DUP | DROP: dup of GRAD-13 | — |
-| GRAD-31 | 290-298 | Never skip shared build config for small projects | DUP | DROP: dup of GRAD-14 | — |
+| GRAD-31 | 290-298 | Never skip shared build config for small projects | RULE | DROP: conflicts with kit decision | — |
 
 ## references/hilt.md
 
@@ -731,36 +731,36 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | IOS-01 | 5-16 | Kotlin-to-Swift naming table (file functions to ClassKt, object to shared, companion direct, sealed to hierarchy or SKIE enum, suspend to SKIE async) plus MainViewControllerKt entry sample | API | DROP: tutorial code | — |
 | IOS-02 | 20-27 | Kotlin-to-Swift bridging facts: numeric widening, Unit awkwardness, read-only collection copies | DUP | DROP: split into IOS-30–IOS-33 | — |
 | IOS-30 | 20-27 | Bridge Kotlin Int and Long as Int32 and Int64, never Swift Int | GENERIC | DROP: model already knows (Opus test) | — |
-| IOS-31 | 20-27 | Avoid Unit in public API; Swift receives KotlinUnit | DUP | DROP: dup of IOS-20 | — |
-| IOS-32 | 20-27 | Pass Kotlin Lists as read-only copies without shared mutability | DUP | DROP: dup of CMP-59 | — |
+| IOS-31 | 20-27 | Avoid Unit in public API; Swift receives KotlinUnit | GENERIC | DROP: model already knows (Opus test) | — |
+| IOS-32 | 20-27 | Pass Kotlin Lists as read-only copies without shared mutability | DUP | DROP: covered by CMP-59 (kept in EXTERNAL_LEDGER) | — |
 | IOS-33 | 20-27 | Bridge nullability directly between Kotlin and Swift optionals | GENERIC | DROP: model already knows | — |
-| IOS-03 | 27 | Pass collections across the boundary sparingly; batch, do not iterate | DUP | DROP: dup of IOS-19 | — |
+| IOS-03 | 27 | Pass collections across the boundary sparingly; batch, do not iterate | DUP | DROP: covered by CMP-59 (kept in EXTERNAL_LEDGER) | — |
 | IOS-04 | 31-34 | SKIE vs KMP-NativeCoroutines decision: SKIE default for new CMP projects, NativeCoroutines only where already adopted | DECISION | compose-platform/references/ios-swift-interop.md#coroutines | https://skie.touchlab.co/features |
-| IOS-05 | 38-46 | SKIE converts suspend to Swift async automatically with call sample | DUP | DROP: dup of CMP-52 | https://skie.touchlab.co/features |
-| IOS-06 | 52-60 | SKIE converts Flow to AsyncSequence observed via for-await loop | DUP | DROP: dup of CMP-54 | https://skie.touchlab.co/features/flows |
+| IOS-05 | 38-46 | SKIE converts suspend to Swift async automatically with call sample | DUP | DROP: covered by CMP-52 (kept in EXTERNAL_LEDGER) | https://skie.touchlab.co/features |
+| IOS-06 | 52-60 | SKIE converts Flow to AsyncSequence observed via for-await loop | DUP | DROP: covered by CMP-54 (kept in EXTERNAL_LEDGER) | https://skie.touchlab.co/features/flows |
 | IOS-07 | 63-75 | Manual StateFlow wrapper without SKIE must hold the cancel closure and invoke it in deinit | GOTCHA | DROP: conflicts with SKIE default — hand-rolled Flow bridge is an M2 failure mode | — |
 | IOS-08 | 82-96 | Non-exhaustive if-let chains without SKIE vs exhaustive onEnum(of:) switch with SKIE that fails compilation on new subclasses | GOTCHA | compose-platform/references/ios-swift-interop.md#sealed | https://skie.touchlab.co/features/sealed |
 | IOS-09 | 100-102 | Sealed edge cases: generic sealed classes need concrete types at boundary, nested hierarchies flatten names, @SealedInterop.Disabled opts out | GOTCHA | DROP: optional depth — sealed edge cases | UNVERIFIED: opt-out annotation and flattening not re-checked against current SKIE docs |
 | IOS-10 | 106-112 | iOS API design rules: small surface with internal plus @HiddenFromObjC, no generics in public API, data classes over deep hierarchies, isStatic true, minimal hot-path crossings, no Unit-returning suspend, concrete sealed params for SKIE | DUP | DROP: split into IOS-15–IOS-21 | — |
-| IOS-15 | 106-112 | Keep the iOS-facing surface small with internal plus @HiddenFromObjC | DUP | DROP: dup of CMP-60 | — |
-| IOS-16 | 106-112 | Avoid generics in public iOS-facing API | DUP | DROP: dup of CMP-63 | — |
+| IOS-15 | 106-112 | Keep the iOS-facing surface small with internal plus @HiddenFromObjC | DUP | DROP: covered by CMP-60 (kept in EXTERNAL_LEDGER) | — |
+| IOS-16 | 106-112 | Avoid generics in public iOS-facing API | DUP | DROP: covered by CMP-63 (kept in EXTERNAL_LEDGER) | — |
 | IOS-17 | 106-112 | Prefer data classes over deep hierarchies at the boundary | GENERIC | DROP: model already knows (Opus test) | — |
 | IOS-18 | 106-112 | Set isStatic true in framework configuration | RULE | DROP: optional depth — single build-flag trivia | — |
-| IOS-19 | 106-112 | Minimize Kotlin-to-Swift boundary crossings in hot paths | DUP | DROP: dup of CMP-59 | — |
+| IOS-19 | 106-112 | Minimize Kotlin-to-Swift boundary crossings in hot paths | DUP | DROP: covered by CMP-59 (kept in EXTERNAL_LEDGER) | — |
 | IOS-20 | 106-112 | Never return Unit from public suspend API | GENERIC | DROP: model already knows (Opus test) | — |
-| IOS-21 | 106-112 | Expose sealed classes with concrete type parameters for SKIE | DUP | DROP: dup of CMP-53 | — |
+| IOS-21 | 106-112 | Expose sealed classes with concrete type parameters for SKIE | DUP | DROP: covered by CMP-53 (kept in EXTERNAL_LEDGER) | — |
 | IOS-11 | 118-138 | Compose in SwiftUI via ComposeUIViewController MainViewController entry plus UIViewControllerRepresentable bridge; whole-app vs per-feature vs single-widget decision table | DECISION | compose-platform/references/ios-swift-interop.md#embedding | — |
 | IOS-12 | 150-189 | UIKitView factory/update/modifier basics; SwiftUI views need UIHostingController plus UIKitViewController; UIKit-direct vs hosting-wrap vs keep-native-screen decision table | DECISION | DROP: optional depth — one-line CMP-49 kept instead | — |
-| IOS-13 | 191-197 | UIKitView decision rows duplicated from IOS-12 table (which view wrapper per need) | DUP | DROP: dup of IOS-12 | — |
+| IOS-13 | 191-197 | UIKitView decision rows duplicated from IOS-12 table (which view wrapper per need) | DECISION | DROP: optional depth — one-line CMP-49 kept instead | — |
 | IOS-14 | 201-208 | Anti-patterns: generic Resource sealed to Swift, uncancelled StateFlow observation, Unit returns, looped boundary crossings, exposed mutable collections, missing @HiddenFromObjC, recreated UIKit views, missing update sync | DUP | DROP: split into IOS-22–IOS-29 | — |
-| IOS-22 | 201-208 | Never expose generic sealed result types to Swift | DUP | DROP: dup of CMP-53 | — |
-| IOS-23 | 201-208 | Never observe StateFlow without cancellation cleanup | DUP | DROP: dup of IOS-07 | — |
-| IOS-24 | 201-208 | Never return Unit from public API | DUP | DROP: dup of IOS-20 | — |
-| IOS-25 | 201-208 | Never cross the ObjC boundary in a loop | DUP | DROP: dup of IOS-19 | — |
-| IOS-26 | 201-208 | Never expose mutable Kotlin collections to Swift | DUP | DROP: dup of CMP-59 | — |
-| IOS-27 | 201-208 | Never skip @HiddenFromObjC on internals | DUP | DROP: dup of IOS-15 | — |
-| IOS-28 | 201-208 | Never recreate UIKit views on recomposition; update in update | DUP | DROP: dup of CMP-49 | — |
-| IOS-29 | 201-208 | Never skip update in UIKitView | DUP | DROP: dup of IOS-28 | — |
+| IOS-22 | 201-208 | Never expose generic sealed result types to Swift | DUP | DROP: covered by CMP-53 (kept in EXTERNAL_LEDGER) | — |
+| IOS-23 | 201-208 | Never observe StateFlow without cancellation cleanup | GOTCHA | DROP: conflicts with SKIE default — hand-rolled Flow bridge is an M2 failure mode | — |
+| IOS-24 | 201-208 | Never return Unit from public API | GENERIC | DROP: model already knows (Opus test) | — |
+| IOS-25 | 201-208 | Never cross the ObjC boundary in a loop | DUP | DROP: covered by CMP-59 (kept in EXTERNAL_LEDGER) | — |
+| IOS-26 | 201-208 | Never expose mutable Kotlin collections to Swift | DUP | DROP: covered by CMP-59 (kept in EXTERNAL_LEDGER) | — |
+| IOS-27 | 201-208 | Never skip @HiddenFromObjC on internals | DUP | DROP: covered by CMP-60 (kept in EXTERNAL_LEDGER) | — |
+| IOS-28 | 201-208 | Never recreate UIKit views on recomposition; update in update | DUP | DROP: covered by CMP-49 (kept in EXTERNAL_LEDGER) | — |
+| IOS-29 | 201-208 | Never skip update in UIKitView | DUP | DROP: covered by CMP-49 (kept in EXTERNAL_LEDGER) | — |
 
 ## references/koin.md
 
@@ -802,7 +802,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | KOIN-34 | 254-260 | Never skip parametersOf for runtime constructor params | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | — |
 | KOIN-35 | 254-260 | Never call startKoin more than once | DUP | DROP: dup of KOIN-23 | — |
 | KOIN-36 | 254-260 | Never reference Android Context in commonMain modules | GOTCHA | compose-architecture/references/dependency-injection.md#anti-patterns | — |
-| KOIN-37 | 254-260 | Never use koin-compose without koin-compose-viewmodel for ViewModels | DUP | DROP: dup of KOIN-21 | — |
+| KOIN-37 | 254-260 | Never use koin-compose without koin-compose-viewmodel for ViewModels | GENERIC | DROP: model already knows (Opus test) | — |
 
 ## references/lists-grids.md
 
@@ -818,11 +818,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | LIST-08 | 96-104 | Pager state with pageCount lambda, HorizontalPager/VerticalPager rendering, animateScrollToPage from LaunchedEffect | API | DROP: tutorial code | — |
 | LIST-09 | 109-128 | Scroll-dependent UI reads through derivedStateOf; LazyListState stays local and out of ViewModel state | DUP | DROP: split into LIST-18–LIST-19 | — |
 | LIST-18 | 109-128 | Derive scroll-dependent UI from list state with derivedStateOf | GENERIC | DROP: model already knows (Opus test) | — |
-| LIST-19 | 109-128 | Keep LazyListState local; never store scroll position in ViewModel state | DUP | DROP: dup of CB-04 | — |
+| LIST-19 | 109-128 | Keep LazyListState local; never store scroll position in ViewModel state | DUP | DROP: covered by CB-04 (kept in EXTERNAL_LEDGER) | — |
 | LIST-10 | 133-147 | Never verticalScroll inside LazyColumn (same-axis fight); nested LazyRow inside LazyColumn is acceptable; complex cases use nestedScroll with NestedScrollConnection | GOTCHA | compose-ui/references/lists.md#nesting | — |
 | LIST-11 | 151-160 | List anti-patterns table: keyless/index keys, upstream computation in item lambda, inline filter/sort in items(), LazyColumn for tiny fixed lists, allocated key objects, missing contentType | DUP | DROP: split into LIST-12–LIST-17 | — |
 | LIST-12 | 151-160 | Never ship mutable lists without stable domain-ID keys | DUP | DROP: dup of LIST-03 | — |
-| LIST-13 | 151-160 | Never compute, filter, or sort inside the item lambda | DUP | DROP: dup of ANTI-01 | — |
+| LIST-13 | 151-160 | Never compute, filter, or sort inside the item lambda | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | LIST-14 | 151-160 | Never use LazyColumn for tiny fixed lists | DUP | DROP: dup of LIST-01 | — |
 | LIST-15 | 151-160 | Never allocate new objects in the key lambda | GOTCHA | compose-ui/references/lists.md#anti-patterns | — |
 | LIST-16 | 151-160 | Never skip contentType on multi-type lists | DUP | DROP: dup of LIST-05 | — |
@@ -836,7 +836,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | MTRL-18 | 5-18 | Wrap app content in MaterialTheme with colorScheme, typography, and shapes | GENERIC | DROP: model already knows | — |
 | MTRL-19 | 5-18 | Enable dynamic color on Android 12+ with a brand-scheme fallback | GENERIC | DROP: model already knows (Opus test) | — |
 | MTRL-20 | 5-18 | Follow the system dark/light setting with an optional user override | GENERIC | DROP: model already knows | — |
-| MTRL-21 | 5-18 | Pair every container color with its matching on-color | DUP | DROP: dup of MTRL-30 | — |
+| MTRL-21 | 5-18 | Pair every container color with its matching on-color | GENERIC | DROP: model already knows | — |
 | MTRL-22 | 5-18 | Use the default type and shape scales except branded slots | GENERIC | DROP: model already knows | — |
 | MTRL-23 | 5-18 | Use Scaffold for screens with bars, FAB, snackbar, or bottom bar | GENERIC | DROP: model already knows | — |
 | MTRL-24 | 5-18 | Default to NavigationSuiteScaffold for 3-5 top-level destinations | DUP | DROP: dup of MTRL-11 | — |
@@ -848,13 +848,13 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | MTRL-03 | 50-52 | Define brand schemes with light and dark constructors; generate tonal palettes with the Theme Builder; dynamic color stays Android-only | DUP | DROP: split into MTRL-32–MTRL-34 | — |
 | MTRL-32 | 50-52 | Define Light and Dark schemes with the scheme constructors | GENERIC | DROP: model already knows | — |
 | MTRL-33 | 50-52 | Generate brand colors with the Material Theme Builder | GENERIC | DROP: model already knows (Opus test) | — |
-| MTRL-34 | 50-52 | Dynamic color is Android-only with brand fallback elsewhere | DUP | DROP: dup of MTRL-19 | — |
+| MTRL-34 | 50-52 | Dynamic color is Android-only with brand fallback elsewhere | GENERIC | DROP: model already knows (Opus test) | — |
 | MTRL-04 | 58-70 | Color-role pairing table (primary/onPrimary through error/onError containers) | RULE | DROP: optional depth — android/skills styles | — |
 | MTRL-05 | 73-75 | Always use the matching on* color; never mix unrelated pairs; paired tonal palettes guarantee 3:1+ contrast | DUP | DROP: split into MTRL-30–MTRL-31 | — |
 | MTRL-30 | 73-75 | Always use the matching on* color for text and icons on a container | GENERIC | DROP: model already knows | — |
 | MTRL-31 | 73-75 | Correctly paired tonal palettes guarantee 3:1+ contrast | GENERIC | DROP: model already knows (Opus test) | — |
 | MTRL-06 | 79-83 | Material color Do/Don't: matching pairs, colorScheme over hex, both-themes testing | DUP | DROP: split into MTRL-35–MTRL-37 | — |
-| MTRL-35 | 79-83 | Pair container colors with matching content colors | DUP | DROP: dup of MTRL-30 | — |
+| MTRL-35 | 79-83 | Pair container colors with matching content colors | GENERIC | DROP: model already knows | — |
 | MTRL-36 | 79-83 | Read colors from colorScheme instead of hardcoding hex | DUP | DROP: dup of ACC-15 | — |
 | MTRL-37 | 79-83 | Render every screen in both light and dark themes | GENERIC | DROP: model already knows | — |
 | MTRL-07 | 89-105 | M3 15-style type scale across Display/Headline/Title/Body/Label; use defaults and override only branded slots | GENERIC | DROP: model already knows | — |
@@ -891,7 +891,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | MVI-02 | 19 | State stays equality-friendly; trivial derivations compute; canonical values store with display derived at the UI boundary | DUP | DROP: split into MVI-24–MVI-26 | — |
 | MVI-24 | 19 | Model state as equality-friendly data classes with immutable collections | DUP | DROP: dup of ANTI-04 | — |
 | MVI-25 | 19 | Derive trivial values with computed properties | GENERIC | DROP: model already knows | — |
-| MVI-26 | 19 | Store canonical values and derive display values at the UI boundary | DUP | DROP: dup of ANTI-13 | — |
+| MVI-26 | 19 | Store canonical values and derive display values at the UI boundary | DUP | DROP: dup of SKL-69 | — |
 | MVI-03 | 23-25 | Effects are not state: consume-boolean modeling needs reset logic and breeds bugs; effects fire once and are gone | RULE | compose-architecture/references/mvi-contract.md#effects | — |
 | MVI-04 | 29-38 | Event naming from the user perspective (OnSaveClick not SaveCategory, OnTitleChanged not UpdateTitle, OnRetryClick not RetryRequest, OnBackClick not NavigateBack); ViewModel decides handling | RULE | compose-architecture/references/naming-and-packages.md#events | — |
 | MVI-05 | 50-60 | Event processing flow: gesture to onEvent when() to sync updateState or sendEffect or viewModelScope launch to completion update plus effect; onEvent is the single decision point | WORKFLOW | compose-architecture/references/mvi-contract.md#flow | — |
@@ -968,7 +968,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
 | NTHDI-01 | 10 | Nav3 scopes ViewModels to entries via rememberViewModelStoreNavEntryDecorator; VMs created on entry add, cleared on pop | RULE | DROP: deferred to android/skills navigation-3 | UNVERIFIED: decorator API not re-checked against current Nav3 docs |
-| NTHDI-02 | 14-25 | Globally-scoped viewModel() for per-screen data is BAD; entry-scoped via decorator is GOOD; cross-entry sharing lifts to parent or app scope | DUP | DROP: dup of AND-03 | — |
+| NTHDI-02 | 14-25 | Globally-scoped viewModel() for per-screen data is BAD; entry-scoped via decorator is GOOD; cross-entry sharing lifts to parent or app scope | DUP | DROP: covered by AND-03 (kept in EXTERNAL_LEDGER) | — |
 | NTHDI-03 | 33-38 | hiltViewModel inside entry blocks (Android only) | OUTOFKIT | DROP: out-of-kit stack | — |
 | NTHDI-04 | 42-50 | Hilt @AssistedInject creationCallback for key values outside SavedStateHandle | OUTOFKIT | DROP: out-of-kit stack | — |
 | NTHDI-05 | 55-77 | Hilt multibinding entry-provider aggregation (feature EntryProviderScope builders collected into a Set at the app module) | OUTOFKIT | DROP: out-of-kit stack | — |
@@ -986,8 +986,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NTHR-01 | 3 | Nav3 model: you own the back stack as state, the library renders it; verify artifact maturity before production use | DUP | DROP: dup of brief §7.1 | — |
 | NTHR-02 | 17-39 | Four building blocks (Keys, SnapshotStateList stack, NavEntry with metadata, NavDisplay with SceneStrategy, decorators) plus interaction flow | API | DROP: tutorial code | — |
 | NTHR-03 | 43-52 | Define route keys as @Serializable types grouped in one sealed hierarchy per feature | RULE | compose-architecture/references/navigation.md#keys | — |
-| NTHR-04 | 56-62 | rememberNavBackStack for persisted stacks (keys must be @Serializable NavKey) vs plain mutableStateListOf for prototypes only | DUP | DROP: dup of AND-01 | UNVERIFIED: not re-checked against current Nav3 docs |
-| NTHR-05 | 66 | Non-JVM CMP targets need SavedStateConfiguration plus SerializersModule with polymorphic NavKey subclasses | DUP | DROP: dup of CMP-26 | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/guide/navigation/navigation-3/save-state |
+| NTHR-04 | 56-62 | rememberNavBackStack for persisted stacks (keys must be @Serializable NavKey) vs plain mutableStateListOf for prototypes only | DUP | DROP: covered by AND-01 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current Nav3 docs |
+| NTHR-05 | 66 | Non-JVM CMP targets need SavedStateConfiguration plus SerializersModule with polymorphic NavKey subclasses | DUP | DROP: covered by CMP-26 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/guide/navigation/navigation-3/save-state |
 | NTHR-06 | 73-94 | NavDisplay configuration sample (decorators, sceneStrategy, transition specs, entryProvider with metadata) | API | DROP: tutorial code | — |
 | NTHR-07 | 100-124 | Top-level tabs via NavigationState plus Navigator (top-level root swap vs push) used with NavigationSuiteScaffold | RULE | DROP: deferred to android/skills navigation-3 | — |
 | NTHR-08 | 128-137 | Always include both entry decorators (saveable holder plus ViewModelStore); VMs created on add, cleared on pop | RULE | DROP: deferred to android/skills navigation-3 | UNVERIFIED: decorator API not re-checked against current Nav3 docs |
@@ -1076,7 +1076,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NKA-17 | 130-164 | 5xx responses classify as server errors | GENERIC | DROP: model already knows | — |
 | NKA-18 | 130-164 | Unrecognized exceptions classify as unknown failures | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
 | NKA-19 | 130-164 | Raw status codes map through a dedicated status classifier | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
-| NKA-07 | 167 | CancellationException always rethrown, never swallowed; breaks structured concurrency otherwise | DUP | DROP: dup of CB-99 | — |
+| NKA-07 | 167 | CancellationException always rethrown, never swallowed; breaks structured concurrency otherwise | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
 | NKA-08 | 173-181 | Plugin concern placement: defaultRequest for base/headers, ContentNegotiation for JSON, HttpTimeout default, Logging debug aid, Auth for tokens, HttpRequestRetry for transient servers, ContentEncoding for bandwidth | DUP | DROP: split into NKA-20–NKA-25 | — |
 | NKA-20 | 173-181 | Base URL, content type, and static headers live in defaultRequest | DECISION | compose-data/references/networking-ktor.md#plugins | — |
 | NKA-21 | 173-181 | JSON parsing lives in ContentNegotiation and timeouts in HttpTimeout | DECISION | compose-data/references/networking-ktor.md#plugins | — |
@@ -1089,7 +1089,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NKA-11 | 223-226 | Debug vs production logging: BODY in debug, HEADERS-or-off in production, Authorization sanitize required | GOTCHA | compose-data/references/networking-ktor.md#logging | — |
 | NKA-12 | 230-237 | Networking anti-patterns table: per-request client, swallowed CancellationException, production body logging, mixed expectSuccess modes, random plugin order, forced wrapper choice | DUP | DROP: split into NKA-27–NKA-32 | — |
 | NKA-27 | 230-237 | Never build an HttpClient per request | DUP | DROP: dup of NK-04 | — |
-| NKA-28 | 230-237 | Never swallow CancellationException | DUP | DROP: dup of CF-12 | — |
+| NKA-28 | 230-237 | Never swallow CancellationException | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
 | NKA-29 | 230-237 | Never log request bodies in production | DUP | DROP: dup of NKA-11 | — |
 | NKA-30 | 230-237 | Never mix expectSuccess modes in one codebase | DUP | DROP: dup of NK-09 | — |
 | NKA-31 | 230-237 | Never install plugins in random order | DUP | DROP: dup of NKA-09 | — |
@@ -1127,7 +1127,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NKTEST-08 | 134-138 | HttpClient plus engine provided as DI singletons with expect/actual platform engine modules | RULE | compose-data/references/data-testing.md#di | CONFLICT: resolved — Hilt sample removed |
 | NKTEST-09 | 145-152 | Networking test anti-patterns table: DTOs in UI state, network in composables, missing timeouts, hardcoded base URLs, mapping in API service, per-test client construction, missing compression | DUP | DROP: split into NKTEST-10–NKTEST-16 | — |
 | NKTEST-10 | 145-152 | Never use DTOs directly in UI state | DUP | DROP: dup of NK-16 | — |
-| NKTEST-11 | 145-152 | Never issue network calls from composables | DUP | DROP: dup of ANTI-01 | — |
+| NKTEST-11 | 145-152 | Never issue network calls from composables | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | NKTEST-12 | 145-152 | Never ship without timeout configuration | DUP | DROP: dup of NK-06 | — |
 | NKTEST-13 | 145-152 | Never hardcode base URLs; inject them per environment | GENERIC | DROP: model already knows (Opus test) | — |
 | NKTEST-14 | 145-152 | Never parse or map in the API service; return DTOs for the repository to map | GENERIC | DROP: model already knows (Opus test) | — |
@@ -1164,7 +1164,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | PG-28 | 146-172 | Key and content-type paged items with itemKey and itemContentType | RULE | compose-data/references/paging.md#ui | — |
 | PG-29 | 146-172 | LazyPagingItems work in all lazy layouts | GENERIC | DROP: model already knows | — |
 | PG-30 | 146-172 | Prefer items over itemsIndexed since prepend shifts indices | GOTCHA | compose-data/references/paging.md#ui | — |
-| PG-31 | 146-172 | Never compute, filter, or sort inside the paged item lambda | DUP | DROP: dup of ANTI-01 | — |
+| PG-31 | 146-172 | Never compute, filter, or sort inside the paged item lambda | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | PG-09 | 176-184 | LoadState pattern: branch on refresh with full-screen states only at itemCount zero, inline indicators plus retry() otherwise | RULE | compose-data/references/paging.md#loadstate | — |
 | PG-10 | 184 | RemoteMediator screens read loadState.source.refresh not loadState.refresh (convenience flag can complete before Room writes) | GOTCHA | compose-data/references/offline-first.md#loadstate | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/topic/libraries/architecture/paging/v3-compose |
 | PG-11 | 188-214 | Transformations (map/filter/insertSeparators) on the outer Flow BEFORE cachedIn or they are lost on cache hit; per-type unique keys plus contentTypes with separators | GOTCHA | compose-data/references/paging.md#transforms | — |
@@ -1206,38 +1206,38 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| PERF-01 | 5 | Phase/primitive pointer duplicates CESS-01 plus CESS-03 (offset lambda, graphicsLayer, int/float specializations) | DUP | DROP: dup of CESS-01 | — |
+| PERF-01 | 5 | Phase/primitive pointer duplicates CESS-01 plus CESS-03 (offset lambda, graphicsLayer, int/float specializations) | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | PERF-02 | 9-26 | Sixteen performance mistakes plus fixes | DUP | DROP: split into PERF-14–PERF-29 | — |
 | PERF-14 | 9-26 | Never pass unstable parameters like MutableList or lambdas in state models | DUP | DROP: dup of ANTI-04 | — |
 | PERF-15 | 9-26 | Never observe broad state in parents; slice for leaves | DUP | DROP: dup of SKL-25 | — |
 | PERF-16 | 9-26 | Never pass large state everywhere; pass only rendered fields | DUP | DROP: dup of SKL-25 | — |
 | PERF-17 | 9-26 | Stabilize callbacks with remember in hot repeated paths | GENERIC | DROP: model already knows (Opus test) | — |
-| PERF-18 | 9-26 | Never calculate during composition; derive upstream | DUP | DROP: dup of ANTI-01 | — |
+| PERF-18 | 9-26 | Never calculate during composition; derive upstream | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | PERF-19 | 9-26 | Never cache business state in remember | DUP | DROP: dup of SKL-46 | — |
-| PERF-20 | 9-26 | Reserve derivedStateOf for fast-changing Compose state with coarse output | DUP | DROP: dup of SKY-45 | — |
+| PERF-20 | 9-26 | Reserve derivedStateOf for fast-changing Compose state with coarse output | DUP | DROP: covered by SKY-45 (kept in EXTERNAL_LEDGER) | — |
 | PERF-21 | 9-26 | Reserve rememberSaveable for tiny UI-local values | DUP | DROP: dup of CESS-06 | — |
-| PERF-22 | 9-26 | Read state close to its use, never high in the tree | DUP | DROP: dup of SKY-37 | — |
+| PERF-22 | 9-26 | Read state close to its use, never high in the tree | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | PERF-23 | 9-26 | Never ship mutable lists without stable keys and immutable models | DUP | DROP: dup of LIST-03 | — |
 | PERF-24 | 9-26 | Never emit identical state transitions | DUP | DROP: dup of PERF-10 | — |
 | PERF-25 | 9-26 | Never keep ephemeral visual state in global screen state | DUP | DROP: dup of ANIM-01 | — |
 | PERF-26 | 9-26 | Never put lambdas or mutables in data classes | DUP | DROP: dup of ANTI-04 | — |
 | PERF-27 | 9-26 | Never silence the compiler with undeserved @Immutable or @Stable | DUP | DROP: dup of PERF-03 | — |
-| PERF-28 | 9-26 | Isolate read scopes for dense text-input screens | DUP | DROP: dup of PERF-04 | — |
-| PERF-29 | 9-26 | Never read layout and draw values in the Composition phase | DUP | DROP: dup of CESS-01 | — |
+| PERF-28 | 9-26 | Isolate read scopes for dense text-input screens | GOTCHA | DROP: UNVERIFIED against current docs — niche text-input depth | — |
+| PERF-29 | 9-26 | Never read layout and draw values in the Composition phase | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | PERF-03 | 14 | Never use @Immutable/@Stable to silence the compiler; describe truth only, @Stable rare in app code | GOTCHA | compose-ui/references/performance-diagnostics.md#stability-annotations | — |
 | PERF-04 | 15 | Raw MVI text input stutter at 25-plus fields: TextFieldState/BasicTextField2, nested field groups, isolated read scopes | GOTCHA | DROP: UNVERIFIED against current docs — niche text-input depth | UNVERIFIED: threshold and API names not re-checked against current docs |
 | PERF-05 | 30-41 | Compose API decision table: remember, rememberSaveable, derivedStateOf, key, LaunchedEffect, DisposableEffect, produceState, snapshotFlow, collectAsState, lifecycle-aware collection, stable callbacks | DUP | DROP: split into PERF-30–PERF-40 | — |
 | PERF-30 | 30-41 | Reserve remember for local objects across recompositions | GENERIC | DROP: model already knows | — |
 | PERF-31 | 30-41 | Reserve rememberSaveable for small restorable UI-local state | DUP | DROP: dup of CESS-06 | — |
-| PERF-32 | 30-41 | Reserve derivedStateOf for fast-changing state with coarse output | DUP | DROP: dup of PERF-20 | — |
+| PERF-32 | 30-41 | Reserve derivedStateOf for fast-changing state with coarse output | DUP | DROP: covered by SKY-45 (kept in EXTERNAL_LEDGER) | — |
 | PERF-33 | 30-41 | Reserve key for preserving identity in dynamic children | GENERIC | DROP: model already knows | — |
-| PERF-34 | 30-41 | Reserve LaunchedEffect for effect collection and one-shot route work | DUP | DROP: dup of CESS-07 | — |
-| PERF-35 | 30-41 | Reserve DisposableEffect for listener register-unregister pairs | DUP | DROP: dup of CESS-08 | — |
+| PERF-34 | 30-41 | Reserve LaunchedEffect for effect collection and one-shot route work | RULE | DROP: out of scope — effect-collection placement (architecture/feature scope) | — |
+| PERF-35 | 30-41 | Reserve DisposableEffect for listener register-unregister pairs | GENERIC | DROP: model already knows (Opus test) | — |
 | PERF-36 | 30-41 | Reserve produceState for bridging external sources, never as a ViewModel | GENERIC | DROP: model already knows | — |
 | PERF-37 | 30-41 | Reserve snapshotFlow for turning Compose reads into Flow operators | GENERIC | DROP: model already knows | — |
 | PERF-38 | 30-41 | Collect StateFlow into Compose with collectAsState | GENERIC | DROP: model already knows | — |
-| PERF-39 | 30-41 | Collect lifecycle-aware at hosts, never in common leaves | DUP | DROP: dup of PERF-06 | — |
-| PERF-40 | 30-41 | Stabilize callbacks in hot repeated UI paths | DUP | DROP: dup of PERF-17 | — |
+| PERF-39 | 30-41 | Collect lifecycle-aware at hosts, never in common leaves | DUP | DROP: dup of CESS-10 | — |
+| PERF-40 | 30-41 | Stabilize callbacks in hot repeated UI paths | GENERIC | DROP: model already knows (Opus test) | — |
 | PERF-06 | 41 | Lifecycle-aware collection is multiplatform since lifecycle 2.8+ but belongs at hosts not common leaves | DUP | DROP: dup of CESS-10 | https://developer.android.com/jetpack/androidx/releases/lifecycle |
 | PERF-07 | 48-77 | BAD derived-calculation-in-composable vs GOOD upstream-derived narrow-read screen pair | EXAMPLE | compose-feature/examples.md#pairs | — |
 | PERF-08 | 81-108 | BAD unstable HistoryRowState (MutableList plus lambda) vs GOOD @Immutable UI model plus ImmutableList plus keyed items plus remembered per-row callbacks | EXAMPLE | compose-feature/examples.md#pairs | — |
@@ -1255,10 +1255,10 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | RES-02 | 23-27 | Res import convention ({group}.{module}.generated.resources.Res with per-accessor imports) | GENERIC | DROP: model already knows | — |
 | RES-03 | 31-47 | composeResources layout plus qualifier combination plus unqualified fallback | DUP | DROP: split into RES-26–RES-28 | — |
 | RES-26 | 31-47 | Lay out shared resources under composeResources per source set | GENERIC | DROP: model already knows | — |
-| RES-27 | 31-47 | Combine qualifiers with hyphens for locale, theme, and density | DUP | DROP: dup of RES-38 | — |
+| RES-27 | 31-47 | Combine qualifiers with hyphens for locale, theme, and density | DUP | DROP: covered by CMP-05 (kept in EXTERNAL_LEDGER) | — |
 | RES-28 | 31-47 | Fall back to the unqualified resource when no qualifier matches | GENERIC | DROP: model already knows | — |
 | RES-04 | 52-69 | Gradle setup code (compose.components.resources, publicResClass, packageOfResClass, generateResClass, androidLibrary androidResources.enable) | API | DROP: tutorial code | UNVERIFIED: androidResources.enable gate (AGP 8.8.0+) not re-checked against current docs |
-| RES-05 | 60 | publicResClass true is required when sharing resources from a library module | DUP | DROP: dup of CMP-03 | — |
+| RES-05 | 60 | publicResClass true is required when sharing resources from a library module | DUP | DROP: covered by CMP-03 (kept in EXTERNAL_LEDGER) | — |
 | RES-06 | 73-79 | painterResource covers raster and vector drawables; raster-only and vector-only APIs stay specialized | DUP | DROP: split into RES-29–RES-30 | — |
 | RES-29 | 73-79 | Prefer painterResource as the primary drawable API | GENERIC | DROP: model already knows (Opus test) | — |
 | RES-30 | 73-79 | Reserve imageResource and vectorResource for raster-only and vector-only reads | GENERIC | DROP: model already knows | — |
@@ -1267,29 +1267,29 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | RES-09 | 122-123 | Resource string rules: no @/? escaping, plural count-plus-args semantics, quantity set | DUP | DROP: split into RES-31–RES-33 | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-31 | 122-123 | Skip @ and ? escaping in CMP strings unlike Android | GOTCHA | DROP: optional depth — string-escaping minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-32 | 122-123 | Pass count for plural selection plus format arguments separately | GOTCHA | DROP: optional depth — plural minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
-| RES-33 | 122-123 | Cover all plural quantities including zero, few, and many | DUP | DROP: dup of CMP-15 | UNVERIFIED: not re-checked against current CMP resources docs |
+| RES-33 | 122-123 | Cover all plural quantities including zero, few, and many | DUP | DROP: covered by CMP-15 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-10 | 126-140 | Font() is composable in CMP so Typography construction must be composable too | GOTCHA | compose-ui/references/resources.md#fonts | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-11 | 146-159 | Raw-file access through Res.readBytes and decode helpers plus platform URIs through Res.getUri; CMP 1.7+ packs resources into Android assets | DUP | DROP: split into RES-34–RES-37 | UNVERIFIED: 1.7 floor and SVG-except-Android not re-checked against current docs |
-| RES-34 | 146-159 | Read raw files with suspend Res.readBytes | DUP | DROP: dup of CMP-09 | UNVERIFIED: not re-checked against current CMP resources docs |
-| RES-35 | 146-159 | Decode raw bytes with the bitmap, vector, and SVG helpers | DUP | DROP: dup of CMP-21 | UNVERIFIED: SVG-except-Android not re-checked against current docs |
-| RES-36 | 146-159 | Hand platform URIs to external APIs through Res.getUri | DUP | DROP: dup of CMP-10 | UNVERIFIED: not re-checked against current CMP resources docs |
-| RES-37 | 146-159 | CMP 1.7+ packs resources into Android assets for Preview and WebView access | DUP | DROP: dup of CMP-19 | UNVERIFIED: 1.7 floor not re-checked against current docs |
+| RES-34 | 146-159 | Read raw files with suspend Res.readBytes | DUP | DROP: covered by CMP-09 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
+| RES-35 | 146-159 | Decode raw bytes with the bitmap, vector, and SVG helpers | DUP | DROP: covered by CMP-21 (kept in EXTERNAL_LEDGER) | UNVERIFIED: SVG-except-Android not re-checked against current docs |
+| RES-36 | 146-159 | Hand platform URIs to external APIs through Res.getUri | DUP | DROP: covered by CMP-10 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
+| RES-37 | 146-159 | CMP 1.7+ packs resources into Android assets for Preview and WebView access | DUP | DROP: covered by CMP-19 (kept in EXTERNAL_LEDGER) | UNVERIFIED: 1.7 floor not re-checked against current docs |
 | RES-12 | 163-169 | Qualifier reference plus automatic locale selection | DUP | DROP: split into RES-38–RES-39 | — |
-| RES-38 | 163-169 | Qualify resources by language, region, theme, and density | DUP | DROP: dup of CMP-05 | — |
+| RES-38 | 163-169 | Qualify resources by language, region, theme, and density | DUP | DROP: covered by CMP-05 (kept in EXTERNAL_LEDGER) | — |
 | RES-39 | 163-169 | stringResource selects the runtime locale automatically | GENERIC | DROP: model already knows | — |
-| RES-13 | 173 | Remote URL images need a dedicated library; multiplatform resources are bundled-assets only | DUP | DROP: dup of CMP-21 | — |
+| RES-13 | 173 | Remote URL images need a dedicated library; multiplatform resources are bundled-assets only | DUP | DROP: covered by CMP-21 (kept in EXTERNAL_LEDGER) | — |
 | RES-14 | 177-190 | MVI rule: semantic keys/enums in state, stringResource/painterResource resolution at render; never resolve strings or load resources in reducers or ViewModels | RULE | compose-ui/references/resources.md#mvi | — |
 | RES-15 | 196-206 | Shared-resource rules list: composeResources, typed accessors, qualifiers, render-time resolution, suspend variants, publicResClass, semantic keys, no Android R, no platform-only assets, rebuild after adding | DUP | DROP: split into RES-16–RES-25 | — |
 | RES-16 | 196-206 | Keep all shared assets under composeResources | GENERIC | DROP: model already knows | — |
 | RES-17 | 196-206 | Reference resources through typed accessors for compile-time safety | GENERIC | DROP: model already knows (Opus test) | — |
-| RES-18 | 196-206 | Localize and variant resources with qualifiers | DUP | DROP: dup of RES-38 | — |
+| RES-18 | 196-206 | Localize and variant resources with qualifiers | DUP | DROP: covered by CMP-05 (kept in EXTERNAL_LEDGER) | — |
 | RES-19 | 196-206 | Resolve resources at render time in composables | DUP | DROP: dup of RES-14 | — |
-| RES-20 | 196-206 | Use suspend resource variants in non-composable contexts | DUP | DROP: dup of CMP-09 | — |
-| RES-21 | 196-206 | Enable publicResClass when sharing resources from a library | DUP | DROP: dup of RES-05 | — |
+| RES-20 | 196-206 | Use suspend resource variants in non-composable contexts | DUP | DROP: covered by CMP-09 (kept in EXTERNAL_LEDGER) | — |
+| RES-21 | 196-206 | Enable publicResClass when sharing resources from a library | DUP | DROP: covered by CMP-03 (kept in EXTERNAL_LEDGER) | — |
 | RES-22 | 196-206 | Hold semantic keys in state and map them to resources in UI | DUP | DROP: dup of RES-14 | — |
 | RES-23 | 196-206 | Never use Android R in commonMain | GENERIC | DROP: model already knows (Opus test) | — |
-| RES-24 | 196-206 | Never place platform-only assets in composeResources | DUP | DROP: dup of SMP-53 | — |
-| RES-25 | 196-206 | Rebuild after adding resources so Res regenerates | DUP | DROP: dup of CMP-01 | — |
+| RES-24 | 196-206 | Never place platform-only assets in composeResources | DUP | DROP: covered by SMP-53 (kept in EXTERNAL_LEDGER) | — |
+| RES-25 | 196-206 | Rebuild after adding resources so Res regenerates | DUP | DROP: covered by CMP-01 (kept in EXTERNAL_LEDGER) | — |
 
 ## references/room-database.md
 
@@ -1363,10 +1363,10 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | TEST-20 | 81-86 | Test edge cases including empty input and concurrent saves | DUP | DROP: dup of TEST-14 | — |
 | TEST-21 | 81-86 | Test that refresh preserves content and errors preserve data | DUP | DROP: dup of TEST-14 | — |
 | TEST-06 | 89-106 | Test simultaneous state-plus-effect events independently: effect assertions on the effect flow, state assertions on the state flow | DUP | DROP: dup of brief §9.1 | — |
-| TEST-07 | 110-126 | Validators as pure-function unit tests; inline ViewModel validation tested through events for simple cases | DUP | DROP: dup of TEST-08 | — |
+| TEST-07 | 110-126 | Validators as pure-function unit tests; inline ViewModel validation tested through events for simple cases | DUP | DROP: dup of brief §9.5 | — |
 | TEST-08 | 130-140 | Calculation engines tested directly as pure functions covering edges, rounding, invariants, regression fixtures | DUP | DROP: dup of brief §9.5 | — |
 | TEST-09 | 144-160 | Fake repositories (not mocks) with success/failure control via shouldThrow | DUP | DROP: dup of brief §9.2 | — |
-| TEST-10 | 164 | CMP common UI testing uses runComposeUiTest not Android JUnit TestRule | DUP | DROP: dup of CMP-67 | UNVERIFIED: runner name not re-checked against current CMP testing docs |
+| TEST-10 | 164 | CMP common UI testing uses runComposeUiTest not Android JUnit TestRule | DUP | DROP: covered by CMP-67 (kept in EXTERNAL_LEDGER) | UNVERIFIED: runner name not re-checked against current CMP testing docs |
 | TEST-11 | 166-173 | UI test targets: field-entry flows, submit enablement, error visibility, placeholder/content swap, refresh preservation, critical-control a11y labels | DUP | DROP: split into TEST-22–TEST-27 | — |
 | TEST-22 | 166-173 | UI-test critical field-entry flows | GENERIC | DROP: model already knows | — |
 | TEST-23 | 166-173 | UI-test submit enable and disable behavior | DUP | DROP: dup of brief §9.6 | — |
@@ -1388,8 +1388,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | TEST-14 | 196-201 | Lean matrix: Turbine VM tests per feature, pure validator/calculator tests per rule-heavy feature, UI tests for high-risk screens, platform tests for real platform behavior; no screenshot infrastructure before VM coverage | WORKFLOW | compose-feature/references/testing.md#matrix | — |
 | TEST-15 | 205-212 | Testing anti-patterns: UI-only testing, private-implementation testing, DI-framework mocking, screenshots before VM coverage, isolated derived-property tests, shared mutable fixtures | DUP | DROP: split into TEST-35–TEST-40 | — |
 | TEST-35 | 205-212 | Never test ViewModels through UI tests alone | DUP | DROP: dup of brief §9.7 | — |
-| TEST-36 | 205-212 | Never test private functions and internals; test through the public event API | DUP | DROP: dup of TEST-01 | — |
-| TEST-37 | 205-212 | Never mock the DI framework; swap fakes via constructor injection | DUP | DROP: dup of DI-07 | — |
+| TEST-36 | 205-212 | Never test private functions and internals; test through the public event API | DUP | DROP: dup of brief §9.1 | — |
+| TEST-37 | 205-212 | Never mock the DI framework; swap fakes via constructor injection | DUP | DROP: dup of brief §9.1 | — |
 | TEST-38 | 205-212 | Never build screenshot infrastructure before ViewModel coverage | DUP | DROP: dup of TEST-14 | — |
 | TEST-39 | 205-212 | Never test derived values in isolation from ViewModel state | RULE | compose-feature/references/testing.md#anti-patterns | — |
 | TEST-40 | 205-212 | Never share mutable test fixtures across tests | GENERIC | DROP: model already knows | — |
@@ -1433,7 +1433,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | UX-15 | 134-139 | GOOD stable placeholder slot (ResultCardSlot with min height) | EXAMPLE | compose-feature/examples.md#pairs | — |
 | UX-16 | 143-169 | GOOD skeleton-with-shimmer implementation sample | API | DROP: tutorial code | — |
 
-## Findings (post-review-fix state: 1158 rows — RULE 294, GOTCHA 117, DECISION 66, WORKFLOW 22, EXAMPLE 15, API 76, GENERIC 99, OUTOFKIT 62, DUP 407; 669 dropped)
+## Findings (Phase 2.6 D2.5-1 state: 1162 rows — RULE 228, GOTCHA 90, DECISION 51, WORKFLOW 22, EXAMPLE 15, API 76, CONFLICT 2, GENERIC 158, OUTOFKIT 62, DUP 458; 820 dropped, 342 kept)
 
 ### Top 15 most valuable items
 
@@ -1482,6 +1482,46 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 - Empty by plan: error-handling.md and enforcement.md (0 rows), guard scripts, evals. P1/P5 author these.
 - SPLIT PROPOSAL (change 8): resources-and-images.md holds 39 kept rows — 19 CMP-resources rows (RES-*, SKL-60 now DUP, XPLAT-18 now DUP) plus 20 Coil-image rows (IMG-*, ANADV-09 now DUP). Trimming further would destroy verified gotchas both halves need, so I propose splitting into `resources.md` (Res mechanics, qualifiers, fonts, files, MVI keys) and `images.md` (Coil setup, pipeline, caching, lists, testing) ahead of P6. If the moderator rejects the split, P6 trims 19 more rows with the change-6 test.
 - Gap (unchanged): legacy contains no BaseViewModel/launchGuarded contract, no error-tier model, no guard scripts, no convention plugins, and no exactly-three-type Contract.kt rule. These kit pillars must come from house sources in Phase 1.
+
+### Dup-chain resolution (Phase 2.6, carry-over D2.5-1)
+
+All 108 dup chains reported by `handoff/tools/ledger-check.sh` are resolved;
+the tool now reports zero chains and `handoff/tools/dest-load.py` still exits
+0 (no destination over cap; naming-and-packages.md 15→16 kept rows).
+
+- D0-7 applied: CLEAN-14 reinstated as kept RULE at
+  `compose-architecture/references/naming-and-packages.md#imports` (was
+  GENERIC/DROP). Un-breaks SKL-72, SKL-84, ANTI-18 (still DUP of CLEAN-14).
+- D0-10 applied: GRAD-24/GRAD-31 → RULE `DROP: conflicts with kit decision`;
+  MTRL-21/MTRL-35 → GENERIC `DROP: model already knows`; MVI-26 →
+  `DROP: dup of SKL-69` (kept).
+- Re-pointed to kept harvest rows: ARCH-06/CLEAN-34 → dup of SKL-46;
+  PERF-39 → dup of CESS-10; SKL-61/TEST-36 → `DROP: dup of brief §9.1`;
+  SKL-62/TEST-07 → `DROP: dup of brief §9.5`; DS-34 → `DROP: dup of brief
+  §9.2` (TEST-09 precedent); TEST-37 → `DROP: dup of brief §9.1`.
+- Mirrored terminal non-dup DROP reasons (X adds nothing beyond Y):
+  GRAD-19/GRAD-22/GRAD-27, IOS-24/IOS-31, KOIN-37, MTRL-34, CF-25, PERF-35,
+  PERF-40, SKL-60, CESS-27 → GENERIC `DROP: model already knows (Opus
+  test)`; IOS-13 → Y=IOS-12 optional-depth reason; IOS-23 → Y=IOS-07
+  SKIE-conflict reason; PERF-28 → Y=PERF-04 UNVERIFIED-niche reason;
+  PERF-34 → Y=CESS-07 out-of-scope reason; CESS-21/CESS-23 → Y=CESS-20
+  out-of-scope reason.
+- Cross-ledger convention (new): a harvest row whose only canonical is a kept
+  EXTERNAL_LEDGER row uses `DROP: covered by <EXT-ID> (kept in
+  EXTERNAL_LEDGER)` with class DUP. The `ledger-check.sh` chain regex only
+  resolves IDs inside this file, so `DROP: dup of <external-ID>` can never
+  pass it; `covered by` preserves the trace without tripping the check.
+  Applied to the ANTI-01/CB-24 cluster (11 rows), CESS-01/SKY-37 cluster
+  (6 rows), RES→CMP-0x cluster (13 rows), IOS→CMP-5x/6x cluster (14 rows),
+  XPLAT→CB-110/AND-38/CMP-36/CMP-99, GRAD-06/07/28, CF/NKA→CB-99,
+  PERF-20/32→SKY-45, CESS-17→CB-11, ANIM→CB-60, NTH→AND-01/AND-03/CMP-26,
+  TEST-10→CMP-67, CICD→CMP-86/87. Every named canonical was verified kept
+  in EXTERNAL_LEDGER on 2026-09-24.
+- Approximation admitted: LIST-13/PG-31 (no compute in item lambdas) resolve
+  to CB-24 as the nearest kept rule; the kit's "no heavy work in item scope"
+  seed (SKILL_SPECS §3) has no closer kept row in either ledger.
+- Net class movement: DUP 480→458, GENERIC 145→158, RULE 222→228, GOTCHA
+  88→90, DECISION 50→51. No kept destination added except CLEAN-14.
 
 
 

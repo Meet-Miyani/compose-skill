@@ -202,7 +202,7 @@ function that only forwards its parameters is not.
 
 **Citations.** `house:docs/FEATURE_ARCHITECTURE.md#7-destination-responsibilities-strict` (rule on suffixes), `house:docs/FEATURE_ARCHITECTURE.md#7.1-navigation-keys-args-serialization` (alias convention), `house:.cursor/rules/navigation-keys.mdc` (3, 4).
 
-### 2.4 Repository read naming — one-shot vs stream [house]
+### 2.4 Repository read naming — one-shot vs stream [house, M-6]
 
 The async contract is part of the name. The same name cannot be both `suspend` and `Flow`.
 
@@ -217,6 +217,14 @@ The async contract is part of the name. The same name cannot be both `suspend` a
 
 `Stream` is the chosen qualifier: it names the semantic without restating the `Flow` type and
 avoids the LiveData/Observer metaphor. `PagingSource` stays `internal` in `data/repository/`.
+
+**Ruling M-6.** The `Stream` suffix stays required on every `Flow`-returning repository read,
+even where no suspend one-shot coexists. A conditional rule ("suffix only on coexisting pairs")
+needs judgment and forces a rename the day a one-shot is added; the unconditional rule ("every
+`Flow`-returning repository read ends in `Stream`; suspend one-shots are `getX`") a weak model
+applies without error. The Now in Android `getTopics(): Flow` shape is a sample convention, not
+official guidance; the divergence is known and intentional. *Prevents:* async-contract confusion
+surviving a future one-shot.
 
 **Citations.** `house:docs/FEATURE_ARCHITECTURE.md#4.1-repository-read-naming-one-shot-vs-stream-strict`.
 
@@ -291,7 +299,7 @@ similar field, specific events for screen-level actions) is unchanged.
 
 **Citations.** `house:docs/FEATURE_ARCHITECTURE.md#3-the-mvi-contract` (referenced via MVI reference), `house:docs/MODULARIZATION.md#4-creating-a-feature-name-module` (Event naming), `legacy:references/mvi.md:50-60` (form pattern).
 
-### 3.4 How effects are sent and collected [house]
+### 3.4 How effects are sent and collected [house, M-5]
 
 The base class owns two channels and exposes their `Flow`:
 
@@ -300,8 +308,8 @@ The base class owns two channels and exposes their `Flow`:
   sequencing (no per-effect coroutine, no reliance on `Dispatchers.Main.immediate` eagerly
   starting `launch`), buffers while the UI is stopped, and replays on resume.
 - `errors: Flow<AppError>` — a second `Channel<AppError>(BUFFERED)` exposed via
-`receiveAsFlow()`. Use `emitError(error)` (`onError = ::emitError` is the popup-tier wiring) or
-`inlineUnlessSensitiveAccess(error)` for the inline tier.
+`receiveAsFlow()`. Use `emitError(error)` (`onError = ::emitError` is the popup-tier wiring).
+`errors` carries popup-tier errors only; inline-tier failures live on `UiState.error` (see §3.5).
 
 The Route collects `effect` once, lifecycle-aware, in the design-system module's `CollectEffect`
 helper (`repeatOnLifecycle(STARTED) { effect.collect { … } }`). Effects carry intent, not
@@ -311,10 +319,18 @@ presentation: the Route maps `UiEffect.OpenNoteDetail(noteId)` to a
 `ViewModel.sendEffect` is for one-shot commands (navigate, snackbar, share, haptics). Never use
 consume-once booleans in `UiState` for these.
 
+**Ruling M-5.** The two channels stay, as a `[kit]` decision. `Effect` is each feature's own
+sealed type, so a base-class error cannot live inside it; collapsing the channels would force
+every feature to declare and forward its own `ShowError` variant — per-feature boilerplate a
+mid-tier model forgets (M2 showed models dropping error wiring). The separate generic channel
+makes popup wiring one line at every Route (`HandleAppErrors(viewModel.errors)`). `trySend`
+fails only on a closed channel (the buffer is 64). Effects and errors are for one-shots;
+anything the user must still see after returning is state. *Prevents:* dropped error wiring.
+
 **Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:41-50` (channel + flow),
 `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:82-94` (sendEffect, emitError).
 
-### 3.5 How errors are emitted [house]
+### 3.5 How errors are emitted [house, O-2]
 
 The base class provides two paths; the ViewModel chooses one per call site, never a
 hand-rolled `try / catch`:
@@ -333,12 +349,7 @@ provides a single app-level instance and hosts it above `NavDisplay`; every Rout
 `CancellationException` is **always** rethrown — structured concurrency or it does not work.
 Any `Throwable` outside the network taxonomy propagates as a programming defect.
 
-`inlineUnlessSensitiveAccess(error: AppError): AppError?` returns `null` for
-`AppErrorType.SensitiveAccessRequired` and emits the error to the popup tier, otherwise returns the
-error unchanged. Inline-tier handlers call it once before `updateState` so a sensitive-access failure
-becomes a modal popup instead of an inline retry button that can never succeed.
-
-**Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:120-171` (inlineUnlessSensitiveAccess, launchGuarded).
+**Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:120-171` (launchGuarded).
 
 ### 3.6 Threading and `launchGuarded` / `runGuarded` [house]
 
@@ -346,7 +357,8 @@ becomes a modal popup instead of an inline retry button that can never succeed.
 runs `onStart` before the block, runs `onComplete` in a `finally`, catches `NetworkException`
 and converts it via `NetworkException.toAppError()`, rethrows `CancellationException`, lets
 everything else propagate. `onError` is **required** — every call site must consciously choose
-silent / popup / inline.
+silent / popup / inline. `launchGuarded` returns the launched `Job` so call sites can guard
+overlap (`loadJob?.isActive`; see §8.3).
 
 `runGuarded(onError, onStart = {}, onComplete = {}, block)`: same contract, but as a `suspend`
 function inside an existing coroutine. Prefer this for sequential work (a poll loop, a
@@ -359,7 +371,7 @@ caller. Inject dispatchers as constructor parameters for testability.
 **Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:133-171`,
 `legacy:references/coroutines-flow.md:96-114` (dispatcher rule).
 
-### 3.7 State update and one owner per field [house]
+### 3.7 State update and one owner per field [house, M-4]
 
 State updates go through `protected fun updateState(reduce: State.() -> State)`, which wraps
 `MutableStateFlow.update`. The base class exposes:
@@ -368,20 +380,24 @@ State updates go through `protected fun updateState(reduce: State.() -> State)`,
 - `protected val currentState: State` — synchronous read inside the ViewModel.
 
 `MutableStateFlow.update { it.reduce() }` is thread-safe and may re-run the reducer on contention;
-the `updateState` contract relies on this. Call `inlineUnlessSensitiveAccess(error)` **once**
-before `updateState`, never twice.
+the `updateState` contract relies on this.
 
 **Every piece of state has exactly one owner.** No `rememberSaveable` mirror of `UiState`, no
 `LaunchedEffect` that syncs two copies. `rememberSaveable` is for state no ViewModel owns (a
 sheet's expansion toggle, the once-per-visit focus guard).
 
-**No ViewModel uses `SavedStateHandle`.** Typed input does not survive process death today, and
-inventing a `rememberSaveable` mirror to fake it produces two owners and a restore path that
-silently does nothing. Identity travels on the nav key; a detail destination restored after
-process death re-fetches the record from the repository.
+**User-entered state that is not yet persisted** (form drafts, typed text, a chosen filter or
+step) lives in the ViewModel's `SavedStateHandle`, via the multiplatform `androidx.savedstate`
+/ `lifecycle-viewmodel-savedstate` APIs (the `saved` delegate or `getStateFlow`;
+`kotlinx.serialization` for structured values). `UiState` is *derived* from the handle for those
+fields. That is one owner, not a mirror, so the one-owner/no-mirror rule stands. Identity stays
+on the nav key, and records are re-fetched by identity (unchanged).
 
 **Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:53-65`,
-`house:.cursor/rules/mvi-contract.mdc` (2).
+`house:.cursor/rules/mvi-contract.mdc` (2),
+`official:https://developer.android.com/topic/libraries/architecture/viewmodel/viewmodel-savedstate`
+(`SavedStateHandle` with `getStateFlow` / the `saved` delegate exists to preserve typed
+ViewModel state across process death; text-field input is the canonical saved-state content).
 
 ### 3.8 What this prevents
 
@@ -393,7 +409,7 @@ process death re-fetches the record from the repository.
 
 ## 4. Error model
 
-### 4.1 The taxonomy [house]
+### 4.1 The taxonomy [house, O-2]
 
 Two types and one mapper. Both types live in `:core:error` (`com.example.core.error`), the
 mapper in `:core:network` (`com.example.core.network.error`).
@@ -410,7 +426,7 @@ data class AppError(
 // AppErrorType — semantic, presentation-facing
 enum class AppErrorType {
     NoNetwork, Timeout, Tls, Unauthorized, Forbidden,
-    SensitiveAccessRequired, NotFound, ServerError, UpdateRequired, Generic,
+    NotFound, ServerError, UpdateRequired, Generic,
 }
 ```
 
@@ -422,7 +438,7 @@ and CTA always derive from `AppErrorType`.
 **Citations.** `house:core/error/src/commonMain/kotlin/com/haat/core/error/AppError.kt:18-23` (shape),
 `house:core/error/src/commonMain/kotlin/com/haat/core/error/AppErrorType.kt:10-27` (enum).
 
-### 4.2 Exception classification [house]
+### 4.2 Exception classification [house, O-2]
 
 The wire-shape exception lives in `:core:network`:
 
@@ -433,7 +449,6 @@ sealed class NetworkException(message: String, cause: Throwable? = null) : Excep
     class Timeout(cause: Throwable? = null) : NetworkException(…)
     class SslHandshake(cause: Throwable? = null) : NetworkException(…)
     class Serialization(cause: Throwable? = null) : NetworkException(…)
-    class SensitiveAccessTokenStorage(cause: Throwable? = null) : NetworkException(…)
     class Unknown(cause: Throwable? = null) : NetworkException(…)
 }
 ```
@@ -446,11 +461,9 @@ network failures, and the kit never disguises them as `NetworkException.Unknown`
 
 **Citations.** `house:core/network/src/commonMain/kotlin/com/haat/core/network/error/NetworkException.kt:3-38` (sealed shape), `house:core/network/src/commonMain/kotlin/com/haat/core/network/error/NetworkExceptionMapper.kt:17-44` (classifier semantics).
 
-### 4.3 `NetworkException` → `AppError` [house]
+### 4.3 `NetworkException` → `AppError` [house, O-2]
 
-The mapper is pure and side-effect free. The HTTP branch picks `AppErrorType` by status code,
-with a special case: a `428` precondition whose body matches the sensitive-access contract
-becomes `AppErrorType.SensitiveAccessRequired`. Any other 428 stays `Generic`.
+The mapper is pure and side-effect free. The HTTP branch picks `AppErrorType` by status code.
 
 ```kotlin
 fun NetworkException.toAppError(): AppError = when (this) {
@@ -458,7 +471,6 @@ fun NetworkException.toAppError(): AppError = when (this) {
     is NetworkException.Timeout -> AppError(AppErrorType.Timeout)
     is NetworkException.SslHandshake -> AppError(AppErrorType.Tls)
     is NetworkException.Serialization -> AppError(AppErrorType.Generic)
-    is NetworkException.SensitiveAccessTokenStorage -> AppError(AppErrorType.Generic)
     is NetworkException.Unknown -> AppError(AppErrorType.Generic)
     is NetworkException.Http -> AppError(type = …, serverTitle = error?.title, serverMessage = error?.message, httpStatus = statusCode)
 }
@@ -467,10 +479,9 @@ fun NetworkException.toAppError(): AppError = when (this) {
 `NetworkException.toAppError()` is the **only** conversion that crosses from transport to
 presentation. ViewModels call it via `launchGuarded(onError = …)`; repositories never call it.
 
-**Citations.** `house:core/network/src/commonMain/kotlin/com/haat/core/network/error/NetworkErrorMapper.kt:14-40`,
-`house:core/network/src/commonMain/kotlin/com/haat/core/network/sensitive/SensitiveAccess.kt` (sensitive-access detection).
+**Citations.** `house:core/network/src/commonMain/kotlin/com/haat/core/network/error/NetworkErrorMapper.kt:14-40`.
 
-### 4.4 The three tiers [house options; kit selection]
+### 4.4 The three tiers [house options; kit selection, O-2]
 
 The house source lists three wirings and names **no default**. The kit keeps
 the house wirings, names the tiers `popup` / `inline` / `silent` (never
@@ -480,7 +491,7 @@ below.
 | Tier | What it is | Wiring | Tag |
 |---|---|---|---|
 | **popup** | Global popup, app shell | `launchGuarded(onError = ::emitError, …)` + `HandleAppErrors(viewModel.errors)` at the Route | `[house]` |
-| **inline** | Screen-owned error state or field message, with a Retry holding the error | `launchGuarded(onError = { updateState { copy(error = it) } }, …)`, then call `inlineUnlessSensitiveAccess` once before `updateState` on screens that might see a 428 | `[house]` |
+| **inline** | Screen-owned error state or field message, with a Retry holding the error | `launchGuarded(onError = { updateState { copy(error = it) } }, …)` | `[house]` |
 | **silent** | Silent fire-and-forget | `launchGuarded(onError = {}, …)`; this is the **only** acceptable silent handler | `[house]` |
 
 **D2-1 — tier selection rule `[kit]`** (moderator decision; rationale: a popup
@@ -494,7 +505,6 @@ sibling-screen inconsistency of §12.5):
 | Refresh or reconcile fails while content is visible | **popup** | Keep the content; `onError = ::emitError`, shown by the app error host |
 | A user-initiated action fails (save, delete, toggle, submit) | **popup**, unless the screen owns a field-level recovery (form validation from the server) → **inline** at that field | `::emitError`, or `updateState { copy(fieldError = …) }` |
 | Background poll or non-blocking reconcile the user did not trigger | **silent** (named as a poll) | `onError = {}`; only for polls |
-| Sensitive-access / step-up auth required | **popup**, always (escalation overrides inline) | `inlineUnlessSensitiveAccess` before `updateState` |
 | Session expired (401) | **none**; handled by the session sign-out path | suppressed at the app error host |
 
 The composition root hosts **one** app-level error host (a `HandleAppErrors` collector wired to
@@ -510,25 +520,12 @@ drops the error on the floor — that leaves a screen with no data, no message, 
 
 **Citations.** `house:AGENTS.md#error-handling-strict`, `house:docs/FEATURE_ARCHITECTURE.md#10-production-quality-gates-strict` (network errors).
 
-### 4.5 The sensitive-access popup-escalation rule [house]
+### 4.5 The sensitive-access popup-escalation rule [dropped, O-2]
 
-A 428 sensitive-access precondition means the user did not complete verification. The
-guarded screen has no data to show; an inline retry cannot succeed because the call needs the
-fresh grant. The inline tier must therefore route this error to the popup tier via
-`inlineUnlessSensitiveAccess`, which:
-
-- returns the error unchanged for every other `AppErrorType`;
-- for `AppErrorType.SensitiveAccessRequired`, emits it to the popup-tier channel and returns `null`.
-
-The popup is modal, its CTA pops the guarded screen, and the user signs in to complete the
-verification. Popup-tier call sites (`onError = ::emitError`) need nothing.
-
-A paged list surfaces `LoadState.Error`, never `launchGuarded` — the Paging path does not enter
-`BaseViewModel.launchGuarded`. The Compose mirror `AppError?.inlineUnlessSensitiveAccess()`
-applies to refresh **and** append errors on a paged list. Empty-state and "unavailable" copy
-key off the raw load failure, not the already-escalated `null`.
-
-**Citations.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:97-124` (inlineUnlessSensitiveAccess), `house:docs/FEATURE_ARCHITECTURE.md#10-production-quality-gates-strict` (sensitive-access bullet).
+Dropped per owner decision O-2: purely house business logic (the house backend's 428
+precondition contract). A sensitive-access failure is an ordinary `AppError` routed by the D2-1
+tier-selection rule like any other failure; the inline tier is chosen only where a retry can
+succeed. The server-title/message rendering sentence survives under §4.1.
 
 ### 4.6 Failure vs business state [house]
 
@@ -567,7 +564,7 @@ app-shell error host by mapping it to the session sign-out handler, not to a pop
 
 ## 5. Data boundaries
 
-### 5.1 Three models, three owners [house]
+### 5.1 Three models, three owners [house, M-8, O-3]
 
 Every cross-screen aggregate has three types in three layers. Never reuse one type across
 layers.
@@ -578,12 +575,10 @@ layers.
 | Domain | `<X>` | `domain.model` | App-shaped, non-null where meaningful; framework-free; no `@Serializable`, no API field names, no wire strings, no Compose | `Note` |
 | Presentation | `<X>UiModel` | `presentation/<dest>.model` | Formatted strings, flags, icon identity, stable keys | `NoteUiModel` |
 
-Domain models carry `Instant`, never an ISO string and never epoch millis. `UiState` fields
-carry `Instant`, never an ISO string or epoch millis, and never a formatted countdown string
-ticked by the ViewModel — formatting happens in a mapper, and the clock is read in the leaf.
-Money stays `Double?` through UiModels and is formatted at display time via a design-system
-helper that reads the ambient currency; a discount percent stays `Int` and formats at display
-time via a design-system formatter.
+Domain models carry `kotlin.time.Instant`, never an ISO string and never epoch millis.
+`UiState` fields carry `kotlin.time.Instant`, never an ISO string or epoch millis, and never a
+formatted countdown string ticked by the ViewModel — formatting happens in a mapper, and the
+clock is read in the leaf.
 
 **Citations.** `house:AGENTS.md#architecture-invariants-strict` (data block), `house:docs/FEATURE_ARCHITECTURE.md#2-three-models-three-owners-strict`, `house:.cursor/rules/mvi-contract.mdc` (5).
 
@@ -916,7 +911,7 @@ nothing.
 
 **Citations.** `house:.cursor/rules/mvi-contract.mdc` (2), `house:.cursor/rules/ui-reuse.mdc` (4).
 
-### 8.2 What may be UI-local [house]
+### 8.2 What may be UI-local [house, M-8]
 
 UI-local state is acceptable only for ephemeral visual concerns:
 
@@ -929,7 +924,7 @@ into `UiState` as formatted strings. A ticking clock read at the top of a screen
 invalidates the screen body every tick; the same read inside the leaf that renders the
 countdown invalidates only that leaf.
 
-`UiState` carries `Instant`, never an ISO string or epoch millis, and never a formatted
+`UiState` carries `kotlin.time.Instant`, never an ISO string or epoch millis, and never a formatted
 countdown string ticked by the ViewModel — formatting happens in a mapper, not in
 composition. `composing-stable-ui` owns the read-at-leaf rule.
 
@@ -937,14 +932,21 @@ composition. `composing-stable-ui` owns the read-at-leaf rule.
 
 ### 8.3 Process death and overlapping loads [house]
 
+The cold/reconcile split below applies to one-shot imperative fetches. A repository stream
+needs no split — collect the stream and let re-emission reconcile.
+
 Three rules the agent is most likely to break:
 
 1. **One owner for the first load.** Do not pair an `init { fetch() }` with a lifecycle path
    that suppresses itself once. The first `LifecycleStartEffect` `ON_START` is the cold load;
    later `ON_START`s are reconcile. Guard overlapping loads explicitly with
-   `loadJob?.isActive` so a pull-to-refresh landing on an in-flight reconcile does not have
-   the stale response win.
-2. **Reconcile-fetch hooks to `LifecycleStartEffect`, not `LifecycleResumeEffect`.** Nav3
+   `loadJob?.isActive` (`launchGuarded` returns its `Job`; see §3.6) so a pull-to-refresh
+   landing on an in-flight reconcile does not have the stale response win. Skip, not cancel:
+   the in-flight load keeps owning the response, so two overlapping loads can never both
+   write; cancelling the in-flight load to restart it trades one owner for restart churn with
+   no fresher data guaranteed.
+2. **Reconcile-fetch hooks to `LifecycleStartEffect`, not `LifecycleResumeEffect`.** Key the
+   effect by the nav-key id; the keyless overload is now an error. Nav3
    `NavDisplay` caps the scene under any overlay (sheet / dialog) at `STARTED`. A
    `LifecycleResumeEffect` would re-hit the API on every sheet dismiss and on every tab return;
    `LifecycleStartEffect` covers both. Reserve `LifecycleResumeEffect` for interactive-top
@@ -989,7 +991,7 @@ pause only.
 
 ## 9. Testing conventions
 
-### 9.1 ViewModel tests are the highest-ROI test [house]
+### 9.1 ViewModel tests are the highest-ROI test [house, M-4]
 
 The canonical ViewModel test exercises the public event API through the public state API.
 The house testing convention (D1-1) is:
@@ -1019,7 +1021,7 @@ fun `valid field then save traverses saving-to-done`() = runTest {
 are collected by `backgroundScope.launch { vm.effect.toList(toList) }` (D1-1). Phases that
 land ViewModel tests in the kit follow the same shape.
 
-**Citations.** `house:.cursor/skills/implementing-a-feature/SKILL.md#verification` (the verification gate that asserts the state matrix), `house:.cursor/rules/mvi-contract.mdc` (no `SavedStateHandle` → tests reflect the same constraint).
+**Citations.** `house:.cursor/skills/implementing-a-feature/SKILL.md#verification` (the verification gate that asserts the state matrix).
 
 ### 9.2 Fakes, not mocks [house]
 
@@ -1615,6 +1617,11 @@ Every guard from the house codebase, what it enforces, and whether/how it should
 generalised into the kit's `skills-v2/compose-architecture/scripts/` (Phase 5). Inputs are
 the only thing the kit generalises — names, paths and the conf file.
 
+**Ruling M-9.** The kit ships exactly one guard implementation: bash + ripgrep scripts,
+registry-wired through `run-checks.sh`. Konsist and detekt custom rules are rejected for v1 (a
+dedicated-module rerun cost for Konsist; syntax-only `commonMain` analysis for detekt);
+re-evaluated in the later tools/CLI scope. **[kit, M-9]**
+
 ### 11.1 `check-layering.sh` — module dependency direction [house]
 
 Enforces (94-line shell script), with non-zero exit:
@@ -1891,7 +1898,7 @@ summarises the patterns generically, with no house file or symbol names in the b
 The house app leaves some choices open. The brief resolves them with a recommendation; the
 moderator may accept or amend.
 
-### 13.1 Ktor `expectSuccess` policy [house]
+### 13.1 Ktor `expectSuccess` policy [house, O-2]
 
 `Ktor.HttpClientConfig.expectSuccess` defaults to `false`. With `false`, the client returns
 the response for manual status inspection; with `true`, the client throws
@@ -1911,7 +1918,7 @@ not successful (>=300)`"),
 **Recommendation.** `expectSuccess = true` at the client config. The
 `NetworkExceptionMapper` already wraps `ClientRequestException` and `ServerResponseException`
 into `NetworkException.Http(statusCode, …)`, which `toAppError()` maps to `Unauthorized`,
-`Forbidden`, `NotFound`, `ServerError`, `SensitiveAccessRequired`, or `Generic` by status.
+`Forbidden`, `NotFound`, `ServerError`, or `Generic` by status.
 With `false`, every call site manually inspects the status — exactly the error-tossing the
 kit forbids.
 
@@ -1934,26 +1941,27 @@ configuration needed."), `official:https://insert-koin.io/docs/reference/koin-an
 DSL flavour (`viewModelOf`, `single`, `factory`) remains available for tests and edge cases,
 but the kit writes new modules with annotations.
 
-### 13.3 KMP DataStore approach (D1-2)
+### 13.3 KMP DataStore approach (D1-2) [house, M-7]
 
 The Android KMP guide documents `androidx.datastore:datastore:1.2.1` and
-`androidx.datastore:datastore-preferences:1.2.1` in `commonMain` and explicitly states that
-**only Preferences DataStore is supported in KMP projects** (`official:https://developer.android.com/kotlin/multiplatform/datastore`:
-the guide ships a Preferences-only factory with per-source-set file paths and a JVM
-`java.io.tmpdir` note that the kit turns into an app-specific folder).
+`androidx.datastore:datastore-preferences:1.2.1` in `commonMain`. The official KMP guide
+documents Preferences DataStore only
+(`official:https://developer.android.com/kotlin/multiplatform/datastore`: the guide ships a
+Preferences-only factory with per-source-set file paths and a JVM `java.io.tmpdir` note).
 
 **Recommendation.** Preferences DataStore is the kit's KMP-safe default. Structured settings
 objects (notes app settings, user preferences) are stored as **one serialized JSON string
 key**: a single `stringPreferencesKey("notes_settings_json")` whose value is a
 `@Serializable` data class encoded and decoded with `kotlinx-serialization-json` in the
 repository. Typed DataStore (the `androidx.datastore:datastore-core` artifact with a
-`Serializer<T>`) is **not taught** by the kit — it is supported in `commonMain` per the
-artifact's docs, but the Preferences + JSON-string pattern covers the same need with one
-fewer dependency and no schema-migration contract to teach.
+`Serializer<T>`) is **not taught** by the kit — the stable KMP guide documents Preferences
+only — and the Preferences + JSON-string pattern covers the same need with one fewer
+dependency and no schema-migration contract to teach.
 
 One DataStore instance per file, injected as a Koin `single`. Never point Desktop storage
-at `java.io.tmpdir`; use an app-specific folder (`File(System.getProperty("user.home"),
-".appname")` per the Android KMP guide).
+at `java.io.tmpdir` (`[kit]` hardening: the official guide shows `java.io.tmpdir`; the ban
+prevents shipping the snippet verbatim); use an app-specific folder
+(`File(System.getProperty("user.home"), ".appname")` per the Android KMP guide).
 
 **Citation.** `official:https://developer.android.com/kotlin/multiplatform/datastore` ("You
 need to define how to instantiate the DataStore object on each platform. This is the only
@@ -2018,21 +2026,12 @@ values from this Flow and represents its latest value via State in a lifecycle-a
 `jvmMain`. `collectAsStateWithLifecycle` is the only acceptable collector at the Route
 boundary. `collectAsState` is for non-lifecycle-aware hosts only.
 
-### 13.7 `onError` presentation policy for inline-tier screens [house]
+### 13.7 `onError` presentation policy for inline-tier screens [dropped, O-2]
 
-When `onError = { updateState { copy(error = it) } }` is used, the Route reads the `AppError`
-on `UiState` and presents it inline. The kit's rule:
-
-- Inline-tier routes call `inlineUnlessSensitiveAccess(error)` **once** before `updateState` to
-  redirect sensitive-access failures to the popup tier.
-- A non-sensitive-access `AppError` is rendered with its `serverTitle` / `serverMessage` (when
-  non-blank) over the per-type default copy; the illustration and CTA derive from
-  `AppErrorType`.
-- A paged list maps `LoadState.Error` to `AppError?` at the boundary and surfaces the same
-  inline message for refresh **and** append errors; empty-state and "unavailable" copy key
-  off the raw load failure, not the already-escalated `null`.
-
-**Citation.** `house:core/mvi/src/commonMain/kotlin/com/haat/core/mvi/BaseViewModel.kt:97-124` (inlineUnlessSensitiveAccess), `house:docs/FEATURE_ARCHITECTURE.md#10-production-quality-gates-strict` (sensitive-access bullet).
+Dropped per owner decision O-2 with §4.5. The mechanism (the escalation-once rule, the
+server-title/message rendering rule, the paged-list `LoadState` mirror) is removed;
+the rendering sentence (server title/message over per-type defaults; illustration/CTA from
+type) survives under §4.1 where it already exists.
 
 ### 13.8 Size heuristics [kit, D1-6]
 
@@ -2050,6 +2049,12 @@ preamble.
 ---
 
 ## Provenance summary (final)
+
+Provenance counts (2026-09-24 review-fix pass; `grep -c` over this file): `[house…]` 114,
+`[kit…]` 20, `[legacy…]` 7 tag occurrences (headers plus inline rule tags). Ruling tags applied
+in this pass: O-2 (§§3.5, 4.1–4.5, 13.1, 13.7), O-3 (§5.1 money sentences), M-4 (§§3.7, 9.1),
+M-5 (§3.4), M-6 (§2.4), M-7 (§13.3), M-8 (§§5.1, 8.2), M-9 (§11). Two subsections are kept as
+numbered tombstones so later citations (§§4.6+, §13.8) do not shift: §4.5 and §13.7.
 
 - `[house]` decisions are everywhere in §1–§12 — the kit's non-negotiables are house rules,
   cited at the file / line level. The house `.cursor/rules/*.mdc`, the `core/mvi/`,
