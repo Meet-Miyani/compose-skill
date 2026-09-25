@@ -511,6 +511,12 @@ templates are internally consistent (plugin ids referenced by module templates e
    and FEAT-01b (Route + Screen + DI/nav wiring), each with its own rubric carrying over the FEAT-01
    items, in `evals-v2/compose-feature/scenarios.md` and `evals.json`. The moderator regenerates the
    Opus references.
+8. **Freedom audit (M-10):** list every rule in the six skills that dictates implementation
+   internals, rather than a boundary, and give each its evidence (an M2/gate failure or a brief
+   decision). Rules with no evidence are loosened to a boundary or cut. Also flag any workflow step
+   that makes a model plan or restate more than it builds. Record the counts in the report.
+
+**Moderator step M9** also runs Claude Opus 5.5 and Sonnet **with** the kit (M-10): strong-model quality with the kit must not drop below without it.
 
 **Moderator step M9.** The moderator runs the scenarios with the skills (compared with the M2
 baselines), reviews end to end, and signs off. Then Phase 10 (cut-over to `skills/`, catalog and CLI
