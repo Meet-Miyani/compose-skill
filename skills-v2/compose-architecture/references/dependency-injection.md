@@ -33,6 +33,8 @@ Apply the Koin compiler plugin once with `alias(libs.plugins.koin.compiler)`. ( 
 
 Sources: https://insert-koin.io/docs/reference/koin-annotations/kmp, https://insert-koin.io/docs/reference/koin-annotations/annotations-inventory, https://insert-koin.io/docs/reference/koin-android/viewmodel/
 
+M-13 note: the annotations-inventory page still lists `@KoinViewModel` under `org.koin.android.annotation`; that package is the legacy KSP flavour. Under the compiler plugin (the kit default, O-1) the annotation is `org.koin.core.annotation.KoinViewModel`, per https://insert-koin.io/docs/migration/from-ksp-to-compiler-plugin.
+
 ## Module ownership by module kind
 
 Each module kind has one Koin posture. (§1.1; §6.2; KOIN-06; SKL-94)
@@ -132,6 +134,7 @@ The composition root's `adapter/` package holds every host implementation of a `
 - A missing `parametersOf` at the entry builder fails at runtime, not at compile time; every `@InjectedParam` needs a matching `parametersOf` at its resolution site. (KOIN-34)
 - An Android `Context` reference in `commonMain` breaks non-Android targets; platform types enter shared code only through an interface bound in the composition root. (KOIN-36)
 - Resolving a ViewModel anywhere except the composition-root entry builder or its Route orphans it from the nav scope; entry resolution stays in the root. (§6.3)
+- The typed `startKoin<T>()` for a `@KoinApplication` is `org.koin.plugin.module.dsl.startKoin`, not `org.koin.core.context.startKoin`; without that import the call fails overload resolution. The migration page snippet leaves it unqualified.
 
 ## Red flags
 

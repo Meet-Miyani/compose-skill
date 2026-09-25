@@ -11,10 +11,12 @@ import __PACKAGE__.domain.model.__Item__
 import __PACKAGE__.domain.repository.__Name__Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import org.koin.core.annotation.Factory
 
 /**
  * Default __name__ repository backed by the remote source.
  */
+@Factory
 internal class Default__Name__Repository(
     private val remote: __Name__RemoteDataSource,
 ) : __Name__Repository {

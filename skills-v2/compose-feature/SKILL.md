@@ -100,6 +100,7 @@ scripts/new-feature.sh --name Notes --item Note --package com.example.feature.no
 | "I'll resolve detail from the cached list; faster." | No. Arch rules 10 and 15: detail fetches by identity; a cold cache has no list. |
 | "Refresh failure over content can stay silent." | No. Arch rule 8: silent is only for named polls. |
 | "A file-level `var` is the simplest result callback." | No. Arch rule 13: results travel through a repository write. |
+| "I'll time `runCurrent()` to catch the loading frame." | No. testing.md Fakes gate rule (Verification gate 18): hold the fake open with a `CompletableDeferred` gate; `runCurrent()` drains every queued task, so a non-suspending fake settles first. |
 
 ## Verification
 

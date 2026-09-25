@@ -23,8 +23,8 @@ abstract class ComposekitKmpComposePlugin : Plugin<Project> {
                 // plus kotlin.collections.* (M-11). It lives next to the
                 // plugin that wires it. Valid only for genuinely
                 // immutable models (see the compose-ui skill, rule 4).
-                stabilityConfigurationFile.set(
-                    rootProject.file("build-logic/compose-stability.conf"),
+                stabilityConfigurationFiles.add(
+                    rootProject.layout.projectDirectory.file("build-logic/compose-stability.conf"),
                 )
             }
         }

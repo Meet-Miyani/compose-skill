@@ -115,6 +115,22 @@ and the exhaustive `when`. The graders were blind, with 4 answers per packet. Re
 
 On DATA-01 and UI-03, every kit model passes the craft check (short KDoc, intent comments, braces).
 
+## Compile gate: do the kit's templates actually build? (Phase 9, 2026-09-25)
+
+An agent followed `compose-project/references/bootstrap.md` **literally** in an empty folder. It built a
+Compose Multiplatform Notes app (`:composeApp` + `:androidApp` + iOS framework) and scaffolded two features
+with `new-feature.sh`, then built every target on this Mac: Gradle 9.8.0, AGP 9, Kotlin 2.4, CMP 1.12.1,
+Xcode 27.
+
+| Round | Defects to reach a build | Result |
+|---|---|---|
+| 1 (templates as first written) | 21 (17 blockers) | built only after 21 manual fixes |
+| 2 | 10 (4 blockers) | built after patches |
+| 3 | **0 build defects** | **zero-patch** sync, Android APK, desktop, iOS framework link |
+| 4 | 0 | scaffolded tests: **36/36 pass** (2 features × 9 tests × JVM + iOS) |
+
+Every defect was fixed in the kit, not worked around. Report: `handoff/reviews/phase-9.md`.
+
 ## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
 
 `skills-v2/compose-architecture/scripts/run-checks.sh` has 10 checks. It needs bash 3.2 and BSD

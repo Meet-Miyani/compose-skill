@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.onStopOrDispose
 import com.example.core.mvi.CollectEffect
 import com.example.core.mvi.UiEffect
 import com.example.designsystem.error.HandleAppErrors

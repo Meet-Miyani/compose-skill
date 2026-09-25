@@ -68,3 +68,10 @@ item, append a "Review fixes" section to your phase report (item → what change
 Report exactly what happened. If a self-check failed, say so and paste the output. If you skipped
 something, say so and why. A report that claims PASS without the command output counts as a failed
 phase.
+
+## Sealed held-out set (Phase 9 on)
+
+Never open, read, grep, list or reference `evals-v2/heldout.json`, `evals-v2/heldout.md` or anything
+under `evals-v2/heldout/`. They are the sealed test set (STANDARDS §8.5 rule 3). Reading them
+invalidates the kit's "performance on new tasks" numbers.
+

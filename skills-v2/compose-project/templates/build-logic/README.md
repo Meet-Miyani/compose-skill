@@ -8,7 +8,7 @@ plugins through catalog aliases, never by repeating target blocks.
 
 | Id | Class | Owns |
 |---|---|---|
-| `composekit.kmp.library` | `ComposekitKmpLibraryPlugin` | KMP + Android-KMP-library plugins, the kit target set (Android, both iOS archs, JVM), `androidLibrary` SDK levels, framework shape |
+| `composekit.kmp.library` | `ComposekitKmpLibraryPlugin` | KMP + Android-KMP-library plugins, the kit target set (Android, both iOS archs, JVM), `android` SDK levels, framework shape |
 | `composekit.kmp.compose` | `ComposekitKmpComposePlugin` | Compose Multiplatform + Compose compiler plugins, the shared `compose-stability.conf` wiring |
 | `composekit.kmp.feature` | `ComposekitKmpFeaturePlugin` | Composition of library + compose for `:feature:*` modules |
 | `composekit.koin` | `ComposekitKoinPlugin` | The Koin compiler plugin (`io.insert-koin.compiler.plugin`; needs Kotlin 2.3.20+) |

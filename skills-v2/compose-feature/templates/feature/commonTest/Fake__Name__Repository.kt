@@ -1,7 +1,7 @@
 /**
  * Hand-written fake of the __Name__ repository for `commonTest`.
  *
- * Tests own this fake's behaviour through [seed] and [setShouldThrow].
+ * Tests own this fake's behaviour through [seed] and [shouldThrow].
  * Never a mocking library; swap fakes via constructor injection.
  */
 package __PACKAGE__.presentation.__name__
@@ -9,6 +9,7 @@ package __PACKAGE__.presentation.__name__
 import __PACKAGE__.domain.model.__Item__
 import __PACKAGE__.domain.repository.__Name__Repository
 import com.example.core.error.NetworkException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,13 @@ import kotlinx.coroutines.flow.update
 
 /** Test-only fake backing the __Name__ ViewModel tests. */
 class Fake__Name__Repository : __Name__Repository {
+    // One mutation path only: tests assign this directly. A fun
+    // setShouldThrow next to this var shares its JVM signature and fails
+    // compileTestKotlinJvm with a platform declaration clash, so it stays out.
     var shouldThrow: NetworkException? = null
+
+    /** When set, one-shot reads suspend until the test completes it, so in-flight states stay observable. */
+    var gate: CompletableDeferred<Unit>? = null
     private val backing = MutableStateFlow<List<__Item__>>(emptyList())
 
     /** Counts one-shot reads; the overlap test asserts the guard keeps this at one. */
@@ -30,12 +37,8 @@ class Fake__Name__Repository : __Name__Repository {
         backing.value = items
     }
 
-    /** Test-only helper that arms or clears the next failure. */
-    fun setShouldThrow(error: NetworkException?) {
-        shouldThrow = error
-    }
-
     override suspend fun get__Item__(id: Long): __Item__? {
+        gate?.await()
         getCalls += 1
         // By-id read: null when absent; the armed failure throws only when no row matches.
         return backing.value.firstOrNull { it.id == id } ?: shouldThrow?.let { throw it }

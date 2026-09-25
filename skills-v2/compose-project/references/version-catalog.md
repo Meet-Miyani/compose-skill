@@ -38,3 +38,4 @@ if (localLibPath.exists()) { includeBuild(localLibPath) }
 - The Koin compiler plugin requires Kotlin 2.3.20 or newer; confirm the floor at https://insert-koin.io/docs/migration/from-ksp-to-compiler-plugin before wiring the plugin.
 - KSP and Hilt floors move with patch releases, so recheck the current release notes plus `libs.versions.toml` instead of trusting a remembered number (AND-37 UNVERIFIED, kept as a verify gate, not a fact).
 - Navigation 3 minSdk plus compileSdk pins move with releases; confirm in the current docs plus `libs.versions.toml` before teaching them (AND-52 UNVERIFIED).
+- Google's `androidx.navigation3:navigation3-ui` artifact is Android and JVM only, so CMP `commonMain` takes the UI from the JetBrains fork (`org.jetbrains.androidx.navigation3:navigation3-ui`, same packages and imports); the runtime stays on the Google group. Verify the fork's stable line in the CMP release notes before pinning.

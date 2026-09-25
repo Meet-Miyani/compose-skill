@@ -20,9 +20,10 @@ CORE_DIRS="core"
 DATA_DIRS="data"
 
 # Project-relative directory of the composition root module
-# (the single `:app` module that owns NavDisplay and aggregates Koin
+# (the `:composeApp` module on CMP, the single `:app` module on
+# Android-only, that owns NavDisplay and aggregates Koin
 # modules). Nothing depends on it except the root itself.
-COMPOSITION_ROOT="app"
+COMPOSITION_ROOT="composeApp"
 
 # Project-relative directory of the design-system module (the only place
 # where raw color literals such as `Color(0x...)` may appear).

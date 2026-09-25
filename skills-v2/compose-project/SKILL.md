@@ -35,7 +35,7 @@ Build files are load-bearing contracts, not scaffolding to rush past. A shortcut
 
 Rules 1–8 are **non-negotiables**. Rules 9–10 are **defaults**: a recorded project decision in `## Project decisions` wins with no argument; waiving a non-negotiable needs a recorded reason (see the `compose-architecture` skill, `existing-projects.md` item 5).
 
-1. **Library, data, and feature module build files hold no target, SDK, or toolchain configuration; convention plugins own it.** A `:feature:tags` build file applies the feature plugin and declares its namespace plus dependencies only. (Exception: the `:app` shell mirrors the official template's `android {}` block.) Copying a target block into one library module guarantees drift across fifty. *Prevents:* per-module SDK drift (brief §12.1).
+1. **Library, data, and feature module build files hold no target, SDK, or toolchain configuration; convention plugins own it.** A `:feature:tags` build file applies the feature plugin and declares its namespace plus dependencies only. (Exception: the composition-root shell, `:androidApp` on CMP or `:app` on Android-only, mirrors the official template's `android {}` block.) Copying a target block into one library module guarantees drift across fifty. *Prevents:* per-module SDK drift (brief §12.1).
 2. **`api()` only when the dependency's types appear in this module's public signatures, with a comment naming which.** A leaked type expands every consumer's classpath and build graph. *Prevents:* classpath leaks through core modules (brief §12.6).
 3. **No module depends on the composition root.** Only the root depends on features and data modules. A feature that imports the root's NavKey or component has built a cycle. *Prevents:* feature-to-root cycles (brief §1.2).
 4. **Every new module is registered in `.composekit.conf` and passes `run-checks.sh`.** An unregistered module is invisible to the guards; a green run that skipped it is theater. *Prevents:* unguarded modules.
@@ -56,7 +56,7 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 ### Bootstrap a new project
 
 - [ ] Pick the target shape from the decision table (CMP app vs Android-only).
-- [ ] Lay out the kit skeleton from `templates/project/`: root settings, root build file, `gradle.properties`, `gradle/libs.versions.toml`, `build-logic/`, `:core:mvi` and `:core:error` from the `compose-architecture` templates, `:core:designsystem`, `:data:notes`, `:feature:notes`, the `:app` composition root.
+- [ ] Lay out the kit skeleton from `templates/project/`: root settings, root build file, `gradle.properties`, `gradle/libs.versions.toml`, `build-logic/`, `:core:mvi` and `:core:error` from the `compose-architecture` templates, `:core:designsystem`, `:feature:notes`, the composition root (`:composeApp` plus `:androidApp` on CMP, `:app` on Android-only). A `:data:<domain>` module joins only when a second feature needs the same data (see `bootstrap.md`).
 - [ ] Install the guards with `install-guards.sh`; register every module in `.composekit.conf` and document every key where setup is explained (see `bootstrap.md`). `UI_MODEL` stays `when-needed` unless the project records `always`.
 - [ ] Create the project's `## Project decisions` section in `AGENTS.md`/`CLAUDE.md` (see `bootstrap.md`); add the one-line kit-activation pointer from `enforcement.md`.
 - [ ] Build the first feature with the `compose-feature` scaffold, never by hand-copying an old screen.
@@ -89,14 +89,14 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 
 | Need | Shape |
 |---|---|
-| Android, iOS, Desktop, Web from one codebase | CMP app: shared KMP module plus thin `androidApp` shell plus Xcode project (see `bootstrap.md`) |
+| Android, iOS, Desktop, Web from one codebase | CMP app: shared `:composeApp` KMP module plus thin `:androidApp` shell plus Xcode project (see `bootstrap.md`) |
 | Android only, now and for the foreseeable future | Android-only: `:app` plus `:core:*`, `:data:*`, `:feature:*` (see `bootstrap.md`) |
 
 ### AGP plugin shape (read the AGP version first)
 
 | `libs.versions.toml` shows | Shape |
 |---|---|
-| AGP 9 or newer | Shared module uses `com.android.kotlin.multiplatform.library` with the `kotlin { androidLibrary { … } }` block; the Android entry point lives in a separate `androidApp` module |
+| AGP 9 or newer | Shared module uses `com.android.kotlin.multiplatform.library` with the `kotlin { android { … } }` block; the Android entry point lives in a separate `:androidApp` module |
 | AGP below 9 | Keep `com.android.library`; do not apply the AGP 9 shape. Stop and report instead of migrating as a side effect |
 
 ### Adopt incrementally (existing-project case → plan)
@@ -125,7 +125,7 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 
 - [ ] `scripts/composekit/run-checks.sh` (or the skill's `scripts/run-checks.sh <project-root>`) exits 0.
 - [ ] `scripts/audit-project.sh <project-root>` output is reviewed for bootstrap gaps and adopt-existing classification.
-- [ ] No target, SDK, or toolchain block in any library, data, or feature module build file: `rg -n "compileSdk|minSdk|targetSdk|jvmTarget|jvmToolchain" --glob '*.gradle.kts' <module-dirs>` is empty outside `build-logic/` and the `:app` shell.
+- [ ] No target, SDK, or toolchain block in any library, data, or feature module build file: `rg -n "compileSdk|minSdk|targetSdk|jvmTarget|jvmToolchain" --glob '*.gradle.kts' <module-dirs>` is empty outside `build-logic/` and the composition-root shell module.
 - [ ] No versions in module build files: every coordinate resolves through `libs.` accessors.
 - [ ] Every `api(` line carries a comment naming the leaked type.
 - [ ] Every module directory is registered in `.composekit.conf`; every `.composekit.conf` key used by the project is documented where setup is explained.

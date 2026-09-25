@@ -31,7 +31,7 @@ Gotcha: never synthesize an `AppError` for "empty" or "not found"; those are `Ui
 `NetworkException` lives in `:core:network`. It models wire shape, not presentation.
 ```kotlin
 sealed class NetworkException(message: String, cause: Throwable? = null) : Exception(message, cause) {
-  class Http(val statusCode: Int, val error: DecodedHttpError?, cause: Throwable? = null) : NetworkException(message, cause)
+  class Http(val statusCode: Int, val error: DecodedHttpError?, cause: Throwable? = null) : NetworkException("http $statusCode", cause)
   class Connection(cause: Throwable? = null) : NetworkException("connection", cause)
   class Timeout(cause: Throwable? = null) : NetworkException("timeout", cause)
   class SslHandshake(cause: Throwable? = null) : NetworkException("tls", cause)

@@ -69,9 +69,10 @@ check check-data-boundary "must be internal"
 check check-error-handling "without onError"
 check check-file-level-state "top-level var"
 check check-nav-keys "directly"
-# Placeholders root-only follows `git diff --name-only` inside a work tree,
-# which is empty for these untracked fixtures, so the bad tree is scanned
-# via explicit file args (the check's other mode).
+# Placeholders root-only mode covers the tracked diff plus untracked files
+# inside a work tree. The fixtures live in the repo tree, so the bad tree
+# is still scanned via explicit file args (the check's other mode) to name
+# the exact file under test.
 expect_pass "check-placeholders passes on fixtures/good" bash "$SCRIPTS_DIR/check-placeholders.sh" "$GOOD"
 expect_fail "check-placeholders fails on fixtures/bad/check-placeholders" "placeholder" bash "$SCRIPTS_DIR/check-placeholders.sh" "$BAD/check-placeholders" "$BAD/check-placeholders/feature/tags/src/commonMain/kotlin/com/example/feature/tags/presentation/tags/TagsScreen.kt"
 check check-locale-parity "missing"
@@ -93,6 +94,26 @@ expect_fail "check-locale-parity discovers the broken root without the override"
 check check-hardcoded-colors "outside the design-system"
 check check-commonmain-imports "platform import"
 
+# Untracked files count in a git work tree: an untracked file with TODO
+# fails check-placeholders in root-only mode (defect #9). A fresh scaffold
+# failing on its SEAMs stays the intended behaviour.
+mkdir -p "$SCRATCH/untracked/feature/demo/src/commonMain/kotlin/demo"
+printf '%s\n' 'FEATURE_DIRS="feature"' 'COMPOSITION_ROOT="app"' > "$SCRATCH/untracked/.composekit.conf"
+printf '%s\n' 'package demo' '// TODO: implement the demo' > "$SCRATCH/untracked/feature/demo/src/commonMain/kotlin/demo/Demo.kt"
+git init -q "$SCRATCH/untracked" 2>/dev/null
+expect_fail "check-placeholders fails on an untracked TODO file" "TODO" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/untracked"
+
+# A fresh guard install leaves untracked scripts plus wrapper files beside a
+# clean source tree: the git scan skips the installed guard directory and
+# non-source files, so the check passes (compile-gate r3 defect #2). A fresh
+# scaffold still fails on its SEAMs, by design.
+mkdir -p "$SCRATCH/cleaninstall/feature/demo/src/commonMain/kotlin/demo"
+printf '%s\n' 'FEATURE_DIRS="feature"' 'COMPOSITION_ROOT="app"' > "$SCRATCH/cleaninstall/.composekit.conf"
+printf '%s\n' 'package demo' 'fun hello(): String = "hi"' > "$SCRATCH/cleaninstall/feature/demo/src/commonMain/kotlin/demo/Demo.kt"
+git init -q "$SCRATCH/cleaninstall" 2>/dev/null
+expect_pass "install-guards.sh installs into the clean tree" bash "$SCRIPTS_DIR/install-guards.sh" "$SCRATCH/cleaninstall"
+expect_pass "check-placeholders passes with untracked guard scripts and clean sources" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/cleaninstall"
+
 # The compose-feature scaffold (Tags/Tag) ships SEAM markers: a fresh
 # scaffold fails only check-placeholders, and passes the full registry
 # once the SEAM lines are implemented (stripped here). M-11: both the
@@ -105,9 +126,9 @@ scaffold_case() {
     for check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-locale-parity check-hardcoded-colors check-commonmain-imports; do
         expect_pass "$check passes on the fresh scaffold $tag" bash "$SCRIPTS_DIR/$check.sh" "$dir"
     done
-    # Root-only placeholders follows `git diff --name-only` inside a work tree,
-    # which is empty for this untracked scaffold, so the scaffold is scanned
-    # via explicit file args (the check's other mode, as for the bad fixture).
+    # Root-only placeholders scans the tracked diff plus untracked files
+    # inside a work tree; the scaffold is scanned via explicit file args
+    # (the check's other mode, as for the bad fixture) to name the tree.
     SCAFFOLD_FILES="$(find "$dir" -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -print | sort)"
     expect_fail "check-placeholders fails on the fresh scaffold $tag (SEAMs)" "SEAM" bash "$SCRIPTS_DIR/check-placeholders.sh" "$dir" $SCAFFOLD_FILES
     find "$dir" -type f -name '*.kt' -print | while IFS= read -r f; do

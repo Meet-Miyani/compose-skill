@@ -34,7 +34,7 @@ Multi-module projects repeat the pattern: each module declares its own sealed hi
 
 ## Persistence
 
-Each feature exposes its own serializers module derived from its sealed hierarchy. Use `subclassesOfSealed`, never a hand-maintained subclass list. A hand list drifts when a subtype is added. (CONTRACT_BRIEF §7.2)
+Each feature exposes its own serializers module derived from its sealed hierarchy. Use `subclassesOfSealed`, never a hand-maintained subclass list. A hand list drifts when a subtype is added. `subclassesOfSealed` needs kotlinx.serialization 1.10.0 or newer; if `gradle/libs.versions.toml` shows an older pin, stop and report. See https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization.modules/-polymorphic-module-builder/subclasses-of-sealed.html. (CONTRACT_BRIEF §7.2)
 
 ```kotlin
 @OptIn(ExperimentalSerializationApi::class)
@@ -43,7 +43,16 @@ val notesNavSerializers = SerializersModule {
 }
 ```
 
-The composition root aggregates every feature module with `include(notesNavSerializers)` into one `appNavSerializersModule`. (CONTRACT_BRIEF §1.3, §7.2)
+The composition root aggregates every feature module into one serializers module with `+` and hands it to the back-stack holder through a `SavedStateConfiguration`, identically on every platform:
+
+```kotlin
+val backStack = rememberNavBackStack(
+    SavedStateConfiguration { serializersModule = notesNavSerializers + tagsNavSerializers },
+    NotesListKey,
+)
+```
+
+`rememberNavBackStack` with no configuration exists on Android only; the `SavedStateConfiguration` form is the only overload every target publishes, so the root uses it everywhere. (CONTRACT_BRIEF §1.3, §7.2)
 
 Non-JVM targets have no reflection serializers. Pass a `SavedStateConfiguration` carrying the explicit `SerializersModule` to the back-stack holder. Verify the call shape against https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-3.html and https://developer.android.com/guide/navigation/navigation-3/save-state. (CMP-26; CONTRACT_BRIEF §7.2)
 
@@ -70,7 +79,19 @@ Each nav entry is built once in the composition root. Resolve the nav-scoped Vie
 
 One bare injected param is fine. Two or more construction values travel as one `Params` class through `parametersOf`. Koin matches injected params by type, so two raw strings silently rebind. (CONTRACT_BRIEF §6.3)
 
-Every `NavDisplay` carries both entry decorators: the saveable-state-holder decorator and the view-model-store decorator. One decorator alone leaves distinct keys sharing a single store, and ViewModels fall back to activity scope. For decorator mechanics, the android/skills `navigation-3` skill goes deeper, if installed. (AND-03; CMP-30)
+Every `NavDisplay` carries the view-model-store entry decorator, an explicit scene strategy, and an explicit back handler. The decorator comes from `androidx.lifecycle.viewmodel.navigation3`; the strategy from `androidx.navigation3.scene`; `NavDisplay` itself from `androidx.navigation3.ui`. On CMP the UI artifact resolves from the JetBrains fork group with identical packages and imports (see the `compose-project` skill, `version-catalog.md`):
+
+```kotlin
+NavDisplay(
+    backStack = backStack,
+    entryDecorators = listOf(rememberViewModelStoreNavEntryDecorator()),
+    sceneStrategies = listOf(SinglePaneSceneStrategy()),
+    onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+    entryProvider = entryProvider { /* one entry<> per destination */ },
+)
+```
+
+One decorator alone leaves distinct keys sharing a single store, and ViewModels fall back to activity scope. For decorator mechanics, the android/skills `navigation-3` skill goes deeper, if installed. (AND-03; CMP-30)
 
 ## Back stack
 
@@ -134,15 +155,15 @@ Navigation 2 is not taught.
 | "I'll grab the result from the previous entry/ViewModel." | No. Rule 13: the picker writes through the repository; the editor observes it via a `getXStream`. |
 | "I'll hold the stack in a plain state list; it recomposes fine." | No. Rule 15: `rememberNavBackStack` persists the stack; a plain list loses it on process death. |
 | "I'll pass the back-stack handle into the ViewModel to keep routing simple." | No. Rules 4 and 15: the ViewModel emits semantic effects; the Route translates them into stack calls. |
-| "One decorator is enough; the screens look right." | No. Rule 15: both decorators are required, or distinct keys share one store. |
+| "One decorator is enough; the screens look right." | No. Rule 15: the view-model-store decorator is required, or distinct keys share one store. |
 | "I'll add the new destination to the shared global key hierarchy." | No. Rule 15: one sealed hierarchy per feature, aggregated in the root. |
 
 ## Verification
 
 - [ ] `grep -rn "sealed interface.*NavKey" --include="*.kt" feature/` shows exactly one hierarchy per feature.
-- [ ] `grep -rn "include(.*NavSerializers)" --include="*.kt" app/` (or the composition root) lists every feature serializers module.
+- [ ] `grep -rn "NavSerializers" --include="*.kt"` in the composition root lists every feature serializers module aggregated into the back-stack configuration.
 - [ ] `grep -rn "mutableStateListOf" --include="*.kt" . | grep -iv test | grep -i "key\|stack"` returns nothing.
 - [ ] `grep -rn "^private var \|^var \|^internal var " --include="*.kt" feature/*/navigation/ feature/*/presentation/` returns nothing.
 - [ ] `grep -rn "import com.example.feature" --include="*.kt" feature/` returns no cross-feature navigation import (shared `:data:` imports are fine).
 - [ ] Every key carries only identifiers, enums, or short hints; no key references a `*UiModel` or aggregate: yes or no.
-- [ ] Every `NavDisplay` call site applies both entry decorators: yes or no.
+- [ ] Every `NavDisplay` call site passes the view-model-store entry decorator, a scene strategy, and `onBack`: yes or no.

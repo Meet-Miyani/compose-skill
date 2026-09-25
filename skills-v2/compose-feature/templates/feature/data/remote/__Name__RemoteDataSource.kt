@@ -5,9 +5,12 @@
  */
 package __PACKAGE__.data.remote
 
+import org.koin.core.annotation.Single
+
 /**
  * Fetches __item__ DTOs from the backend.
  */
+@Single
 internal class __Name__RemoteDataSource {
     /**
      * Returns the current __item__ wire list.

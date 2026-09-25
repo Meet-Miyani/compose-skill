@@ -1,7 +1,9 @@
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -31,14 +33,20 @@ abstract class ComposekitKmpLibraryPlugin : Plugin<Project> {
                     }
                 }
                 jvm()
-                androidLibrary {
+                // androidLibrary{} is a build-script-only type-safe accessor:
+                // it never resolves from a Plugin<Project> class in an
+                // included build. Configure the real public interface from
+                // com.android.tools.build:gradle-api instead, per
+                // https://developer.android.com/kotlin/multiplatform/kmp-integration
+                targets.withType<KotlinMultiplatformAndroidLibraryTarget>().configureEach {
                     // Single source of truth for SDK levels (never repeated
                     // per module). Bump here, not in module build files.
-                    compileSdk = 36
+                    // Checked together with the Compose, lifecycle, and
+                    // navigation3 catalog pins, which require compileSdk 37
+                    // or newer.
+                    compileSdk = 37
                     minSdk = 24
-                    compilerOptions {
-                        jvmTarget.set(JvmTarget.JVM_11)
-                    }
+                    compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
                     androidResources {
                         enable = true
                     }

@@ -8,7 +8,7 @@ plugins {
 
 kotlin {
     // EDIT: one namespace per module, matching its directory.
-    androidLibrary {
+    android {
         namespace = "com.example.data.notes"
     }
 

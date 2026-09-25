@@ -121,8 +121,8 @@ def skill_text(skill, mode):
             + "\n\n".join(parts))
 
 
-def scenarios():
-    d = json.load(open(os.path.join(ROOT, "evals-v2", "evals.json")))
+def scenarios(path=""):
+    d = json.load(open(path or os.path.join(ROOT, "evals-v2", "evals.json")))
     return d if isinstance(d, list) else d.get("evals") or d.get("scenarios")
 
 
@@ -190,14 +190,25 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--jobs", type=int, default=6)
     ap.add_argument("--max-out", type=int, default=64000)
+    ap.add_argument("--resume", action="store_true",
+                    help="skip scenarios whose output file already holds a non-empty answer (usage-limit safe)")
+    ap.add_argument("--evals", default="", help="alternate scenario file (e.g. evals-v2/heldout.json)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     if a.triggers:
         return run_triggers(a)
-    scs = scenarios()
+    scs = scenarios(a.evals)
     if a.only:
         keep = set(a.only.split(","))
         scs = [s for s in scs if s["id"] in keep]
+    if a.resume:
+        def done(sc):
+            f = os.path.join(a.out, f"{sc['id']}.md")
+            return os.path.isfile(f) and re.search(r"^## Answer\s*\n\s*\S", open(f).read(), re.M)
+        skipped = [s["id"] for s in scs if done(s)]
+        scs = [s for s in scs if not done(s)]
+        if skipped:
+            print(f"resume: skipping {len(skipped)} already answered", flush=True)
     print(f"{len(scs)} scenarios · model={a.model} ({style(a.model)}) · skill-mode={a.skill_mode}", flush=True)
     with ThreadPoolExecutor(max_workers=a.jobs) as ex:
         rows = list(ex.map(lambda s: run_scenario(s, a), scs))

@@ -17,6 +17,12 @@ dependencies {
     // ComposeCompilerGradlePluginExtension). They never ship.
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.compose.compilerPlugin)
+    // compileOnly: the Android DSL surface the library plugin configures.
+    // gradle-api ships the public com.android.build.api.dsl interfaces
+    // (KotlinMultiplatformAndroidLibraryTarget); the plain gradle artifact
+    // ships the remaining AGP extension classes.
+    compileOnly(libs.android.gradlePlugin)
+    compileOnly(libs.android.gradleApi)
 }
 
 gradlePlugin {

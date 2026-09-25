@@ -8,12 +8,14 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.example.designsystem"
     }
 
     sourceSets {
         commonMain.dependencies {
+            // HandleAppErrors (in this module's error package) needs AppError.
+            implementation(projects.core.error)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)

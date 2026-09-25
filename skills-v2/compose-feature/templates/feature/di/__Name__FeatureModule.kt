@@ -21,5 +21,5 @@ class __Name__FeatureModule {
      * Binds the __Name__ repository contract to its default.
      */
     @Single
-    fun bind__Name__Repository(impl: Default__Name__Repository): __Name__Repository = impl
+    internal fun bind__Name__Repository(impl: Default__Name__Repository): __Name__Repository = impl
 }

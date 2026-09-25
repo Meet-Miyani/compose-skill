@@ -5,11 +5,12 @@
 plugins {
     alias(libs.plugins.composekit.kmp.feature)
     alias(libs.plugins.composekit.koin)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
     // EDIT: one namespace per module, matching its directory.
-    androidLibrary {
+    android {
         namespace = "com.example.feature.notes"
     }
 
@@ -18,9 +19,26 @@ kotlin {
             implementation(projects.core.mvi)
             implementation(projects.core.error)
             implementation(projects.core.designsystem)
-            implementation(projects.data.notes)
+            // EDIT: add this line only when a shared :data:<domain> module exists:
+            // implementation(projects.data.notes)
             implementation(libs.koin.core)
             implementation(libs.koin.annotations)
+            // @KoinViewModel needs this at compile time.
+            implementation(libs.koin.core.viewmodel)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

@@ -43,7 +43,7 @@ Gotcha: anything the user must still see after returning is state, not an effect
 ## Collect at the Route (§3.4)
 The Route reads state with `collectAsStateWithLifecycle()`. The call uses the default active state. Never drop the minimum active state to `Created`.
 The Route collects `effect` once with the design-system `CollectEffect` helper. The helper wraps `repeatOnLifecycle(STARTED)`. One collector owns effects.
-If `gradle/libs.versions.toml` shows lifecycle below 2.8.0, stop and report. `LocalLifecycleOwner` and `repeatOnLifecycle` in `commonMain` need `lifecycle-runtime-compose` 2.8.0, where its APIs moved to `common`.
+If `gradle/libs.versions.toml` shows lifecycle below 2.11.0, stop and report. `LocalLifecycleOwner` and `repeatOnLifecycle` in `commonMain` ship in the pinned `org.jetbrains.androidx.lifecycle` artifacts; confirm the floor in the current release notes before depending on an older pin. Evidence: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-lifecycle.html shows the 2.11.0 `commonMain` coordinates.
 Never rewrap an existing snapshot state into a `Flow` to reach the lifecycle-aware collector. Collect the snapshot state directly.
 Gotcha: collection at `Created` survives while the Notes screen is invisible; the default active state stops it.
 Gotcha: a missing `CollectEffect` call compiles and drops every one-shot on that Route (§3.4).

@@ -26,7 +26,9 @@ class __Name__ViewModel(
     private val repository: __Name__Repository,
     @InjectedParam private val params: __Name__Params,
     private val savedStateHandle: SavedStateHandle,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    // Dispatchers.Default, not Dispatchers.IO: IO is JVM/Android-only and
+    // does not exist on Kotlin/Native, so shared code never names it.
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : BaseViewModel<__Name__UiAction, __Name__UiState, __Name__UiEffect>(__Name__UiState()) {
 
     private val draftTitle: StateFlow<String> =
@@ -56,13 +58,16 @@ class __Name__ViewModel(
             onStart = { updateState { copy(isLoading = !hasStarted, isRefreshing = hasStarted) } },
         ) {
             val item = withContext(ioDispatcher) { repository.get__Item__(params.__item__Id) }
+            // Read the draft before updateState: inside its lambda the bare
+            // draftTitle name resolves to the UiState field, not this flow.
+            val currentDraftTitle = draftTitle.value
             updateState {
                 copy(
                     isLoading = false,
                     isRefreshing = false,
                     isMissing = item == null,
                     items = listOfNotNull(item),
-                    draftTitle = draftTitle.value,
+                    draftTitle = currentDraftTitle,
                 )
             }
             hasStarted = true

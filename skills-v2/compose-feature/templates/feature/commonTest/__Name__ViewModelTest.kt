@@ -10,11 +10,15 @@ import __PACKAGE__.domain.model.__Item__
 import androidx.lifecycle.SavedStateHandle
 import com.example.core.error.NetworkException
 import com.example.core.mvi.UiEffect
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -32,11 +36,14 @@ import kotlin.time.Clock
 /** ViewModel tests covering every observable __Name__ state. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class __Name__ViewModelTest {
-    private val testDispatcher = StandardTestDispatcher()
+    // One scheduler for every dispatcher in the test: Main, the ViewModel's
+    // injected dispatcher, and the effect collectors all share virtual time.
+    private val testScheduler = TestCoroutineScheduler()
+    private val mainDispatcher = StandardTestDispatcher(testScheduler)
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(testDispatcher)
+        Dispatchers.setMain(mainDispatcher)
     }
 
     @AfterTest
@@ -55,24 +62,29 @@ class __Name__ViewModelTest {
         fake: Fake__Name__Repository,
         handle: SavedStateHandle = SavedStateHandle(),
         id: Long = 1L,
+        // Separate instance on the shared scheduler, so withContext(ioDispatcher) suspends.
+        ioDispatcher: CoroutineDispatcher = StandardTestDispatcher(testScheduler),
     ): __Name__ViewModel = __Name__ViewModel(
         repository = fake,
         params = __Name__Params(__item__Id = id),
         savedStateHandle = handle,
-        ioDispatcher = testDispatcher,
+        ioDispatcher = ioDispatcher,
     )
 
     @Test
-    fun `cold load shows item`() = runTest(testDispatcher) {
+    fun `cold load shows item`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
         val effects = mutableListOf<UiEffect>()
-        backgroundScope.launch { viewModel.effect.toList(effects) }
+        // Unconfined collector: trySend delivery resumes it without waiting on the queue.
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
 
+        val gate = CompletableDeferred<Unit>().also { fake.gate = it }
         viewModel.onAction(__Name__UiAction.OnScreenStarted)
-        testScheduler.runCurrent()
+        advanceUntilIdle()
         assertTrue(viewModel.state.value.isLoading)
 
+        gate.complete(Unit)
         advanceUntilIdle()
 
         assertEquals(1, viewModel.state.value.items.size)
@@ -82,7 +94,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `reconcile keeps content`() = runTest(testDispatcher) {
+    fun `reconcile keeps content`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
 
@@ -96,7 +108,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `refresh keeps content and flags refreshing`() = runTest(testDispatcher) {
+    fun `refresh keeps content and flags refreshing`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
 
@@ -104,11 +116,13 @@ class __Name__ViewModelTest {
         advanceUntilIdle()
 
         fake.seed(listOf(note().copy(title = "New")))
+        val gate = CompletableDeferred<Unit>().also { fake.gate = it }
         viewModel.onAction(__Name__UiAction.OnScreenStarted)
-        testScheduler.runCurrent()
+        advanceUntilIdle()
         assertTrue(viewModel.state.value.isRefreshing)
         assertEquals("Title", viewModel.state.value.items.first().title)
 
+        gate.complete(Unit)
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isRefreshing)
@@ -116,11 +130,12 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `save persists draft and emits saved`() = runTest(testDispatcher) {
+    fun `save persists draft and emits saved`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
         val effects = mutableListOf<UiEffect>()
-        backgroundScope.launch { viewModel.effect.toList(effects) }
+        // Unconfined collector: trySend delivery resumes it without waiting on the queue.
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
 
         viewModel.onAction(__Name__UiAction.OnTitleChanged("edited"))
         viewModel.onAction(__Name__UiAction.OnSaveClick)
@@ -131,8 +146,8 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `inline error on throw then retry succeeds`() = runTest(testDispatcher) {
-        val fake = Fake__Name__Repository().apply { setShouldThrow(NetworkException.Connection()) }
+    fun `inline error on throw then retry succeeds`() = runTest(testScheduler) {
+        val fake = Fake__Name__Repository().apply { shouldThrow = NetworkException.Connection() }
         val viewModel = viewModel(fake)
 
         viewModel.onAction(__Name__UiAction.OnScreenStarted)
@@ -141,7 +156,7 @@ class __Name__ViewModelTest {
         assertNotNull(viewModel.state.value.error)
         assertTrue(viewModel.state.value.items.isEmpty())
 
-        fake.setShouldThrow(null)
+        fake.shouldThrow = null
         fake.seed(listOf(note()))
         viewModel.onAction(__Name__UiAction.OnRetryClick(viewModel.state.value.error!!))
         advanceUntilIdle()
@@ -151,7 +166,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `empty backing shows empty list`() = runTest(testDispatcher) {
+    fun `empty backing shows empty list`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository()
         val viewModel = viewModel(fake)
 
@@ -163,7 +178,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `not found sets isMissing with no AppError`() = runTest(testDispatcher) {
+    fun `not found sets isMissing with no AppError`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note(id = 2L))) }
         val viewModel = viewModel(fake, id = 1L)
 
@@ -176,7 +191,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `overlapping loads never let stale win`() = runTest(testDispatcher) {
+    fun `overlapping loads never let stale win`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
 
@@ -190,7 +205,7 @@ class __Name__ViewModelTest {
     }
 
     @Test
-    fun `process death restores draft and refetches`() = runTest(testDispatcher) {
+    fun `process death restores draft and refetches`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val handle = SavedStateHandle()
         handle["draftTitle"] = "half-typed"

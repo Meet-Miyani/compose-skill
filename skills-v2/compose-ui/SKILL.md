@@ -47,7 +47,7 @@ Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recor
 8. **Every lazy list item has a stable key from domain identity plus a `contentType`; no heavy work runs in item scope.** Never the index; never allocate per item per tick. *Prevents:* scrambled row state and per-tick parsing.
 9. **Every user-facing string is a resource, present in every locale. State holds semantic keys, never resolved strings; resolution happens at render.** *Prevents:* untranslated UI and locale drift the guard catches.
 10. **Branch panes on the received size class and apply WindowInsets exactly once per screen.** Panes mount through the Navigation 3 scene strategy so Back, deep link, and restore reach them; the detail leaf never reads window size. Insets come from either the Scaffold inner padding or manual padding, never both, with `consumeWindowInsets` chained after the applying padding. *Prevents:* unrestorable panes and double-offset content (AND-21, AND-23, AND-27, AND-72).
-11. **Code in `commonMain` never imports `java.*`, `android.*`, `LocalContext`, or `R`.** A `java.time.Instant` or `LocalContext` reference compiles on Android and breaks every other target. Time is `kotlin.time.Instant`; strings are CMP `Res` accessors. *Prevents:* shared code that compiles on Android only.
+11. **Code in `commonMain` never imports `java.*`, `android.*`, `LocalContext`, or `R`, and never names `Dispatchers.IO`.** A `java.time.Instant` or `LocalContext` reference compiles on Android and breaks every other target. Time is `kotlin.time.Instant`; strings are CMP `Res` accessors. `Dispatchers.IO` is JVM/Android-only and does not exist on Kotlin/Native; shared code defaults to `Dispatchers.Default` or takes the dispatcher as an injected constructor parameter. *Prevents:* shared code that compiles on Android only.
 
 ## Workflow
 
@@ -87,6 +87,7 @@ Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recor
 | "I'll copy this component; the condition was specific to that screen." | No. Rule 6: copy the gate with the component. |
 | "I'll put this string inline; translation comes later." | No. Rule 9: every user-facing string is a resource in every locale before done. |
 | "I'll use `java.time` / `LocalContext` here; it works on my device." | No. Rule 11: `commonMain` uses `kotlin.time.Instant` and CMP `Res`. Never `java.*`, `android.*`, `LocalContext`, or `R`. |
+| "I'll default this dispatcher to `Dispatchers.IO`; it is only shared code." | No. Rule 11: `IO` does not exist on Kotlin/Native. Default to `Dispatchers.Default` or inject the dispatcher. |
 
 ## Verification
 

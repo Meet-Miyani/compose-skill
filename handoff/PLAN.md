@@ -765,6 +765,17 @@ GitHub Action or a scheduled agent task.
 Template pins can additionally use Renovate or Dependabot on the template catalog. A human or moderator
 still reviews every bump that touches a rule.
 
+**M9 usage policy (owner, 2026-09-25; OpenCode Go plan limits).**
+
+1. Models run **one at a time, cheapest first**, never in parallel across models. Within a model, at
+   most 3 scenarios in flight.
+2. Every run uses `run-evals-api.py --resume`, so a usage-limit stop loses nothing and the run
+   continues after the reset.
+3. After the first model (both modes), the moderator reports the usage consumed and projects the rest.
+   The owner decides whether to continue in the current window.
+4. Claude-side work (grading, reviews, held-out writing, the compile gate) does not touch the OpenCode
+   plan.
+
 **Moderator step M9.** The moderator runs the scenarios with the skills (compared with the M2
 baselines), reviews end to end, and signs off. Then Phase 10 (cut-over to `skills/`, catalog and CLI
 changes) is planned separately.

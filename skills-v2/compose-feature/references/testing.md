@@ -16,21 +16,24 @@ Exercise the public event API through the public state API. Drive input with `on
 Use `runTest` with a test dispatcher set as `Main`. Set `Main` in setUp, reset it in tearDown. Share one scheduler between the `runTest` scope and `Main`. *Prevents:* hangs and flakes from split schedulers.
 Construct the ViewModel directly: `FakeNotesRepository`, the params object, a `SavedStateHandle()` test instance, and injected dispatchers. Never load Koin in a ViewModel test. Never use a mocking library. Assert with `kotlin.test`. *Prevents:* tests that exercise the DI framework instead of the contract.
 Turbine is not part of the kit. Never add it; the `backgroundScope` plus `toList` shape covers effect and state assertions. *Prevents:* an extra dependency for an assertion the stdlib already performs.
-Verified against https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/ — use only: `runTest(context)`, `TestScope.advanceUntilIdle()`, `TestScope.backgroundScope`, `StandardTestDispatcher()`, `Dispatchers.setMain` / `Dispatchers.resetMain`, `kotlinx.coroutines.flow.toList(destination)`. Verify every other helper in the project or official docs before calling it.
+Verified against https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-test/ and https://developer.android.com/kotlin/coroutines/test — use only: `runTest(context)`, `TestScope.advanceUntilIdle()`, `TestScope.backgroundScope`, `StandardTestDispatcher(scheduler?)`, `UnconfinedTestDispatcher(scheduler)`, `TestCoroutineScheduler()`, `Dispatchers.setMain` / `Dispatchers.resetMain`, `kotlinx.coroutines.flow.toList(destination)`. Verify every other helper in the project or official docs before calling it.
 *Trace: CONTRACT_BRIEF §9.1, §9.2; SMP-56 (Main rule plus fakes plus coroutine test API).*
 
 ## Canonical skeleton
 One shape for every ViewModel test in `com.example.feature.notes`. Copy it, do not reinvent it. Names match the feature templates exactly (`NotesParams(noteId)`, `OnScreenStarted`).
 ```kotlin
 private lateinit var fake: FakeNotesRepository
-private val dispatcher = StandardTestDispatcher()
-@BeforeTest fun setUp() { Dispatchers.setMain(dispatcher); fake = FakeNotesRepository() }
+private val testScheduler = TestCoroutineScheduler()
+private val mainDispatcher = StandardTestDispatcher(testScheduler)
+@BeforeTest fun setUp() { Dispatchers.setMain(mainDispatcher); fake = FakeNotesRepository() }
 @AfterTest fun tearDown() { Dispatchers.resetMain() }
-@Test fun `cold load fills detail`() = runTest(dispatcher) {
+@Test fun `cold load fills detail`() = runTest(testScheduler) {
   fake.seed(listOf(Note(id = 1L, title = "T", body = "B", updatedAt = null))) // absence stays null; never a sentinel
   val effects = mutableListOf<NotesUiEffect>()
-  val vm = NotesViewModel(fake, NotesParams(noteId = 1L), SavedStateHandle(), dispatcher)
-  backgroundScope.launch { vm.effect.toList(effects) }
+  // Separate instance on the shared scheduler, so withContext suspends and the loading frame stays observable.
+  val vm = NotesViewModel(fake, NotesParams(noteId = 1L), SavedStateHandle(), StandardTestDispatcher(testScheduler))
+  // Unconfined collector, so trySend delivery resumes it without waiting on the queue.
+  backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.effect.toList(effects) }
   vm.onAction(NotesUiAction.OnScreenStarted); advanceUntilIdle()
   assertEquals(1, vm.state.value.items.size)
   assertTrue(effects.isEmpty())
@@ -61,12 +64,13 @@ Back streams with replaying hot flows preloaded with empty defaults, plus test-o
 Launch background collectors before driving actions: `stateIn` flows start on collect, so collect in `backgroundScope` first, then `onAction`, then `advanceUntilIdle()`. *Prevents:* asserting a value collection never started.
 Never test derived values in isolation from ViewModel state. Assert labels, flags, and totals through `vm.state.value`, never mapper-only when the ViewModel owns the field. *Prevents:* a green mapper beside broken wiring.
 Give `UiState` an explicit loading initial value and pin loading-to-success: assert `isLoading` true after the action, then content with false after idle. *Prevents:* a spinner that never appears or never clears.
+Assert in-flight states (loading, refreshing) by holding the fake's call open with a gate (`CompletableDeferred`), never by timing `runCurrent()`. The scheduler runs every task queued at the current time, so a non-suspending fake settles before the assertion reads. *Prevents:* in-flight assertions that read the settled state.
 *Trace: CONTRACT_BRIEF §9.2; TEST-39 (derived values through ViewModel state); SMP-57 (replaying hot flows, empty defaults, test-only setters); SMP-58 (stateIn starts on collect: collectors first); SMP-59 (explicit loading value; pin loading-to-success).*
 
 ## Dispatchers and determinism
 Inject dispatchers as constructor parameters on the ViewModel and on any repository that dispatches. The only allowed `Dispatchers.IO` occurrence in production is a `= Dispatchers.IO` default on an injected parameter; never look it up at a call site. The callee switches with the injected dispatcher. *Prevents:* untestable threading. *Trace: CONTRACT_BRIEF §3.6, §9.4.*
-Default to queuing `StandardTestDispatcher` shared between `runTest` and `Main`; it holds tasks until `advanceUntilIdle()`. *Prevents:* assertions that race the dispatcher.
-Use `UnconfinedTestDispatcher` only for hot-flow collector setup, with the reason stated in a comment. *Prevents:* eager execution hiding an ordering defect.
+Default to queuing `StandardTestDispatcher` on one shared `TestCoroutineScheduler`: `setMain` a `Main` instance in setUp, pass that scheduler to `runTest`, and build the injected dispatcher as a separate instance on the same scheduler, never the same instance as `Main`. *Prevents:* assertions that race the dispatcher, and a `withContext` on the shared instance that never suspends, hiding the loading frame.
+Use `UnconfinedTestDispatcher(testScheduler)` for collectors that must not miss an emission: effect collection in `backgroundScope`, and hot-flow collector setup. State the reason in a comment. *Prevents:* eager execution hiding an ordering defect, and a `trySend` handoff the queue never drains.
 *Trace: SKT-60 (queuing dispatcher default; unconfined only for hot-flow collector setup with stated reason); SKT-61 (set Main; one scheduler shared).*
 Inject clock and random seams with dispatchers; control time and ids from the test. Disable animations in tests. *Prevents:* flaky timestamps and animated assertions.
 *Trace: SKT-80 (inject clock/dispatcher/random; disable animations).*
@@ -94,6 +98,7 @@ Platform tests (shell wiring, deep-link entry, nav-host integration, share/clipb
 - Hardcoded `Dispatchers.IO` removes the test seam; inject the dispatcher and switch in the callee.
 - No explicit loading initial value starts as content; pin the loading-to-success transition.
 - Screenshot goldens before matrix coverage picture broken states; finish ViewModel tests first.
+- Asserting `isLoading`/`isRefreshing` after `runCurrent()` with a non-suspending fake reads the settled state; hold the fake open with the gate instead.
 
 ## Verification
 - [ ] Each destination has one ViewModel test class covering all applicable matrix rows (yes/no).

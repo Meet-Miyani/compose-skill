@@ -3,7 +3,9 @@
 # bash 3.2 safe (no assoc arrays/mapfile/read -d/[[ =~ ]]/sed -i/GNU grep).
 # No network; no writes. Usage: check-placeholders.sh <project-root> [file ...]
 # File args: scan exactly those (each must exist). Otherwise: `git diff
-# --name-only` in a work tree (tracked diff only), else *.kt/*.kts/*.xml
+# --name-only` plus untracked files (`git ls-files --others
+# --exclude-standard`) in a work tree, filtered to source and resource
+# files and excluding the installed guard directory, else *.kt/*.kts/*.xml
 # under the configured module dirs. SEAM is a placeholder too: template
 # SEAMs are implemented, not shipped (compose-feature rule 2).
 # Prints <path>:<line>: <message>; exits 0 clean, 1 violation, 2 usage/error.
@@ -76,8 +78,21 @@ fi
 
 if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   difflist="$(git -C "$ROOT" diff --name-only 2>/dev/null)"
+  untracked="$(git -C "$ROOT" ls-files --others --exclude-standard 2>/dev/null)"
+  difflist="$difflist
+$untracked"
   while IFS= read -r entry || [ -n "$entry" ]; do
     [ -n "$entry" ] || continue
+    # Source and resource files only, never the installed guard directory:
+    # the guard scripts carry TODO/FIXME/SEAM literals in their own comments
+    # and pattern strings, so scanning them fails the check on itself.
+    case "$entry" in
+      scripts/composekit/*) continue ;;
+    esac
+    case "$entry" in
+      *.kt|*.kts|*.xml|*.gradle) ;;
+      *) continue ;;
+    esac
     cand="$ROOT/$entry"
     [ -f "$cand" ] || continue
     check_file "$cand" "$entry"
