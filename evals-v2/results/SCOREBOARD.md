@@ -100,6 +100,21 @@ For `compose-project` + `compose-platform`, the gate ran once, on 10 scenarios, 
 beat Opus on quality. PLAT-01 #3 was excluded because all five answers failed it; it was a rubric flaw,
 since rewritten. The gate ran on the pre-fix skill, and M9 re-measures the final kit.
 
+## Code craft and modern Kotlin (Phases 8.5 + 8.6, combined gate, 2026-09-25)
+
+The gate covered FEAT-01, DATA-01 and UI-03, with new binary checks for KDoc, intent comments, braces
+and the exhaustive `when`. The graders were blind, with 4 answers per packet. Report:
+`handoff/reviews/phase-8.6.md` (gate-p86).
+
+| Model | Rubric | Quality | Note |
+|---|---|---|---|
+| Muse Spark 1.3 + kit | **96%** (25/26) | **7.7** | missed only the craft item on FEAT-01 (a rule ambiguity, since fixed) |
+| DeepSeek V4.1 Flash + kit | 16/26 (**16/16 on the scenarios it answered**) | 8.5 on answered | FEAT-01 empty: reasoning spent the 64k budget (D4-1; fixed by the P9 split) |
+| MiniMax M3 + kit | 77% (20/26) | 4.7 | compile-level slips |
+| Claude Opus 5.5, no kit | 73% (19/26) | 7.0 | reference |
+
+On DATA-01 and UI-03, every kit model passes the craft check (short KDoc, intent comments, braces).
+
 ## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
 
 `skills-v2/compose-architecture/scripts/run-checks.sh` has 10 checks. It needs bash 3.2 and BSD

@@ -38,6 +38,8 @@ Result wrappers: in a project that uses `Result` wrappers or its own base class 
 
 Koin flavours: new kit code uses the compiler plugin, where `@KoinViewModel` is `org.koin.core.annotation.KoinViewModel` (ruling M-13). Projects on the KSP flavour keep `org.koin.android.annotation.KoinViewModel` for the change at hand (STANDARDS §6 case 2).
 
+Java sources: convert leaf dependencies first with `git mv` history preserved. The framework-aware batch methodology is optional depth in the Kotlin/kotlin-agent-skills `kotlin-tooling-java-to-kotlin` skill, if installed.
+
 ## Pressure script
 
 Answer no first, with the violated rule and the project evidence. State the correct approach in the project's own pattern. Name the consequence in one sentence. (Stance item 3; SKILL.md rule 1)

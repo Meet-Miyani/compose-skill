@@ -2,7 +2,7 @@
 
 Load this reference when the task writes or reviews Kotlin: a new declaration needs KDoc, logic needs a comment, or a branch body lacks braces.
 
-Every rule below is **default** (M-12): craft governs implementation internals, not boundaries (M-10), and rule 3 is stricter than the official guides. A decision recorded in the project's `## Project decisions` section wins in either direction: stricter ("braces always, no exceptions") or looser. No other skill restates these rules; other skills link here.
+Every rule below is **default** (M-12): craft governs implementation internals, not boundaries (M-10). A decision recorded in the project's `## Project decisions` section wins in either direction: stricter ("braces always, no exceptions") or looser. Language-level idioms (exhaustive `when`, value classes, scope-function restraint) are owned by `modern-kotlin.md`, not restated here. No other skill restates these rules; other skills link here.
 
 Sources (all fetched 2026-09-25): the Kotlin coding conventions
 (https://kotlinlang.org/docs/coding-conventions.html), the KDoc reference
@@ -22,11 +22,16 @@ meaning into the text instead.
    earns one line. *Prevents:* tag noise that restates the signature.
 3. **A short paragraph only for genuinely complex contracts** (threading, error tiers,
    lifecycle). Never a 20+ line essay. *Prevents:* documentation that rots past the code.
-4. **Required on public or cross-module APIs** (repository interfaces, base-contract types,
-   public design-system composables) **and on anything non-obvious.** The library-author
-   conventions require KDoc on every public member; the kit requires it where a stranger
-   meets the code. *Prevents:* a public API whose contract lives only in its author's head.
-5. **Not required on a private or small declaration whose name says it all.** A
+4. **One-line KDoc required on:** every repository and data-source interface; every
+   base-contract type (`BaseViewModel`, `AppError`, ...); every design-system composable
+   other modules use; each feature's ViewModel and Route (one line on what the destination
+    does and what it owns); and anything non-obvious. Every declaration is public by
+    default in Kotlin, so "public" alone never decides; this list does. An important
+    private function whose behavior is not obvious from its name gets a one-line KDoc
+    like any other; visibility never decides. *Prevents:* a
+    shared contract whose purpose lives only in its author's head.
+5. **Not required on:** Screen and leaf composables inside a feature, and private
+    functions or state members whose name and signature say it all. A
    `private fun retry()` with a clear name carries no KDoc. *Prevents:* comment volume that
    hides the comments that matter.
 
@@ -48,7 +53,7 @@ RIGHT (one line folding the meaning into the text):
 suspend fun getNote(id: Long): Note?
 ```
 
-WRONG (missing KDoc on a public cross-module API):
+WRONG (missing KDoc on a repository interface):
 
 ```kotlin
 interface NotesRepository {
@@ -75,6 +80,9 @@ reason when it is not obvious:
 - loops (what the accumulation builds toward)
 - multi-step collection pipelines (`filter`/`map`/`groupBy`/`sortedBy` chains: what survives
   each step and in what order)
+
+KDoc says *what* the function does and its contract, for callers and for hover;
+inline comments say *why* a step inside the body is done that way.
 
 Rules:
 
@@ -118,48 +126,20 @@ updateState { copy(isLoading = true) }
 
 ## 3. Clean, linear, readable shape (default)
 
-1. **Braces on every `if`/`else`, `for`, `while` and `do` body, including single-line
-   guards** (`if (x) { return }`). The Android style guide requires braces "even when the
-   body is empty or contains only a single statement". The kit keeps exactly one exception,
-   verified on that page: "An `if/else` conditional that is used as an expression may omit
-   braces *only* if the entire expression fits on one line"
-   (`val value = if (string.isEmpty()) 0 else 1`). A project may record "no exceptions".
-   Single-line `when` branches follow the guide and may omit braces
-   (`OnScreenStarted -> load()`); multi-line branches are braced. Note the kit is stricter
-   than the guide on `if`/`else`/`for`/`while`: the guide also exempts `if (x) return`,
-   which the kit still braces; that is why this rule is default, not non-negotiable.
-   *Prevents:* the unbraced-line edit that silently escapes the branch.
-2. **Early return instead of deep nesting.** Guard at the top; the happy path stays flat.
-   *Prevents:* nesting that hides the main flow.
-3. **One chained call per line once a chain wraps.** The Android guide breaks before the dot;
-   the kit puts each call on its own line so every step is diffable. *Prevents:* wrapped
-   chains nobody can review line by line.
-4. **Named intermediate `val`s instead of nested calls several levels deep.** Name the
-   middle, then use it. *Prevents:* inside-out reading.
-5. **One level of abstraction per function.** A function fits on one screen or is split at a
-   named concept. This is a review trigger, not a hard limit. *Prevents:* functions that do
-   three jobs under one name.
+1. **Braces follow the Android Kotlin style guide exactly (ruling M-14).** Braces are required on every multi-line `if`, `for`, `while`, `do`, and `when` body. They may be omitted only on single-line `when` branches (`OnScreenStarted -> load()`) and on `if` expressions with at most one `else` that fit on one line (`val label = if (isArchived) "Archived" else "Active"`, `if (loadJob?.isActive == true) return`). A project may record "braces always, even on single-line guards and `when` branches" as a sample `## Project decisions` entry. *Prevents:* the unbraced-line edit that silently escapes the branch.
 
-WRONG (braceless guard; braces wrapped around single-line `when` branches):
+WRONG (multi-line body without braces: the second line escapes the branch):
+
+```kotlin
+if (isArchived)
+    archive(note)
+    refresh()
+```
+
+RIGHT (multi-line bodies braced; single-line guard and `when` branches bare):
 
 ```kotlin
 if (loadJob?.isActive == true) return
-when (action) {
-    OnScreenStarted -> {
-        load()
-    }
-    OnSaveClick -> {
-        save()
-    }
-}
-```
-
-RIGHT (braced guard; single-line `when` branches bare, multi-line branches braced):
-
-```kotlin
-if (loadJob?.isActive == true) {
-    return
-}
 when (action) {
     OnScreenStarted -> load()
     OnSaveClick -> save()

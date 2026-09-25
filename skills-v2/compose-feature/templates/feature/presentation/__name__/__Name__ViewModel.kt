@@ -20,7 +20,7 @@ import org.koin.core.annotation.InjectedParam
 /** Construction bag for the destination's nav arguments. Top-level so entries and tests share it. */
 data class __Name__Params(val __item__Id: Long)
 
-/** ViewModel behind the __Name__ destination. */
+/** ViewModel behind the __Name__ destination; owns its UiState, draft title, and cold-load/reconcile split. */
 @KoinViewModel
 class __Name__ViewModel(
     private val repository: __Name__Repository,
@@ -50,9 +50,7 @@ class __Name__ViewModel(
 
     private fun load() {
         // Overlap guard: the first load owns the response; later overlapping loads return early.
-        if (loadJob?.isActive == true) {
-            return
-        }
+        if (loadJob?.isActive == true) return
         loadJob = launchGuarded(
             onError = { updateState { copy(error = it, isLoading = false) } },
             onStart = { updateState { copy(isLoading = !hasStarted, isRefreshing = hasStarted) } },

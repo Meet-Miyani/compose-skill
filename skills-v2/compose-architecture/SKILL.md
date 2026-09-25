@@ -64,7 +64,7 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 14. **Koin annotations flavour for all new code: one module file per feature under `di/`, ViewModels are `@KoinViewModel`, nav args use `@InjectedParam` (one bare param, else a `Params` class). Composables never resolve dependencies except the Route's ViewModel.** Params match by type, not name. *Prevents:* DI drift and nav-arg confusion.
 15. **Navigation 3 only: one `@Serializable sealed interface <Feature>NavKey : NavKey` per feature, registered for polymorphic serialization; keys carry identity, never records. The composition root owns `NavDisplay` and the back stack.** *Prevents:* unrestorable destinations.
 16. **Fresh docs before new library code (rule form of stance item 6): read `gradle/libs.versions.toml`, then the current official docs, then write. Unreachable docs means marking the code unverified.** M2 models invented APIs. *Prevents:* code against a remembered API.
-17. **Code reads as intent (default): short KDoc on cross-module APIs, intent comments on non-obvious logic, braces on every `if`/`else`/`for`/`while` body, no noise or dead code.** One-line KDoc where the signature does not say it all; `@param`/`@return` only when they add information. Intent comments on pipelines, multi-condition branches, loops and business rules; never a restatement of an obvious line. Braces on every `if`/`else`, `for`, `while` and `do` body, including single-line guards; single-line `when` branches may omit braces and multi-line branches are braced; the only exception is a one-line `if`/`else` expression (`val x = if (a) b else c`). No commented-out code, no TODO without an owner or issue link. Full rules and WRONG/RIGHT pairs: `code-craft.md`. Labelled default because craft governs internals and the braces clause is stricter than the official guides. *Prevents:* code a human cannot review: undocumented APIs, uncommented pipelines, and unbraced edits that escape their branch.
+17. **Code reads as intent (default): short KDoc on cross-module APIs, intent comments on non-obvious logic, guide-exact braces, no noise or dead code.** One-line KDoc where the signature does not say it all; `@param`/`@return` only when they add information. Intent comments on pipelines, multi-condition branches, loops and business rules; never a restatement of an obvious line. Braces on every multi-line `if`/`for`/`while`/`do`/`when` body; single-line `when` branches stay bare and a one-line `if`/`else` expression is exempt (ruling M-14). No commented-out code, no TODO without an owner or issue link. Full rules and WRONG/RIGHT pairs: `code-craft.md`. Labelled default because craft governs internals. *Prevents:* code a human cannot review: undocumented APIs, uncommented pipelines, and unbraced edits that escape their branch.
 
 ## Workflow
 
@@ -112,7 +112,7 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 | "I'll leave a no-op body for now." | No. Stance item 1: never ship a no-op as real logic. |
 | "I'll comment every line so it's clear." | No. Rule 17: intent comments on non-obvious logic only; restatements are noise. Delete them. |
 | "The name is obvious; no KDoc needed on this public repository." | No. Rule 17: cross-module APIs carry short KDoc even when the name is clear. |
-| "It's one line; braces are noise." | No. Rule 17: every `if`/`else`/`for`/`while` body has braces and multi-line `when` branches are braced; only a one-line `if`/`else` expression is exempt. |
+| "It's one line; braces are noise." | No. Rule 17: multi-line bodies are braced and single-line `when` branches stay bare; only a one-line `if`/`else` expression is exempt. |
 
 ## Verification
 
@@ -148,4 +148,5 @@ Load exactly one reference, only when needed. One level deep.
 - [coroutines-flow.md](references/coroutines-flow.md) — `Channel` vs `SharedFlow`, sharing flows, cancellation, dispatchers.
 - [existing-projects.md](references/existing-projects.md) — kit divergences, migrating from Navigation 2, Hilt or MVVM.
 - [code-craft.md](references/code-craft.md) — KDoc, intent comments, braces, naming, magic values; load when writing or reviewing Kotlin.
+- [modern-kotlin.md](references/modern-kotlin.md) — language idioms with version gates; load when the code could use one.
 - [README.md](templates/core/README.md) — creating `:core:mvi`, `:core:error`.

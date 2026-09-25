@@ -99,6 +99,7 @@ DueSoonBadge(visible = isDueSoon)
 - Mutating a single-value-state list in place notifies nothing; replace the list. (CB-11)
 - Writing state read in the same pass loops; move the write to an effect. (SKY-43)
 - Static provision for a churning value invalidates all consumers; track it. (SKY-136)
+- Bumping `kotlinx.collections.immutable` to 0.5.x renames every copy-returning method to participial form (`add` to `adding`); drive from compiler warnings, never blind find-replace, because Builders keep imperative names. Migration depth: the Kotlin/kotlin-agent-skills `kotlin-tooling-immutable-collections-0-5-x-migration` skill, if installed.
 
 ## Red flags
 

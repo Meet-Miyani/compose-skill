@@ -25,6 +25,14 @@ fact MIT (techniques only, no content taken). Flagged for the moderator; no acti
 | JetBrains/kotlinconf-app | https://github.com/JetBrains/kotlinconf-app | Apache-2.0 |
 | Kotlin/KMP-App-Template | https://github.com/Kotlin/KMP-App-Template | Apache-2.0 |
 | JetBrains/compose-multiplatform (examples/) | https://github.com/JetBrains/compose-multiplatform | Apache-2.0 |
+| Kotlin/kotlin-agent-skills | https://github.com/Kotlin/kotlin-agent-skills | Apache-2.0 |
+
+## Checked, not absorbed (no content taken; see EXTERNAL_LEDGER.md G8)
+
+| Source | URL | License as observed |
+|---|---|---|
+| JetBrains/skills | https://github.com/JetBrains/skills | No license file observed in the clone; deferral pointers only, no text copied |
+| maxrave-dev/kotlin-footguns | https://github.com/maxrave-dev/kotlin-footguns | GPL-3.0; topic checklist only, no text copied; landed rules re-derived from official docs |
 
 ## Style sources (techniques only, in STYLE_NOTES.md; no content taken)
 

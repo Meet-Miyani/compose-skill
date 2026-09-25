@@ -34,3 +34,5 @@ The script prints four sections: the module list, the dependency edges between m
 - Guards that skip unregistered modules report green while covering nothing, so register every module in `.composekit.conf` before trusting a clean baseline.
 - A gap report that lists findings without the incremental step for each becomes a rewrite wishlist, so every row names the step it belongs to.
 - The AGP upgrade skill refuses KMP projects while this stack is CMP, so verify AGP 9 plus KMP against the JetBrains docs instead of that skill alone.
+- For a KMP project the AGP 9 migration mechanics (library plugin swap, `androidApp` split, built-in-Kotlin removal) are optional depth in the Kotlin/kotlin-agent-skills `kotlin-tooling-agp9-migration` skill, if installed.
+- For a KMP iOS integration still on CocoaPods, the move to `swiftPMDependencies` (add SPM alongside, transform imports, reconfigure Xcode, then remove CocoaPods) is optional depth in the Kotlin/kotlin-agent-skills `kotlin-tooling-cocoapods-spm-migration` skill, if installed.

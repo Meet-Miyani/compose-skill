@@ -22,7 +22,7 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 5. PASS if a missing reminder stays null and is never substituted with "now", zero, or an empty default. [BRIEF §5.3]
 6. PASS if a note with a missing id is dropped, while a note with an unparseable timestamp keeps the row with a degraded timestamp field. [BRIEF §5.3]
 7. PASS if the DTO-to-domain mapper lives in `data/remote/mapper/` as a pure `toDomain` extension; if a UiModel exists, its mapper lives in the presentation `mapper/`, never in the ViewModel. [BRIEF §5.4]
-8. PASS if public or cross-module declarations the answer adds carry short KDoc, non-obvious logic carries an intent comment, every if/else/for/while body has braces, multi-line when branches are braced, and no noise or commented-out code remains. [compose-architecture/code-craft.md] [kit]
+8. PASS if one-line KDoc is on each repository/data-source interface, base-contract type, shared design-system composable, and feature ViewModel and Route the answer adds (one line on what the destination does and what it owns), and none is on Screen/leaf composables, private functions, or self-named UiState/UiAction/UiEffect members, non-obvious logic carries an intent comment, every multi-line if/else/for/while/do body has braces, single-line when branches stay bare, and no noise or commented-out code remains. [compose-architecture/code-craft.md] [kit]
 
 **Guard scripts that must pass:** check-data-boundary.sh (prospective)
 

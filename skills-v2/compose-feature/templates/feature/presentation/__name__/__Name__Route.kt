@@ -15,7 +15,7 @@ import com.example.core.mvi.CollectEffect
 import com.example.core.mvi.UiEffect
 import com.example.designsystem.error.HandleAppErrors
 
-/** Entry wrapper for the __Name__ destination. */
+/** Entry for the __Name__ destination; owns lifecycle, effect collection, and error forwarding. */
 @Composable
 fun __Name__Route(
     viewModel: __Name__ViewModel,

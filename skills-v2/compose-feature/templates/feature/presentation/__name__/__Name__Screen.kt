@@ -14,7 +14,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
-/** Stateless __Name__ screen. */
 @Composable
 fun __Name__Screen(
     state: __Name__UiState,
