@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tags_title">Tags_tr</string>
+    <string name="tags_error">Error_tr</string>
+    <string name="tags_retry">Retry_tr</string>
+</resources>

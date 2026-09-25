@@ -65,6 +65,21 @@ blind no-skill run for MiniMax. Residuals: DeepSeek FEAT-01 was truncated at the
 MiniMax FEAT-01 had two compile errors. Both are single-shot artifacts, addressed by splitting FEAT-01
 for the final eval.
 
+## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
+
+`skills-v2/compose-architecture/scripts/run-checks.sh` has 10 checks. It needs bash 3.2 and BSD
+grep/awk, and no other tools. It ran read-only on a private production KMP app of about 1,600 Kotlin
+files and finished in under a minute. The moderator verified every hit by hand.
+
+| Round | Hits | True | False |
+|---|---|---|---|
+| First version | 539 | 12 | 527 |
+| After 4 review rounds | **12** | **12** | **0** |
+
+The 12 true hits: 7 Contract files with extra or misnamed types, 4 domain timestamps typed `String`, and 1
+shipped `TODO`. Each false-positive shape found along the way is now a regression fixture in the 39-test
+suite.
+
 ## Final (M9, after all six skills)
 
 Filled in after Phase 9: all scenarios with all skills, plus skill-triggering accuracy.

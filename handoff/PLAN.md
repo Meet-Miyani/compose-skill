@@ -477,6 +477,10 @@ output in the report. Every check has a good and a bad fixture.
 
 ## Phase 6 — `compose-ui`
 
+**Start with ruling M-11** (`handoff/reviews/ruling-M-11.md`): apply its required changes to the two
+approved skills, the brief and the evals, run its self-checks, and report them in a separate "M-11" section
+of `reports/phase-6.md`. Then write `compose-ui`, which owns the stability rule from M-11 item 4.
+
 Follows SKILL_SPECS §3, the ledger and the M2 review. Harvest the house `composing-stable-ui` skill for
 failure patterns (genericized). The deferrals follow STANDARDS §7: stability internals go to skydoves,
 M3 and adaptive mechanics to android/skills. **Acceptance:** budget and validate pass; ledger rows

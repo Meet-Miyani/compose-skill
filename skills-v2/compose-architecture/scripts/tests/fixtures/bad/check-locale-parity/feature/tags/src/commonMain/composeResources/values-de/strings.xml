@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tags_title">Tags</string>
+    <string name="tags_error">Etwas ist schiefgelaufen.</string>
+</resources>

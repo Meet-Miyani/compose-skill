@@ -308,6 +308,20 @@ Use these deliberately; they are how a skill makes a mid-tier model behave like 
    code, name the incoherence, and propose migration as a separate task.
 4. **Precedent is evidence, not permission.** Copying an existing file that violates a non-negotiable
    copies the defect.
+5. **Recorded project decisions (M-12).** The kit has two kinds of rule, and each skill labels which is
+   which:
+   - **Defaults and conditionals** (UiModel triggers, file-split thresholds, optional layers,
+     scaffold options). An owner decision recorded in the project **wins with no argument**. The agent
+     may say the cost once, the first time it applies, and then follows the decision everywhere.
+   - **Non-negotiables** (the iron laws: DTO boundary, guarded async with `onError`, cancellation
+     rethrow, one owner per value, identity-only nav keys, and so on). These hold against an in-chat
+     push; that is what the pressure scenarios test. A project may waive one only through a recorded
+     decision that gives a reason. The agent then follows it, marks the affected code as a known
+     deviation, and does not re-argue.
+   - **Where decisions live.** One `## Project decisions` section in the project's agent instructions
+     file (`AGENTS.md` / `CLAUDE.md`). Machine-readable switches the scripts need (e.g.
+     `UI_MODEL=always`) go in `.composekit.conf`. A preference said once in chat and not recorded is
+     applied to the current task, and the agent offers to record it.
 
 ---
 
