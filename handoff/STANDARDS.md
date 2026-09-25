@@ -221,6 +221,27 @@ official documentation during this phase (cite the URL in the harvest ledger).
 
 ---
 
+### 3.2 Growth policy (how the kit takes new content without re-balancing)
+
+Budgets are **per file**, and nothing caps the number of reference files in a skill. The kit grows by
+adding files, never by inflating them.
+
+1. **A new topic inside an existing task** (a new API, library or pattern): write a new
+   `references/<topic>.md` in the owning skill, under its own budget. `SKILL.md` gains **one line** in
+   its reference index (about 25 tokens) plus, if needed, one trigger word in the description.
+2. **A reference past about 20 rules** (the `dest-load.py` cap), or past its token budget: split it by
+   sub-topic into two files. Never compress rules to fit.
+3. **A `SKILL.md` near its 5,000-token hard max:** move detail from the body into references. The body
+   keeps only what applies to every task the skill owns: non-negotiables, workflow, red flags, gates
+   and the index.
+4. **A new skill only for a new task shape.** Add one only when a task a user asks for has its own
+   workflow and gates that no current skill owns; a new library or topic alone does not qualify.
+   Before adding it, check the combined description size against the listing budget (about 15k
+   characters for all installed skills; the six kit descriptions are about 4k now), then add the
+   routing row in `compose-architecture` and trigger/no-trigger cases in `evals-v2/triggers.json`.
+5. **Superseded content is replaced, not appended.** When an API or pattern changes, edit the rule in
+   place and bump `last-reviewed`. Two versions of the same rule never coexist.
+
 ## 4. Skill anatomy (every SKILL.md follows this order)
 
 ```markdown

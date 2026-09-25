@@ -18,10 +18,10 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 1. PASS if the wire type is named NoteDto, marked internal, and never appears in the repository interface, the ViewModel, or any composable. [BRIEF §5.2]
 2. PASS if the domain Note carries the reminder as Instant (nullable), never as an ISO string or epoch millis. [BRIEF §5.1]
 3. PASS if the domain Note carries no serialization annotations, wire field names, or wire strings. [SPEC §4 seed 2]
-4. PASS if parsing happens only in the DTO-to-domain mapper: ISO strings become Instant there, and UiModels only format. [BRIEF §5.3]
+4. PASS if parsing happens only in the DTO-to-domain mapper: ISO strings become Instant there, and formatting happens in a UiModel mapper or at display. [BRIEF §5.3]
 5. PASS if a missing reminder stays null and is never substituted with "now", zero, or an empty default. [BRIEF §5.3]
 6. PASS if a note with a missing id is dropped, while a note with an unparseable timestamp keeps the row with a degraded timestamp field. [BRIEF §5.3]
-7. PASS if the DTO-to-domain mapper lives in data/remote/mapper/ as a pure toDomain extension and the domain-to-UIModel mapper lives in the presentation mapper, not in the ViewModel. [BRIEF §5.4]
+7. PASS if the DTO-to-domain mapper lives in `data/remote/mapper/` as a pure `toDomain` extension; if a UiModel exists, its mapper lives in the presentation `mapper/`, never in the ViewModel. [BRIEF §5.4]
 
 **Guard scripts that must pass:** check-data-boundary.sh (prospective)
 

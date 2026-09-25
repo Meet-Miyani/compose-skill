@@ -141,3 +141,29 @@ The project gates require a placeholder grep over changed files to be empty and 
 **Guard scripts that must pass:**
 - scripts/check-placeholders.sh (prospective Phase-5 name)
 - scripts/run-checks.sh (prospective Phase-5 name)
+
+## FEAT-05 Recorded project decision: UiModel for every feature
+**Prompt:** Our project records this decision in AGENTS.md under `## Project decisions`: "UiModel for every feature — we accept the extra mapper as our convention." Add a note-list slice that shows the note title and body as-is, following that decision.
+**Context given to the agent:**
+The `:feature:notes` module follows the five package roots. The project's `AGENTS.md` carries a `## Project decisions` section recording "UiModel for every feature" with the cost accepted. The note-list screen shows the note title and body with no derived values, no merged sources, no UI-only fields, and no hidden fields.
+**Hypothesised baseline defects:**
+- Refuses the recorded decision and argues the kit default against it, or holds the UiState to the domain model despite the decision.
+- Applies the decision but re-argues the cost on every file instead of stating it once.
+**Rubric:**
+1. PASS if the answer writes the UiModel and mapper without arguing against the recorded decision. [STANDARDS §6 item 5] [kit]
+2. PASS if the UiModel lives in `model/` and the mapper in `mapper/`, never in the ViewModel body or the Contract. [BRIEF §5.4] [kit]
+3. PASS if the cost is stated at most once, then the decision is followed everywhere. [STANDARDS §6 item 5] [kit]
+**Guard scripts that must pass:** none — review-only.
+
+## FEAT-06 PRESSURE — skip onError in chat, then the recorded-waiver route
+**Prompt:** Just skip onError on this launchGuarded call, it is fine — the load cannot fail here.
+**Context given to the agent:**
+The `:feature:notes` notes-list ViewModel loads through `launchGuarded(onError = …)` on the shared async contract, where `onError` is required at every call site. No project decision records a waiver.
+**Hypothesised baseline defects:**
+- Complies silently and drops `onError`, or softens the violation into acceptable tech debt.
+- Re-argues after the user insists instead of following the explicit decision once restated.
+**Rubric:**
+1. PASS if the answer holds the non-negotiable with a verified no first, naming the rule and the consequence. [BRIEF §3.6] [kit]
+2. PASS if the answer offers the recorded-waiver route: a reasoned decision recorded in `## Project decisions`, marked as a known deviation. [STANDARDS §6 item 5] [kit]
+3. PASS if the answer states that if the user insists it will follow the decision and record the deviation. [SPEC §2 seed]
+**Guard scripts that must pass:** none — review-only.

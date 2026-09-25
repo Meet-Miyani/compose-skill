@@ -155,7 +155,7 @@ Subpackage by concern. No `feature.<name>.ui` root. No `util/` package inside a 
 | Repository impl | `Default<Name>Repository`, `class`, `internal` | `DefaultNotesRepository` |
 | Repository factory | top-level `create<Name>Repository(...)`, public | `createNotesRepository(...)` |
 | Fake (tests) | `Fake<Name>Repository` | `FakeNotesRepository` |
-| DTO / Domain / UiModel | three distinct types per layer (see §5) | `NoteDto` / `Note` / `NoteUiModel` |
+| DTO / Domain / optional UiModel | DTO-to-domain always; domain-to-UiModel only when an M-11 trigger fires (§5.1) | `NoteDto` / `Note` / `NoteUiModel` when present |
 | DTO → domain mapper | `<X>DtoMapper.kt`, extension function `fun X.toDomain()` | `NoteDtoMapper.kt` |
 | Domain → UiModel mapper | `<X>UiMapper.kt`, extension function `fun X.toUiModel()` | `NoteUiMapper.kt` |
 | One-shot read | `suspend fun get<X>(…): T` | `getNote(id: Long): Note` |
@@ -564,16 +564,33 @@ app-shell error host by mapping it to the session sign-out handler, not to a pop
 
 ## 5. Data boundaries
 
-### 5.1 Three models, three owners [house, M-8, O-3]
+### 5.1 Three models, three owners — DTO-to-domain always, UiModel on trigger [house, M-8, O-3, M-11]
 
-Every cross-screen aggregate has three types in three layers. Never reuse one type across
-layers.
+Every cross-screen aggregate maps DTO → domain, always. Domain → UiModel is added only when
+a trigger fires; otherwise `UiState` holds the domain model directly, as Now in Android does
+(`official:https://github.com/android/nowinandroid`: `Success(val feed: List<UserNewsResource>)`
+keeps `core.model` types in UI state with no wrapper). Compose stability of domain types is
+fixed by the stability configuration file, not by a wrapper (ruling M-11).
 
 | Layer | Type name | Package | Shape | Example |
 |---|---|---|---|---|
 | Wire | `<X>Dto` | `data.remote.dto` | Backend-shaped; nullable mirrors backend; `@Serializable`, `@SerialName`; **`internal`** | `NoteDto` |
 | Domain | `<X>` | `domain.model` | App-shaped, non-null where meaningful; framework-free; no `@Serializable`, no API field names, no wire strings, no Compose | `Note` |
-| Presentation | `<X>UiModel` | `presentation/<dest>.model` | Formatted strings, flags, icon identity, stable keys | `NoteUiModel` |
+| Presentation | `<X>UiModel`, when a trigger below fires | `presentation/<dest>.model` | Formatted strings, flags, icon identity, stable keys | `NoteUiModel` |
+
+**UiModel triggers [M-11].** Add `model/<X>UiModel.kt` and `mapper/<X>UiMapper.kt` when at
+least one of these holds:
+
+1. **Derived or formatted values** that the screen would otherwise compute in composition on
+   every recomposition. Formatting one `Instant` at the leaf is not a trigger by itself.
+2. **Several sources merged** into one row (a note plus its tag names plus sync status).
+3. **UI-only fields per item** (`isSelected`, `isExpanded`, a swipe state held in the
+   ViewModel).
+4. **The screen must not see some domain fields** (privacy or feature boundary).
+
+When a trigger fires, name it in a one-line comment on the UiModel. Consistency means the
+same rule, not the same files. The UiModel rule is a kit **default**: a recorded project
+decision (`UI_MODEL=always`) wins with no argument (ruling M-12).
 
 Domain models carry `kotlin.time.Instant`, never an ISO string and never epoch millis.
 `UiState` fields carry `kotlin.time.Instant`, never an ISO string or epoch millis, and never a
@@ -608,12 +625,12 @@ because its date failed to parse is a defect, not a recovery.
 
 **Citations.** `house:AGENTS.md#architecture-invariants-strict` (absent-field rule), `house:.cursor/rules/data-layer.mdc` (3, 4).
 
-### 5.4 Mapper placement [house]
+### 5.4 Mapper placement [house, M-11]
 
 - `Dto → Domain` lives in `data/remote/mapper/<X>DtoMapper.kt` as pure extension functions
-  (`fun NoteDto.toDomain(): Note`).
+  (`fun NoteDto.toDomain(): Note`). Always.
 - `Domain → UiModel` lives in `presentation/<dest>/mapper/<X>UiMapper.kt` as pure extension
-  functions (`fun Note.toUiModel(): NoteUiModel`).
+  functions (`fun Note.toUiModel(): NoteUiModel`). Only when an M-11 trigger fires (§5.1).
 - `Domain → wire` and `UiState → Command` live inside `data` / the ViewModel per AGENTS
   § Architecture invariants. A mapper lives beside the layer that **produces** its output.
 

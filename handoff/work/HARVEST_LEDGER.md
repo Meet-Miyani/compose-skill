@@ -157,7 +157,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-44 | 161-200 | Quick-routing intents (performance, flow, nav, paging, ktor, DI, a11y, animation, review, interop, architecture, files, essentials, M3, images, lists, ux, testing, datastore, room, resources, gradle, CI) feed the kit routing table and per-skill trigger phrases | DUP | DROP: split into SKL-85–SKL-92 | — |
 | SKL-85 | 161-200 | State-management triggers (ViewModel, StateFlow, UiState, onEvent) route to the compose-architecture skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-86 | 161-200 | Review and anti-pattern triggers route to the compose-feature skill | WORKFLOW | compose-feature/SKILL.md#workflow | ✓ landed |
-| SKL-87 | 161-200 | UI triggers (@Composable, LazyColumn, animation, accessibility) route to the compose-ui skill | WORKFLOW | compose-ui/SKILL.md#workflow | — |
+| SKL-87 | 161-200 | UI triggers (@Composable, LazyColumn, animation, accessibility) route to the compose-ui skill | WORKFLOW | compose-ui/SKILL.md#workflow | ✓ landed |
 | SKL-88 | 161-200 | Data triggers (repository, Ktor, Room, Paging) route to the compose-data skill | WORKFLOW | compose-data/SKILL.md#workflow | — |
 | SKL-89 | 161-200 | Build triggers (Gradle, version catalog, build-logic, CI, packaging) route to the compose-project skill | WORKFLOW | compose-project/SKILL.md#workflow | — |
 | SKL-90 | 161-200 | Platform triggers (commonMain, expect/actual, iOS, desktop, web) route to the compose-platform skill | WORKFLOW | compose-platform/SKILL.md#workflow | — |
@@ -169,25 +169,25 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| ACC-01 | 5-8 | Every Image and Icon needs explicit contentDescription: null when decorative, localized string when meaningful | RULE | compose-ui/references/accessibility.md#content-descriptions | — |
-| ACC-02 | 21 | Flag any Image with a non-obvious resource name plus contentDescription null that lacks a comment explaining why it is decorative | RULE | compose-ui/references/accessibility.md#content-descriptions | — |
+| ACC-01 | 5-8 | Every Image and Icon needs explicit contentDescription: null when decorative, localized string when meaningful | RULE | compose-ui/references/accessibility.md#content-descriptions | ✓ landed |
+| ACC-02 | 21 | Flag any Image with a non-obvious resource name plus contentDescription null that lacks a comment explaining why it is decorative | RULE | compose-ui/references/accessibility.md#content-descriptions | ✓ landed |
 | ACC-03 | 25-32 | Semantics API property table (contentDescription, role, stateDescription, heading) | API | DROP: tutorial code | — |
-| ACC-04 | 43 | Prefer built-in Material components over manual role assignment; they include correct semantics automatically | RULE | compose-ui/references/accessibility.md#semantics | — |
-| ACC-05 | 49-58 | Use semantics(mergeDescendants=true) when children together form one logical announcement unit | DECISION | compose-ui/references/accessibility.md#grouping | — |
-| ACC-06 | 49-67 | GOOD/BAD pair: merged single announcement vs fragmented per-child announcements with a labeled decorative icon | GOTCHA | compose-ui/references/accessibility.md#grouping | — |
-| ACC-07 | 71-80 | Use clearAndSetSemantics when auto-generated text is verbose or misleading | DECISION | compose-ui/references/accessibility.md#grouping | — |
+| ACC-04 | 43 | Prefer built-in Material components over manual role assignment; they include correct semantics automatically | RULE | compose-ui/references/accessibility.md#semantics | ✓ landed |
+| ACC-05 | 49-58 | Use semantics(mergeDescendants=true) when children together form one logical announcement unit | DECISION | compose-ui/references/accessibility.md#grouping | ✓ landed |
+| ACC-06 | 49-67 | GOOD/BAD pair: merged single announcement vs fragmented per-child announcements with a labeled decorative icon | GOTCHA | compose-ui/references/accessibility.md#grouping | ✓ landed |
+| ACC-07 | 71-80 | Use clearAndSetSemantics when auto-generated text is verbose or misleading | DECISION | compose-ui/references/accessibility.md#grouping | ✓ landed |
 | ACC-08 | 82-85 | Decision: mergeDescendants keeps child text in one announcement; clearAndSetSemantics replaces it with a custom string | DUP | DROP: dup of ACC-05 plus ACC-07 | — |
-| ACC-09 | 89 | Minimum interactive size 48x48 dp | RULE | compose-ui/references/accessibility.md#touch-targets | — |
-| ACC-10 | 91 | Use Modifier.minimumInteractiveComponentSize() on custom interactive elements | RULE | compose-ui/references/accessibility.md#touch-targets | — |
-| ACC-11 | 92 | Material components handle touch targets internally; do not add redundant padding | RULE | compose-ui/references/accessibility.md#touch-targets | — |
+| ACC-09 | 89 | Minimum interactive size 48x48 dp | RULE | compose-ui/references/accessibility.md#touch-targets | ✓ landed |
+| ACC-10 | 91 | Use Modifier.minimumInteractiveComponentSize() on custom interactive elements | RULE | compose-ui/references/accessibility.md#touch-targets | ✓ landed |
+| ACC-11 | 92 | Material components handle touch targets internally; do not add redundant padding | RULE | compose-ui/references/accessibility.md#touch-targets | ✓ landed |
 | ACC-12 | 107-112 | WCAG AA minimum contrast ratios: 4.5:1 normal text, 3:1 large text | GENERIC | DROP: model already knows (Opus test) | — |
-| ACC-13 | 114 | Never use color as the only way to convey information; pair with icon, text label, or pattern | RULE | compose-ui/references/accessibility.md#contrast | — |
+| ACC-13 | 114 | Never use color as the only way to convey information; pair with icon, text label, or pattern | RULE | compose-ui/references/accessibility.md#contrast | ✓ landed |
 | ACC-14 | 117-128 | BAD/GOOD pair: color-only status box vs icon plus text plus color status row | EXAMPLE | compose-feature/examples.md#pairs | — |
-| ACC-15 | 130 | Use theme tokens (MaterialTheme.colorScheme) rather than hardcoded colors for contrast across light/dark modes | RULE | compose-ui/references/accessibility.md#contrast | — |
-| ACC-16 | 133-144 | Custom clickable needs semantic role plus onClickLabel; Card example | RULE | compose-ui/references/accessibility.md#custom-clickable | — |
-| ACC-17 | 146 | Prefer Button / IconButton / TextButton over custom clickable elements for free semantics, targets, feedback | RULE | compose-ui/references/accessibility.md#custom-clickable | — |
-| ACC-18 | 150-159 | Expose named customAccessibilityActions for multi-action items; lambda returns true when handled | GOTCHA | compose-ui/references/accessibility.md#actions | UNVERIFIED: not re-checked against current official docs |
-| ACC-19 | 165-174 | MVI placement: semantic descriptions in Screen/Leaf, semantic keys or enums in State, Modifier.semantics in composable chains never ViewModel, a11y actions via onEvent | RULE | compose-ui/references/accessibility.md#mvi | — |
+| ACC-15 | 130 | Use theme tokens (MaterialTheme.colorScheme) rather than hardcoded colors for contrast across light/dark modes | RULE | compose-ui/references/accessibility.md#contrast | ✓ landed |
+| ACC-16 | 133-144 | Custom clickable needs semantic role plus onClickLabel; Card example | RULE | compose-ui/references/accessibility.md#custom-clickable | ✓ landed |
+| ACC-17 | 146 | Prefer Button / IconButton / TextButton over custom clickable elements for free semantics, targets, feedback | RULE | compose-ui/references/accessibility.md#custom-clickable | ✓ landed |
+| ACC-18 | 150-159 | Expose named customAccessibilityActions for multi-action items; lambda returns true when handled | GOTCHA | compose-ui/references/accessibility.md#actions | UNVERIFIED: not re-checked against current official docs · ✓ landed |
+| ACC-19 | 165-174 | MVI placement: semantic descriptions in Screen/Leaf, semantic keys or enums in State, Modifier.semantics in composable chains never ViewModel, a11y actions via onEvent | RULE | compose-ui/references/accessibility.md#mvi | ✓ landed |
 | ACC-20 | 174 | Keep accessibility descriptions in the UI layer; State holds semantic keys and Screen/Leaf resolves via stringResource() | DUP | DROP: dup of ACC-19 | — |
 | ACC-21 | 180-195 | Do/Don't: contentDescription for meaningful images, mergeDescendants for groups, clearAndSetSemantics for misleading text, 48dp targets, pair color with icons/text, colorScheme tokens, test with a screen reader per platform | DUP | DROP: split into ACC-23–ACC-29 | — |
 | ACC-23 | 180-195 | Provide contentDescription for every meaningful Image and Icon | DUP | DROP: dup of ACC-01 | — |
@@ -196,14 +196,14 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ACC-26 | 180-195 | Enforce 48dp minimum touch targets on custom interactive elements | DUP | DROP: dup of ACC-09 | — |
 | ACC-27 | 180-195 | Pair color with icons or text for status indicators | DUP | DROP: dup of ACC-13 | — |
 | ACC-28 | 180-195 | Use MaterialTheme.colorScheme tokens for contrast-safe colors | DUP | DROP: dup of ACC-15 | — |
-| ACC-29 | 180-195 | Test with a screen reader on each target platform | RULE | compose-ui/references/accessibility.md#checklist | — |
+| ACC-29 | 180-195 | Test with a screen reader on each target platform | RULE | compose-ui/references/accessibility.md#checklist | ✓ landed |
 | ACC-22 | 189-195 | Don't: null description on meaningful images without comment, manual role over Material, extra padding on compliant Material components, color-alone state, localized strings in VM state, hardcoded a11y text | DUP | DROP: split into ACC-30–ACC-35 | — |
 | ACC-30 | 189-195 | Never leave contentDescription null on meaningful images without a comment | DUP | DROP: dup of ACC-02 | — |
 | ACC-31 | 189-195 | Never apply role manually when a Material component already provides it | DUP | DROP: dup of ACC-04 | — |
 | ACC-32 | 189-195 | Never add extra padding on Material components that already meet touch targets | DUP | DROP: dup of ACC-11 | — |
 | ACC-33 | 189-195 | Never rely on color alone to communicate state changes | DUP | DROP: dup of ACC-13 | — |
 | ACC-34 | 189-195 | Never put localized accessibility strings in ViewModel state | DUP | DROP: dup of ACC-19 | — |
-| ACC-35 | 189-195 | Never hardcode accessibility text instead of using stringResource() | RULE | compose-ui/references/accessibility.md#checklist | — |
+| ACC-35 | 189-195 | Never hardcode accessibility text instead of using stringResource() | RULE | compose-ui/references/accessibility.md#checklist | ✓ landed |
 
 ## references/animations-advanced.md
 
@@ -211,29 +211,29 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 |---|---|---|---|---|---|
 | ANADV-01 | 7 | Shared element transitions available in Jetpack Compose and CMP since CMP 1.7+ | GOTCHA | DROP: optional depth — version floor, UNVERIFIED | UNVERIFIED: CMP 1.7 floor not re-checked against current release notes |
 | ANADV-02 | 11-27 | SharedTransitionLayout plus AnimatedContent core setup code | API | DROP: tutorial code | — |
-| ANADV-03 | 31-36 | sharedElement vs sharedBounds decision: same content hero vs visually-different container transform; text prefers sharedBounds | DECISION | compose-ui/references/motion.md#shared-elements | — |
+| ANADV-03 | 31-36 | sharedElement vs sharedBounds decision: same content hero vs visually-different container transform; text prefers sharedBounds | DECISION | compose-ui/references/motion.md#shared-elements | ✓ landed |
 | ANADV-04 | 41-56 | sharedElement / sharedBounds modifier usage with rememberSharedContentState and ResizeMode | API | DROP: tutorial code | — |
-| ANADV-05 | 60-63 | Use unique structured shared-element keys (id, origin, type enum) | RULE | compose-ui/references/motion.md#shared-elements | — |
+| ANADV-05 | 60-63 | Use unique structured shared-element keys (id, origin, type enum) | RULE | compose-ui/references/motion.md#shared-elements | ✓ landed |
 | ANADV-06 | 67-79 | boundsTransform keyframes customization code | API | DROP: tutorial code | — |
-| ANADV-07 | 83-84 | ResizeMode: ScaleToBounds for Text, RemeasureToBounds for different aspect ratios | DECISION | compose-ui/references/motion.md#shared-elements | UNVERIFIED: not re-checked against current official docs |
+| ANADV-07 | 83-84 | ResizeMode: ScaleToBounds for Text, RemeasureToBounds for different aspect ratios | DECISION | compose-ui/references/motion.md#shared-elements | UNVERIFIED: not re-checked against current official docs · ✓ landed |
 | ANADV-08 | 88-101 | Wrap NavHost in SharedTransitionLayout and pass both scopes to screens | API | DROP: tutorial code | — |
 | ANADV-09 | 107-119 | Coil shared-element pattern: matching memoryCacheKey plus placeholderMemoryCacheKey between source and destination | DUP | DROP: dup of IMG-12 | UNVERIFIED: not re-checked against current Coil docs |
-| ANADV-10 | 123-125 | renderInSharedTransitionScopeOverlay for chrome, clipInOverlayDuringTransition, skipToLookaheadSize for text reflow | GOTCHA | compose-ui/references/motion.md#overlay | UNVERIFIED: not re-checked against current official docs |
-| ANADV-11 | 129 | Size modifiers go AFTER sharedElement(); inconsistent modifier order between matched elements causes visual jumps | GOTCHA | compose-ui/references/motion.md#order | — |
+| ANADV-10 | 123-125 | renderInSharedTransitionScopeOverlay for chrome, clipInOverlayDuringTransition, skipToLookaheadSize for text reflow | GOTCHA | compose-ui/references/motion.md#overlay | UNVERIFIED: not re-checked against current official docs · ✓ landed |
+| ANADV-11 | 129 | Size modifiers go AFTER sharedElement(); inconsistent modifier order between matched elements causes visual jumps | GOTCHA | compose-ui/references/motion.md#order | ✓ landed |
 | ANADV-12 | 136-150 | Tap-to-animate pointerInput plus Animatable pattern code | API | DROP: tutorial code | — |
 | ANADV-13 | 152 | Interruption rule: tapping during animation cancels current and starts new, maintaining velocity | DUP | DROP: dup of ANIM-10 | — |
 | ANADV-14 | 156-187 | swipeToDismiss custom modifier implementation code | API | DROP: tutorial code | — |
-| ANADV-15 | 189 | Gesture key patterns: snapTo during drag, animateDecay for fling, animateTo(0f) for snap-back, VelocityTracker for velocity | GOTCHA | compose-ui/references/motion.md#gestures | — |
+| ANADV-15 | 189 | Gesture key patterns: snapTo during drag, animateDecay for fling, animateTo(0f) for snap-back, VelocityTracker for velocity | GOTCHA | compose-ui/references/motion.md#gestures | ✓ landed |
 | ANADV-16 | 195-205 | Canvas composable plus drawBehind vs drawWithContent distinction | API | DROP: tutorial code | — |
 | ANADV-17 | 207-216 | Animate canvas content via state; Canvas draws in Drawing phase so no recomposition is needed for visual updates | GENERIC | DROP: model already knows | — |
-| ANADV-18 | 222-229 | graphicsLayer transforms at Drawing phase level, avoiding recomposition entirely | RULE | compose-ui/references/motion.md#graphics-layer | — |
+| ANADV-18 | 222-229 | graphicsLayer transforms at Drawing phase level, avoiding recomposition entirely | RULE | compose-ui/references/motion.md#graphics-layer | ✓ landed |
 | ANADV-19 | 232-238 | BAD/GOOD pair: Modifier.scale (recomposes every frame) vs Modifier.graphicsLayer scaleX (draw phase) | DUP | DROP: dup of ANADV-18 | — |
 
 ## references/animations.md
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| ANIM-01 | 11-13 | Animation state is local UI state in composables not reducers; never put tween progress, shake counters, skeleton alpha, removal phases in ViewModel state | RULE | compose-ui/references/motion.md#state | — |
+| ANIM-01 | 11-13 | Animation state is local UI state in composables not reducers; never put tween progress, shake counters, skeleton alpha, removal phases in ViewModel state | RULE | compose-ui/references/motion.md#state | ✓ landed |
 | ANIM-02 | 19 | SVG/icon animation: AnimatedVectorDrawable on Android, Lottie/Compottie on CMP | DECISION | DROP: optional depth — icon-art catalogue (UNVERIFIED Compottie) | UNVERIFIED: Compottie API surface not re-checked against current docs |
 | ANIM-03 | 20-25 | Infinite repeat via rememberInfiniteTransition; switching composables via AnimatedContent or Crossfade; appear/disappear via AnimatedVisibility; size change via animateContentSize | DUP | DROP: split into ANIM-31–ANIM-34 | — |
 | ANIM-31 | 20-25 | Loop with rememberInfiniteTransition | GENERIC | DROP: model already knows | — |
@@ -245,21 +245,21 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ANIM-36 | 26-29 | Time props differently with sequential Animatable animateTo calls | GENERIC | DROP: model already knows | — |
 | ANIM-37 | 26-29 | Animate single-prop targets with animate*AsState | GENERIC | DROP: model already knows | — |
 | ANIM-38 | 26-29 | Drive gesture animation with Animatable snapTo and animateTo | DUP | DROP: dup of ANADV-15 | — |
-| ANIM-39 | 26-29 | Animate list changes with Modifier.animateItem | DECISION | compose-ui/references/motion.md#api-table | — |
+| ANIM-39 | 26-29 | Animate list changes with Modifier.animateItem | DECISION | compose-ui/references/motion.md#api-table | ✓ landed |
 | ANIM-05 | 34-41 | AnimationSpec guidance: spring default, tween for duration, keyframes for timestamps, repeatable for loops, snap for jumps | DUP | DROP: split into ANIM-40–ANIM-44 | — |
 | ANIM-40 | 34-41 | Default to spring for interruption-safe motion | DUP | DROP: dup of ANIM-06 | — |
 | ANIM-41 | 34-41 | Use tween only for exact duration control | GENERIC | DROP: model already knows (Opus test) | — |
 | ANIM-42 | 34-41 | Use keyframes for specific values at timestamps | GENERIC | DROP: model already knows | — |
 | ANIM-43 | 34-41 | Use repeatable and infiniteRepeatable for looping | GENERIC | DROP: model already knows | — |
 | ANIM-44 | 34-41 | Use snap for instant jumps | GENERIC | DROP: model already knows | — |
-| ANIM-06 | 41 | Prefer spring: handles interruption smoothly while tween snaps to a new curve which feels jarring | GOTCHA | compose-ui/references/motion.md#specs | — |
+| ANIM-06 | 41 | Prefer spring: handles interruption smoothly while tween snaps to a new curve which feels jarring | GOTCHA | compose-ui/references/motion.md#specs | ✓ landed |
 | ANIM-07 | 45-52 | animate*AsState single-value samples plus supported types plus animateValueAsState with TwoWayConverter for custom types | API | DROP: tutorial code | — |
 | ANIM-08 | 55-57 | drawBehind for animated colors over background(); graphicsLayer for transforms; TextMotion.Animated for smooth text scale | DUP | DROP: split into ANIM-45–ANIM-47 | UNVERIFIED: TextMotion.Animated availability not re-checked against current docs |
 | ANIM-45 | 55-57 | Paint animated colors with drawBehind instead of background | DUP | DROP: dup of ANIM-21 | — |
 | ANIM-46 | 55-57 | Apply animated transforms with graphicsLayer | DUP | DROP: dup of ANADV-18 | — |
 | ANIM-47 | 55-57 | Set TextMotion.Animated for smooth text scale transitions | GOTCHA | DROP: optional depth — spec trivia (UNVERIFIED TextMotion.Animated) | UNVERIFIED: TextMotion.Animated availability not re-checked against current docs |
 | ANIM-09 | 62-88 | Animatable coroutine control: animateTo/snapTo/animateDecay/stop/updateBounds semantics plus sequential vs concurrent launch patterns | API | DROP: tutorial code | — |
-| ANIM-10 | 90 | New animateTo cancels ongoing animation and continues from current value/velocity with no jumpiness | GOTCHA | compose-ui/references/motion.md#animatable | — |
+| ANIM-10 | 90 | New animateTo cancels ongoing animation and continues from current value/velocity with no jumpiness | GOTCHA | compose-ui/references/motion.md#animatable | ✓ landed |
 | ANIM-11 | 94-110 | updateTransition multi-property state machine samples plus per-transition transitionSpec plus MutableTransitionState immediate start plus coordinated AnimatedVisibility/AnimatedContent children | API | DROP: tutorial code | — |
 | ANIM-12 | 112-123 | rememberInfiniteTransition shimmer/pulse pattern | API | DROP: tutorial code | — |
 | ANIM-13 | 127-142 | AnimatedVisibility enter/exit catalog plus combinators plus per-child overrides plus parent delegation | DUP | DROP: split into ANIM-48–ANIM-51 | — |
@@ -268,19 +268,19 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ANIM-50 | 127-142 | Override transitions per child with animateEnterExit | GENERIC | DROP: model already knows | — |
 | ANIM-51 | 127-142 | Delegate transition choice to children with Enter and Exit None on the parent | GENERIC | DROP: model already knows | — |
 | ANIM-14 | 146-166 | AnimatedContent directional transitionSpec with SizeTransform; always use the lambda target parameter never the outer variable | DUP | DROP: split into ANIM-52–ANIM-53 | — |
-| ANIM-52 | 146-166 | Control inter-state size animation with SizeTransform | RULE | compose-ui/references/motion.md#content | — |
+| ANIM-52 | 146-166 | Control inter-state size animation with SizeTransform | RULE | compose-ui/references/motion.md#content | ✓ landed |
 | ANIM-53 | 146-166 | Always read the lambda target parameter inside AnimatedContent | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-15 | 170-175 | Performance rules: spring default, lambda offset for Layout phase, graphicsLayer for Drawing phase, drawBehind for animated colors, animateContentSize BEFORE size modifiers, lambda param in AnimatedContent/AnimatedVisibility | DUP | DROP: split into ANIM-18–ANIM-23 | — |
 | ANIM-18 | 170-175 | Prefer spring as the default spec for interruption-safe motion | DUP | DROP: dup of ANIM-06 | — |
 | ANIM-19 | 170-175 | Read offsets in the lambda overload so they resolve in the Layout phase | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-20 | 170-175 | Apply visual transforms in graphicsLayer so they resolve in the Drawing phase | DUP | DROP: dup of ANADV-18 | — |
-| ANIM-21 | 170-175 | Paint animated colors with drawBehind instead of background() | GOTCHA | compose-ui/references/motion.md#perf | — |
-| ANIM-22 | 170-175 | Place animateContentSize BEFORE size modifiers in the chain | RULE | compose-ui/references/motion.md#perf | — |
+| ANIM-21 | 170-175 | Paint animated colors with drawBehind instead of background() | GOTCHA | compose-ui/references/motion.md#perf | ✓ landed |
+| ANIM-22 | 170-175 | Place animateContentSize BEFORE size modifiers in the chain | RULE | compose-ui/references/motion.md#perf | ✓ landed |
 | ANIM-23 | 170-175 | Use the lambda target parameter inside AnimatedContent and AnimatedVisibility | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-16 | 179-187 | Anti-patterns table: animation state in ViewModel, Modifier.scale/offset per frame, animating every change, animateContentSize after size modifiers, outer variable in AnimatedContent, tween-everywhere, animating padding/size per frame | DUP | DROP: split into ANIM-24–ANIM-30 | — |
 | ANIM-24 | 179-187 | Never keep animation state in the ViewModel | DUP | DROP: dup of ANIM-01 | — |
 | ANIM-25 | 179-187 | Never drive per-frame visuals with Modifier.scale() or eager offset() | DUP | DROP: dup of ANADV-18 | — |
-| ANIM-26 | 179-187 | Animate meaningful transitions only, not every change | GOTCHA | compose-ui/references/motion.md#anti-patterns | — |
+| ANIM-26 | 179-187 | Animate meaningful transitions only, not every change | GOTCHA | compose-ui/references/motion.md#anti-patterns | ✓ landed |
 | ANIM-27 | 179-187 | Never place animateContentSize after size modifiers | DUP | DROP: dup of ANIM-22 | — |
 | ANIM-28 | 179-187 | Never read the outer variable inside AnimatedContent | DUP | DROP: covered by CB-60 (kept in EXTERNAL_LEDGER) | — |
 | ANIM-29 | 179-187 | Never default to tween or snap everywhere | DUP | DROP: dup of ANIM-06 | — |
@@ -294,17 +294,17 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ANTI-01 | 11 | Business logic inside composables forks source of truth, hurts testability, reruns during composition; move into ViewModel/domain | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | ANTI-02 | 12 | Giant god-ViewModel has too large a blast radius; one ViewModel per screen or independent flow | RULE | compose-architecture/references/mvi-contract.md#holder | ✓ landed |
 | ANTI-03 | 13 | Scattered updateState/sendEffect with no structure hides transitions; disciplined onEvent() as single entry point | RULE | compose-architecture/references/mvi-contract.md#flow | ✓ landed |
-| ANTI-04 | 14 | Unstable state models (mutable collections, lambdas in state) defeat skipping; immutable data classes plus immutable collections | RULE | compose-ui/references/state-reads-and-stability.md#models | — |
+| ANTI-04 | 14 | Unstable state models (mutable collections, lambdas in state) defeat skipping; immutable data classes plus immutable collections | RULE | compose-ui/references/state-reads-and-stability.md#models | ✓ landed |
 | ANTI-05 | 15 | Duplicated derived data (total, formattedTotal, hasTotal) drifts; keep canonical value plus computed property | RULE | compose-architecture/references/mvi-contract.md#modeling | ✓ landed |
 | ANTI-06 | 16 | Broad state reads in parents cascade recomposition; slice state and pass only required props to each child | DUP | DROP: dup of SKL-25 | — |
 | ANTI-07 | 17 | Mutable state passed deep into tree hides writes; explicit props plus callbacks | RULE | compose-architecture/references/state-ownership.md#slicing | ✓ landed |
 | ANTI-08 | 18 | One-off events as consumable state causes replay on config change; separate Effect via Channel | RULE | compose-architecture/references/mvi-contract.md#effects | ✓ landed |
 | ANTI-09 | 19 | No-op state emissions waste recomposition; guard unchanged values before updating | DUP | DROP: dup of PERF-10 | — |
-| ANTI-10 | 20 | Full-screen loading wiping content is bad UX; keep old content plus inline refresh indicator | RULE | compose-ui/references/ux-states.md#loading | — |
+| ANTI-10 | 20 | Full-screen loading wiping content is bad UX; keep old content plus inline refresh indicator | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
 | ANTI-11 | 21 | ViewModel doing platform work directly (share, analytics, navigation) breaks testability; emit effects handled in Route | RULE | compose-architecture/references/mvi-contract.md#logic | ✓ landed |
 | ANTI-12 | 22 | Animation state in ViewModel without reason pollutes business state; local composable animation state | DUP | DROP: dup of ANIM-01 | — |
 | ANTI-13 | 23 | Display strings stored too early hurt locale flexibility; keep canonical values until presentation boundary | DUP | DROP: dup of SKL-69 | — |
-| ANTI-14 | 24 | Poor lazy list keys corrupt row state; stable key by domain ID | RULE | compose-ui/references/lists.md#keys | — |
+| ANTI-14 | 24 | Poor lazy list keys corrupt row state; stable key by domain ID | RULE | compose-ui/references/lists.md#keys | ✓ landed |
 | ANTI-15 | 25 | Too many trivial composables fragment reading; extract only meaningful boundaries | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | ANTI-16 | 26 | Platform abstraction too early adds indirection; share business logic first, abstract only real platform capabilities | DUP | DROP: dup of SKL-27 | — |
 | ANTI-17 | 27 | Forcing MVI migration on an existing codebase causes churn; respect existing patterns, MVI for new features only | DUP | DROP: dup of SKL-17 | — |
@@ -483,7 +483,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-21 | 105-114 | Reserve rememberCoroutineScope for UI-local async work | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-22 | 105-114 | Capture latest callbacks with rememberUpdatedState in long-running effects | GENERIC | DROP: model already knows | — |
 | CESS-23 | 105-114 | Prefer ViewModel StateFlow over produceState in MVI screens | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
-| CESS-10 | 124-130 | collectAsStateWithLifecycle over collectAsState to collect only in STARTED; available in CMP via lifecycle-runtime-compose with version-dependent KMP surface | GOTCHA | compose-ui/references/state-reads-and-stability.md#collect | https://developer.android.com/jetpack/androidx/releases/lifecycle |
+| CESS-10 | 124-130 | collectAsStateWithLifecycle over collectAsState to collect only in STARTED; available in CMP via lifecycle-runtime-compose with version-dependent KMP surface | GOTCHA | compose-ui/references/state-reads-and-stability.md#collect | https://developer.android.com/jetpack/androidx/releases/lifecycle · ✓ landed |
 | CESS-11 | 136-146 | CollectEffect lifecycle-aware effect collector (repeatOnLifecycle STARTED); collect one-offs at route level | RULE | compose-architecture/templates/core/mvi/CollectEffect.kt#collect | ✓ landed |
 | CESS-12 | 150-158 | Modifier order matters left-to-right; background/padding/size ordering sample | GENERIC | DROP: model already knows | — |
 | CESS-13 | 162-168 | Every reusable composable accepts a Modifier parameter defaulted to Modifier | GENERIC | DROP: model already knows | — |
@@ -698,31 +698,31 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| IMG-01 | 17-32 | Coil 3 ships no network by default; add coil-compose plus exactly one network integration (okhttp Android/JVM-only, ktor2 for Ktor 2.x, ktor3 for Ktor 3.x); Ktor users add per-target platform engines | GOTCHA | compose-ui/references/images.md#setup | https://coil-kt.github.io/coil/changelog |
-| IMG-02 | 36-44 | API decision: AsyncImage default for most UI, rememberAsyncImagePainter for Painter control or restart observation, SubcomposeAsyncImage for slot API with first-frame correctness | DECISION | compose-ui/references/images.md#api | — |
+| IMG-01 | 17-32 | Coil 3 ships no network by default; add coil-compose plus exactly one network integration (okhttp Android/JVM-only, ktor2 for Ktor 2.x, ktor3 for Ktor 3.x); Ktor users add per-target platform engines | GOTCHA | compose-ui/references/images.md#setup | https://coil-kt.github.io/coil/changelog · ✓ landed |
+| IMG-02 | 36-44 | API decision: AsyncImage default for most UI, rememberAsyncImagePainter for Painter control or restart observation, SubcomposeAsyncImage for slot API with first-frame correctness | DECISION | compose-ui/references/images.md#api | ✓ landed |
 | IMG-03 | 44 | SubcomposeAsyncImage subcomposes and suits dense LazyColumn/LazyGrid cells poorly; prefer AsyncImage for list-heavy screens | DUP | DROP: dup of IMG-16 | — |
-| IMG-04 | 48-63 | One reusable default AsyncImage pattern (crossfade, placeholder/error/fallback painters, contentDescription unless decorative, Crop, rounded clip) | RULE | compose-ui/references/images.md#default-pattern | — |
+| IMG-04 | 48-63 | One reusable default AsyncImage pattern (crossfade, placeholder/error/fallback painters, contentDescription unless decorative, Crop, rounded clip) | RULE | compose-ui/references/images.md#default-pattern | ✓ landed |
 | IMG-05 | 69-88 | One shared ImageLoader per app process; multiples fragment caches and reduce hit rates; libraries take coil-core plus injected loader instead of overriding the singleton | DUP | DROP: split into IMG-18–IMG-19 | — |
-| IMG-18 | 69-88 | Keep one shared ImageLoader per app process | RULE | compose-ui/references/images.md#loader | — |
-| IMG-19 | 69-88 | Libraries accept an injected ImageLoader instead of overriding the app singleton | RULE | compose-ui/references/images.md#loader | — |
-| IMG-06 | 94-114 | Pipeline execution order Interceptor, Mapper, Keyer, Fetcher, Decoder with single registration at ImageLoader build | DECISION | compose-ui/references/images.md#pipeline | https://raw.githubusercontent.com/coil-kt/coil/main/docs/image_pipeline.md |
+| IMG-18 | 69-88 | Keep one shared ImageLoader per app process | RULE | compose-ui/references/images.md#loader | ✓ landed |
+| IMG-19 | 69-88 | Libraries accept an injected ImageLoader instead of overriding the app singleton | RULE | compose-ui/references/images.md#loader | ✓ landed |
+| IMG-06 | 94-114 | Pipeline execution order Interceptor, Mapper, Keyer, Fetcher, Decoder with single registration at ImageLoader build | DECISION | compose-ui/references/images.md#pipeline | https://raw.githubusercontent.com/coil-kt/coil/main/docs/image_pipeline.md · ✓ landed |
 | IMG-07 | 118-126 | Need-to-customization decision table (retry/policy to Interceptor, custom model to Mapper, cacheability to Keyer, protocol to Fetcher.Factory, format to Decoder.Factory, global vs per-request headers) | DUP | DROP: split into IMG-20–IMG-25 | — |
-| IMG-20 | 118-126 | Cross-cutting request policy customizes the Interceptor | DECISION | compose-ui/references/images.md#pipeline | — |
+| IMG-20 | 118-126 | Cross-cutting request policy customizes the Interceptor | DECISION | compose-ui/references/images.md#pipeline | ✓ landed |
 | IMG-21 | 118-126 | Custom model types normalize through a Mapper | DUP | DROP: dup of IMG-08 | — |
 | IMG-22 | 118-126 | Custom models stay memory-cacheable through a stable Keyer | DUP | DROP: dup of IMG-09 | — |
-| IMG-23 | 118-126 | Custom sources and protocols plug in through a Fetcher.Factory | DECISION | compose-ui/references/images.md#pipeline | — |
-| IMG-24 | 118-126 | Custom encoded formats decode through a Decoder.Factory | DECISION | compose-ui/references/images.md#pipeline | — |
-| IMG-25 | 118-126 | Global headers ride the network client while per-request headers ride ImageRequest | DECISION | compose-ui/references/images.md#pipeline | — |
-| IMG-08 | 130-131 | CMP placement: domain wrappers plus mapping intent in commonMain, OkHttp/Android-only setup in platform sets, Ktor network preferred for broad CMP | RULE | compose-ui/references/images.md#cmp-placement | — |
-| IMG-09 | 135-139 | Pipeline anti-patterns: per-screen component registration, custom Fetcher without stable Keyer, volatile cache keys, unbounded blocking Interceptors, platform types in commonMain contracts | GOTCHA | compose-ui/references/images.md#pipeline | — |
-| IMG-10 | 141 | HTTP Cache-Control semantics need explicit CacheControlCacheStrategy registration with the network fetcher | GOTCHA | compose-ui/references/images.md#caching | UNVERIFIED: not re-checked against current Coil docs |
-| IMG-11 | 145 | Default request cache policies stay enabled; override memory/disk/network policies only for non-default behavior | RULE | compose-ui/references/images.md#caching | — |
-| IMG-12 | 149-159 | Stable memoryCacheKey plus placeholderMemoryCacheKey for recurring logical images avoids flashes and smooths shared transitions | GOTCHA | compose-ui/references/images.md#caching | — |
-| IMG-13 | 163 | transformations() only for pixel-level decoded-output changes; Modifier.clip/shapes for UI-only effects; transformations materialize bitmaps and can collapse animated images | GOTCHA | compose-ui/references/images.md#transformations | — |
-| IMG-14 | 167-171 | Coil auto-decodes SVG once coil-svg is on classpath; explicit SvgDecoder.Factory only for non-default wiring | GOTCHA | compose-ui/references/images.md#svg | UNVERIFIED: not re-checked against current Coil docs |
-| IMG-15 | 175-184 | CMP resources load via Res.getUri string URIs; direct Res.drawable handles are not Coil models | GOTCHA | compose-ui/references/images.md#cmp-resources | UNVERIFIED: not re-checked against current Coil docs |
-| IMG-16 | 187-192 | List plus shared-element patterns: AsyncImage in cells, predictable item size, stable item plus cache keys together, shared key reuse, size resolver when painter API is unavoidable | RULE | compose-ui/references/images.md#lists | — |
-| IMG-17 | 196-198 | Preview without network via LocalAsyncImagePreviewHandler; DebugLogger in debug builds only; inject fake ImageLoader for large-app testability | RULE | compose-ui/references/images.md#testing | — |
+| IMG-23 | 118-126 | Custom sources and protocols plug in through a Fetcher.Factory | DECISION | compose-ui/references/images.md#pipeline | ✓ landed |
+| IMG-24 | 118-126 | Custom encoded formats decode through a Decoder.Factory | DECISION | compose-ui/references/images.md#pipeline | ✓ landed |
+| IMG-25 | 118-126 | Global headers ride the network client while per-request headers ride ImageRequest | DECISION | compose-ui/references/images.md#pipeline | ✓ landed |
+| IMG-08 | 130-131 | CMP placement: domain wrappers plus mapping intent in commonMain, OkHttp/Android-only setup in platform sets, Ktor network preferred for broad CMP | RULE | compose-ui/references/images.md#cmp-placement | ✓ landed |
+| IMG-09 | 135-139 | Pipeline anti-patterns: per-screen component registration, custom Fetcher without stable Keyer, volatile cache keys, unbounded blocking Interceptors, platform types in commonMain contracts | GOTCHA | compose-ui/references/images.md#pipeline | ✓ landed |
+| IMG-10 | 141 | HTTP Cache-Control semantics need explicit CacheControlCacheStrategy registration with the network fetcher | GOTCHA | compose-ui/references/images.md#caching | UNVERIFIED: not re-checked against current Coil docs · ✓ landed |
+| IMG-11 | 145 | Default request cache policies stay enabled; override memory/disk/network policies only for non-default behavior | RULE | compose-ui/references/images.md#caching | ✓ landed |
+| IMG-12 | 149-159 | Stable memoryCacheKey plus placeholderMemoryCacheKey for recurring logical images avoids flashes and smooths shared transitions | GOTCHA | compose-ui/references/images.md#caching | ✓ landed |
+| IMG-13 | 163 | transformations() only for pixel-level decoded-output changes; Modifier.clip/shapes for UI-only effects; transformations materialize bitmaps and can collapse animated images | GOTCHA | compose-ui/references/images.md#transformations | ✓ landed |
+| IMG-14 | 167-171 | Coil auto-decodes SVG once coil-svg is on classpath; explicit SvgDecoder.Factory only for non-default wiring | GOTCHA | compose-ui/references/images.md#svg | UNVERIFIED: not re-checked against current Coil docs · ✓ landed |
+| IMG-15 | 175-184 | CMP resources load via Res.getUri string URIs; direct Res.drawable handles are not Coil models | GOTCHA | compose-ui/references/images.md#cmp-resources | UNVERIFIED: not re-checked against current Coil docs · ✓ landed |
+| IMG-16 | 187-192 | List plus shared-element patterns: AsyncImage in cells, predictable item size, stable item plus cache keys together, shared key reuse, size resolver when painter API is unavoidable | RULE | compose-ui/references/images.md#lists | ✓ landed |
+| IMG-17 | 196-198 | Preview without network via LocalAsyncImagePreviewHandler; DebugLogger in debug builds only; inject fake ImageLoader for large-app testability | RULE | compose-ui/references/images.md#testing | ✓ landed |
 
 ## references/ios-swift-interop.md
 
@@ -808,23 +808,23 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| LIST-01 | 7 | Lazy layouts only for large/dynamic lists; Column/Row for small fixed lists under ~10 items | RULE | compose-ui/references/lists.md#which | — |
+| LIST-01 | 7 | Lazy layouts only for large/dynamic lists; Column/Row for small fixed lists under ~10 items | RULE | compose-ui/references/lists.md#which | ✓ landed |
 | LIST-02 | 10-23 | LazyColumn DSL patterns: item() for singles, items(list, key) for keyed lists, itemsIndexed when index is needed | API | DROP: tutorial code | — |
-| LIST-03 | 29-40 | Stable unique keys required on changing lists; domain-ID GOOD vs index-based BAD vs keyless BAD | RULE | compose-ui/references/lists.md#keys | — |
-| LIST-04 | 40 | Domain IDs not indices; removals corrupt remaining-item state without stable keys | RULE | compose-ui/references/lists.md#keys | — |
-| LIST-05 | 44-66 | contentType enables layout reuse across mixed item types (Header/Post sample) | RULE | compose-ui/references/lists.md#content-type | — |
-| LIST-06 | 74-81 | GridCells.Fixed vs preferred responsive GridCells.Adaptive(minSize) | DECISION | compose-ui/references/lists.md#grids | — |
+| LIST-03 | 29-40 | Stable unique keys required on changing lists; domain-ID GOOD vs index-based BAD vs keyless BAD | RULE | compose-ui/references/lists.md#keys | ✓ landed |
+| LIST-04 | 40 | Domain IDs not indices; removals corrupt remaining-item state without stable keys | RULE | compose-ui/references/lists.md#keys | ✓ landed |
+| LIST-05 | 44-66 | contentType enables layout reuse across mixed item types (Header/Post sample) | RULE | compose-ui/references/lists.md#content-type | ✓ landed |
+| LIST-06 | 74-81 | GridCells.Fixed vs preferred responsive GridCells.Adaptive(minSize) | DECISION | compose-ui/references/lists.md#grids | ✓ landed |
 | LIST-07 | 85-92 | LazyVerticalStaggeredGrid for Pinterest-style variable heights | API | DROP: tutorial code | — |
 | LIST-08 | 96-104 | Pager state with pageCount lambda, HorizontalPager/VerticalPager rendering, animateScrollToPage from LaunchedEffect | API | DROP: tutorial code | — |
 | LIST-09 | 109-128 | Scroll-dependent UI reads through derivedStateOf; LazyListState stays local and out of ViewModel state | DUP | DROP: split into LIST-18–LIST-19 | — |
 | LIST-18 | 109-128 | Derive scroll-dependent UI from list state with derivedStateOf | GENERIC | DROP: model already knows (Opus test) | — |
 | LIST-19 | 109-128 | Keep LazyListState local; never store scroll position in ViewModel state | DUP | DROP: covered by CB-04 (kept in EXTERNAL_LEDGER) | — |
-| LIST-10 | 133-147 | Never verticalScroll inside LazyColumn (same-axis fight); nested LazyRow inside LazyColumn is acceptable; complex cases use nestedScroll with NestedScrollConnection | GOTCHA | compose-ui/references/lists.md#nesting | — |
+| LIST-10 | 133-147 | Never verticalScroll inside LazyColumn (same-axis fight); nested LazyRow inside LazyColumn is acceptable; complex cases use nestedScroll with NestedScrollConnection | GOTCHA | compose-ui/references/lists.md#nesting | ✓ landed |
 | LIST-11 | 151-160 | List anti-patterns table: keyless/index keys, upstream computation in item lambda, inline filter/sort in items(), LazyColumn for tiny fixed lists, allocated key objects, missing contentType | DUP | DROP: split into LIST-12–LIST-17 | — |
 | LIST-12 | 151-160 | Never ship mutable lists without stable domain-ID keys | DUP | DROP: dup of LIST-03 | — |
 | LIST-13 | 151-160 | Never compute, filter, or sort inside the item lambda | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
 | LIST-14 | 151-160 | Never use LazyColumn for tiny fixed lists | DUP | DROP: dup of LIST-01 | — |
-| LIST-15 | 151-160 | Never allocate new objects in the key lambda | GOTCHA | compose-ui/references/lists.md#anti-patterns | — |
+| LIST-15 | 151-160 | Never allocate new objects in the key lambda | GOTCHA | compose-ui/references/lists.md#anti-patterns | ✓ landed |
 | LIST-16 | 151-160 | Never skip contentType on multi-type lists | DUP | DROP: dup of LIST-05 | — |
 | LIST-17 | 151-160 | Never use position index as the key | DUP | DROP: dup of LIST-03 | — |
 
@@ -861,19 +861,19 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | MTRL-08 | 109-118 | M3 shape scale extraSmall to extraLarge; override only brand-required corner radii | GENERIC | DROP: model already knows | — |
 | MTRL-09 | 124-131 | Scaffold slot table (topBar, bottomBar, FAB, snackbarHost, content) plus always-apply-innerPadding rule | API | DROP: tutorial code | — |
 | MTRL-10 | 137-141 | Top-app-bar variant table (small, center-aligned, medium, large) with scroll-behavior defaults | API | DROP: deferred to android/skills styles | — |
-| MTRL-11 | 145-166 | Navigation by window size (Bar compact, Rail medium/expanded) with NavigationSuiteScaffold default for 3-5 destinations | DECISION | compose-ui/references/design-system.md#navigation | — |
+| MTRL-11 | 145-166 | Navigation by window size (Bar compact, Rail medium/expanded) with NavigationSuiteScaffold default for 3-5 destinations | DECISION | compose-ui/references/design-system.md#navigation | ✓ landed |
 | MTRL-12 | 170-177 | ModalBottomSheet covers overlays while BottomSheetScaffold covers persistent sheets; sheet visibility flows from Effect through Route sheetState | DUP | DROP: split into MTRL-38–MTRL-39 | — |
-| MTRL-38 | 170-177 | Choose ModalBottomSheet for overlays and BottomSheetScaffold for persistent sheets | RULE | compose-ui/references/design-system.md#sheets | — |
-| MTRL-39 | 170-177 | Drive sheet visibility from an Effect through Route sheetState calls | RULE | compose-ui/references/design-system.md#sheets | — |
+| MTRL-38 | 170-177 | Choose ModalBottomSheet for overlays and BottomSheetScaffold for persistent sheets | RULE | compose-ui/references/design-system.md#sheets | ✓ landed |
+| MTRL-39 | 170-177 | Drive sheet visibility from an Effect through Route sheetState calls | RULE | compose-ui/references/design-system.md#sheets | ✓ landed |
 | MTRL-13 | 181-197 | Snackbar host lives in the Route Scaffold slot; ShowSnackbar effects collect with action routing back to onEvent | DUP | DROP: split into MTRL-40–MTRL-41 | — |
-| MTRL-40 | 181-197 | Remember SnackbarHostState in the Route and pass it to the Scaffold slot | RULE | compose-ui/references/design-system.md#snackbar | — |
-| MTRL-41 | 181-197 | Collect ShowSnackbar effects and route action taps back to onEvent | RULE | compose-ui/references/design-system.md#snackbar | — |
+| MTRL-40 | 181-197 | Remember SnackbarHostState in the Route and pass it to the Scaffold slot | RULE | compose-ui/references/design-system.md#snackbar | ✓ landed |
+| MTRL-41 | 181-197 | Collect ShowSnackbar effects and route action taps back to onEvent | RULE | compose-ui/references/design-system.md#snackbar | ✓ landed |
 | MTRL-14 | 201-206 | AlertDialog covers simple confirm/dismiss while Dialog plus Card covers complex content; dialog visibility reads from state with confirm/dismiss events | DUP | DROP: split into MTRL-42–MTRL-43 | — |
-| MTRL-42 | 201-206 | Choose AlertDialog for simple confirm/dismiss and Dialog plus Card for complex content | RULE | compose-ui/references/design-system.md#dialogs | — |
-| MTRL-43 | 201-206 | Drive dialog visibility from state with confirm and dismiss events | RULE | compose-ui/references/design-system.md#dialogs | — |
+| MTRL-42 | 201-206 | Choose AlertDialog for simple confirm/dismiss and Dialog plus Card for complex content | RULE | compose-ui/references/design-system.md#dialogs | ✓ landed |
+| MTRL-43 | 201-206 | Drive dialog visibility from state with confirm and dismiss events | RULE | compose-ui/references/design-system.md#dialogs | ✓ landed |
 | MTRL-15 | 212-218 | Window size breakpoints plus root-level size-class reading | DUP | DROP: split into MTRL-44–MTRL-45 | — |
 | MTRL-44 | 212-218 | Compact, Medium, and Expanded break at 600dp and 840dp | GENERIC | DROP: model already knows | — |
-| MTRL-45 | 212-218 | Compute the window size class once at app level and pass it down | RULE | compose-ui/references/design-system.md#adaptive | — |
+| MTRL-45 | 212-218 | Compute the window size class once at app level and pass it down | RULE | compose-ui/references/design-system.md#adaptive | ✓ landed |
 | MTRL-16 | 224-230 | Canonical adaptive scaffolds plus list-detail default plus root-derived layout flags | DUP | DROP: split into MTRL-46–MTRL-48 | UNVERIFIED: scaffold API names not re-checked against current adaptive-layout docs |
 | MTRL-46 | 224-230 | Compose canonical layouts from list-detail and supporting-pane scaffolds | RULE | DROP: optional depth — android/skills adaptive | UNVERIFIED: scaffold API names not re-checked against current adaptive-layout docs |
 | MTRL-47 | 224-230 | Default list-detail apps to NavigableListDetailPaneScaffold | RULE | DROP: optional depth — android/skills adaptive | UNVERIFIED: scaffold API names not re-checked against current adaptive-layout docs |
@@ -1224,7 +1224,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | PERF-27 | 9-26 | Never silence the compiler with undeserved @Immutable or @Stable | DUP | DROP: dup of PERF-03 | — |
 | PERF-28 | 9-26 | Isolate read scopes for dense text-input screens | GOTCHA | DROP: UNVERIFIED against current docs — niche text-input depth | — |
 | PERF-29 | 9-26 | Never read layout and draw values in the Composition phase | DUP | DROP: covered by SKY-37 (kept in EXTERNAL_LEDGER) | — |
-| PERF-03 | 14 | Never use @Immutable/@Stable to silence the compiler; describe truth only, @Stable rare in app code | GOTCHA | compose-ui/references/performance-diagnostics.md#stability-annotations | — |
+| PERF-03 | 14 | Never use @Immutable/@Stable to silence the compiler; describe truth only, @Stable rare in app code | GOTCHA | compose-ui/references/performance-diagnostics.md#stability-annotations | ✓ landed |
 | PERF-04 | 15 | Raw MVI text input stutter at 25-plus fields: TextFieldState/BasicTextField2, nested field groups, isolated read scopes | GOTCHA | DROP: UNVERIFIED against current docs — niche text-input depth | UNVERIFIED: threshold and API names not re-checked against current docs |
 | PERF-05 | 30-41 | Compose API decision table: remember, rememberSaveable, derivedStateOf, key, LaunchedEffect, DisposableEffect, produceState, snapshotFlow, collectAsState, lifecycle-aware collection, stable callbacks | DUP | DROP: split into PERF-30–PERF-40 | — |
 | PERF-30 | 30-41 | Reserve remember for local objects across recompositions | GENERIC | DROP: model already knows | — |
@@ -1242,7 +1242,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | PERF-07 | 48-77 | BAD derived-calculation-in-composable vs GOOD upstream-derived narrow-read screen pair | EXAMPLE | compose-feature/examples.md#pairs | — |
 | PERF-08 | 81-108 | BAD unstable HistoryRowState (MutableList plus lambda) vs GOOD @Immutable UI model plus ImmutableList plus keyed items plus remembered per-row callbacks | EXAMPLE | compose-feature/examples.md#pairs | — |
 | PERF-09 | 112-122 | GOOD scroll-threshold derivedStateOf vs BAD derivedStateOf around cheap string picks | EXAMPLE | compose-feature/examples.md#pairs | — |
-| PERF-10 | 126-132 | Guard identical transitions: early-return when the edited value is unchanged | RULE | compose-ui/references/state-reads-and-stability.md#guards | — |
+| PERF-10 | 126-132 | Guard identical transitions: early-return when the edited value is unchanged | RULE | compose-ui/references/state-reads-and-stability.md#guards | ✓ landed |
 | PERF-11 | 136-138 | Strong Skipping Mode, stability_config.conf (DTO plus Instant entries), compiler metrics audits | GOTCHA | DROP: deferred to skydoves/compose-performance-skills | UNVERIFIED: mechanics live with the external skill set per STANDARDS §7 |
 | PERF-12 | 142-159 | Baseline Profiles via Macrobenchmark (StartupTimingMetric, under-16.67ms frames, FrameTimingMetric for scrolls) | API | DROP: tutorial code | — |
 | PERF-13 | 163-166 | R8/ProGuard keeps for @Stable plus @Immutable | API | DROP: tutorial code | — |
@@ -1262,13 +1262,13 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | RES-06 | 73-79 | painterResource covers raster and vector drawables; raster-only and vector-only APIs stay specialized | DUP | DROP: split into RES-29–RES-30 | — |
 | RES-29 | 73-79 | Prefer painterResource as the primary drawable API | GENERIC | DROP: model already knows (Opus test) | — |
 | RES-30 | 73-79 | Reserve imageResource and vectorResource for raster-only and vector-only reads | GENERIC | DROP: model already knows | — |
-| RES-07 | 83-92 | Material Symbols XML icon pipeline: Android XML variant into drawable/, fillColor black, tint removed, runtime tint via ColorFilter | RULE | compose-ui/references/resources.md#icons | — |
+| RES-07 | 83-92 | Material Symbols XML icon pipeline: Android XML variant into drawable/, fillColor black, tint removed, runtime tint via ColorFilter | RULE | compose-ui/references/resources.md#icons | ✓ landed |
 | RES-08 | 98-103 | String/template/array/plural XML-to-API table (composable plus suspend accessors) | API | DROP: tutorial code | — |
 | RES-09 | 122-123 | Resource string rules: no @/? escaping, plural count-plus-args semantics, quantity set | DUP | DROP: split into RES-31–RES-33 | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-31 | 122-123 | Skip @ and ? escaping in CMP strings unlike Android | GOTCHA | DROP: optional depth — string-escaping minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-32 | 122-123 | Pass count for plural selection plus format arguments separately | GOTCHA | DROP: optional depth — plural minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-33 | 122-123 | Cover all plural quantities including zero, few, and many | DUP | DROP: covered by CMP-15 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
-| RES-10 | 126-140 | Font() is composable in CMP so Typography construction must be composable too | GOTCHA | compose-ui/references/resources.md#fonts | UNVERIFIED: not re-checked against current CMP resources docs |
+| RES-10 | 126-140 | Font() is composable in CMP so Typography construction must be composable too | GOTCHA | compose-ui/references/resources.md#fonts | UNVERIFIED: not re-checked against current CMP resources docs · ✓ landed |
 | RES-11 | 146-159 | Raw-file access through Res.readBytes and decode helpers plus platform URIs through Res.getUri; CMP 1.7+ packs resources into Android assets | DUP | DROP: split into RES-34–RES-37 | UNVERIFIED: 1.7 floor and SVG-except-Android not re-checked against current docs |
 | RES-34 | 146-159 | Read raw files with suspend Res.readBytes | DUP | DROP: covered by CMP-09 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-35 | 146-159 | Decode raw bytes with the bitmap, vector, and SVG helpers | DUP | DROP: covered by CMP-21 (kept in EXTERNAL_LEDGER) | UNVERIFIED: SVG-except-Android not re-checked against current docs |
@@ -1278,7 +1278,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | RES-38 | 163-169 | Qualify resources by language, region, theme, and density | DUP | DROP: covered by CMP-05 (kept in EXTERNAL_LEDGER) | — |
 | RES-39 | 163-169 | stringResource selects the runtime locale automatically | GENERIC | DROP: model already knows | — |
 | RES-13 | 173 | Remote URL images need a dedicated library; multiplatform resources are bundled-assets only | DUP | DROP: covered by CMP-21 (kept in EXTERNAL_LEDGER) | — |
-| RES-14 | 177-190 | MVI rule: semantic keys/enums in state, stringResource/painterResource resolution at render; never resolve strings or load resources in reducers or ViewModels | RULE | compose-ui/references/resources.md#mvi | — |
+| RES-14 | 177-190 | MVI rule: semantic keys/enums in state, stringResource/painterResource resolution at render; never resolve strings or load resources in reducers or ViewModels | RULE | compose-ui/references/resources.md#mvi | ✓ landed |
 | RES-15 | 196-206 | Shared-resource rules list: composeResources, typed accessors, qualifiers, render-time resolution, suspend variants, publicResClass, semantic keys, no Android R, no platform-only assets, rebuild after adding | DUP | DROP: split into RES-16–RES-25 | — |
 | RES-16 | 196-206 | Keep all shared assets under composeResources | GENERIC | DROP: model already knows | — |
 | RES-17 | 196-206 | Reference resources through typed accessors for compile-time safety | GENERIC | DROP: model already knows (Opus test) | — |
@@ -1399,34 +1399,34 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| UX-01 | 5 | Utility apps are trust products: stable, immediate, precise, reversible, non-destructive | RULE | compose-ui/references/ux-states.md#principles | — |
+| UX-01 | 5 | Utility apps are trust products: stable, immediate, precise, reversible, non-destructive | RULE | compose-ui/references/ux-states.md#principles | ✓ landed |
 | UX-02 | 11-17 | Loading-state decision table: skeleton for known layouts, keep-content for section refresh, rare spinner for unknown blocking startup, keep-old-result for recalculation, empty hint for idle-empty | DUP | DROP: split into UX-17–UX-21 | — |
-| UX-17 | 11-17 | Never wipe existing content during refresh or load | RULE | compose-ui/references/ux-states.md#loading | — |
-| UX-18 | 11-17 | Default to skeleton screens for known layouts with missing data | RULE | compose-ui/references/ux-states.md#loading | — |
-| UX-19 | 11-17 | Refresh sections inline while keeping content visible | RULE | compose-ui/references/ux-states.md#loading | — |
-| UX-20 | 11-17 | Reserve full-screen spinners for unknown-layout blocking tasks | RULE | compose-ui/references/ux-states.md#loading | — |
-| UX-21 | 11-17 | Show an empty-state hint, never a spinner, for idle-empty screens | RULE | compose-ui/references/ux-states.md#loading | — |
+| UX-17 | 11-17 | Never wipe existing content during refresh or load | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
+| UX-18 | 11-17 | Default to skeleton screens for known layouts with missing data | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
+| UX-19 | 11-17 | Refresh sections inline while keeping content visible | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
+| UX-20 | 11-17 | Reserve full-screen spinners for unknown-layout blocking tasks | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
+| UX-21 | 11-17 | Show an empty-state hint, never a spinner, for idle-empty screens | RULE | compose-ui/references/ux-states.md#loading | ✓ landed |
 | UX-03 | 21-23 | Skeleton default for known-but-missing layout; shimmer as optional polish never the strategy; spinner only for small unknown or blocking tasks without placeholder shape | DUP | DROP: split into UX-27–UX-29 | — |
 | UX-27 | 21-23 | Default to skeleton for known layouts with missing data | DUP | DROP: dup of UX-18 | — |
-| UX-28 | 21-23 | Treat shimmer as optional polish, never the loading strategy | RULE | compose-ui/references/ux-states.md#skeleton | — |
+| UX-28 | 21-23 | Treat shimmer as optional polish, never the loading strategy | RULE | compose-ui/references/ux-states.md#skeleton | ✓ landed |
 | UX-29 | 21-23 | Reserve spinners for small unknown-layout or blocking tasks | DUP | DROP: dup of UX-20 | — |
 | UX-04 | 27 | Never wipe content during refresh; never cause height jumps, flicker, or lost context | DUP | DROP: split into UX-22–UX-23 | — |
 | UX-22 | 27 | Never wipe content during refresh | DUP | DROP: dup of UX-17 | — |
-| UX-23 | 27 | Never cause height jumps, flicker, or lost context during loading | RULE | compose-ui/references/ux-states.md#stability | — |
-| UX-05 | 31-37 | Inline validation: live format/range feedback where obvious, no errors on untouched fields, errors beside their field, no layout collapse on error toggle, disabled submit only with explanation | RULE | compose-ui/references/ux-states.md#validation | — |
-| UX-06 | 41-45 | Good validation behavior: value preserved during error, error under field, minimal submit disabling, no modal per keystroke, no full-form error wall | RULE | compose-ui/references/ux-states.md#validation | — |
-| UX-07 | 49-55 | Disabled states allowed only with obvious nearby reason, readable screen, preserved input; never reason-less buttons, cleared forms, or whole-screen gray-outs for small refreshes | RULE | compose-ui/references/ux-states.md#disabled | — |
+| UX-23 | 27 | Never cause height jumps, flicker, or lost context during loading | RULE | compose-ui/references/ux-states.md#stability | ✓ landed |
+| UX-05 | 31-37 | Inline validation: live format/range feedback where obvious, no errors on untouched fields, errors beside their field, no layout collapse on error toggle, disabled submit only with explanation | RULE | compose-ui/references/ux-states.md#validation | ✓ landed |
+| UX-06 | 41-45 | Good validation behavior: value preserved during error, error under field, minimal submit disabling, no modal per keystroke, no full-form error wall | RULE | compose-ui/references/ux-states.md#validation | ✓ landed |
+| UX-07 | 49-55 | Disabled states allowed only with obvious nearby reason, readable screen, preserved input; never reason-less buttons, cleared forms, or whole-screen gray-outs for small refreshes | RULE | compose-ui/references/ux-states.md#disabled | ✓ landed |
 | UX-08 | 61-63 | Never clear user-visible state during loads: edited fields, last good results, single-failure screens | DUP | DROP: split into UX-24–UX-26 | — |
-| UX-24 | 61-63 | Never clear edited fields on refresh | RULE | compose-ui/references/ux-states.md#preserve | — |
-| UX-25 | 61-63 | Never clear the last good result while fetching a new one | RULE | compose-ui/references/ux-states.md#preserve | — |
+| UX-24 | 61-63 | Never clear edited fields on refresh | RULE | compose-ui/references/ux-states.md#preserve | ✓ landed |
+| UX-25 | 61-63 | Never clear the last good result while fetching a new one | RULE | compose-ui/references/ux-states.md#preserve | ✓ landed |
 | UX-26 | 61-63 | Never wipe the screen because one request failed | DUP | DROP: dup of UX-17 | — |
-| UX-09 | 67-72 | Progressive disclosure for dense forms: advanced hidden by default, obvious main path, gradual reveal, no over-stepped trivial forms | RULE | compose-ui/references/ux-states.md#disclosure | — |
-| UX-10 | 77-82 | Partial results: instant local estimate first, background remote refinement, old refined quote kept until replacement, refreshed state labeled | RULE | compose-ui/references/ux-states.md#partial | — |
-| UX-11 | 87-92 | Perceived performance: instant local field updates, immediate cheap recalculation, debounce for expensive async only, stable layout, meaningful-only animation | RULE | compose-ui/references/ux-states.md#perceived | — |
+| UX-09 | 67-72 | Progressive disclosure for dense forms: advanced hidden by default, obvious main path, gradual reveal, no over-stepped trivial forms | RULE | compose-ui/references/ux-states.md#disclosure | ✓ landed |
+| UX-10 | 77-82 | Partial results: instant local estimate first, background remote refinement, old refined quote kept until replacement, refreshed state labeled | RULE | compose-ui/references/ux-states.md#partial | ✓ landed |
+| UX-11 | 87-92 | Perceived performance: instant local field updates, immediate cheap recalculation, debounce for expensive async only, stable layout, meaningful-only animation | RULE | compose-ui/references/ux-states.md#perceived | ✓ landed |
 | UX-12 | 96-100 | Accessibility bullets duplicate ACC coverage (text-not-color errors, non-hiding indicators, keyboard order, no rapid shimmer, large data-entry targets) | DUP | DROP: split into UX-30–UX-33 | — |
 | UX-30 | 96-100 | Express errors in text, never color alone | DUP | DROP: dup of ACC-13 | — |
 | UX-31 | 96-100 | Keep data-entry controls large | DUP | DROP: dup of ACC-09 | — |
-| UX-32 | 96-100 | Keep loading indicators visible without hiding context and without rapid shimmer | GOTCHA | compose-ui/references/accessibility.md#ux-loading | — |
+| UX-32 | 96-100 | Keep loading indicators visible without hiding context and without rapid shimmer | GOTCHA | compose-ui/references/accessibility.md#ux-loading | ✓ landed |
 | UX-33 | 96-100 | Support logical keyboard and focus order | GENERIC | DROP: model already knows | — |
 | UX-13 | 106-115 | BAD disappearing-content sample swapping spinner for content on isLoading | EXAMPLE | compose-feature/examples.md#pairs | — |
 | UX-14 | 119-129 | GOOD stable-layout sample preserving old content with refreshing flag plus skeleton/empty branches | EXAMPLE | compose-feature/examples.md#pairs | — |

@@ -519,8 +519,29 @@ templates are internally consistent (plugin ids referenced by module templates e
    internals, rather than a boundary, and give each its evidence (an M2/gate failure or a brief
    decision). Rules with no evidence are loosened to a boundary or cut. Also flag any workflow step
    that makes a model plan or restate more than it builds. Record the counts in the report.
+9. **Weak-model knowledge probe of "model already knows" drops.** About 185 rows across both ledgers
+   were dropped as `model already knows`. About 83 of them were checked by an Opus test; the rest were
+   the worker's judgement. The kit's bar is a **weak** model, so a drop is safe only if a weak model
+   knows it.
+   - Turn each unverified GOTCHA/RULE drop into a one-line question.
+   - The moderator runs the questions over the API against DeepSeek V4.1 Flash and MiniMax M3, with
+     no skill.
+   - Every item that either model gets wrong is restored as a one-line gotcha in its natural owner
+     skill, within budget.
+   - Record the counts: probed, known, restored.
 
 **Moderator step M9** also runs Claude Opus 5.5 and Sonnet **with** the kit (M-10): strong-model quality with the kit must not drop below without it.
+
+**M9, Fable 5.1 (O-9).**
+
+- **Eval panel.** Fable 5.1 runs all scenarios with and without the kit, next to Opus and Sonnet.
+- **Independent final review.**
+  - A fresh-context, read-only Fable 5.1 reviewer reads all six skills, `DECISIONS.md`, `STANDARDS.md`
+    and `SCOREBOARD.md`.
+  - It reports technical inaccuracies (each API ruling cites a fetched page), cross-skill
+    contradictions, over-engineering, and rules without evidence.
+  - The moderator verifies every finding before any change, then sends accepted findings to the
+    worker as a review file.
 
 **Moderator step M9.** The moderator runs the scenarios with the skills (compared with the M2
 baselines), reviews end to end, and signs off. Then Phase 10 (cut-over to `skills/`, catalog and CLI

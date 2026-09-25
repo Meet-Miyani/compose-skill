@@ -1,12 +1,14 @@
 /**
  * MVI contract for the __Name__ destination.
  *
- * Notes example: exactly three top-level declarations live here. Display
- * models stay in `model/`; domain-to-UiModel mapping stays in `mapper/`.
+ * Notes example: exactly three top-level declarations live here. UiState
+ * holds the domain __Item__ directly (no M-11 trigger fires on this
+ * screen); add model/ plus mapper/ only with --ui-model when a trigger
+ * fires (see templates/feature/README.md).
  */
 package __PACKAGE__.presentation.__name__
 
-import __PACKAGE__.presentation.__name__.model.__Item__UiModel
+import __PACKAGE__.domain.model.__Item__
 import com.example.core.error.AppError
 import com.example.core.mvi.UiAction
 import com.example.core.mvi.UiEffect
@@ -14,7 +16,7 @@ import com.example.core.mvi.UiState
 
 /** Observable state for the __Name__ destination. */
 data class __Name__UiState(
-    val items: List<__Item__UiModel> = emptyList(),
+    val items: List<__Item__> = emptyList(),
     val draftTitle: String = "",
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,

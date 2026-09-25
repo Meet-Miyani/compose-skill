@@ -5,6 +5,7 @@ Load this file at step 6 of the feature workflow, before writing any code.
 Contents: 1 contract shape; 2 no placeholders; 3 one version; 4 verified helpers.
 5 copy conditions; 6 detail by identity; 7 absence handling; 8 load guard.
 9 single cold-load owner; 10 drafts in handle; 11 repository results; 12 failure vs missing.
+13 UiModel only on an M-11 trigger.
 
 ## 1. Contract holds exactly three declarations
 
@@ -250,3 +251,30 @@ updateState { copy(isMissing = note == null, note = note?.toUiModel()) }
 ```
 
 Cites: (arch rule 7).
+
+## 13. UiModel only when an M-11 trigger fires
+
+Consistency means the same rule, not the same files. A screen that shows the domain fields as-is holds the domain model; a per-item `isSelected` flag earns the pair.
+
+WRONG:
+```kotlin
+// WRONG because: 1:1 wrapper with no trigger; UiState pays a mapper for nothing.
+data class NoteUiModel(val id: Long, val title: String?, val body: String?)
+fun Note.toUiModel(): NoteUiModel = NoteUiModel(id = id, title = title, body = body)
+data class NotesUiState(val items: List<NoteUiModel> = emptyList()) : UiState
+```
+
+RIGHT:
+```kotlin
+data class NotesUiState(val items: List<Note> = emptyList()) : UiState
+// No model/, no mapper/: the screen renders the domain fields as-is.
+```
+
+RIGHT with trigger 3 (UI-only per-item field):
+```kotlin
+// M-11 trigger 3: per-item selection state held in the ViewModel.
+data class NoteUiModel(val id: Long, val title: String?, val isSelected: Boolean)
+fun Note.toUiModel(isSelected: Boolean): NoteUiModel = NoteUiModel(id, title, isSelected)
+```
+
+Cites: (arch M-11 UiModel triggers).

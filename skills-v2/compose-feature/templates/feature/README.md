@@ -20,6 +20,8 @@ Run from the project root:
 scripts/new-feature.sh --name __Name__ --item __Item__ --package __PACKAGE__ --root <project-root>
 ```
 
+The default scaffold holds the domain `__Item__` in `UiState` directly: no `model/`, no `mapper/` (ruling M-11). Add `--ui-model` to also write `__Item__UiModel` and `__Item__UiMapper` when a trigger fires; name that trigger in the one-line comment on the UiModel. `UI_MODEL=always` in `.composekit.conf` makes `--ui-model` the default (`--no-ui-model` forces it off).
+
 The script copies `templates/feature/` and renames `__Name__`, `__name__`, `__Item__`, `__item__`, and `__PACKAGE__` in paths and contents.
 
 ## Composition-root entry

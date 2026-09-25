@@ -32,6 +32,13 @@ Rules:
   reviewing a PR. Weigh: correctness (APIs real and used correctly, would compile), completeness
   (every needed file, nothing truncated or duplicated), architecture soundness, and NO
   over-engineering (no abstraction without need). One line of justification each.
+- ACCEPTED PATTERNS (official sources; never a defect on their own):
+  - domain models held directly in UiState (Android architecture recommendations: "ViewModel can
+    include data layer models in UiState classes"; Now in Android does this)
+  - read-only stdlib collections (List/Set/Map) in state (official Compose stability docs allow
+    declaring kotlin.collections.* stable in the stability configuration file)
+  - an answer that leaves correct existing code unchanged instead of re-showing it
+  Judge what the answer does wrong, not which of these valid options it picked.
 - List up to 3 "critical_defects" per answer (invented or wrong API, crash risk, architectural
   violation, duplicated or truncated files).
 

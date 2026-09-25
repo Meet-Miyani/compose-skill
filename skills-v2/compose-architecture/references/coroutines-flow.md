@@ -86,8 +86,8 @@ Use `WhileSubscribed(5000)` for ViewModel state. The timeout survives rotation g
 Use `Lazily` for expensive shared resources. Use `Eagerly` for data that must be fresh before the first collector arrives.
 Reserve `WhileSubscribed` sharing for acceptable stale or cached values with primarily asynchronous collection. Terminate derived streams needing synchronous reads with `stateIn`.
 ```kotlin
-val notes: StateFlow<List<NoteUiModel>> =
-  repository.getNotesStream().map { it.toUiModels() }
+val notes: StateFlow<List<Note>> =
+  repository.getNotesStream().map { list -> list.filter { !it.isArchived } }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 ```
 Gotcha: `map` on `StateFlow` returns a plain `Flow`; only `stateIn` restores synchronous reads.

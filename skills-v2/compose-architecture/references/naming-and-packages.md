@@ -40,9 +40,9 @@ One file holds one public type. The file name equals that type. A file with seve
 | Repository implementation | `Default<Name>Repository`, class, `internal` | `DefaultNotesRepository` |
 | Repository factory | Top-level `create<Name>Repository(...)`, public | `createNotesRepository(...)` |
 | Fake for tests | `Fake<Name>Repository` | `FakeNotesRepository` |
-| DTO / Domain / UiModel | Three distinct types, one per layer (§5) | `NoteDto` / `Note` / `NoteUiModel` |
+| DTO / Domain / optional UiModel | DTO-to-domain always; domain-to-UiModel only when an M-11 trigger below fires | `NoteDto` / `Note` / `NoteUiModel` when present |
 | DTO-to-domain mapper | `<X>DtoMapper.kt`, pure `fun X.toDomain()` | `NoteDtoMapper.kt` |
-| Domain-to-UiModel mapper | `<X>UiMapper.kt`, pure `fun X.toUiModel()` | `NoteUiMapper.kt` |
+| Domain-to-UiModel mapper, when an M-11 trigger fires | `<X>UiMapper.kt`, pure `fun X.toUiModel()` | `NoteUiMapper.kt` |
 | One-shot read | `suspend fun get<X>(…): T` | `getNote(id: Long): Note` |
 | Continuous read | `fun get<X>Stream(…): Flow<…>` | `getNotesStream(): Flow<List<Note>>` |
 | Write or command | Verb phrase, `suspend` | `suspend fun deleteNote(id: Long)` |
@@ -52,7 +52,18 @@ One file holds one public type. The file name equals that type. A file with seve
 
 Never use an `Impl` suffix or an `I` prefix (§2.2). Never add `Util` to a feature file or package name (§2.2).
 
-Mapper placement follows the output (§5.4): DTO-to-domain mappers live in `data/remote/mapper/`; domain-to-UiModel mappers live in `presentation/<destination>/mapper/`. A mapper lives beside the layer that produces its output. Mapping details belong to the `compose-data` skill.
+Mapper placement follows the output (§5.4): DTO-to-domain mappers live in `data/remote/mapper/`; when an M-11 trigger fires, domain-to-UiModel mappers live in `presentation/<destination>/mapper/`. A mapper lives beside the layer that produces its output. Mapping details belong to the `compose-data` skill.
+
+## UiModel triggers (M-11) — a default, not a non-negotiable
+
+DTO-to-domain mapping is mandatory: DTOs stay `internal` to the data layer, and one pure `toDomain()` in `data/remote/mapper/` isolates wire changes. Domain-to-UiModel mapping is conditional. `UiState` holds the domain model directly unless at least one trigger fires (ruling M-11; CONTRACT_BRIEF §5.1):
+
+1. **Derived or formatted values** the screen would otherwise compute in composition on every recomposition: display labels, combined names, status derived from several fields. Formatting one `Instant` at the leaf is not a trigger by itself.
+2. **Several sources merged** into one row: a note plus its tag names plus sync status.
+3. **UI-only fields per item**: `isSelected`, `isExpanded`, a swipe state held in the ViewModel.
+4. **The screen must not see some domain fields** (privacy or feature boundary).
+
+When a trigger fires, the placement rules above apply unchanged: the model in `presentation/<destination>/model/`, the pure mapper in `presentation/<destination>/mapper/`, never mapping in the ViewModel body or the Contract. Name the trigger in a one-line comment on the UiModel. Domain-type stability in `UiState` is fixed by the stability configuration file, not by a wrapper; the `compose-ui` skill owns that rule.
 
 ## Key, Route, Screen, Sheet suffixes
 
@@ -104,7 +115,7 @@ No use case wraps a single repository call (SKL-26). A use case earns its place 
 
 ## Contract and type names
 
-Each destination keeps one `<Dest>Contract.kt` with exactly three top-level declarations named `<Dest>UiState`, `<Dest>UiAction`, `<Dest>UiEffect` (CLEAN-54, resolved; rule 4). UiModels live in `presentation/<destination>/model/`. Step enums and constants live in `model/`, never in the Contract file.
+Each destination keeps one `<Dest>Contract.kt` with exactly three top-level declarations named `<Dest>UiState`, `<Dest>UiAction`, `<Dest>UiEffect` (CLEAN-54, resolved; rule 4). UiModels, when present (M-11), live in `presentation/<destination>/model/`. Step enums and constants live in `model/`, never in the Contract file.
 
 Contract types take their names directly from the feature, without taxonomic compounds (CLEAN-21, CLEAN-51 resolved): `NotesUiState`, not `NotesViewState` or `NotesContract.State`. The kit type names are `UiAction`, `UiState`, `UiEffect` per destination.
 
@@ -147,6 +158,7 @@ A destination that exceeds a limit because of justified complexity explains the 
 | "I will add a forwarding composable to dodge the key and route name clash." | No. Rule 15: alias the composable at the entry site. A forwarding function is a second entry point. |
 | "I will inline this one fully qualified name; it is only used once." | No. Rule 11: every type is imported at the top. Inline paths hide layer violations. |
 | "This ViewModel is 400 lines, so the build must fail it." | No. Rule 11 and §12.4: sizes are WARN-level review triggers, never failures. Split collaborators and record the reason. |
+| "I will add a `NoteUiModel` plus mapper for consistency; every feature has one." | No. UiModel triggers (M-11) above: consistency means the same rule, not the same files. Add the pair only when a trigger fires, and name that trigger in a one-line comment on the UiModel. |
 | "I will extract this one-line `Text` wrapper for consistency." | No. Rule 11: never extract one-line wrappers or modifier forwarders. Extract only meaningful boundaries. |
 
 ## Verification

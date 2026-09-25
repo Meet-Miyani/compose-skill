@@ -45,7 +45,7 @@ sealed interface NotesUiAction : UiAction
 sealed interface NotesUiEffect : UiEffect
 ```
 
-UiModels live in `presentation/<destination>/model/`. Mappers live in `presentation/<destination>/mapper/`. Nothing else lives in the file. Split into a `contract/` subpackage (one file per type) only when the single file exceeds a few hundred lines after nested models are extracted.
+UiModels live in `presentation/<destination>/model/` when present (M-11: only when a UiModel trigger fires; otherwise `UiState` holds the domain model directly). Mappers live in `presentation/<destination>/mapper/`. Nothing else lives in the file. Split into a `contract/` subpackage (one file per type) only when the single file exceeds a few hundred lines after nested models are extracted.
 
 *Trace: CONTRACT_BRIEF §3.2; F-22; MVI-21 (events are the only input from the UI into the holder).*
 

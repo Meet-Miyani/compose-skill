@@ -105,7 +105,7 @@ Failures and business states are separate fields in both directions. "Not found"
 // Inline-tier failure path keeps the error object.
 onError = { error -> updateState { copy(error = error) } }
 // Successful response with no such id sets business state, not an error.
-updateState { copy(isMissing = note == null, note = note?.toUiModel()) }
+updateState { copy(isMissing = note == null, note = note) }
 ```
 F-05 pattern: a deleted note routed through `AppError(Generic)` shows a Retry button for a stable outcome; route it to `isMissing` instead. F-14 pattern: `onError = { copy(isMissing = true) }` discards the error and removes any retryable failure; keep `error` and `isMissing` apart.
 

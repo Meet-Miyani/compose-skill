@@ -343,6 +343,15 @@ references/
      - `install-guards.sh`
      - a CI job
      - Claude Code / OpenCode / Cursor hooks that run `run-checks.sh`
+     - **kit activation**, which makes routing reliable without depending on skill matching. This is
+       how superpowers makes `using-superpowers` reliable: a SessionStart hook injects it, rather than
+       relying on a description match. Two parts:
+       - one line in the project's `AGENTS.md` / `CLAUDE.md`: "Compose/CMP work: load
+         `compose-architecture` first; it routes to the owning skill"
+       - an optional Claude Code SessionStart hook snippet that injects `compose-architecture`'s
+         routing section (a short excerpt, not the whole skill)
+
+       `install-guards.sh` / the CLI prints both. It never writes them without the user's consent.
      - desktop packaging, signing and distribution gotchas
 
 **Description intent.** Triggers:

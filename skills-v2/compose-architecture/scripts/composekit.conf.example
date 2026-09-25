@@ -45,3 +45,9 @@ LOCALE_DIRS=""
 # Root package of the project's feature code, used to detect
 # cross-feature imports (arch rules 1-3).
 BASE_PACKAGE="com.example"
+
+# UiModel scaffold default (ruling M-11/M-12): when-needed means
+# new-feature.sh writes model/ + mapper/ only with --ui-model; always
+# makes --ui-model the default (--no-ui-model forces it off). A recorded
+# ## Project decisions entry of "UiModel for every feature" sets always.
+UI_MODEL="when-needed"

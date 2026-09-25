@@ -36,7 +36,7 @@ fun __Name__Screen(
         }
         else -> Column {
             if (state.isRefreshing) Text("Refreshing…") // SEAM: string resource
-            state.items.forEach { item -> Text(item.title) }
+            state.items.forEach { item -> Text(item.title ?: "") }
             OutlinedTextField(
                 value = state.draftTitle,
                 onValueChange = onTitleChange,

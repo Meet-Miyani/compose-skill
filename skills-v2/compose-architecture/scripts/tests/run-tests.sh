@@ -94,27 +94,57 @@ check check-hardcoded-colors "outside the design-system"
 
 # The compose-feature scaffold (Tags/Tag) ships SEAM markers: a fresh
 # scaffold fails only check-placeholders, and passes the full registry
-# once the SEAM lines are implemented (stripped here).
+# once the SEAM lines are implemented (stripped here). M-11: both the
+# default (domain model in UiState) and the --ui-model variants pass.
+scaffold_case() {
+    tag="$1"; dir="$2"; shift 2
+    mkdir -p "$dir"
+    expect_pass "new-feature.sh scaffolds Tags/Tag $tag" bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$dir" "$@"
+    cp "$GOOD/.composekit.conf" "$dir/.composekit.conf"
+    for check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-locale-parity check-hardcoded-colors; do
+        expect_pass "$check passes on the fresh scaffold $tag" bash "$SCRIPTS_DIR/$check.sh" "$dir"
+    done
+    # Root-only placeholders follows `git diff --name-only` inside a work tree,
+    # which is empty for this untracked scaffold, so the scaffold is scanned
+    # via explicit file args (the check's other mode, as for the bad fixture).
+    SCAFFOLD_FILES="$(find "$dir" -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -print | sort)"
+    expect_fail "check-placeholders fails on the fresh scaffold $tag (SEAMs)" "SEAM" bash "$SCRIPTS_DIR/check-placeholders.sh" "$dir" $SCAFFOLD_FILES
+    find "$dir" -type f -name '*.kt' -print | while IFS= read -r f; do
+        if grep -q SEAM "$f" 2>/dev/null; then
+            grep -v SEAM "$f" > "$f.noseam" && mv "$f.noseam" "$f"
+        fi
+    done
+    expect_pass "run-checks.sh passes on the scaffold $tag once SEAMs are implemented" bash "$SCRIPTS_DIR/run-checks.sh" "$dir"
+    SCAFFOLD_FILES="$(find "$dir" -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -print | sort)"
+    expect_pass "check-placeholders passes on the scaffold $tag once SEAMs are implemented" bash "$SCRIPTS_DIR/check-placeholders.sh" "$dir" $SCAFFOLD_FILES
+}
 rm -rf "$SCRATCH"
-mkdir -p "$SCRATCH/scaffold"
-expect_pass "new-feature.sh scaffolds Tags/Tag" bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$SCRATCH/scaffold"
-cp "$GOOD/.composekit.conf" "$SCRATCH/scaffold/.composekit.conf"
-for check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-locale-parity check-hardcoded-colors; do
-    expect_pass "$check passes on the fresh scaffold" bash "$SCRIPTS_DIR/$check.sh" "$SCRATCH/scaffold"
-done
-# Root-only placeholders follows `git diff --name-only` inside a work tree,
-# which is empty for this untracked scaffold, so the scaffold is scanned
-# via explicit file args (the check's other mode, as for the bad fixture).
-SCAFFOLD_FILES="$(find "$SCRATCH/scaffold" -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -print | sort)"
-expect_fail "check-placeholders fails on the fresh scaffold (SEAMs)" "SEAM" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/scaffold" $SCAFFOLD_FILES
-find "$SCRATCH/scaffold" -type f -name '*.kt' -print | while IFS= read -r f; do
-    if grep -q SEAM "$f" 2>/dev/null; then
-        grep -v SEAM "$f" > "$f.noseam" && mv "$f.noseam" "$f"
-    fi
-done
-expect_pass "run-checks.sh passes on the scaffold once SEAMs are implemented" bash "$SCRIPTS_DIR/run-checks.sh" "$SCRATCH/scaffold"
-SCAFFOLD_FILES="$(find "$SCRATCH/scaffold" -type f \( -name '*.kt' -o -name '*.kts' -o -name '*.xml' \) -print | sort)"
-expect_pass "check-placeholders passes on the scaffold once SEAMs are implemented" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/scaffold" $SCAFFOLD_FILES
+scaffold_case "(default)" "$SCRATCH/scaffold"
+scaffold_case "(--ui-model)" "$SCRATCH/scaffold-uimodel" --ui-model
+# UI_MODEL=always in .composekit.conf makes --ui-model the default;
+# --no-ui-model forces it off. Asserted on dry-run output (no writes).
+mkdir -p "$SCRATCH/uiconf"
+printf '%s\n' 'UI_MODEL="always"' > "$SCRATCH/uiconf/.composekit.conf"
+out="$(bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$SCRATCH/uiconf" --dry-run 2>&1)"
+case "$out" in
+    *UiMapper.kt*)
+        echo "PASS: UI_MODEL=always defaults to the UiModel pair"
+        pass=$((pass + 1)) ;;
+    *)
+        echo "FAIL: UI_MODEL=always did not default to the UiModel pair"
+        printf '%s\n' "$out" | sed 's/^/    /'
+        fail=$((fail + 1)) ;;
+esac
+out="$(bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$SCRATCH/uiconf" --no-ui-model --dry-run 2>&1)"
+case "$out" in
+    *UiMapper.kt*)
+        echo "FAIL: --no-ui-model still planned the UiModel pair"
+        printf '%s\n' "$out" | sed 's/^/    /'
+        fail=$((fail + 1)) ;;
+    *)
+        echo "PASS: --no-ui-model skips the UiModel pair"
+        pass=$((pass + 1)) ;;
+esac
 
 # install-guards.sh installs scripts plus a fresh conf into a project.
 mkdir -p "$SCRATCH/installed"

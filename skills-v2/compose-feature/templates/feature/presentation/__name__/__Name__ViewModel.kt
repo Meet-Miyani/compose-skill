@@ -7,7 +7,6 @@
 package __PACKAGE__.presentation.__name__
 
 import __PACKAGE__.domain.repository.__Name__Repository
-import __PACKAGE__.presentation.__name__.mapper.toUiModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.core.mvi.BaseViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -61,7 +60,7 @@ class __Name__ViewModel(
                     isLoading = false,
                     isRefreshing = false,
                     isMissing = item == null,
-                    items = listOfNotNull(item?.toUiModel()),
+                    items = listOfNotNull(item),
                     draftTitle = draftTitle.value,
                 )
             }

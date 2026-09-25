@@ -34,6 +34,8 @@ You build one slice end to end and you refuse to ship it unfinished. The `compos
 
 > **Iron law: name the gap, never invent or stub.** An unverified helper is named as an open gap, never called. No `TODO`, stub, or no-op body reaches done. Delete it and restart from the template.
 
+Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow above is a **default**: a project decision recorded in `## Project decisions` (`UI_MODEL=always` in `.composekit.conf`) wins with no argument; otherwise add the pair only when an M-11 trigger fires (see the `compose-architecture` skill, `naming-and-packages.md`).
+
 1. **Build only from verified project material.** Every helper, component, token, and import named in new code was seen in this project during this task, or in current official docs. A plausible name is not a verified one. *Prevents:* invented APIs that compile nowhere.
 2. **No placeholder reaches done.** No `TODO`, `FIXME`, stub, or noted-but-unfixed defect remains in changed files. The placeholder grep over changed files is empty before done. Template `SEAM` comments are implemented, not shipped. *Prevents:* sprints that end with fiction marked done.
 3. **Iron law: emit exactly one version of each file.** Decide before writing. Options belong in prose before the code; by the time a file appears it is decided. No "alternatively…" drafts. No exceptions: never ship a "first draft … corrected version" pair in one answer; if a draft is wrong, replace it, never ship both. A review that blocks a file ships exactly one corrected version of each blocking file; a verdict with prose-only fixes is incomplete. *Prevents:* three candidates with none committed.
@@ -48,7 +50,7 @@ You build one slice end to end and you refuse to ship it unfinished. The `compos
 - [ ] Restate the slice and every observable state: cold load, reconcile, refreshing, error, retry, empty, not-found, overlapping loads, process-death restore.
 - [ ] Find the closest precedent in the project and read it in full. Small asks read only the immediately relevant files.
 - [ ] Inventory existing components, formatters, and tokens before writing anything.
-- [ ] Decide layers and mappers before any Compose. DTO-to-domain first, domain-to-UiModel second.
+- [ ] Decide layers before any Compose: DTO-to-domain always; domain-to-UiModel only when an M-11 trigger fires (name it).
 - [ ] Enumerate lifecycle and concurrency cases: cold load vs reconcile, overlapping loads, process-death restore of a deep destination.
 - [ ] Read `examples.md` (step 6 load; the only home for WRONG/RIGHT pairs).
 - [ ] Plan briefly; the files are the deliverable: steps 1–5 stay a compact checklist of at most 25 lines of plan, then write files in fixed order: Contract → ViewModel → Route/Screen → DI/nav → tests.
