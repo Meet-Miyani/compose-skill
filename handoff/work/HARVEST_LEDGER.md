@@ -136,7 +136,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-66 | 130-140 | Reuse unchanged nested state objects instead of rebuilding them | GENERIC | DROP: model already knows (Opus test) | — |
 | SKL-67 | 130-140 | Emit semantic effects instead of making platform calls from event handling | DUP | DROP: dup of SKL-38 | — |
 | SKL-68 | 130-140 | Preserve old content during refresh | DUP | DROP: dup of UX-17 | — |
-| SKL-69 | 130-140 | Map domain data to UI state close to the presentation boundary | RULE | compose-data/references/boundaries-and-mapping.md#mapping | — |
+| SKL-69 | 130-140 | Map domain data to UI state close to the presentation boundary | RULE | compose-data/references/boundaries-and-mapping.md#mapping | ✓ landed |
 | SKL-70 | 130-140 | Use feature-specific ViewModel names | RULE | compose-architecture/references/naming-and-packages.md#naming | ✓ landed |
 | SKL-71 | 130-140 | Key list items by stable domain ID | DUP | DROP: dup of LIST-03 | — |
 | SKL-72 | 130-140 | Import all types at the top of the file with import-as aliases for name clashes | DUP | DROP: dup of CLEAN-14 | — |
@@ -158,7 +158,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-85 | 161-200 | State-management triggers (ViewModel, StateFlow, UiState, onEvent) route to the compose-architecture skill | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
 | SKL-86 | 161-200 | Review and anti-pattern triggers route to the compose-feature skill | WORKFLOW | compose-feature/SKILL.md#workflow | ✓ landed |
 | SKL-87 | 161-200 | UI triggers (@Composable, LazyColumn, animation, accessibility) route to the compose-ui skill | WORKFLOW | compose-ui/SKILL.md#workflow | ✓ landed |
-| SKL-88 | 161-200 | Data triggers (repository, Ktor, Room, Paging) route to the compose-data skill | WORKFLOW | compose-data/SKILL.md#workflow | — |
+| SKL-88 | 161-200 | Data triggers (repository, Ktor, Room, Paging) route to the compose-data skill | WORKFLOW | compose-data/SKILL.md#workflow | ✓ landed |
 | SKL-89 | 161-200 | Build triggers (Gradle, version catalog, build-logic, CI, packaging) route to the compose-project skill | WORKFLOW | compose-project/SKILL.md#workflow | — |
 | SKL-90 | 161-200 | Platform triggers (commonMain, expect/actual, iOS, desktop, web) route to the compose-platform skill | WORKFLOW | compose-platform/SKILL.md#workflow | — |
 | SKL-91 | 161-200 | DI triggers (Koin, module, ViewModel injection) route to compose-architecture dependency-injection | WORKFLOW | compose-architecture/SKILL.md#workflow | ✓ landed |
@@ -323,11 +323,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ARCH-04 | 25 | A ViewModel is one implementation of a screen state holder, not a requirement for every composable | GENERIC | DROP: model already knows | — |
 | ARCH-05 | 29-40 | MVI vs MVVM decision guide (contract, boilerplate, testing input, best-for) plus choose/preserve rules | OUTOFKIT | DROP: out-of-kit stack | CONFLICT: kit mandates MVI for new work |
 | ARCH-06 | 44-46 | Lighter patterns for presentational leaves, trivial screens, prototypes; do not invent reducers, result types, or global frameworks unless they earn their keep | DUP | DROP: dup of SKL-46 | — |
-| ARCH-07 | 51 | Domain layer runs zero-platform so it executes in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
+| ARCH-07 | 51 | Domain layer runs zero-platform so it executes in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | ✓ landed |
 | ARCH-08 | 53-59 | Domain rules: zero platform imports, domain models differ from DTOs/entities, repository interfaces in domain with impls in data, mappers at data boundary, use cases only for multi-step orchestration | DUP | DROP: split into ARCH-29–ARCH-33 | — |
-| ARCH-29 | 53-59 | Domain code has zero platform imports so it runs in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
-| ARCH-30 | 53-59 | Domain models are distinct types from DTOs and entities | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
-| ARCH-31 | 53-59 | Repository interfaces live in domain while implementations live in data | RULE | compose-data/references/boundaries-and-mapping.md#domain | — |
+| ARCH-29 | 53-59 | Domain code has zero platform imports so it runs in commonTest without emulators | RULE | compose-data/references/boundaries-and-mapping.md#domain | ✓ landed |
+| ARCH-30 | 53-59 | Domain models are distinct types from DTOs and entities | RULE | compose-data/references/boundaries-and-mapping.md#domain | ✓ landed |
+| ARCH-31 | 53-59 | Repository interfaces live in domain while implementations live in data | RULE | compose-data/references/boundaries-and-mapping.md#domain | ✓ landed |
 | ARCH-32 | 53-59 | Mappers sit at the data boundary | DUP | DROP: dup of NK-16 | — |
 | ARCH-33 | 53-59 | Use cases exist only for multi-step orchestration | DUP | DROP: dup of SKL-26 | — |
 | ARCH-09 | 61-78 | Domain example code (Item model, ItemRepository interface, CreateItemUseCase with Result) | API | DROP: tutorial code | CONFLICT: Result wrapper conflicts with kit launchGuarded contract |
@@ -586,39 +586,39 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| DS-01 | 11-16 | When-to-use table: Preferences for key-value, Typed JSON for structured settings objects, Room for queries/indexes/relations, filesystem for large blobs | DECISION | compose-data/references/datastore.md#which | — |
-| DS-02 | 18 | Scope rule: need WHERE/JOIN or more than ~100 entries means Room | RULE | compose-data/references/datastore.md#scope | — |
-| DS-03 | 22 | One DataStore instance per file enforced via DI singleton; multiples cause IllegalStateException/corruption | RULE | compose-data/references/datastore.md#singleton | — |
-| DS-04 | 23 | DataStore T must be immutable; mutation breaks transactional consistency | RULE | compose-data/references/datastore.md#types | — |
-| DS-05 | 24 | Never mix SingleProcess and MultiProcess factories for the same file | GOTCHA | compose-data/references/datastore.md#multiprocess | UNVERIFIED: not re-checked against current official docs |
+| DS-01 | 11-16 | When-to-use table: Preferences for key-value, Typed JSON for structured settings objects, Room for queries/indexes/relations, filesystem for large blobs | DECISION | compose-data/references/datastore.md#which | ✓ landed |
+| DS-02 | 18 | Scope rule: need WHERE/JOIN or more than ~100 entries means Room | RULE | compose-data/references/datastore.md#scope | ✓ landed |
+| DS-03 | 22 | One DataStore instance per file enforced via DI singleton; multiples cause IllegalStateException/corruption | RULE | compose-data/references/datastore.md#singleton | ✓ landed |
+| DS-04 | 23 | DataStore T must be immutable; mutation breaks transactional consistency | RULE | compose-data/references/datastore.md#types | ✓ landed |
+| DS-05 | 24 | Never mix SingleProcess and MultiProcess factories for the same file | GOTCHA | DROP: unverified, no fetched page (Phase 7) | UNVERIFIED: not re-checked against current official docs |
 | DS-06 | 28-38 | Setup dependency plus serialization-plugin pointers with always-search-latest-versions instruction | API | DROP: tutorial code | — |
 | DS-07 | 42-75 | KMP factory pattern: commonMain createDataStore(producePath), platform file paths for Android/iOS, app-specific folder (never java.io.tmpdir) for Desktop | DUP | DROP: split into DS-26–DS-28 | https://developer.android.com/kotlin/multiplatform/datastore |
-| DS-26 | 42-75 | Define the DataStore factory once in commonMain with a path lambda | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore |
-| DS-27 | 42-75 | Resolve Android and iOS file paths in their platform source sets | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore |
-| DS-28 | 42-75 | Store Desktop data in an app-specific folder, never java.io.tmpdir | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore |
+| DS-26 | 42-75 | Define the DataStore factory once in commonMain with a path lambda | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore. ✓ landed |
+| DS-27 | 42-75 | Resolve Android and iOS file paths in their platform source sets | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore. ✓ landed |
+| DS-28 | 42-75 | Store Desktop data in an app-specific folder, never java.io.tmpdir | RULE | compose-data/references/datastore.md#kmp | https://developer.android.com/kotlin/multiplatform/datastore. ✓ landed |
 | DS-08 | 75 | Android-only shortcut: Context.settingsDataStore by preferencesDataStore delegate | API | DROP: tutorial code | — |
 | DS-09 | 79-87 | Preferences key-type factory table (int/long/double/float/boolean/string/set) | API | DROP: tutorial code | — |
 | DS-10 | 92-109 | Preferences repository pattern: IOException catch, domain mapping, atomic edit transaction, clearAll | DUP | DROP: split into DS-29–DS-32 | — |
 | DS-29 | 92-109 | Catch IOException to defaults when reading dataStore.data | DUP | DROP: dup of DS-11 | — |
 | DS-30 | 92-109 | Map preferences to domain settings models | DUP | DROP: dup of DS-14 | — |
-| DS-31 | 92-109 | Treat edit as an atomic read-write-modify transaction | RULE | compose-data/references/datastore.md#repository | — |
+| DS-31 | 92-109 | Treat edit as an atomic read-write-modify transaction | RULE | compose-data/references/datastore.md#repository | ✓ landed |
 | DS-32 | 92-109 | Clear all preferences through a single edit clear | GENERIC | DROP: model already knows | — |
-| DS-11 | 111 | Always handle IOException on dataStore.data; file may be unreadable on first launch or after corruption | RULE | compose-data/references/datastore.md#repository | — |
-| DS-12 | 115-142 | Typed DataStore (JSON) with @Serializable settings, Serializer plus CorruptionException mapping, ReplaceFileCorruptionHandler, updateData copy writes | DECISION | compose-data/references/datastore.md#typed | CONFLICT: official KMP guide states only Preferences DataStore is supported in KMP projects, see https://developer.android.com/kotlin/multiplatform/datastore |
-| DS-13 | 146-152 | SharedPreferencesMigration runs once on first access; old file deleted after success | GOTCHA | compose-data/references/datastore.md#migration | — |
-| DS-14 | 159 | Map Preferences to domain models at repository boundary; never pass Preferences or raw key lookups into ViewModel or UI | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | — |
-| DS-15 | 165-170 | DI singleton wiring samples for Koin single and Hilt Provides Singleton | RULE | compose-data/references/datastore.md#di | CONFLICT: resolved — Hilt sample removed, DataStore provided as a Koin single |
+| DS-11 | 111 | Always handle IOException on dataStore.data; file may be unreadable on first launch or after corruption | RULE | compose-data/references/datastore.md#repository | ✓ landed |
+| DS-12 | 115-142 | Typed DataStore (JSON) with @Serializable settings, Serializer plus CorruptionException mapping, ReplaceFileCorruptionHandler, updateData copy writes | DECISION | compose-data/references/datastore.md#typed | CONFLICT: official KMP guide states only Preferences DataStore is supported in KMP projects, see https://developer.android.com/kotlin/multiplatform/datastore. ✓ landed (as the rule-6 NOT-TAUGHT note, D1-9) |
+| DS-13 | 146-152 | SharedPreferencesMigration runs once on first access; old file deleted after success | GOTCHA | compose-data/references/datastore.md#migration | ✓ landed |
+| DS-14 | 159 | Map Preferences to domain models at repository boundary; never pass Preferences or raw key lookups into ViewModel or UI | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | ✓ landed |
+| DS-15 | 165-170 | DI singleton wiring samples for Koin single and Hilt Provides Singleton | RULE | compose-data/references/datastore.md#di | CONFLICT: resolved — Hilt sample removed, DataStore provided as a Koin single. ✓ landed |
 | DS-16 | 177-184 | DataStore test isolation: factory-built instances plus fake-backed ViewModel tests | DUP | DROP: split into DS-33–DS-34 | — |
-| DS-33 | 177-184 | Build test DataStores with the factory plus a per-test temp dir | RULE | compose-data/references/data-testing.md#datastore | — |
+| DS-33 | 177-184 | Build test DataStores with the factory plus a per-test temp dir | RULE | compose-data/references/data-testing.md#datastore | ✓ landed |
 | DS-34 | 177-184 | Bypass DataStore in ViewModel tests with fake repositories | DUP | DROP: dup of brief §9.2 | — |
 | DS-17 | 188-197 | Anti-patterns table: multi-instance same file, runBlocking on main, large objects in DataStore, missing catch, missing corruption handler, tmpdir on Desktop, preference reads in composables, raw Preferences to UI | DUP | DROP: split into DS-18–DS-25 | — |
 | DS-18 | 188-197 | Never create multiple DataStore instances for the same file | DUP | DROP: dup of DS-03 | — |
 | DS-19 | 188-197 | Never read DataStore with runBlocking on the main thread | GENERIC | DROP: model already knows | — |
 | DS-20 | 188-197 | Never store large objects or lists in DataStore | GENERIC | DROP: model already knows | — |
 | DS-21 | 188-197 | Never collect dataStore.data without an IOException catch | DUP | DROP: dup of DS-11 | — |
-| DS-22 | 188-197 | Never ship without a corruption handler | RULE | compose-data/references/datastore.md#anti-patterns | — |
+| DS-22 | 188-197 | Never ship without a corruption handler | RULE | compose-data/references/datastore.md#anti-patterns | ✓ landed |
 | DS-23 | 188-197 | Never point Desktop storage at java.io.tmpdir | DUP | DROP: dup of DS-28 | — |
-| DS-24 | 188-197 | Never read preferences inside composables | RULE | compose-data/references/datastore.md#anti-patterns | — |
+| DS-24 | 188-197 | Never read preferences inside composables | RULE | compose-data/references/datastore.md#anti-patterns | ✓ landed |
 | DS-25 | 188-197 | Never pass raw Preferences to the UI | DUP | DROP: dup of DS-14 | — |
 
 ## references/dependency-injection.md
@@ -1038,25 +1038,25 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NK-20 | 38-60 | Wire Darwin in iosMain | DUP | DROP: dup of NK-03 | — |
 | NK-21 | 38-60 | Wire CIO in jvmMain | DUP | DROP: dup of NK-03 | — |
 | NK-22 | 38-60 | Wire MockEngine in commonTest | DUP | DROP: dup of NK-03 | — |
-| NK-03 | 64-71 | Platform engine decision table (OkHttp Android, Darwin iOS, CIO JVM/Desktop, MockEngine testing); CMP selects per source set, Android-only uses OkHttp directly | DECISION | compose-data/references/networking-ktor.md#engines | — |
-| NK-04 | 75 | Single reusable HttpClient instance; never one per request | RULE | compose-data/references/networking-ktor.md#client | — |
+| NK-03 | 64-71 | Platform engine decision table (OkHttp Android, Darwin iOS, CIO JVM/Desktop, MockEngine testing); CMP selects per source set, Android-only uses OkHttp directly | DECISION | compose-data/references/networking-ktor.md#engines | ✓ landed |
+| NK-04 | 75 | Single reusable HttpClient instance; never one per request | RULE | compose-data/references/networking-ktor.md#client | ✓ landed |
 | NK-05 | 78-106 | Minimal production HttpClient factory sample | API | DROP: tutorial code | — |
-| NK-06 | 93-97 | HttpTimeout triple: connect 15s, request 30s, socket 15s | GOTCHA | compose-data/references/networking-ktor.md#timeouts | — |
-| NK-07 | 99-103 | Logging at HEADERS with sanitizeHeader on Authorization; BODY in debug only | GOTCHA | compose-data/references/networking-ktor.md#logging | — |
-| NK-08 | 110 | isLenient only for non-standard APIs; it accepts malformed JSON and hides data issues in production | GOTCHA | compose-data/references/networking-ktor.md#json | — |
-| NK-09 | 114-119 | expectSuccess decision: true throws Client/ServerResponseException for try/catch handling, false returns responses for manual status inspection; pick one consistently | DECISION | compose-data/references/networking-ktor.md#expect-success | CONFLICT: kit contract brief (P1) must pick exactly one policy; legacy leaves it open |
+| NK-06 | 93-97 | HttpTimeout triple: connect 15s, request 30s, socket 15s | GOTCHA | compose-data/references/networking-ktor.md#timeouts | ✓ landed |
+| NK-07 | 99-103 | Logging at HEADERS with sanitizeHeader on Authorization; BODY in debug only | GOTCHA | compose-data/references/networking-ktor.md#logging | ✓ landed |
+| NK-08 | 110 | isLenient only for non-standard APIs; it accepts malformed JSON and hides data issues in production | GOTCHA | compose-data/references/networking-ktor.md#json | ✓ landed |
+| NK-09 | 114-119 | expectSuccess decision: true throws Client/ServerResponseException for try/catch handling, false returns responses for manual status inspection; pick one consistently | DECISION | compose-data/references/networking-ktor.md#expect-success | CONFLICT: kit contract brief (P1) must pick exactly one policy; legacy leaves it open. ✓ landed (resolved: expectSuccess=true, brief §13.1) |
 | NK-10 | 124-146 | DTO modeling conventions: always Serializable, SerialName on differing keys, defaults for optionals, serial enum names, no business logic | DUP | DROP: split into NK-23–NK-27 | — |
-| NK-23 | 124-146 | Annotate every DTO with @Serializable | RULE | compose-data/references/boundaries-and-mapping.md#dto | — |
+| NK-23 | 124-146 | Annotate every DTO with @Serializable | RULE | compose-data/references/boundaries-and-mapping.md#dto | ✓ landed |
 | NK-24 | 124-146 | Map differing JSON keys with @SerialName | GENERIC | DROP: model already knows | — |
 | NK-25 | 124-146 | Give optional DTO fields default values | GENERIC | DROP: model already knows | — |
 | NK-26 | 124-146 | Name serialized enum entries explicitly | GENERIC | DROP: model already knows | — |
-| NK-27 | 124-146 | Keep business logic out of DTOs | RULE | compose-data/references/boundaries-and-mapping.md#dto | — |
+| NK-27 | 124-146 | Keep business logic out of DTOs | RULE | compose-data/references/boundaries-and-mapping.md#dto | ✓ landed |
 | NK-11 | 150-164 | DTO-to-domain mappers at repository boundary; domain models carry no serialization annotations | DUP | DROP: split into NK-16–NK-17 | — |
-| NK-16 | 150-164 | DTO-to-domain mappers sit at the repository boundary | RULE | compose-data/references/boundaries-and-mapping.md#mapping | — |
-| NK-17 | 150-164 | Domain models carry no serialization annotations | RULE | compose-data/references/boundaries-and-mapping.md#mapping | — |
+| NK-16 | 150-164 | DTO-to-domain mappers sit at the repository boundary | RULE | compose-data/references/boundaries-and-mapping.md#mapping | ✓ landed |
+| NK-17 | 150-164 | Domain models carry no serialization annotations | RULE | compose-data/references/boundaries-and-mapping.md#mapping | ✓ landed |
 | NK-12 | 168-194 | Typed API service layer wrapping HttpClient (get with paging params, get by id, post with JSON body, delete) plus @Serializable request bodies | API | DROP: tutorial code | — |
-| NK-13 | 203-218 | Simple repository approach: interface plus impl mapping DTOs to domain with exceptions bubbling to ViewModel catch; suits simpler apps | RULE | compose-data/references/boundaries-and-mapping.md#repository | CONFLICT: kit ViewModels catch via launchGuarded(onError), never hand-rolled try/catch |
-| NK-14 | 224-239 | Offline-first repository: local DB as single source of truth, remote sync into storage, UI observes local Flow | RULE | compose-data/references/offline-first.md#source-of-truth | — |
+| NK-13 | 203-218 | Simple repository approach: interface plus impl mapping DTOs to domain with exceptions bubbling to ViewModel catch; suits simpler apps | RULE | compose-data/references/boundaries-and-mapping.md#repository | CONFLICT: kit ViewModels catch via launchGuarded(onError), never hand-rolled try/catch. ✓ landed (partial: bubble-to-launchGuarded kept; ViewModel try/catch dropped) |
+| NK-14 | 224-239 | Offline-first repository: local DB as single source of truth, remote sync into storage, UI observes local Flow | RULE | compose-data/references/offline-first.md#source-of-truth | ✓ landed |
 | NK-15 | 243-269 | Optional Ktor Resources plugin for type-safe @Resource routes with install plus usage samples | API | DROP: tutorial code | — |
 
 ## references/networking-ktor-architecture.md
@@ -1067,26 +1067,26 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NKA-02 | 23-46 | Option A safeRequest returning Kotlin Result with onSuccess/onFailure consumption and per-exception UI branching | OUTOFKIT | DROP: conflicts with the launchGuarded contract | CONFLICT: no Result wrappers in kit ViewModels or repositories |
 | NKA-03 | 50-78 | Custom ApiResult sealed-hierarchy error-wrapper sample | OUTOFKIT | DROP: conflicts with the launchGuarded contract | CONFLICT: no Result wrappers; classification shape may inform AppError mapping in P1 |
 | NKA-04 | 82-104 | safeRequest centralizing wrapper paired with expectSuccess false plus Unit type param for 204 No Content | OUTOFKIT | DROP: conflicts with the launchGuarded contract | CONFLICT: no safeApiCall-style wrappers in the kit |
-| NKA-05 | 108-122 | Server error-envelope parsing (ErrorDto message/error/detail fallback) that never fails on malformed bodies | GOTCHA | compose-data/references/networking-ktor.md#errors | — |
+| NKA-05 | 108-122 | Server error-envelope parsing (ErrorDto message/error/detail fallback) that never fails on malformed bodies | GOTCHA | compose-data/references/networking-ktor.md#errors | ✓ landed |
 | NKA-06 | 130-164 | Exception-to-failure classification (timeouts, IO/unresolved-address, serialization incl JsonConvert/MissingField, 401 vs other 4xx, 5xx, unknown) plus status-code classifier | DUP | DROP: split into NKA-13–NKA-19 | — |
-| NKA-13 | 130-164 | Timeout exceptions classify as retriable request timeouts | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
-| NKA-14 | 130-164 | IO and unresolved-address exceptions classify as network errors | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
-| NKA-15 | 130-164 | Serialization exceptions classify as invalid-response-format errors | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
-| NKA-16 | 130-164 | HTTP 401 classifies as unauthorized while other 4xx classify as request failures | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
+| NKA-13 | 130-164 | Timeout exceptions classify as retriable request timeouts | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
+| NKA-14 | 130-164 | IO and unresolved-address exceptions classify as network errors | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
+| NKA-15 | 130-164 | Serialization exceptions classify as invalid-response-format errors | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
+| NKA-16 | 130-164 | HTTP 401 classifies as unauthorized while other 4xx classify as request failures | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
 | NKA-17 | 130-164 | 5xx responses classify as server errors | GENERIC | DROP: model already knows | — |
-| NKA-18 | 130-164 | Unrecognized exceptions classify as unknown failures | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
-| NKA-19 | 130-164 | Raw status codes map through a dedicated status classifier | GOTCHA | compose-data/references/networking-ktor.md#classification | — |
+| NKA-18 | 130-164 | Unrecognized exceptions classify as unknown failures | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
+| NKA-19 | 130-164 | Raw status codes map through a dedicated status classifier | GOTCHA | compose-data/references/networking-ktor.md#classification | ✓ landed |
 | NKA-07 | 167 | CancellationException always rethrown, never swallowed; breaks structured concurrency otherwise | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
 | NKA-08 | 173-181 | Plugin concern placement: defaultRequest for base/headers, ContentNegotiation for JSON, HttpTimeout default, Logging debug aid, Auth for tokens, HttpRequestRetry for transient servers, ContentEncoding for bandwidth | DUP | DROP: split into NKA-20–NKA-25 | — |
-| NKA-20 | 173-181 | Base URL, content type, and static headers live in defaultRequest | DECISION | compose-data/references/networking-ktor.md#plugins | — |
-| NKA-21 | 173-181 | JSON parsing lives in ContentNegotiation and timeouts in HttpTimeout | DECISION | compose-data/references/networking-ktor.md#plugins | — |
+| NKA-20 | 173-181 | Base URL, content type, and static headers live in defaultRequest | DECISION | compose-data/references/networking-ktor.md#plugins | ✓ landed |
+| NKA-21 | 173-181 | JSON parsing lives in ContentNegotiation and timeouts in HttpTimeout | DECISION | compose-data/references/networking-ktor.md#plugins | ✓ landed |
 | NKA-22 | 173-181 | Logging stays a debug aid with sanitized Authorization | DUP | DROP: dup of NKA-11 | — |
-| NKA-23 | 173-181 | Token load and refresh live in the Auth plugin | DECISION | compose-data/references/networking-ktor.md#plugins | — |
-| NKA-24 | 173-181 | Transient server failures retry through HttpRequestRetry | DECISION | compose-data/references/networking-ktor.md#plugins | — |
-| NKA-25 | 173-181 | Bandwidth-sensitive APIs compress through ContentEncoding | DECISION | compose-data/references/networking-ktor.md#plugins | — |
-| NKA-09 | 185-191 | Install order ContentNegotiation, Auth, HttpRequestRetry, HttpTimeout, ContentEncoding; retry before timeout so retries cover timeouts; Auth 401s independent of retry | GOTCHA | compose-data/references/networking-ktor.md#plugins | UNVERIFIED: plugin ordering semantics not re-checked against current Ktor docs |
+| NKA-23 | 173-181 | Token load and refresh live in the Auth plugin | DECISION | compose-data/references/networking-ktor.md#plugins | ✓ landed |
+| NKA-24 | 173-181 | Transient server failures retry through HttpRequestRetry | DECISION | compose-data/references/networking-ktor.md#plugins | ✓ landed |
+| NKA-25 | 173-181 | Bandwidth-sensitive APIs compress through ContentEncoding | DECISION | compose-data/references/networking-ktor.md#plugins | ✓ landed |
+| NKA-09 | 185-191 | Install order ContentNegotiation, Auth, HttpRequestRetry, HttpTimeout, ContentEncoding; retry before timeout so retries cover timeouts; Auth 401s independent of retry | GOTCHA | compose-data/references/networking-ktor.md#plugins | UNVERIFIED: plugin ordering semantics not re-checked against current Ktor docs. ✓ landed (partial: retry-before-timeout verified https://ktor.io/docs/client-request-retry.html; general order stated conservatively) |
 | NKA-10 | 197-219 | createClientPlugin custom interceptor pattern for analytics, header injection, response logging | API | DROP: tutorial code | — |
-| NKA-11 | 223-226 | Debug vs production logging: BODY in debug, HEADERS-or-off in production, Authorization sanitize required | GOTCHA | compose-data/references/networking-ktor.md#logging | — |
+| NKA-11 | 223-226 | Debug vs production logging: BODY in debug, HEADERS-or-off in production, Authorization sanitize required | GOTCHA | compose-data/references/networking-ktor.md#logging | ✓ landed |
 | NKA-12 | 230-237 | Networking anti-patterns table: per-request client, swallowed CancellationException, production body logging, mixed expectSuccess modes, random plugin order, forced wrapper choice | DUP | DROP: split into NKA-27–NKA-32 | — |
 | NKA-27 | 230-237 | Never build an HttpClient per request | DUP | DROP: dup of NK-04 | — |
 | NKA-28 | 230-237 | Never swallow CancellationException | DUP | DROP: covered by CB-99 (kept in EXTERNAL_LEDGER) | — |
@@ -1099,19 +1099,19 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| NKAUTH-01 | 14-65 | Bearer Auth plugin default pattern: loadTokens from storage, refreshTokens with markAsRefreshTokenRequest, oldTokens access, sendWithoutRequest login/register exemption, null return signalling failed refresh | GOTCHA | compose-data/references/auth-and-realtime.md#refresh | https://ktor.io/docs/client-bearer-auth.html |
-| NKAUTH-02 | 69-71 | markAsRefreshTokenRequest keeps the refresh call outside Auth interception avoiding infinite loops; oldTokens exposes expired tokens; sendWithoutRequest skips endpoints; null means no retry | GOTCHA | compose-data/references/auth-and-realtime.md#refresh | https://ktor.io/docs/client-bearer-auth.html |
-| NKAUTH-03 | 75-85 | TokenStorage interface with app-owned AuthTokens converted to BearerTokens only at the plugin boundary | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | — |
-| NKAUTH-04 | 89-117 | Isolated refresh-client alternative (no-Auth dedicated client closed via use{}) as valid explicit-separation option vs less-ceremony marking | DECISION | compose-data/references/auth-and-realtime.md#refresh-client | — |
+| NKAUTH-01 | 14-65 | Bearer Auth plugin default pattern: loadTokens from storage, refreshTokens with markAsRefreshTokenRequest, oldTokens access, sendWithoutRequest login/register exemption, null return signalling failed refresh | GOTCHA | compose-data/references/auth-and-realtime.md#refresh | https://ktor.io/docs/client-bearer-auth.html. ✓ landed |
+| NKAUTH-02 | 69-71 | markAsRefreshTokenRequest keeps the refresh call outside Auth interception avoiding infinite loops; oldTokens exposes expired tokens; sendWithoutRequest skips endpoints; null means no retry | GOTCHA | compose-data/references/auth-and-realtime.md#refresh | https://ktor.io/docs/client-bearer-auth.html. ✓ landed |
+| NKAUTH-03 | 75-85 | TokenStorage interface with app-owned AuthTokens converted to BearerTokens only at the plugin boundary | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | ✓ landed |
+| NKAUTH-04 | 89-117 | Isolated refresh-client alternative (no-Auth dedicated client closed via use{}) as valid explicit-separation option vs less-ceremony marking | DECISION | compose-data/references/auth-and-realtime.md#refresh-client | ✓ landed |
 | NKAUTH-05 | 123 | ktor-client-websockets catalog plus commonMain dependency for WebSocket support | API | DROP: tutorial code | — |
 | NKAUTH-06 | 128-157 | WebSocket messaging patterns: frame loop, external session control, serialization converter | DUP | DROP: split into NKAUTH-11–NKAUTH-13 | — |
 | NKAUTH-11 | 128-157 | Exchange text and close frames in a receive loop | API | DROP: tutorial code | — |
 | NKAUTH-12 | 128-157 | Control sessions externally through webSocketSession handles | API | DROP: tutorial code | — |
 | NKAUTH-13 | 128-157 | Serialize WebSocket payloads with the kotlinx converter | API | DROP: tutorial code | — |
-| NKAUTH-07 | 131 | pingIntervalMillis 30s keep-alive on the WebSockets install | GOTCHA | compose-data/references/auth-and-realtime.md#websocket | UNVERIFIED: not re-checked against current Ktor docs |
-| NKAUTH-08 | 176 | SSE rides ktor-client-core with no extra dependency | GOTCHA | compose-data/references/auth-and-realtime.md#sse | UNVERIFIED: not re-checked; legacy cites https://ktor.io/docs/client-server-sent-events.html |
+| NKAUTH-07 | 131 | pingIntervalMillis 30s keep-alive on the WebSockets install | GOTCHA | compose-data/references/auth-and-realtime.md#websocket | UNVERIFIED: not re-checked against current Ktor docs. ✓ landed (verified in Phase 7: https://ktor.io/docs/client-websockets.html; 30s value dropped) |
+| NKAUTH-08 | 176 | SSE rides ktor-client-core with no extra dependency | GOTCHA | compose-data/references/auth-and-realtime.md#sse | UNVERIFIED: not re-checked; legacy cites https://ktor.io/docs/client-server-sent-events.html. ✓ landed (verified in Phase 7 on that page) |
 | NKAUTH-09 | 180-192 | SSE basic usage: install(SSE) plus sse(url) collecting event/data/id | API | DROP: tutorial code | — |
-| NKAUTH-10 | 196-204 | SSE vs WebSocket decision: server-push text feeds to SSE (HTTP, auto-reconnect), bidirectional/binary/realtime collaboration to WebSocket | DECISION | compose-data/references/auth-and-realtime.md#realtime-choice | — |
+| NKAUTH-10 | 196-204 | SSE vs WebSocket decision: server-push text feeds to SSE (HTTP, auto-reconnect), bidirectional/binary/realtime collaboration to WebSocket | DECISION | compose-data/references/auth-and-realtime.md#realtime-choice | ✓ landed |
 
 ## references/networking-ktor-testing.md
 
@@ -1123,8 +1123,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | NKTEST-04 | 56-71 | safeRequest wrapper test asserting failure return with expectSuccess false | OUTOFKIT | DROP: conflicts with the launchGuarded contract | CONFLICT: no safeRequest wrappers in the kit |
 | NKTEST-05 | 75-99 | Request-assertion test verifying method, content type, body payload | API | DROP: tutorial code | — |
 | NKTEST-06 | 103-119 | Path-based multiple-response MockEngine routing with respondError fallback | API | DROP: tutorial code | — |
-| NKTEST-07 | 123-130 | Engine injection: HttpClientEngine constructor param so MockEngine swaps in tests; production and tests share one createHttpClient factory keeping plugin config consistent | RULE | compose-data/references/data-testing.md#engine | — |
-| NKTEST-08 | 134-138 | HttpClient plus engine provided as DI singletons with expect/actual platform engine modules | RULE | compose-data/references/data-testing.md#di | CONFLICT: resolved — Hilt sample removed |
+| NKTEST-07 | 123-130 | Engine injection: HttpClientEngine constructor param so MockEngine swaps in tests; production and tests share one createHttpClient factory keeping plugin config consistent | RULE | compose-data/references/data-testing.md#engine | ✓ landed |
+| NKTEST-08 | 134-138 | HttpClient plus engine provided as DI singletons with expect/actual platform engine modules | RULE | compose-data/references/data-testing.md#di | CONFLICT: resolved — Hilt sample removed. ✓ landed |
 | NKTEST-09 | 145-152 | Networking test anti-patterns table: DTOs in UI state, network in composables, missing timeouts, hardcoded base URLs, mapping in API service, per-test client construction, missing compression | DUP | DROP: split into NKTEST-10–NKTEST-16 | — |
 | NKTEST-10 | 145-152 | Never use DTOs directly in UI state | DUP | DROP: dup of NK-16 | — |
 | NKTEST-11 | 145-152 | Never issue network calls from composables | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
@@ -1139,44 +1139,44 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
 | PG-01 | 12-16 | Five critical paging rules: separate PagingData Flow, no per-recomposition Pager, always cachedIn, always stable keys, flatMapLatest for params | DUP | DROP: split into PG-13–PG-17 | — |
-| PG-13 | 12-16 | PagingData travels as a separate Flow, never inside UiState | RULE | compose-data/references/paging.md#rules | — |
-| PG-14 | 12-16 | Never build a new Pager per recomposition | RULE | compose-data/references/paging.md#rules | — |
-| PG-15 | 12-16 | Always apply cachedIn(viewModelScope) | RULE | compose-data/references/paging.md#rules | — |
+| PG-13 | 12-16 | PagingData travels as a separate Flow, never inside UiState | RULE | compose-data/references/paging.md#rules | ✓ landed |
+| PG-14 | 12-16 | Never build a new Pager per recomposition | RULE | compose-data/references/paging.md#rules | ✓ landed |
+| PG-15 | 12-16 | Always apply cachedIn(viewModelScope) | RULE | compose-data/references/paging.md#rules | ✓ landed |
 | PG-16 | 12-16 | Always key paged items by stable domain ID | DUP | DROP: dup of LIST-03 | — |
-| PG-17 | 12-16 | Drive parameter changes with flatMapLatest, never combine on PagingData | RULE | compose-data/references/paging.md#rules | — |
-| PG-02 | 20-27 | paging-compose plus paging-common plus paging-testing coordinates; KMP commonMain support since 3.3.0-alpha02 (Android, JVM, iOS), paging-runtime Android-only, Web/WASM per-version verification | GOTCHA | compose-data/references/paging.md#setup | https://developer.android.com/jetpack/androidx/releases/paging |
+| PG-17 | 12-16 | Drive parameter changes with flatMapLatest, never combine on PagingData | RULE | compose-data/references/paging.md#rules | ✓ landed |
+| PG-02 | 20-27 | paging-compose plus paging-common plus paging-testing coordinates; KMP commonMain support since 3.3.0-alpha02 (Android, JVM, iOS), paging-runtime Android-only, Web/WASM per-version verification | GOTCHA | compose-data/references/paging.md#setup | https://developer.android.com/jetpack/androidx/releases/paging. ✓ landed |
 | PG-03 | 31-42 | Core data-flow pipeline plus component-role table (PagingSource, RemoteMediator, Pager, PagingConfig, LazyPagingItems) | GENERIC | DROP: model already knows | — |
 | PG-04 | 47-72 | PagingSource single-responsibility rules: factory-fresh instances, specific catches, null end signals, cursor key types, anchor refresh keys | DUP | DROP: split into PG-18–PG-22 | — |
-| PG-18 | 47-72 | The pagingSourceFactory returns a new instance on every call | GOTCHA | compose-data/references/paging.md#paging-source | — |
-| PG-19 | 47-72 | PagingSource.load catches specific exceptions only | GOTCHA | compose-data/references/paging.md#paging-source | — |
+| PG-18 | 47-72 | The pagingSourceFactory returns a new instance on every call | GOTCHA | compose-data/references/paging.md#paging-source | ✓ landed |
+| PG-19 | 47-72 | PagingSource.load catches specific exceptions only | GOTCHA | compose-data/references/paging.md#paging-source | ✓ landed |
 | PG-20 | 47-72 | Null prev and next keys signal the end of pagination | GENERIC | DROP: model already knows | — |
 | PG-21 | 47-72 | Cursor-based APIs use String key types | GENERIC | DROP: model already knows | — |
-| PG-22 | 47-72 | getRefreshKey anchors reloads to the closest visible page | GOTCHA | compose-data/references/paging.md#paging-source | — |
+| PG-22 | 47-72 | getRefreshKey anchors reloads to the closest visible page | GOTCHA | compose-data/references/paging.md#paging-source | ✓ landed |
 | PG-05 | 77-91 | Pager plus ViewModel setup with PagingData mapped before cachedIn; PagingConfig param table (pageSize, prefetchDistance, enablePlaceholders, initialLoadSize) | API | DROP: tutorial code | — |
-| PG-06 | 102-113 | Invalidation: repository retains current source, invalidate() triggers factory-fresh reload from getRefreshKey | RULE | compose-data/references/paging.md#invalidation | — |
+| PG-06 | 102-113 | Invalidation: repository retains current source, invalidate() triggers factory-fresh reload from getRefreshKey | RULE | compose-data/references/paging.md#invalidation | ✓ landed |
 | PG-07 | 117-141 | Filter wiring combines debounced distinct flows into flatMapLatest with cachedIn placed after the operator | DUP | DROP: split into PG-23–PG-25 | — |
-| PG-23 | 117-141 | Combine debounced distinct filter flows, then flatMapLatest into a new Pager | GOTCHA | compose-data/references/paging.md#filters | — |
+| PG-23 | 117-141 | Combine debounced distinct filter flows, then flatMapLatest into a new Pager | GOTCHA | compose-data/references/paging.md#filters | ✓ landed |
 | PG-24 | 117-141 | distinctUntilChanged prevents redundant Pager creation | DUP | DROP: dup of PG-23 | — |
-| PG-25 | 117-141 | cachedIn sits AFTER flatMapLatest, never inside it | GOTCHA | compose-data/references/paging.md#filters | — |
+| PG-25 | 117-141 | cachedIn sits AFTER flatMapLatest, never inside it | GOTCHA | compose-data/references/paging.md#filters | ✓ landed |
 | PG-08 | 146-172 | LazyPagingItems access rules: loading index access, non-loading peek, off-composition retry/refresh, key and content-type helpers, all-layout support, items over itemsIndexed | DUP | DROP: split into PG-26–PG-31 | — |
 | PG-26 | 146-172 | Index access loads the item while peek reads without loading | GENERIC | DROP: model already knows | — |
 | PG-27 | 146-172 | Never call retry or refresh from the composable body | DUP | DROP: dup of PGMT-13 | — |
-| PG-28 | 146-172 | Key and content-type paged items with itemKey and itemContentType | RULE | compose-data/references/paging.md#ui | — |
+| PG-28 | 146-172 | Key and content-type paged items with itemKey and itemContentType | RULE | compose-data/references/paging.md#ui | ✓ landed |
 | PG-29 | 146-172 | LazyPagingItems work in all lazy layouts | GENERIC | DROP: model already knows | — |
-| PG-30 | 146-172 | Prefer items over itemsIndexed since prepend shifts indices | GOTCHA | compose-data/references/paging.md#ui | — |
+| PG-30 | 146-172 | Prefer items over itemsIndexed since prepend shifts indices | GOTCHA | compose-data/references/paging.md#ui | ✓ landed |
 | PG-31 | 146-172 | Never compute, filter, or sort inside the paged item lambda | DUP | DROP: covered by CB-24 (kept in EXTERNAL_LEDGER) | — |
-| PG-09 | 176-184 | LoadState pattern: branch on refresh with full-screen states only at itemCount zero, inline indicators plus retry() otherwise | RULE | compose-data/references/paging.md#loadstate | — |
-| PG-10 | 184 | RemoteMediator screens read loadState.source.refresh not loadState.refresh (convenience flag can complete before Room writes) | GOTCHA | compose-data/references/offline-first.md#loadstate | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/topic/libraries/architecture/paging/v3-compose |
-| PG-11 | 188-214 | Transformations (map/filter/insertSeparators) on the outer Flow BEFORE cachedIn or they are lost on cache hit; per-type unique keys plus contentTypes with separators | GOTCHA | compose-data/references/paging.md#transforms | — |
+| PG-09 | 176-184 | LoadState pattern: branch on refresh with full-screen states only at itemCount zero, inline indicators plus retry() otherwise | RULE | compose-data/references/paging.md#loadstate | ✓ landed |
+| PG-10 | 184 | RemoteMediator screens read loadState.source.refresh not loadState.refresh (convenience flag can complete before Room writes) | GOTCHA | compose-data/references/offline-first.md#loadstate | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/topic/libraries/architecture/paging/v3-compose. ✓ landed (verified in Phase 7 via official excerpts of the load-state and CombinedLoadStates pages) |
+| PG-11 | 188-214 | Transformations (map/filter/insertSeparators) on the outer Flow BEFORE cachedIn or they are lost on cache hit; per-type unique keys plus contentTypes with separators | GOTCHA | compose-data/references/paging.md#transforms | ✓ landed |
 | PG-12 | 218-219 | Related-reference pointers to paging-offline and paging-mvi-testing are legacy-internal indexing | GENERIC | DROP: legacy index, superseded by kit routing table | — |
 
 ## references/paging-mvi-testing.md
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| PGMT-01 | 10-49 | MVI dual-flow ViewModel: StateFlow for filters/selection/errors plus separate PagingData Flow reacting via distinctUntilChanged plus flatMapLatest with domain-to-UI mapping before cachedIn | RULE | compose-data/references/paging.md#dual-flow | — |
-| PGMT-02 | 53-69 | Route collects both state and LazyPagingItems and passes them to a dumb Screen receiving LazyPagingItems plus state as props | RULE | compose-data/references/paging.md#route | — |
-| PGMT-03 | 76-103 | PagingSource unit tests for page success and network-error paths via LoadParams.Refresh assertions | RULE | compose-data/references/data-testing.md#paging-tests | — |
+| PGMT-01 | 10-49 | MVI dual-flow ViewModel: StateFlow for filters/selection/errors plus separate PagingData Flow reacting via distinctUntilChanged plus flatMapLatest with domain-to-UI mapping before cachedIn | RULE | compose-data/references/paging.md#dual-flow | ✓ landed |
+| PGMT-02 | 53-69 | Route collects both state and LazyPagingItems and passes them to a dumb Screen receiving LazyPagingItems plus state as props | RULE | compose-data/references/paging.md#route | ✓ landed |
+| PGMT-03 | 76-103 | PagingSource unit tests for page success and network-error paths via LoadParams.Refresh assertions | RULE | compose-data/references/data-testing.md#paging-tests | ✓ landed |
 | PGMT-04 | 107-119 | asSnapshot flow test with scrollTo for multi-page loads | RULE | DROP: optional depth — niche paging-test mechanics | — |
 | PGMT-05 | 123-135 | Transformation test via asPagingSourceFactory plus TestPager refresh assertions | RULE | DROP: optional depth — niche paging-test mechanics | — |
 | PGMT-06 | 141 | PagingData inside UiState StateFlow resets scroll on any state change (official codelab uses separate flows) | DUP | DROP: dup of PG-13 | UNVERIFIED: codelab claim not re-checked; legacy cites https://github.com/android/codelab-android-paging |
@@ -1186,7 +1186,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | PGMT-10 | 142-149 | Never skip cachedIn(viewModelScope) | DUP | DROP: dup of PG-15 | — |
 | PGMT-11 | 142-149 | Never skip stable list keys on paged lists | DUP | DROP: dup of LIST-03 | — |
 | PGMT-12 | 142-149 | Never combine PagingData flows | DUP | DROP: dup of PG-17 | — |
-| PGMT-13 | 142-149 | Never call refresh() from the composable body | GOTCHA | compose-data/references/paging.md#anti-patterns | — |
+| PGMT-13 | 142-149 | Never call refresh() from the composable body | GOTCHA | compose-data/references/paging.md#anti-patterns | ✓ landed |
 | PGMT-14 | 142-149 | Never skip LoadState handling on paged lists | DUP | DROP: dup of PG-09 | — |
 | PGMT-15 | 142-149 | Never transform after cachedIn | DUP | DROP: dup of PG-11 | — |
 | PGMT-16 | 142-149 | Never catch generic Exception in a PagingSource | DUP | DROP: dup of PG-19 | — |
@@ -1195,11 +1195,11 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| PGOFF-01 | 10-30 | RemoteMediator.initialize cache-timeout pattern returning SKIP_INITIAL_REFRESH on fresh cache vs LAUNCH_INITIAL_REFRESH on stale; launch is the default without override | DECISION | compose-data/references/offline-first.md#initialize | — |
+| PGOFF-01 | 10-30 | RemoteMediator.initialize cache-timeout pattern returning SKIP_INITIAL_REFRESH on fresh cache vs LAUNCH_INITIAL_REFRESH on stale; launch is the default without override | DECISION | compose-data/references/offline-first.md#initialize | ✓ landed |
 | PGOFF-02 | 35-89 | RemoteMediator implementation sample covering load types, transactions, remote keys, and error mapping | API | DROP: tutorial code | — |
-| PGOFF-03 | 66 | Room writes wrapped in transaction (withTransaction on Android; KMP writer-connection equivalent per room-database guidance) | RULE | compose-data/references/offline-first.md#transactions | — |
-| PGOFF-04 | 95-100 | Pager wiring: Room pagingSourceFactory plus RemoteMediator plus viewModelScope cachedIn; UI observes the Room-backed source | RULE | compose-data/references/offline-first.md#wiring | — |
-| PGOFF-05 | 104 | With RemoteMediator use loadState.source.refresh in UI, not loadState.refresh | GOTCHA | compose-data/references/offline-first.md#loadstate | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/topic/libraries/architecture/paging/v3-compose |
+| PGOFF-03 | 66 | Room writes wrapped in transaction (withTransaction on Android; KMP writer-connection equivalent per room-database guidance) | RULE | compose-data/references/offline-first.md#transactions | ✓ landed |
+| PGOFF-04 | 95-100 | Pager wiring: Room pagingSourceFactory plus RemoteMediator plus viewModelScope cachedIn; UI observes the Room-backed source | RULE | compose-data/references/offline-first.md#wiring | ✓ landed |
+| PGOFF-05 | 104 | With RemoteMediator use loadState.source.refresh in UI, not loadState.refresh | GOTCHA | compose-data/references/offline-first.md#loadstate | UNVERIFIED: not re-checked; legacy cites https://developer.android.com/topic/libraries/architecture/paging/v3-compose. ✓ landed (verified in Phase 7 via official excerpts of the load-state and CombinedLoadStates pages) |
 | PGOFF-06 | 108-130 | RemoteKey entity plus DAO (insert REPLACE, getRemoteKey, getLastUpdated, delete) backing pagination cursors and cache timestamps | API | DROP: tutorial code | — |
 
 ## references/performance.md
@@ -1295,53 +1295,53 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
-| ROOM-01 | 3 | Room KMP-ready since 2.7.0 for CMP and Android projects | GOTCHA | compose-data/references/room.md#setup | https://developer.android.com/jetpack/androidx/releases/room |
+| ROOM-01 | 3 | Room KMP-ready since 2.7.0 for CMP and Android projects | GOTCHA | compose-data/references/room.md#setup | https://developer.android.com/jetpack/androidx/releases/room. ✓ landed |
 | ROOM-02 | 12-30 | Version-catalog plus plugin coordinates (room runtime/compiler, sqlite-bundled, KSP, androidx.room plugin) with search-latest instruction | API | DROP: tutorial code | — |
 | ROOM-03 | 34-53 | KMP Gradle wiring (ksp plus room plugins, commonMain runtime plus bundled sqlite, per-target ksp compiler adds, schemaDirectory) with Android-only ksp() shortcut | API | DROP: tutorial code | — |
-| ROOM-04 | 58-71 | @Database plus @ConstructedBy plus expect AppDatabaseConstructor with per-platform actuals; Android-only skips to databaseBuilder | RULE | compose-data/references/room.md#setup | https://developer.android.com/kotlin/multiplatform/room |
-| ROOM-05 | 76-80 | getRoomDatabase builder with BundledSQLiteDriver plus IO query context; platforms supply their own getDatabaseBuilder | RULE | compose-data/references/room.md#setup | https://developer.android.com/kotlin/multiplatform/room |
+| ROOM-04 | 58-71 | @Database plus @ConstructedBy plus expect AppDatabaseConstructor with per-platform actuals; Android-only skips to databaseBuilder | RULE | compose-data/references/room.md#setup | https://developer.android.com/kotlin/multiplatform/room. ✓ landed (via official excerpts; direct fetch unreachable from worker env — see phase-7 report) |
+| ROOM-05 | 76-80 | getRoomDatabase builder with BundledSQLiteDriver plus IO query context; platforms supply their own getDatabaseBuilder | RULE | compose-data/references/room.md#setup | https://developer.android.com/kotlin/multiplatform/room. ✓ landed (via official excerpts; direct fetch unreachable from worker env — see phase-7 report) |
 | ROOM-06 | 84-92 | Critical Room performance rules: index queried columns, batch writes transactionally, project columns, Flow reads with suspend writes, no main-thread queries, bundled driver on KMP, singleton database | DUP | DROP: split into ROOM-20–ROOM-26 | — |
 | ROOM-20 | 84-92 | Index every column in WHERE, ORDER BY, and JOIN clauses | GENERIC | DROP: model already knows | — |
 | ROOM-21 | 84-92 | Batch writes inside a transaction | GENERIC | DROP: model already knows | — |
 | ROOM-22 | 84-92 | Project needed columns instead of SELECT star | GENERIC | DROP: model already knows | — |
 | ROOM-23 | 84-92 | Read reactively with Flow and write with suspend functions | GENERIC | DROP: model already knows | — |
 | ROOM-24 | 84-92 | Never allowMainThreadQueries in production | GENERIC | DROP: model already knows | — |
-| ROOM-25 | 84-92 | Use BundledSQLiteDriver on KMP targets | RULE | compose-data/references/room.md#perf | — |
-| ROOM-26 | 84-92 | Provide the RoomDatabase as a DI singleton | RULE | compose-data/references/room.md#perf | — |
+| ROOM-25 | 84-92 | Use BundledSQLiteDriver on KMP targets | RULE | compose-data/references/room.md#perf | ✓ landed |
+| ROOM-26 | 84-92 | Provide the RoomDatabase as a DI singleton | RULE | compose-data/references/room.md#perf | ✓ landed |
 | ROOM-07 | 96-112 | Room entity-design sample covering indices, columns, defaults, keys, and FTS | API | DROP: tutorial code | — |
-| ROOM-08 | 116-122 | Index decision: yes on queried/FK columns, no on rarely-queried or tiny tables; composite (a,b) serves a-alone or both with selective-first ordering | DECISION | compose-data/references/room.md#indexes | — |
+| ROOM-08 | 116-122 | Index decision: yes on queried/FK columns, no on rarely-queried or tiny tables; composite (a,b) serves a-alone or both with selective-first ordering | DECISION | compose-data/references/room.md#indexes | ✓ landed |
 | ROOM-09 | 126-145 | DAO CRUD sample plus Upsert-over-REPLACE rule plus Flow auto-invalidation | DUP | DROP: split into ROOM-36–ROOM-38 | — |
 | ROOM-36 | 126-145 | DAO insert, update, upsert, delete, and query sample | API | DROP: tutorial code | — |
-| ROOM-37 | 126-145 | Prefer @Upsert over REPLACE inserts with foreign keys | GOTCHA | compose-data/references/room.md#dao | — |
+| ROOM-37 | 126-145 | Prefer @Upsert over REPLACE inserts with foreign keys | GOTCHA | compose-data/references/room.md#dao | ✓ landed |
 | ROOM-38 | 126-145 | Room auto-invalidates Flow queries on table changes | GENERIC | DROP: model already knows | — |
-| ROOM-10 | 145 | KMP DAOs must be suspend or Flow-returning for non-Android targets | GOTCHA | compose-data/references/room.md#kmp | https://developer.android.com/kotlin/multiplatform/room |
+| ROOM-10 | 145 | KMP DAOs must be suspend or Flow-returning for non-Android targets | GOTCHA | compose-data/references/room.md#kmp | https://developer.android.com/kotlin/multiplatform/room. ✓ landed (via official excerpts; direct fetch unreachable from worker env — see phase-7 report) |
 | ROOM-11 | 150-164 | Query discipline: projection summaries, bound parameters, LIMIT bounds, Paging for unbounded scroll | DUP | DROP: split into ROOM-39–ROOM-42 | — |
 | ROOM-39 | 150-164 | Read summaries through projection data classes | GENERIC | DROP: model already knows | — |
 | ROOM-40 | 150-164 | Always bind query parameters, never concatenate | GENERIC | DROP: model already knows | — |
 | ROOM-41 | 150-164 | Bound result sets with LIMIT | GENERIC | DROP: model already knows | — |
-| ROOM-42 | 150-164 | Page unbounded scrolling instead of loading all rows | RULE | compose-data/references/room.md#queries | — |
-| ROOM-12 | 170-180 | One-to-many via @Embedded plus @Relation always under @Transaction since Room issues multiple queries | GOTCHA | compose-data/references/room.md#relations | — |
+| ROOM-42 | 150-164 | Page unbounded scrolling instead of loading all rows | RULE | compose-data/references/room.md#queries | ✓ landed |
+| ROOM-12 | 170-180 | One-to-many via @Embedded plus @Relation always under @Transaction since Room issues multiple queries | GOTCHA | compose-data/references/room.md#relations | ✓ landed |
 | ROOM-13 | 184-201 | Many-to-many cross-ref with cascade foreign keys plus Junction mapping | API | DROP: tutorial code | — |
-| ROOM-14 | 205-212 | Instant TypeConverters via epoch millis; kotlinx-datetime on KMP; converters for simple mappings only, normalized tables over JSON blobs | GOTCHA | compose-data/references/room.md#converters | — |
+| ROOM-14 | 205-212 | Instant TypeConverters via epoch millis; kotlinx-datetime on KMP; converters for simple mappings only, normalized tables over JSON blobs | GOTCHA | compose-data/references/room.md#converters | ✓ landed |
 | ROOM-15 | 215-218 | Transaction placement: KMP writer and reader connections, Android-only withTransaction, DAO-level atomicity | DUP | DROP: split into ROOM-43–ROOM-45 | https://developer.android.com/kotlin/multiplatform/room |
-| ROOM-43 | 215-218 | Write on KMP through useWriterConnection with immediateTransaction | GOTCHA | compose-data/references/room.md#transactions | https://developer.android.com/kotlin/multiplatform/room |
-| ROOM-44 | 215-218 | withTransaction stays Android-only and out of commonMain | GOTCHA | compose-data/references/room.md#transactions | https://developer.android.com/kotlin/multiplatform/room |
-| ROOM-45 | 215-218 | Group multi-query writes atomically with DAO-level @Transaction | RULE | compose-data/references/room.md#transactions | — |
+| ROOM-43 | 215-218 | Write on KMP through useWriterConnection with immediateTransaction | GOTCHA | compose-data/references/room.md#transactions | https://developer.android.com/kotlin/multiplatform/room. ✓ landed (via official excerpts + brief §13.5 moderator-verified quote) |
+| ROOM-44 | 215-218 | withTransaction stays Android-only and out of commonMain | GOTCHA | compose-data/references/room.md#transactions | https://developer.android.com/kotlin/multiplatform/room. ✓ landed (via official excerpts + brief §13.5 moderator-verified quote) |
+| ROOM-45 | 215-218 | Group multi-query writes atomically with DAO-level @Transaction | RULE | compose-data/references/room.md#transactions | ✓ landed |
 | ROOM-16 | 223-230 | Migration discipline: versioned Migration objects, AutoMigration for simple changes, schema in VCS, destructive fallback in dev only | DUP | DROP: split into ROOM-46–ROOM-49 | — |
-| ROOM-46 | 223-230 | Migrate schemas with versioned Migration objects | RULE | compose-data/references/room.md#migrations | — |
-| ROOM-47 | 223-230 | Cover simple schema changes with AutoMigration | RULE | compose-data/references/room.md#migrations | — |
-| ROOM-48 | 223-230 | Export the schema to version control | RULE | compose-data/references/room.md#migrations | — |
-| ROOM-49 | 223-230 | Reserve destructive fallback for early development only | RULE | compose-data/references/room.md#migrations | — |
+| ROOM-46 | 223-230 | Migrate schemas with versioned Migration objects | RULE | compose-data/references/room.md#migrations | ✓ landed |
+| ROOM-47 | 223-230 | Cover simple schema changes with AutoMigration | RULE | compose-data/references/room.md#migrations | ✓ landed |
+| ROOM-48 | 223-230 | Export the schema to version control | RULE | compose-data/references/room.md#migrations | ✓ landed |
+| ROOM-49 | 223-230 | Reserve destructive fallback for early development only | RULE | compose-data/references/room.md#migrations | ✓ landed |
 | ROOM-17 | 234 | Entity mapping at the repository boundary; no @Entity classes in UI; database and DAOs as DI singletons | DUP | DROP: split into ROOM-50–ROOM-52 | — |
 | ROOM-50 | 234 | Map entities to domain at the repository boundary | DUP | DROP: dup of NK-16 | — |
-| ROOM-51 | 234 | Never pass @Entity classes to the UI | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | — |
+| ROOM-51 | 234 | Never pass @Entity classes to the UI | RULE | compose-data/references/boundaries-and-mapping.md#boundaries | ✓ landed |
 | ROOM-52 | 234 | Provide the database and DAOs as DI singletons | DUP | DROP: dup of ROOM-26 | — |
-| ROOM-18 | 240-242 | DAO tests via in-memory builder plus BundledSQLiteDriver plus Turbine; migration tests via MigrationTestHelper; ViewModel tests via MutableStateFlow-backed fake DAOs | RULE | compose-data/references/data-testing.md#room | — |
+| ROOM-18 | 240-242 | DAO tests via in-memory builder plus BundledSQLiteDriver plus Turbine; migration tests via MigrationTestHelper; ViewModel tests via MutableStateFlow-backed fake DAOs | RULE | compose-data/references/data-testing.md#room | ✓ landed |
 | ROOM-19 | 246-256 | Room anti-patterns table: main-thread queries, SELECT star, missing indexes, destructive-only fallback, REPLACE with FKs, blocking KMP DAOs, missing relation transactions, multiple instances, blob converters | DUP | DROP: split into ROOM-27–ROOM-35 | — |
 | ROOM-27 | 246-256 | Never allowMainThreadQueries | GENERIC | DROP: model already knows | — |
 | ROOM-28 | 246-256 | Never SELECT star everywhere | GENERIC | DROP: model already knows | — |
 | ROOM-29 | 246-256 | Never leave queried columns unindexed | GENERIC | DROP: model already knows | — |
-| ROOM-30 | 246-256 | Never rely on destructive fallback alone | RULE | compose-data/references/room.md#anti-patterns | — |
+| ROOM-30 | 246-256 | Never rely on destructive fallback alone | RULE | compose-data/references/room.md#anti-patterns | ✓ landed |
 | ROOM-31 | 246-256 | Never use REPLACE inserts with foreign keys | DUP | DROP: dup of ROOM-37 | — |
 | ROOM-32 | 246-256 | Never ship blocking DAO functions on KMP | DUP | DROP: dup of ROOM-10 | — |
 | ROOM-33 | 246-256 | Never skip @Transaction on relational queries | DUP | DROP: dup of ROOM-12 | — |

@@ -55,6 +55,11 @@ All 24 scenarios, 161 rubric items. Report: `2026-09-24-M2-baseline.md`.
 | compose-ui | MiniMax M3 | 51% | **78%** (21/27) | 5.5 | held | 1 (`java.time` syntax) | same |
 | compose-ui | Claude Opus 5.5, no kit | 72% (M2) | 89% (24/27) | 8.0 | held | 0 | same |
 
+| compose-data | DeepSeek V4.1 Flash | 54% (M2) | **100%** (26/26) | **7.75** | held | 0 | `handoff/reviews/phase-7.md` (gate-p7) |
+| compose-data | Muse Spark 1.3 | 56% (M2) | **92%** (24/26) | **7.5** | held | 0 | same |
+| compose-data | MiniMax M3 | 38% | **88%** (23/26) | 6.5 | held | 0 | same |
+| compose-data | Claude Opus 5.5, no kit | 72% (M2) | 69% (18/26) | 7.25 | **folded** | 0 | same |
+
 The gate history for `compose-architecture` (the first attempt found defects, which were fixed):
 
 - run 1: DeepSeek 93%, Muse 93% (`…gate-p3-…`)
@@ -80,6 +85,11 @@ The gate history for `compose-ui` (three rounds; each fixed defects found by the
 
 For `compose-ui`, the "before" values for DeepSeek, Muse and Opus are their overall M2 baselines; the
 M2 run did not isolate UI-only numbers. MiniMax's "before" is the blind no-kit run in the same packets.
+
+For `compose-data`, the gate passed on the first run. DeepSeek and Muse beat Opus on both rubric and
+quality. DATA-02 #7 was excluded because all five answers failed it; it was a rubric flaw, since
+rewritten. The "before" values for DeepSeek, Muse and Opus are their overall M2 baselines; MiniMax's is
+its blind no-kit run.
 
 ## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
 

@@ -43,7 +43,7 @@ Load this file during M2 baseline runs and P7 skill writing for compose-data.
 4. PASS if the read names use the domain (notes, note) and never name the mechanism (pager, pagingSource, pagination). [BRIEF §2.4]
 5. PASS if the detail destination fetches by identity from the key (noteId) through the repository rather than only from an in-memory cache. [BRIEF §5.5]
 6. PASS if the repository contract exposes domain types only, with no DTO, Ktor, Room, or Compose types in its signatures. [BRIEF §5.5]
-7. PASS if streams for filtered aggregates are disambiguated by domain (for example getActiveNotesStream and getArchivedNotesStream) rather than one hidden-filter stream. [BRIEF §2.4] [kit]
+7. PASS if, where the answer adds a filtered stream, its name disambiguates it by domain (for example `getArchivedNotesStream`) rather than one hidden-filter stream; no filtered stream is required. [BRIEF §2.4] [kit]
 
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers repository naming); check-data-boundary.sh (prospective) still applies to the DTO/domain types touched.
 
