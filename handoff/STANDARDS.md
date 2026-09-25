@@ -430,6 +430,14 @@ The rules:
 8. **Real usage beats the eval.** Observations from an agentic trial (a model working in a real project
    with the skills installed) outrank single-shot gate results when the two disagree.
 
+### 8.6 Owner-directed rules count as evidence (moderator, 2026-09-25)
+
+A rule the owner explicitly directed is **evidenced** for every freedom audit (M-10). Such rules are
+recorded as "owner direction" in PLAN.md, DECISIONS.md or a review. Examples: proportional KDoc and the
+no-essay cap, intent comments, braces per M-14, and linear readable shape. An audit may reword such a rule
+for clarity, but it never loosens or cuts one. Only the owner can relax it, and O-11 still applies when the
+rule contradicts an official guide.
+
 ## 9. Quality bar checklist (the worker self-checks before every phase report)
 
 - [ ] Every non-negotiable has a reason and a *Prevents:* line.

@@ -13,6 +13,10 @@ Load this when exposing Kotlin to Swift, embedding Compose in a SwiftUI app, or 
 - SKIE generates genuine Swift `async` from `suspend` with two-way cancellation, callable from any thread.
 - SKIE converts the `Flow` family into `AsyncSequence`-conforming Swift classes that preserve the generic type argument.
 
+## Flow to Swift
+
+9. **Expose UI state to Swift as `StateFlow`; tie collection to the Swift owner's lifecycle and consume UI-bound values on the main thread (non-negotiable).** A `StateFlow` always holds a current value and replays the latest to each new subscriber, so it is the natural fit for UI; a cold `Flow` has no initial value and only runs while collected, so it needs an explicit collection lifecycle (verified: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/-state-flow/). SKIE converts both into `AsyncSequence`-conforming Swift classes (`SkieSwiftStateFlow`, `SkieSwiftFlow`) with two-way cancellation (verified: https://skie.touchlab.co/features/flows). Start collection from the Swift owner's task (a SwiftUI `.task` modifier is cancelled when the user leaves the screen) and consume UI-bound values on the main actor (`@MainActor`), as in the SKIE example. *Prevents:* a Swift screen with no value until the first emission, a leaked collector after the screen is gone, and UI updates off the main thread.
+
 ## SKIE limits
 
 - `suspend` members of generic classes need the generated SKIE wrapper call; Swift overrides target the double-underscore rename, which breaks the cancellation bridge for nested `async` calls.

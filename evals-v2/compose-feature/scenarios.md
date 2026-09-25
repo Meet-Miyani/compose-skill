@@ -1,11 +1,11 @@
 # compose-feature scenarios
 Load this file during M2 baseline runs and P4 skill writing.
 
-## FEAT-01 Add a note-editor slice with the full state matrix
-**Prompt:** Add a note-editor slice (note detail plus note editor for one note id, with tags) following the house workflow: restate the slice and every observable state first, then build it end to end.
+## FEAT-01a Add a note-editor slice: Contract, ViewModel, ViewModel tests
+**Prompt:** Add a note-editor slice (note detail plus note editor for one note id, with tags) following the house workflow: restate the slice and every observable state first, then build the Contract, ViewModel, repository interface plus fake, and ViewModel tests end to end. Route, Screen, DI module, and nav entries are wired in the follow-up slice (FEAT-01b) from this Contract.
 **Context given to the agent:**
 A Compose project with `:core:mvi` (BaseViewModel, launchGuarded), one `:feature:notes` module with `data/`, `domain/`, `presentation/`, `navigation/`, `di/` packages, and a notes list plus Catalog list already present.
-The agent works on a fresh note-editor destination: Contract, ViewModel, Route, Screen, repository interface plus fake, and ViewModel tests.
+The agent works on a fresh note-editor destination: Contract, ViewModel, repository interface plus fake, and ViewModel tests.
 **Hypothesised baseline defects:**
 - Skips the restatement step and builds directly, so empty and not-found collapse into one generic error flag.
 - Fetches the note from an in-memory list instead of by identity, so the detail breaks on process-death restore.
@@ -18,14 +18,32 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 4. First ON_START is the cold load and later ON_STARTs are reconcile with prior data kept, with no init-plus-lifecycle double owner [BRIEF §8.3]
 5. Note detail resolves by identity from the nav key and re-fetches from the repository on a cold cache [BRIEF §8.3]
 6. ViewModel tests cover the seven house rows plus process-death restore using hand-written fakes and advanceUntilIdle [BRIEF §9.3]
-7. No TODO, stub, or noted-but-unfixed defect remains; a placeholder grep over changed files is empty [SPEC §2 seed]
-8. Typed editor input survives process-death restore via `SavedStateHandle` while the record itself is re-fetched by identity from the nav key [BRIEF §3.7] [kit]
-9. One-line KDoc on each repository/data-source interface, base-contract type, shared design-system composable, and feature ViewModel and Route the answer adds (one line on what the destination does and what it owns); none on Screen/leaf composables, private functions, or self-named UiState/UiAction/UiEffect members; non-obvious logic (pipelines, multi-condition branches) carries an intent comment; every multi-line if/else/for/while/do body has braces; single-line when branches stay bare; no noise or commented-out code [compose-architecture/code-craft.md] [kit]
+7. Typed editor input survives process-death restore via `SavedStateHandle` while the record itself is re-fetched by identity from the nav key [BRIEF §3.7] [kit]
+8. No TODO, stub, or noted-but-unfixed defect remains; a placeholder grep over changed files is empty [SPEC §2 seed]
+9. One-line KDoc on each repository/data-source interface, base-contract type, and feature ViewModel the answer adds (one line on what the destination does and what it owns); none on private functions or self-named UiState/UiAction/UiEffect members; non-obvious logic (pipelines, multi-condition branches) carries an intent comment; every multi-line if/else/for/while/do body has braces; single-line when branches stay bare; no noise or commented-out code [compose-architecture/code-craft.md] [kit]
 10. The `when` over the sealed UiAction lists every subtype with no `else` branch [compose-architecture/modern-kotlin.md] [kit]
 **Guard scripts that must pass:**
 - scripts/check-contract-shape.sh (prospective Phase-5 name)
 - scripts/check-placeholders.sh (prospective Phase-5 name)
 - state-matrix rows: none — review-only, verified through ViewModel tests (BRIEF §9.3)
+
+## FEAT-01b Wire the note-editor slice: Route, Screen, DI, nav entries
+**Prompt:** Wire the note-editor slice whose Contract, ViewModel, and repository interface plus fake are decided: build the Route, Screen, Koin DI module, and nav-key entries end to end.
+**Context given to the agent:**
+The same `:feature:notes` module as FEAT-01a. The note-editor Contract (NoteEditorUiState, NoteEditorUiAction, NoteEditorUiEffect), ViewModel, and repository interface plus fake are given as decided. The notes list plus Catalog list already exist, and the composition root owns NavDisplay and the Koin AppModule.
+**Hypothesised baseline defects:**
+- The Screen reads the ViewModel directly (collectAsState in the Screen or a koinViewModel call below the Route) instead of receiving state and callbacks as parameters.
+- The Koin wiring scatters declarations across files or uses the DSL instead of one annotations module file, so the feature has no single DI surface.
+- The nav key carries the whole record instead of identity, or entries are registered in the feature instead of the composition root, so restore and back-stack ownership break.
+**Rubric:**
+1. No TODO, stub, or noted-but-unfixed defect remains; a placeholder grep over changed files is empty [SPEC §2 seed]
+2. One-line KDoc on each shared design-system composable and feature Route the answer adds (one line on what the destination does and what it owns); not required on Screen/leaf composables — a one-line KDoc there is fine, bloated or noise KDoc fails; every multi-line if/else/for/while/do body has braces; single-line when branches stay bare; no noise or commented-out code [compose-architecture/code-craft.md] [kit]
+3. Only the Route touches the ViewModel; the Screen is stateless (state in, callbacks out) and takes no ViewModel parameter [BRIEF §3.4]
+4. The Koin DI wiring is one module file under `di/` with `@Module` plus `@ComponentScan` and a `@KoinViewModel` ViewModel; nav params resolve by type through `@InjectedParam` with a matching `parametersOf` at the composition-root entry [BRIEF §13.2] [kit]
+5. The nav key carries identity only and entries are registered at the composition root; the detail resolves by identity from the key [BRIEF §8.3]
+**Guard scripts that must pass:**
+- scripts/check-placeholders.sh (prospective Phase-5 name)
+- scripts/check-nav-keys.sh (prospective Phase-5 name)
 
 ## FEAT-02 Review a Contract.kt with five declarations and a TODO
 **Prompt:** Review this note-tags Contract.kt: it holds NoteTagsUiState, NoteTagsUiAction, NoteTagsUiEffect, plus a TagStep enum, a MAX_TAGS constant, and a TODO for an unfinished migration. Is it shippable?
@@ -90,6 +108,7 @@ fun NoteTagsScreen(
 5. Emits exactly one corrected file version with no alternatively-style drafts [SPEC §2 seed]
 6. Checks that every UiState field is read by the UI and every UiAction is dispatched by it [SPEC §2 seed] [kit]
 7. Verifies helpers against the project before answering instead of recalling names [SPEC §2 seed]
+8. Notes what is fine as is (the Screen takes state plus callbacks and forwards them) instead of flagging everything [review-mode.md]
 **Guard scripts that must pass:**
 - scripts/check-contract-shape.sh (prospective Phase-5 name)
 - scripts/check-placeholders.sh (prospective Phase-5 name)
@@ -165,7 +184,7 @@ The `:feature:notes` notes-list ViewModel loads through `launchGuarded(onError =
 - Complies silently and drops `onError`, or softens the violation into acceptable tech debt.
 - Re-argues after the user insists instead of following the explicit decision once restated.
 **Rubric:**
-1. PASS if the answer holds the non-negotiable with a verified no first, naming the rule and the consequence. [BRIEF §3.6] [kit]
+1. PASS if the answer holds the non-negotiable with a verified no first, naming the plain consequence, not the rule. [BRIEF §3.6] [kit]
 2. PASS if the answer offers the recorded-waiver route: a reasoned decision recorded in `## Project decisions`, marked as a known deviation. [STANDARDS §6 item 5] [kit]
 3. PASS if the answer states that if the user insists it will follow the decision and record the deviation. [SPEC §2 seed]
 **Guard scripts that must pass:** none — review-only.

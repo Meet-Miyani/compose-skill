@@ -275,3 +275,144 @@ prototype exactly, comments aside.
 | Round 4 (verified) | 0 | 0 | **9/9 per target, JVM and iOS** |
 
 The guard suite passes 61/61, and all six skills validate at 90 or above.
+
+---
+
+## Part B: integration (worker), 2026-09-25
+
+Execute PLAN "Phase 9 — Integration pass" tasks 1–8, plus the items below. Task 9's probe was already run
+by the moderator; only its restores remain.
+
+B-1. **Restore the 11 probe items** listed under "Part B input" above, as one-line gotchas in their owner
+     skills, within budget. Mark each ledger row `restored (P9 probe)` with its new destination.
+B-2. **FEAT-01 split** (task 7): FEAT-01a (Contract + ViewModel + ViewModel tests) and FEAT-01b (Route +
+     Screen + DI/nav wiring).
+     - Carry every FEAT-01 rubric item, including the craft and exhaustive-`when` items, to whichever
+       half owns it.
+     - Update `scenarios.md` and `evals.json`, and remove FEAT-01.
+B-3. **UI-04 item 5** (carry-over): rewrite it so one answer can satisfy it. PASS if the answer states that
+     it will record the deviation when the user insists. Sync both files.
+B-4. **Freedom audit** (task 8, M-10): list every rule that dictates implementation internals with its
+     evidence. Loosen or cut the rules that have none. Report the counts.
+B-5. **Duplication scan** (task 2) and pointer/"When NOT to use" check (task 3) across all **six** skills,
+     including the new `code-craft.md`, `modern-kotlin.md` and the `compose-project` templates. Fix by
+     linking to the owner.
+B-6. **Descriptions vs `triggers.json`** (task 4): check each description against the triggers. Add
+     trigger/no-trigger cases for the new content (code craft, modern Kotlin, composition root) and record
+     ambiguous queries.
+B-7. **`skills-v2/README.md`** (task 5): the kit's purpose; the six skills and when each loads; installing
+     the guards and the kit-activation line; the deferral list; the existing-project policy; the M-12
+     project decisions. Keep it short, and put **no** eval numbers in it (the moderator writes those after
+     M9).
+
+Reminders:
+
+- `evals-v2/heldout*` is sealed. Never read it.
+- Use read-only subagents for the scan and audit tasks, per the PLAN fan-out table.
+- Keep every file within budget.
+
+---
+
+## Part B re-review (moderator, 2026-09-25)
+
+**Accepted:**
+
+- restores: 9 new gotchas plus 2 recorded coverages
+- FEAT-01 split into 01a and 01b
+- the UI-04 #5 rewrite
+- 14 duplication findings linked to their owners
+- trigger cases added, with ambiguous queries recorded
+- the README
+- the cap-forced splits: `shared-elements.md` and `resources-media.md` (growth policy item 2)
+
+Self-checks: budget PASS, validate at least 90 on all six skills, ledger PASS, dest-load 0 over cap,
+guards 61/61, evals.json parses (29 scenarios).
+
+**Changes required (Part B round 2):**
+
+BB-1. **Restore the owner-directed code-craft rules** that the freedom audit loosened or cut. See the new
+      STANDARDS §8.6: owner direction is evidence.
+      - F10/F11 and F12: `code-craft.md` §1 rule 1 must not say "length and tag choice are free". Restore
+        the proportional rule: one sentence for most declarations; tags only when they add information
+        the signature does not; a short paragraph only for complex contracts; **never an essay (20+
+        lines)**.
+      - F19: restore "one chained call per line once a chain wraps" as a default rule.
+      - F15/F16 (comments): make sure the merged rule still says both *intent comments on non-obvious
+        logic* and *never restate an obvious line*.
+      - Renumber §1 without gaps.
+      - The remaining audit outcomes stand (e.g. F40, the expression-body mandate cut).
+BB-2. **GRAD-05 evidence.** It is cited "via search excerpts", which is not evidence (STANDARDS). Replace
+      it with a fetched official page showing root `plugins { … apply false }`: the Android "Configure
+      your build" docs or the JetBrains KMP template's root `build.gradle.kts` source. Otherwise reword
+      the rule to cite the kit's own compile-verified root template.
+BB-3. **W1–W6 workflow flags: moderator ruling, keep.** The restatement steps are eval-tested (FEAT-01a
+      item 1, the state-matrix gates). No change.
+
+---
+
+## Part B: APPROVED (round 2 verified)
+
+The restored owner-directed craft rules are verified: proportional KDoc, "never a 20+ line essay",
+one call per line, and no noise comments. GRAD-05 now cites the KMP-App-Template source.
+
+## Agentic trial (PLAN task C), 2026-09-25
+
+**Setup.** DeepSeek V4.1 Flash in a real `opencode run` session in a copy of the r3 project, with the six
+skills installed in `.opencode/skills/`, the kit-activation line in `AGENTS.md`, and sandboxed permissions.
+
+**Task.** A Settings screen with a persisted "Show archived notes" toggle, notes-list filtering, and an
+entry point. The model had to build, test and pass the guards.
+
+- **Skills loaded:** compose-architecture first, then compose-feature, compose-data, compose-ui and
+  compose-platform. Routing works as designed.
+- **Moderator-verified:**
+  - `:androidApp:assembleDebug` PASS
+  - `:feature:settings` jvmTest 4/4, `:feature:notes` 9/9
+  - guards clean on the model's code
+- **Blind senior review:** **APPROVE WITH NITS, 8/10.** Every requirement passes, and there are no
+  blockers.
+- **Session end:** the session stopped early. A mangled-path edit was auto-rejected by non-interactive
+  permissions. This is a model slip; the work was already complete and verified.
+
+**Kit defects found by the trial** (not visible to fixture tests):
+
+- T1. **The guards scan generated and installed trees.** `check-packages` flags
+  `build/generated/compose/resourceGenerator/**`, and every check flags the kit's own
+  `.opencode/skills/**/fixtures` once the skills are installed in the project.
+  - Every check must skip `build/`, `.gradle/`, `.kotlin/`, `.idea/`, `.opencode/`, `.claude/`,
+    `.agents/` and `node_modules/` at any depth. Put the exclusion in one shared helper, not per script.
+  - Add suite tests: a tree with `build/generated/**` and an `.opencode/skills/**/fixtures/bad` copy
+    must pass.
+- T2. **No iOS entry-point template.**
+  - Add `composeApp/src/iosMain/.../MainViewController.kt` (`ComposeUIViewController { App() }` plus Koin
+    start). Verify the API on the fetched CMP docs page.
+  - Add the `bootstrap.md` note that `iosApp` is created from the official KMP wizard or template and
+    calls `MainViewController()`.
+  - The moderator verifies it with `:composeApp:linkDebugFrameworkIosSimulatorArm64`.
+
+## Part C: APPROVED; Phase 9 COMPLETE (2026-09-25)
+
+**T1: accepted.** A shared `scripts/lib/composekit-skip.sh` is sourced by every check. The guard suite
+passes 73/73. On the agentic-trial project, with the skills installed in `.opencode/skills/` and build
+output present, the guards now pass **11/11** (before: 8 false failures).
+
+**T2: accepted.** The `MainViewController` template was rendered into the r3 project, and
+`:composeApp:linkDebugFrameworkIosSimulatorArm64` passes (`Shared.framework` linked).
+
+**Residual D9-1 (fix together with the M9 findings).** In the trial project, the iOS link failed with
+Koin compile-safety error `KOIN-D002` (missing `SettingsViewModel`): the model had provided the
+DataStore platform binding for Android and JVM only.
+
+- Add a one-line gotcha to `compose-data/references/datastore.md` and the platform-binding rule in
+  `compose-platform`: every platform-provided binding is supplied for **every target the project
+  declares**.
+- The Koin compiler plugin fails the iOS link otherwise.
+
+**Phase 9 totals:**
+
+- compile gate: 21 → 10 → 0 defects
+- scaffold tests: 36/36 (JVM + iOS)
+- iOS framework links
+- agentic trial: APPROVE WITH NITS, 8/10
+- knowledge probe: DeepSeek 133/138, MiniMax 131/138; 10 restored
+- freedom audit: 41 audited / 19 kept / 18 loosened / 4 cut, with the owner-directed rules restored

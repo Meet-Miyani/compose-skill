@@ -1,6 +1,6 @@
 ---
 name: compose-project
-description: Owns project and build-level work for Compose and Compose Multiplatform apps: bootstrapping a new project, adopting the kit in an existing project, adding or extracting a module, convention plugins in build-logic, the version catalog, and CI plus agent hooks. Use when starting a Compose Multiplatform app, adding a module, or editing settings.gradle.kts, build.gradle.kts, build-logic, libs.versions.toml, or packaging. Do NOT use for routing and architecture choices (compose-architecture), feature code (compose-feature), repositories and persistence (compose-data), or commonMain vs platform code (compose-platform).
+description: Owns project and build-level work for Compose and Compose Multiplatform apps: bootstrapping a new project, adopting the kit in an existing project, adding or extracting a module, convention plugins in build-logic, the version catalog, and CI plus agent hooks. Use when starting a Compose Multiplatform app, adding a module, or editing settings.gradle.kts, build.gradle.kts, build-logic, libs.versions.toml, or packaging. Do NOT use for routing and architecture choices (compose-architecture), feature code (compose-feature), repositories and persistence (compose-data), composables or resources (compose-ui), or commonMain vs platform code (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---
@@ -16,8 +16,8 @@ Build files are load-bearing contracts, not scaffolding to rush past. A shortcut
 ### Validate-before-you-answer contract (condensed; full text in the `compose-architecture` skill)
 
 1. **Verify, do not recall.** Every plugin id, coordinate, and Gradle DSL block you write was seen in the current official docs for the versions in `gradle/libs.versions.toml`. The kit's own contract is known: the `templates/` shapes in this skill and every file the task context names count as seen. Never call an invented plugin or task.
-2. **Check the question before answering it.** Read the build files, check the non-negotiables, answer **yes or no first** with evidence (file path, rule number, doc URL).
-3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete.
+2. **Check the question before answering it.** Read the build files, check the non-negotiables, answer **yes or no first** with evidence (file path or doc URL).
+3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete. Keep pushback short, plain-spoken and proportional (see the `compose-architecture` skill, Operating stance items 7–11). Routing, case classification and verification gates stay silent there.
 4. **Unverifiable means say so.** Say what you would need to check. Never present a guess as a fact.
 5. **Fresh docs before new build code.** Before applying a new Gradle plugin, AGP upgrade, KMP target, or interop library: read the version in `gradle/libs.versions.toml`, read the **current official docs** for that version, then write. Unreachable docs means marking the change unverified.
 
@@ -25,7 +25,7 @@ Build files are load-bearing contracts, not scaffolding to rush past. A shortcut
 
 | Task | Use instead |
 |---|---|
-| Route first, choose the owning skill, state the existing-project case | the `compose-architecture` skill, before anything below |
+| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
 | Add, change or review a screen, destination or slice | the `compose-feature` skill |
 | Repositories, Ktor, Room, DataStore, Paging, offline-first | the `compose-data` skill |
 | `commonMain` sharing, `expect`/`actual`, iOS/Swift, desktop, web | the `compose-platform` skill |
@@ -39,7 +39,7 @@ Rules 1–8 are **non-negotiables**. Rules 9–10 are **defaults**: a recorded p
 2. **`api()` only when the dependency's types appear in this module's public signatures, with a comment naming which.** A leaked type expands every consumer's classpath and build graph. *Prevents:* classpath leaks through core modules (brief §12.6).
 3. **No module depends on the composition root.** Only the root depends on features and data modules. A feature that imports the root's NavKey or component has built a cycle. *Prevents:* feature-to-root cycles (brief §1.2).
 4. **Every new module is registered in `.composekit.conf` and passes `run-checks.sh`.** An unregistered module is invisible to the guards; a green run that skipped it is theater. *Prevents:* unguarded modules.
-5. **Adoption is incremental. Guards start in WARN mode on an existing project and become blocking only after the baseline is clean.** Never rewrite working features as a side effect of another task. Never mix two patterns inside one feature. *Prevents:* big-bang rewrites that stall mid-flight (STANDARDS §6).
+5. **Adoption is incremental. Guards start in WARN mode on an existing project and become blocking only after the baseline is clean.** Never rewrite working features as a side effect of another task. Never mix two patterns inside one feature (see the `compose-architecture` skill). *Prevents:* big-bang rewrites that stall mid-flight (STANDARDS §6).
 6. **No new business logic is parked in the composition root.** Root slices are temporary scaffolds, deleted when the target module ships. Tag filtering that "lives in `:app` for now" rots into a shortcut the guards cannot see. *Prevents:* root-as-junk-drawer (brief §12.3).
 7. **Every version is declared once in `gradle/libs.versions.toml`; no versions appear in module build files.** A version written in two places diverges the day one of them is bumped. *Prevents:* version drift across modules.
 8. **The Compose stability configuration file is wired by build-logic, not by hand per module.** The shared config declares the domain-model packages and `kotlin.collections.*`. Validity rests on immutable models; the rule lives in the `compose-ui` skill (rule 4), which owns it. *Prevents:* stability fixes that silently stop applying.
@@ -99,7 +99,7 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 | AGP 9 or newer | Shared module uses `com.android.kotlin.multiplatform.library` with the `kotlin { android { … } }` block; the Android entry point lives in a separate `:androidApp` module |
 | AGP below 9 | Keep `com.android.library`; do not apply the AGP 9 shape. Stop and report instead of migrating as a side effect |
 
-### Adopt incrementally (existing-project case → plan)
+### Adopt incrementally (existing-project case → plan; cases live in the `compose-architecture` skill)
 
 | Case | Plan |
 |---|---|

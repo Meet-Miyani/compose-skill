@@ -29,6 +29,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 fail=0
 report() { printf '%s:%s: %s\n' "$1" "$2" "$3"; fail=1; }
 
@@ -99,6 +104,8 @@ strings_list="$(find "$ROOT" -path '*/.git/*' -prune -o -type f -name 'strings.x
 roots=""
 while IFS= read -r f || [ -n "$f" ]; do
   [ -n "$f" ] || continue
+  srel="${f#$ROOT/}"
+  composekit_skip_path "$srel" && continue
   locdir="$(dirname "$f")"
   case "$(basename "$locdir")" in
     values*) ;;
@@ -120,6 +127,8 @@ for root in $roots; do
   dirs=""
   while IFS= read -r f || [ -n "$f" ]; do
     [ -n "$f" ] || continue
+    srel="${f#$ROOT/}"
+    composekit_skip_path "$srel" && continue
     locdir="$(dirname "$f")"
     case "$(basename "$locdir")" in
       values*) ;;

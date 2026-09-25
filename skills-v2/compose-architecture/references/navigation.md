@@ -75,7 +75,7 @@ Key types live in the feature. Entry builder functions live in the composition r
 
 ## Viewmodels
 
-Each nav entry is built once in the composition root. Resolve the nav-scoped ViewModel inside the entry builder with `koinViewModel()` and pass it into the Route. Routes take the ViewModel as a parameter and resolve nothing themselves. (CONTRACT_BRIEF §7.3)
+Each nav entry is built once in the composition root. Resolve the nav-scoped ViewModel inside the entry builder with `koinViewModel()` and pass it into the Route. Routes take the ViewModel as a parameter and resolve nothing themselves; Route/Screen/leaf ownership lives in the `compose-ui` skill (rule 1). (CONTRACT_BRIEF §7.3)
 
 One bare injected param is fine. Two or more construction values travel as one `Params` class through `parametersOf`. Koin matches injected params by type, so two raw strings silently rebind. (CONTRACT_BRIEF §6.3)
 

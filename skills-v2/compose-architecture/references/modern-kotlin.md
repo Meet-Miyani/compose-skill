@@ -37,7 +37,7 @@ when (action) {
 
 ## 2. Objects and identities (default)
 
-2. **A stateless singleton in a hierarchy is a `data object`.** It keeps `toString`, `equals`, and `hashCode` symmetric with the sibling `data class` branches (stable since 1.9). *Prevents:* hand-written `toString` on plain objects.
+2. **Prefer `data object` for stateless singletons in a hierarchy.** It keeps `toString`, `equals`, and `hashCode` symmetric with the sibling `data class` branches (stable since 1.9). *Prevents:* hand-written `toString` on plain objects.
 3. **A single-field domain identity is a `@JvmInline value class`; multiple fields or different equality take a `data class`.** A `NoteId` wrapper turns mixing two `Long` identities into a compile error, with no allocation on the JVM. The `@JvmInline` annotation is JVM-only; other backends use the bare `value` modifier (stable since 1.5). The stability angle at the Compose boundary is owned by the `compose-ui` skill. *Prevents:* swapped `Long` identities and over-shaped wrappers (CB-107, CB-108).
 
 WRONG (two raw Longs that compile swapped):
@@ -62,7 +62,7 @@ fun getNote(id: NoteId): Note?
 
 ## 4. Guarded branches and jumps (default)
 
-6. **Guard conditions (`is Cat if !cat.mouseHunter`) flatten nested branch logic, only on Kotlin 2.2 or later.** A guard keeps one branch per case instead of an `if` nested inside a branch (stable since 2.2; preview in 2.1 behind `-Xwhen-guards`). A guarded branch never replaces the unguarded branch for its subtype: a guard does not count toward exhaustiveness, so every guarded subtype still needs its plain branch. Never add the flag to enable it. *Prevents:* nesting that hides which case owns the branch.
+6. **Guard conditions (`is Cat if !cat.mouseHunter`) may flatten nested branch logic, only on Kotlin 2.2 or later.** A guard keeps one branch per case instead of an `if` nested inside a branch (stable since 2.2; preview in 2.1 behind `-Xwhen-guards`); a nested check inside the branch stays acceptable. A guarded branch never replaces the unguarded branch for its subtype: a guard does not count toward exhaustiveness, so every guarded subtype still needs its plain branch. Never add the flag to enable it. *Prevents:* nesting that hides which case owns the branch.
 
 WRONG (nested check inside the branch):
 
@@ -81,23 +81,23 @@ is NotesUiAction.OnTitleChanged if action.title.isNotBlank() -> updateTitle(acti
 is NotesUiAction.OnTitleChanged -> Unit
 ```
 
-7. **Non-local `break` and `continue` inside lambdas of inline functions replace flag-variable loops, only on Kotlin 2.2 or later.** A `continue` inside `run {}` resumes the enclosing loop directly (stable since 2.2; preview in 2.1 behind `-Xnon-local-break-continue`). *Prevents:* boolean flags threaded through lambdas to steer an outer loop.
-8. **Multi-dollar interpolation serves literals heavy with `$`, only on Kotlin 2.2 or later.** A `$$"""` raw string keeps schema `$id` keys literal while `$${name}` still interpolates (stable since 2.2; preview in 2.1 behind `-Xmulti-dollar-interpolation`). Single-`$` strings stay the default everywhere else. *Prevents:* `${'$'}` noise and accidental interpolation of literal dollars.
+7. **Non-local `break` and `continue` inside lambdas of inline functions may replace flag-variable loops, only on Kotlin 2.2 or later.** A `continue` inside `run {}` resumes the enclosing loop directly (stable since 2.2; preview in 2.1 behind `-Xnon-local-break-continue`); flag-variable loops stay acceptable. *Prevents:* boolean flags threaded through lambdas to steer an outer loop.
+8. **Multi-dollar interpolation may serve literals heavy with `$`, only on Kotlin 2.2 or later.** A `$$"""` raw string keeps schema `$id` keys literal while `$${name}` still interpolates (stable since 2.2; preview in 2.1 behind `-Xmulti-dollar-interpolation`). Single-`$` strings stay the default everywhere else, and `${'$'}` escapes stay acceptable. *Prevents:* `${'$'}` noise and accidental interpolation of literal dollars.
 9. **Context parameters stay preview-gated and are never introduced by kit code.** The feature is in preview since 2.2 behind `-Xcontext-parameters`; use it only where the project already opted in, and never add the flag. *Prevents:* kit code locked to a preview compiler flag.
 
 ## 5. Time and UUID (default)
 
-10. **Domain instants are `kotlin.time.Instant` and durations `kotlin.time.Duration`, never wire strings.** `Instant` is stable since 2.3 and replaces the deprecated `kotlinx.datetime` type (ruling M-8); `Duration` is stable since 1.6. If `libs.versions.toml` shows Kotlin below 2.3, keep the project's current instant type and report; never add an experimental opt-in to reach `kotlin.time.Instant`. Parse at the boundary, format at display. *Prevents:* stringly-typed time re-parsed on every bind.
+10. **Domain instants are `kotlin.time.Instant` and durations `kotlin.time.Duration`.** Time-at-the-boundary lives in the `compose-data` skill (rule 2): never wire strings; parse at the boundary, format at display. `Instant` is stable since 2.3 and replaces the deprecated `kotlinx.datetime` type (ruling M-8); `Duration` is stable since 1.6. If `libs.versions.toml` shows Kotlin below 2.3, keep the project's current instant type and report; never add an experimental opt-in to reach `kotlin.time.Instant`. *Prevents:* stringly-typed time re-parsed on every bind.
 11. **`kotlin.uuid.Uuid` is used only on Kotlin 2.4 or later; below that the project keeps its current identity type.** The type is stable since 2.4. Never hand-roll UUID parsing to bridge the gap. *Prevents:* bespoke UUID code the stdlib already covers.
 
 ## 6. Builders and preconditions (default)
 
-12. **Conditional accumulation uses `buildList`, `buildMap`, and `buildSet`.** The builders read as one expression and return a read-only collection (stable since 1.6). *Prevents:* mutable-list-then-copy ceremony.
+12. **Prefer `buildList`, `buildMap`, and `buildSet` for conditional accumulation.** The builders read as one expression and return a read-only collection (stable since 1.6); mutable-then-copy stays acceptable. *Prevents:* mutable-list-then-copy ceremony.
 13. **`require` checks arguments, `check` checks state, `error` marks unreachable branches, each with a lazy message.** `require` throws `IllegalArgumentException`; `check` and `error` throw `IllegalStateException`; all three smart-cast after the call. *Prevents:* hand-rolled `if`-throws with the wrong exception type.
 
 ## 7. Scope restraint (default)
 
-14. **One scope function per expression and no nested scope chains; name the argument when `it` confuses.** The stdlib guide warns that nesting and chaining scope functions hides which object `this` or `it` names. Prefer `apply` for configuration and `let` for a nullable receiver or a named intermediate; a second scope function means an intermediate `val` instead. *Prevents:* context-confusion bugs where a call lands on the wrong receiver.
+14. **Name the receiver when `it`/`this` is ambiguous; do not nest scope functions where the receiver is hidden.** The stdlib guide warns that nesting and chaining scope functions hides which object `this` or `it` names. Prefer `apply` for configuration and `let` for a nullable receiver or a named intermediate; a second scope function means an intermediate `val` instead. *Prevents:* context-confusion bugs where a call lands on the wrong receiver.
 
 WRONG (nested scopes hiding the receiver):
 
@@ -114,8 +114,7 @@ tags.forEach { save(it) }
 
 ## 8. Bodies and arguments (default)
 
-15. **One-liner functions use expression bodies; block bodies carry an explicit return type.** The compiler infers the expression type, and the signature stays honest for recursion and nullable results. *Prevents:* ceremony hiding a single expression, and widened types leaking from block bodies.
-16. **Calls name boolean arguments and runs of same-type arguments.** A bare `true` or a second `String` reads backwards at the call site. *Prevents:* swapped-argument bugs that compile cleanly.
+15. **Calls prefer named boolean arguments and runs of same-type arguments.** A bare `true` or a second `String` reads backwards at the call site; bare literals are flagged in review, not in gates. *Prevents:* swapped-argument bugs that compile cleanly.
 
 WRONG (bare booleans):
 

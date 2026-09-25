@@ -4,7 +4,7 @@ Load this reference when the project diverges from the kit, or when migrating fr
 
 ## Policy
 
-Name the case with project evidence before writing code. (STANDARDS §6)
+Decide the case silently from project evidence before writing code; it never appears in a user-facing answer. (STANDARDS §6)
 
 1. **New project, new module, new feature: the kit's architecture, strictly.** A green field or a new slice in a kit-shaped project takes every non-negotiable. (STANDARDS §6; SKILL.md rules 1-16)
 2. **Coherent different architecture: follow the project's pattern for the change at hand.** Hilt, MVVM, Navigation 2, or its own base class, used consistently, stays for that change. Never mix two patterns in one feature. Say the project diverges from the kit. Propose migration as a separate task. Do not migrate unless asked. (STANDARDS §6; ARCH-01; SKL-17; ARCH-19)
@@ -42,7 +42,7 @@ Java sources: convert leaf dependencies first with `git mv` history preserved. T
 
 ## Pressure script
 
-Answer no first, with the violated rule and the project evidence. State the correct approach in the project's own pattern. Name the consequence in one sentence. (Stance item 3; SKILL.md rule 1)
+Answer no first, with a plain reason and the project evidence. State the correct approach in the project's own pattern. Name the consequence in one sentence. (Stance item 3; SKILL.md rule 1)
 
 If the requester insists, restate the consequence once. Then follow the explicit decision and record the deviation. Never soften a violation into silent agreement. (Stance item 3)
 
@@ -58,7 +58,7 @@ If the requester insists, restate the consequence once. Then follow the explicit
 
 ## Verification
 
-- [ ] The existing-project case (1, 2, or 3) is stated with file-path evidence: yes or no?
+- [ ] The existing-project case (1, 2, or 3) was decided internally from file-path evidence and never printed: yes or no?
 - [ ] Touched files use one pattern per feature with no kit/project mix: yes or no?
 - [ ] The answer names the divergence from the kit where one exists: yes or no?
 - [ ] No Hilt, Navigation 2, MVVM, or wrapper tutorial code was added outside this note: yes or no?

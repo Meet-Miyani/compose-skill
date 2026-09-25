@@ -9,9 +9,7 @@ Contents:
 - Locale-qualified values folders and key parity
 - Semantic keys in state with resolution at render
 - String templates and plurals
-- Icon pipeline and runtime tint
-- Fonts
-- Raw files, URIs, and remote content
+- Bundled media (icons, fonts, raw files) lives in `resources-media.md`
 - Gotchas, red flags, and verification
 
 ## Res vs Android R placement
@@ -41,25 +39,23 @@ Contents:
 
 ## Icons
 
-11. **Downloaded Material Symbols XML ships with fill forced to black and tint attributes stripped; recolor at the call site with a runtime tint filter.** A hardcoded icon color misses every theme change. *Prevents:* icons frozen to one theme. (RES-07; SKILL.md rule 5)
-12. Icon homes agree with the design-system reference: stock glyphs stay at the call site and project-drawn glyphs live on the shared set, so this file states no second icon home.
+Icon homes agree with the design-system reference: stock glyphs stay at the call site and project-drawn glyphs live on the shared set. The icon pipeline, fonts, and raw files live in `resources-media.md`.
 
 ## Fonts
 
-13. **Build custom `Typography` inside a composable, because `Font()` reads `Res` in composition.** A notes type scale that applies bundled fonts therefore constructs its `FontFamily` at render time, not in a top-level val. *Prevents:* font loading outside composition. (RES-10)
+Custom `Typography` builds inside a composable; see `resources-media.md`.
 
 ## Raw files, URIs, and remote content
 
-14. **Resources packed as Android assets stay reachable to WebViews and media components by path through `getUri`.** A notes export file bundled under `files/` hands its URI to the player instead of its bytes. *Prevents:* bundled media no external API can open. (CMP-19)
-15. **[Decision] Bundled assets are resources; downloaded or remote files never are.** Fetch remote note attachments with an image or network library and convert bytes with the decode helpers before display. *Prevents:* network content modeled as a static resource. (CMP-21)
-16. **Use the filename-keyed per-type maps (`Res.allDrawableResources`, `Res.allStringResources`, `Res.allStringArrayResources`, `Res.allPluralStringResources`, `Res.allFontResources`) for dynamic lookup when no static accessor can be named up front.** A tag icon chosen by server-sent name resolves through the matching map. *Prevents:* generated-accessor switches over dynamic names. (CMP-22)
+Bundled versus remote asset rules live in `resources-media.md`.
+
+11. **Import `Res` from `{group}.{module}.generated.resources` with per-accessor imports.** A notes screen imports `com.example.feature.notes.generated.resources.Res` plus each accessor it uses (`Res.string.*`, `Res.drawable.*`). The package defaults to group plus module; `packageOfResClass` overrides it. Source: https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html (RES-02)
+12. **Use the filename-keyed per-type maps (`Res.allDrawableResources`, `Res.allStringResources`, `Res.allStringArrayResources`, `Res.allPluralStringResources`, `Res.allFontResources`) for dynamic lookup when no static accessor can be named up front.** A tag icon chosen by server-sent name resolves through the matching map. *Prevents:* generated-accessor switches over dynamic names. (CMP-22)
 
 ## Gotchas
 
 - Region codes are case-sensitive with a lowercase `r` prefix, so a mistyped qualifier folder never matches. (CMP-06)
 - Every script-specific language needs a script-less sibling directory, or a script-less request matches all variants and resolution throws. (CMP-08)
-- Nearly all resources read synchronously on the caller thread; only raw files and web resources read asynchronously. (CMP-09)
-- Big raw files cannot be streamed; pass outside libraries a path through `getUri` instead. (CMP-10)
 - `painterResource` is synchronous on every target except web, where the first composition renders empty and the image arrives on later recompositions. (CMP-11)
 - Android XML vectors must not reference outside Android resources, and SVG drawables work on all targets except Android. (CMP-12)
 

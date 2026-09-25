@@ -38,6 +38,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 violations=""
 for fdir in $FEATURE_DIRS; do
   if [ ! -d "$ROOT/$fdir" ]; then continue; fi
@@ -49,6 +54,7 @@ for fdir in $FEATURE_DIRS; do
   for f in $listing; do
     IFS="$OLDIFS"
     rel="${f#$ROOT/}"
+    composekit_skip_path "$rel" && continue
     # Test source sets (commonTest, androidUnitTest, jvmTest, iosTest, ...)
     # are not bound by the five-package rule: fakes live at the feature
     # root package on purpose.

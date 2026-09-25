@@ -41,6 +41,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
 fi
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 if command -v rg >/dev/null 2>&1; then
   HAVE_RG=1
 else
@@ -58,6 +63,8 @@ IFS='
 for kt in $listing; do
   IFS="$OLDIFS"
   [ -n "$kt" ] || continue
+  krel="${kt#$ROOT/}"
+  composekit_skip_path "$krel" && continue
   case "/${kt#$ROOT/}/" in
     */navigation/*|*/presentation/*) ;;
     *) continue ;;

@@ -36,6 +36,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
 fi
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 HAVE_RG=0
 if command -v rg >/dev/null 2>&1; then HAVE_RG=1; fi
 PATTERN='TODO|FIXME|NotImplementedError|SEAM'
@@ -83,6 +88,9 @@ if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 $untracked"
   while IFS= read -r entry || [ -n "$entry" ]; do
     [ -n "$entry" ] || continue
+    # Generated and installed trees are never scanned (agentic trial T1):
+    # build outputs, Gradle/Kotlin/IDE state, installed skills, node_modules.
+    composekit_skip_path "$entry" && continue
     # Source and resource files only, never the installed guard directory:
     # the guard scripts carry TODO/FIXME/SEAM literals in their own comments
     # and pattern strings, so scanning them fails the check on itself.
@@ -111,6 +119,8 @@ sorted="$(printf '%s\n' "$filelist" | sort -u)"
 while IFS= read -r kt || [ -n "$kt" ]; do
   [ -n "$kt" ] || continue
   [ -f "$kt" ] || continue
+  krel="${kt#$ROOT/}"
+  composekit_skip_path "$krel" && continue
   check_file "$kt" "${kt#$ROOT/}"
 done <<< "$sorted"
 exit "$fail"

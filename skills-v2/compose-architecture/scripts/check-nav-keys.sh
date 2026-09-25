@@ -40,6 +40,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
 fi
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 if command -v rg >/dev/null 2>&1; then
   HAVE_RG=1
 else
@@ -54,6 +59,7 @@ SEALED_AWK='{ pos=index($0, ":"); lineno=substr($0,1,pos-1); content=substr($0,p
 direct_out="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/commonTest/*' -prune -o -path '*/test/*' -prune -o -path '*/androidTest/*' -prune -o -name '*Test.kt' -prune -o -type f -name '*.kt' -print | sort | while IFS= read -r kt; do
   [ -n "$kt" ] || continue
   rel="${kt#$ROOT/}"
+  composekit_skip_path "$rel" && continue
   if [ "$HAVE_RG" -eq 1 ]; then
     rg -n -e "$DIRECT_ERE" "$kt" 2>/dev/null | awk -v rel="$rel" "$DIRECT_AWK"
   else
@@ -64,6 +70,7 @@ done)"
 sealed_list="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/commonTest/*' -prune -o -path '*/test/*' -prune -o -path '*/androidTest/*' -prune -o -name '*Test.kt' -prune -o -type f -name '*.kt' -print | sort | while IFS= read -r kt; do
   [ -n "$kt" ] || continue
   rel="${kt#$ROOT/}"
+  composekit_skip_path "$rel" && continue
   if [ "$HAVE_RG" -eq 1 ]; then
     rg -n -e "$SEALED_ERE" "$kt" 2>/dev/null | awk -v rel="$rel" "$SEALED_AWK"
   else
@@ -88,6 +95,8 @@ if [ -n "$sealed_list" ]; then
     reg_ere="subclassesOfSealed[[:space:]]*<[[:space:]]*$sname[[:space:]]*>"
     found="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/commonTest/*' -prune -o -path '*/test/*' -prune -o -path '*/androidTest/*' -prune -o -name '*Test.kt' -prune -o -type f -name '*.kt' -print | sort | while IFS= read -r kt2; do
       [ -n "$kt2" ] || continue
+      krel2="${kt2#$ROOT/}"
+      composekit_skip_path "$krel2" && continue
       if [ "$HAVE_RG" -eq 1 ]; then
         rg -n -e "$reg_ere" "$kt2" 2>/dev/null
       else

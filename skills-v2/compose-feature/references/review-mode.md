@@ -11,10 +11,10 @@ Contents:
 
 ## 1. Verdict-first format
 
-Answer shippable status on line one. Name the violated rule plus evidence next.
+Answer the verdict on line one, then findings in plain words with file-path evidence. Never name rules, skills, cases, iron laws, sections, or reference files. Routing, rule lookups, and this checklist run silently; the reader sees only the verdict, the fixes, a plain *why* per finding, and what is fine as it is.
 
-- Start with `Not shippable — arch rule N — <file path>: <fact>`. Then list fixes in rule order.
-- FEAT-02 pattern: a Notes `Contract.kt` holding five declarations is not shippable. Name the count violation first (five present, three allowed; arch rule 4), before any other defect.
+- Start with `Shippable` or `Not shippable — <file path>: <fact in plain words>`. Then list fixes, most serious first.
+- FEAT-02 pattern: a Notes `Contract.kt` holding five declarations is not shippable. Name the count violation first in plain words (five present, three allowed), before any other defect.
 - Require the extra enum (for example tag step) moved to `presentation/<dest>/model/` or its own file (arch rule 4).
 - Require the extra constant (for example tag limit) moved out of `Contract.kt` to `model/` or its own file (arch rule 4).
 - Require every TODO resolved before done. No placeholder reaches done.
@@ -22,6 +22,16 @@ Answer shippable status on line one. Name the violated rule plus evidence next.
 - When a review blocks a file, the answer includes exactly one corrected version of each blocking file. A verdict with prose-only fixes is incomplete.
 - Confirm every `UiState` field is read by the UI and every `UiAction` is dispatched by it; flag dead fields and dead actions as separate fix items.
 - Confirm every helper named in the change was seen in the project during the review. Name unverified names as open gaps.
+- Keep the review proportional and plain-spoken (see the `compose-architecture` skill, Operating stance items 7–11): one plain-sentence reason per finding, blocking separated from worth-doing-later with what is fine as it is, smallest correct change, reuse before rebuild.
+
+### Severity: what blocks and what waits
+
+- **Blocking** covers only: a user-visible bug, a crash or ANR risk, data loss, a security or privacy issue, or anything that fails the build, tests, or guards.
+- A kit-convention deviation in working code (naming, file layout, two first-load owners with no bug, DI style) is **worth doing later**, unless the task is kit adoption or the user asked for a convention review.
+- `Not shippable` or `request changes` is used only when a blocking item exists.
+- Every review ends with a short **fine as is** line naming what needs no change.
+
+Output shape, in this order: 1. verdict, 2. blocking (usually 0–2 items), 3. worth doing later, 4. fine as is.
 
 ## 2. Review order checklist
 
@@ -46,7 +56,7 @@ Refuse to mark done while TODOs or stubs remain.
 
 - **CLEAN-22 bloated MVI.** Flag tiny sealed types with one or two members kept only for ceremony. Flag double-wrapped actions (an action wrapping another action type with no added meaning). Fold the member or unwrap the layer.
 - **CLEAN-23 generic frameworks replacing feature code.** Flag a shared helper or base added for one feature destination with no second consumer. Use the feature template shape instead.
-- **SKL-09 tone.** For production code, flag anti-patterns in context: name the rule, the evidence, and the fix. For prototypes and minor tweaks, answer the question first, then add the flag briefly.
+- **SKL-09 tone.** For production code, flag anti-patterns in context: name the defect, the file-path evidence, and the fix. For prototypes and minor tweaks, answer the question first, then add the flag briefly.
 
 ## 5. Test-suite, scope, and perf audit pointers
 

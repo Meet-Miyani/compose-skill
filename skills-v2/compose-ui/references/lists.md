@@ -149,7 +149,7 @@ Prefer the platform pausable-prefetch default before any manual window tuning (S
 | "I'll compute the sort right in the item lambda; it is one line." | No (rule 8): no heavy work in item scope. Sort upstream. |
 | "I'll allocate the key object inline; it reads cleaner." | No (rule 8): primitive stable identifiers only in the key lambda. |
 | "I'll read the clock at the top or tick a formatted countdown string from the ViewModel." | See SKILL.md rules 2–3: read at the leaf, carry the `Instant`. The list-specific scope detail is in "Clock reads stay at the leaf" above. |
-| "I'll put the paged flow inside UiState so the screen has one field." | No (rule 8 with the `compose-data` skill boundary): separate `Flow`, never in state. |
+| "I'll put the paged flow inside UiState so the screen has one field." | No (the `compose-data` skill, rule 6): separate `Flow`, never in state. |
 | "I'll show LoadState.Error directly; mapping is boilerplate." | No (rule 4): convert at the boundary and present `AppError`. |
 
 ## Verification

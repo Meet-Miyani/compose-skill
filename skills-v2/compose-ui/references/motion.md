@@ -8,7 +8,7 @@ Contents:
 - Animation state stays local; it never enters `UiState`.
 - Spec choice: default spring, interruption behavior.
 - Per-frame reads: graphicsLayer versus layout-phase modifiers.
-- Shared elements: element choice, keys, modifier order, overlay.
+- Shared-element transitions live in `shared-elements.md`.
 - Gesture-driven patterns: drag, fling, snap-back.
 - AnimatedContent identity and size rules.
 - Animate only meaningful transitions.
@@ -68,25 +68,9 @@ Gotcha: place `animateContentSize` before size modifiers in the chain; after the
 
 *Prevents:* per-frame recomposition of the whole notes list for one chip's color.
 
-## Shared elements (ANADV-03, ANADV-05, ANADV-07, ANADV-10, ANADV-11)
+Gotcha: children inside `AnimatedVisibility` (or `AnimatedContent`) override the parent transition per child with `Modifier.animateEnterExit`; for fully per-child choreography set the parent `enter`/`exit` to `None`. Source: https://developer.android.com/develop/ui/compose/animation/composables-modifiers (ANIM-50)
 
-Use shared elements for the note list to note detail transition: the tapped note cover travels instead of crossfading.
-
-| Situation | Choice (ANADV-03) |
-|---|---|
-| Same cover art on both screens | `sharedElement` hero |
-| Card morphing into a different detail layout | `sharedBounds` container transform |
-| Note title text that changes size | `sharedBounds`, never `sharedElement` |
-
-Keys: build each shared key from domain identity plus origin and type, so two notes never collide on one key. A note cover key reads as note id plus list origin plus cover type. (ANADV-05)
-
-Gotcha: size modifiers go after `sharedElement`; mismatched modifier order between the matched pair causes visual jumps. (ANADV-11)
-
-Gotcha: pick `ScaleToBounds` for note title text and remeasure-based resizing for covers with different aspect ratios; confirm against current official docs before relying on either default. (ANADV-07)
-
-Gotcha: keep chrome (note list bottom bar, detail FAB) above the transition with the shared-transition overlay hook, clip the element to parent bounds when it bleeds, and freeze title measurement so text does not reflow mid-flight; confirm each hook name against current official docs. (ANADV-10)
-
-*Prevents:* key collisions that teleport the wrong cover, and chrome sliding under the hero.
+*Prevents:* one parent transition flattening every child into the same motion.
 
 ## Gesture-driven patterns (ANADV-15)
 
@@ -128,8 +112,6 @@ Gotcha: animating every note-list change produces jitter; animate the pin, the a
 - [ ] `rg -n "Modifier\.(scale|offset)\(" --glob '*.kt' <feature-root>` shows no per-frame visual modifier outside a `graphicsLayer` or lambda-`offset` block: yes or no.
 - [ ] `animateContentSize` appears before size modifiers in every chain: yes or no.
 - [ ] `AnimatedContent` bodies read the lambda target parameter, never an outer variable: yes or no.
-- [ ] Shared-element keys embed domain identity; matched pairs use identical modifier order: yes or no.
-- [ ] Shared-transition overlay hooks and resize-mode choices verified against current official docs: yes or no.
 
 ## Cross-skill pointers
 

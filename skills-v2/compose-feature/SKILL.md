@@ -1,6 +1,6 @@
 ---
 name: compose-feature
-description: Adds, changes, or reviews a screen, sheet, dialog, or destination slice (endpoint to repository to ViewModel to UI to navigation to DI to tests) in a Compose or CMP project. Use when adding a screen, building a new feature, adding a ViewModel or destination, wiring list/detail or a form screen, scaffolding a slice, or reviewing a feature change. Covers Contract.kt, launchGuarded wiring, SavedStateHandle drafts, the state matrix, and new-feature.sh. Do NOT use for pure refactors, Gradle-only work (compose-project), recomposition or styling problems (compose-ui), repository and persistence mechanics (compose-data), or expect/actual splits (compose-platform).
+description: Adds, changes, or reviews a screen, sheet, dialog, or destination slice (endpoint to repository to ViewModel to UI to navigation to DI to tests) in a Compose or CMP project. Use when adding a screen, building a new feature, adding a ViewModel or destination, wiring list/detail or a form screen, scaffolding a slice, or reviewing a feature change. Covers Contract.kt, launchGuarded wiring, SavedStateHandle drafts, the state matrix, and new-feature.sh. Do NOT use for routing or architecture (compose-architecture), pure refactors, Gradle work (compose-project), recomposition or styling (compose-ui), repository or persistence work (compose-data), or expect/actual splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-24
 ---
@@ -17,14 +17,14 @@ You build one slice end to end and you refuse to ship it unfinished. The `compos
 
 1. **Verify, do not recall.** Every helper, component, token, and file you name was seen in this project during this task, or in current official docs. Name an unverified need as an open gap, never call it.
 2. **Check the question before answering it.** Read the code, check the non-negotiables, answer yes or no first with evidence.
-3. **Say no when the answer is no.** State the correct approach. If the user insists, restate the consequence once, follow the decision, record the deviation.
+3. **Say no when the answer is no.** State the correct approach. If the user insists, restate the consequence once, follow the decision, record the deviation. Keep pushback short, plain-spoken and proportional (see the `compose-architecture` skill, Operating stance items 7–11). Routing, case classification and verification gates stay silent there.
 4. **Fresh docs before new library code.** Read `gradle/libs.versions.toml` and the current official docs first; unreachable docs means marking the code unverified.
 
 ## When NOT to use
 
 | Task | Use instead |
 |---|---|
-| Route first, choose the owning skill, state the existing-project case | the `compose-architecture` skill, before anything below |
+| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
 | Write or review composables, lists, motion, accessibility, tokens, resources | the `compose-ui` skill |
 | Write or review repositories, Ktor, Room, DataStore, Paging, offline-first | the `compose-data` skill |
 | New project or module, convention plugins, version catalog, CI, hooks | the `compose-project` skill |
@@ -39,8 +39,8 @@ Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow ab
 1. **Build only from verified project material.** Every helper, component, token, and import named in new code was seen in this project during this task, or in current official docs. A plausible name is not a verified one. *Prevents:* invented APIs that compile nowhere.
 2. **No placeholder reaches done.** No `TODO`, `FIXME`, stub, or noted-but-unfixed defect remains in changed files. The placeholder grep over changed files is empty before done. Template `SEAM` comments are implemented, not shipped. *Prevents:* sprints that end with fiction marked done.
 3. **Iron law: emit exactly one version of each file.** Decide before writing. Options belong in prose before the code; by the time a file appears it is decided. No "alternatively…" drafts. No exceptions: never ship a "first draft … corrected version" pair in one answer; if a draft is wrong, replace it, never ship both. A review that blocks a file ships exactly one corrected version of each blocking file; a verdict with prose-only fixes is incomplete. *Prevents:* three candidates with none committed.
-4. **Drop a record only when its identity is unusable; degrade a bad field instead.** A missing id drops the row. A blank body or an unparseable timestamp keeps the row with the field nulled or marked. Absence stays null through the domain; never zero, now, or an empty-but-valid default. *Prevents:* silent loss of urgent rows and fake-valid values.
-5. **Copy a component together with the conditions at its call site.** A component copied without the gate that made it correct is a new bug wearing a reviewed name. *Prevents:* precedent-gated UI breaking in its new home.
+4. **Drop a record only when its identity is unusable; degrade a bad field instead.** The full rule lives in the `compose-data` skill (rule 4): absence stays null through the domain, drop only on a missing id. *Prevents:* silent loss of urgent rows and fake-valid values.
+5. **Copy a component together with the conditions at its call site.** Component-reuse gating lives in the `compose-ui` skill (rule 6). *Prevents:* precedent-gated UI breaking in its new home.
 6. **Every `UiState` field is read by the UI, and every `UiAction` is dispatched by it.** No dead fields held "for later", no dead actions with no sender. Cross-check the Screen against the Contract before done. *Prevents:* contract rot nobody renders.
 7. **Offer alternatives only for novel, hard-to-reverse choices.** Build prescribed work directly. A choice the kit already made is built, not debated. *Prevents:* reviews that relitigate settled architecture.
 
@@ -60,7 +60,7 @@ Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow ab
 scripts/new-feature.sh --name Notes --item Note --package com.example.feature.notes --root <project-root>
 ```
 - [ ] Run the Verification gates below.
-- [ ] Report deviations: what diverged, which rule allowed it, and the revisit trigger.
+- [ ] Report deviations in plain words: what diverged and the revisit trigger.
 
 ## Decision tables
 
@@ -100,13 +100,13 @@ scripts/new-feature.sh --name Notes --item Note --package com.example.feature.no
 | "I'll resolve detail from the cached list; faster." | No. Arch rules 10 and 15: detail fetches by identity; a cold cache has no list. |
 | "Refresh failure over content can stay silent." | No. Arch rule 8: silent is only for named polls. |
 | "A file-level `var` is the simplest result callback." | No. Arch rule 13: results travel through a repository write. |
-| "I'll time `runCurrent()` to catch the loading frame." | No. testing.md Fakes gate rule (Verification gate 18): hold the fake open with a `CompletableDeferred` gate; `runCurrent()` drains every queued task, so a non-suspending fake settles first. |
+| "I'll time `runCurrent()` to catch the loading frame." | No. Verification gate 18 (state-matrix tests; Fakes rule in testing.md): hold the fake open across the loading frame instead of timing `runCurrent()`. |
 
 ## Verification
 
 - [ ] The slice and every observable state (cold load, reconcile, refreshing, error, retry, empty, not-found, overlapping loads, process-death restore) were restated before code.
 - [ ] The closest precedent was read in full; components, formatters, and tokens were inventoried.
-- [ ] Every `*Contract.kt` holds exactly `*UiState`, `*UiAction`, `*UiEffect`. Count declarations per file:
+- [ ] Every `*Contract.kt` holds exactly `*UiState`, `*UiAction`, `*UiEffect` (see the `compose-architecture` skill, rule 4). Count declarations per file:
 
 ```sh
 rg --files -g '*Contract.kt' <feature-root>
@@ -122,21 +122,21 @@ rg -n "TODO|FIXME|NotImplementedError" <changed-files>
 rg -n "SEAM" <module>
 ```
 - [ ] Exactly one version of each file; no "alternatively" drafts.
-- [ ] Every `launchGuarded` passes an explicit `onError`; no `try/catch` chains; `CancellationException` rethrown.
+- [ ] Every `launchGuarded` passes an explicit `onError` (see the `compose-architecture` skill, rule 6); no `try/catch` chains; `CancellationException` rethrown.
 - [ ] Every failure path uses exactly one tier (arch rule 8); every Retry holds its error.
 - [ ] First `ON_START` is the cold load, later `ON_START`s reconcile with data kept; every `LifecycleStartEffect` is keyed by the nav-key id.
 - [ ] Every load guards overlap with a stored `Job` that skips while active.
-- [ ] Detail destinations fetch by identity from the key; records re-fetch on a cold cache.
-- [ ] Drafts live in `SavedStateHandle` with `UiState` derived; no `rememberSaveable` mirror, no syncing `LaunchedEffect`.
+- [ ] Detail destinations fetch by identity from the key (see the `compose-architecture` skill, rules 10, 15); records re-fetch on a cold cache.
+- [ ] Drafts live in `SavedStateHandle` with `UiState` derived (see the `compose-architecture` skill, rules 9–10); no `rememberSaveable` mirror, no syncing `LaunchedEffect`.
 - [ ] Every `UiState` field is read by the UI; every `UiAction` is dispatched by it.
 - [ ] Every named helper, token, and import was seen in the project or current docs; nothing invented.
 - [ ] Every repository method called is declared on its interface.
 - [ ] Dropped records had unusable identity; degraded fields kept their rows with nulls, never invented defaults.
-- [ ] Strings exist in every locale folder with identical keys (Phase 5 automates this; until then check by hand).
-- [ ] ViewModel tests cover the full state matrix with hand-written fakes and `advanceUntilIdle`.
+- [ ] Strings exist in every locale folder with identical keys (see the `compose-ui` skill, rule 9; Phase 5 automates this; until then check by hand).
+- [ ] ViewModel tests cover the state matrix with hand-written fakes; settle deterministically (any fake-compatible idle-advance).
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
 - [ ] `scripts/composekit/run-checks.sh` exits 0 when installed (guards land in Phase 5; until then verify by hand).
-- [ ] Deviations are reported with the rule, the reason, and the revisit trigger.
+- [ ] Deviations are reported in plain words: what diverged and the revisit trigger.
 
 ## Reference lookup
 

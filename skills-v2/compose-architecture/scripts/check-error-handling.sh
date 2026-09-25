@@ -54,6 +54,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
 fi
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 if command -v rg >/dev/null 2>&1; then
   HAVE_RG=1
 else
@@ -355,11 +360,15 @@ C_AWK='{ pos = index($0, ":"); lineno = substr($0, 1, pos - 1); content = substr
 
 ab_out="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/src/*Test*/*' -prune -o -type f -name '*.kt' -print | sort | while IFS= read -r kt; do
   [ -n "$kt" ] || continue
+  krel="${kt#$ROOT/}"
+  composekit_skip_path "$krel" && continue
   awk -v rel="${kt#$ROOT/}" "$AWK_PROG" "$kt"
 done)"
 
 c_out="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/src/*Test*/*' -prune -o -type f -name '*ViewModel.kt' -print | sort | while IFS= read -r kt; do
   [ -n "$kt" ] || continue
+  krel="${kt#$ROOT/}"
+  composekit_skip_path "$krel" && continue
   if [ "$HAVE_RG" -eq 1 ]; then
     rg -n --no-filename -e 'NetworkResult|safeApiCall|Result<' "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$C_AWK"
   else

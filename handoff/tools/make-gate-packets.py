@@ -59,9 +59,9 @@ def answer_text(path):
     return s[m.end():].strip() if m else re.sub(r"^# .*\n", "", s, count=1).strip()
 
 
-def rubric(skill, sid):
-    t = open(os.path.join(ROOT, "evals-v2", skill, "scenarios.md")).read()
-    m = re.search(rf"^## {re.escape(sid)}\b.*?(?=^## |\Z)", t, re.S | re.M)
+def rubric(skill, sid, md=""):
+    t = open(md or os.path.join(ROOT, "evals-v2", skill, "scenarios.md")).read()
+    m = re.search(rf"^## (?:PRESSURE:\s*|REVIEW:\s*)?{re.escape(sid)}\b.*?(?=^## |\Z)", t, re.S | re.M)
     return m.group(0).strip() if m else ""
 
 
@@ -71,8 +71,10 @@ def main():
     ap.add_argument("--ids", required=True)
     ap.add_argument("--answer", action="append", required=True, help="name=dir")
     ap.add_argument("--seed", type=int, default=20260925)
+    ap.add_argument("--evals", default="", help="alternate scenario JSON (e.g. evals-v2/heldout.json)")
+    ap.add_argument("--scenarios-md", default="", help="alternate rubric markdown (e.g. evals-v2/heldout.md)")
     a = ap.parse_args()
-    ev = json.load(open(os.path.join(ROOT, "evals-v2", "evals.json")))
+    ev = json.load(open(a.evals or os.path.join(ROOT, "evals-v2", "evals.json")))
     ev = ev if isinstance(ev, list) else ev.get("evals") or ev.get("scenarios")
     ids = a.ids.split(",")
     sel = [s for s in ev if s["id"] in ids]
@@ -89,7 +91,7 @@ def main():
         labels = list(string.ascii_uppercase[:len(names)])
         key[s["id"]] = dict(zip(labels, names))
         with open(os.path.join(gdir, "packets", f"{s['id']}.md"), "w") as f:
-            f.write(f"# Grading packet {s['id']}\n\n## Scenario and rubric\n\n{rubric(s['skill'], s['id'])}\n")
+            f.write(f"# Grading packet {s['id']}\n\n## Scenario and rubric\n\n{rubric(s['skill'], s['id'], a.scenarios_md)}\n")
             for L, n in zip(labels, names):
                 p = os.path.join(srcs[n], f"{s['id']}.md")
                 txt = answer_text(p) if os.path.exists(p) else "(NO ANSWER PRODUCED)"

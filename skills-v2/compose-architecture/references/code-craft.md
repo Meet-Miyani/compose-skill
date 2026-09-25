@@ -15,14 +15,8 @@ Say what a developer needs, in the simplest words. The KDoc reference defines th
 paragraph as the summary; the conventions say to avoid `@param`/`@return` and fold the
 meaning into the text instead.
 
-1. **One-line summary for most declarations.** One sentence naming the intent, not the
-   mechanics. *Prevents:* essays nobody maintains.
-2. **`@param`/`@return`/`@throws` only when they add information the signature does not.**
-   A `userId: Long` needs no `@param`; a nullable return with a "null means absent" contract
-   earns one line. *Prevents:* tag noise that restates the signature.
-3. **A short paragraph only for genuinely complex contracts** (threading, error tiers,
-   lifecycle). Never a 20+ line essay. *Prevents:* documentation that rots past the code.
-4. **One-line KDoc required on:** every repository and data-source interface; every
+1. **One sentence for most declarations; tags only when they add information the signature does not; never an essay (20+ lines).** One sentence naming the intent covers most declarations. Fold meaning into the text instead of `@param`/`@return`/`@throws` tags: a `userId: Long` needs no `@param`; a nullable return with a "null means absent" contract earns one line. A short paragraph only for genuinely complex contracts (threading, error tiers, lifecycle). Never a 20+ line essay. *Prevents:* essays nobody maintains, and tag noise that restates the signature.
+2. **One-line KDoc required on:** every repository and data-source interface; every
    base-contract type (`BaseViewModel`, `AppError`, ...); every design-system composable
    other modules use; each feature's ViewModel and Route (one line on what the destination
     does and what it owns); and anything non-obvious. Every declaration is public by
@@ -30,7 +24,7 @@ meaning into the text instead.
     private function whose behavior is not obvious from its name gets a one-line KDoc
     like any other; visibility never decides. *Prevents:* a
     shared contract whose purpose lives only in its author's head.
-5. **Not required on:** Screen and leaf composables inside a feature, and private
+3. **Not required on:** Screen and leaf composables inside a feature, and private
     functions or state members whose name and signature say it all. A
    `private fun retry()` with a clear name carries no KDoc. *Prevents:* comment volume that
    hides the comments that matter.
@@ -86,15 +80,12 @@ inline comments say *why* a step inside the body is done that way.
 
 Rules:
 
-1. **State the intent, and the reason when it is not obvious.** "Broken identity: a missing
-   id drops the record. Nothing else drops it." *Prevents:* the next reader re-deriving the
-   rule from the code.
-2. **Never restate an obvious line** (`// set loading to true`). If the comment says what the
-   code says, delete it. *Prevents:* noise that trains readers to skip every comment.
-3. **No commented-out code.** Version control holds history; a reader cannot tell dead code
-   from a live alternative. Delete it. *Prevents:* dead branches resurrected by copy-paste.
-4. **No TODO without an owner or issue link.** A bare TODO is a placeholder, and placeholders
-   never reach done (the `compose-feature` skill). *Prevents:* debt with no one to collect it.
+1. **Non-obvious logic carries its why in free wording; never restate an obvious line.** If the comment says what the code says, delete it. *Prevents:* the next reader re-deriving the rule from the code,
+   and noise that trains readers to skip every comment.
+2. **Bare TODOs never reach done; the `compose-feature` skill owns the placeholder rule.**
+   A TODO without an owner or issue link is a placeholder. *Prevents:* debt with no one
+   to collect it.
+3. **One chained call per line once a chain wraps.** When a call chain does not fit on one line, each call goes on its own line. *Prevents:* wrapped chains that hide a step during review.
 
 WRONG (one long chain sorting on display text, oldest or arbitrary order):
 
@@ -102,7 +93,7 @@ WRONG (one long chain sorting on display text, oldest or arbitrary order):
 notes.filter { !it.isArchived }.map { it.toUiModel() }.sortedBy { it.updatedLabel }
 ```
 
-RIGHT (newest first on the domain timestamp, one call per line):
+RIGHT (newest first on the domain timestamp; one call per line):
 
 ```kotlin
 // Keep only visible notes, newest first; the list shows one day per section.
@@ -160,16 +151,15 @@ verb".
 1. **No `data`, `info`, `manager`, `helper` or `util` suffixes without meaning.** If the name
    needs one of these to sound complete, the concept is unnamed; name the concept.
    *Prevents:* drawers where everything fits and nothing is found.
-2. **Booleans read as questions** (`isMissing`, `canRetry`, `hasStarted`). *Prevents:* flags
+2. **Boolean names read unambiguously at the call site; question form preferred, not required** (`isMissing`, `canRetry`, `hasStarted`). *Prevents:* flags
    read backwards at the call site.
 3. **Functions are verbs** (`load`, `retry`, `toDomain`). *Prevents:* nouns that hide whether
    the call mutates, fetches or converts.
 
 ## 5. Magic values (default)
 
-**Non-obvious literals** (status codes, thresholds, timeouts, sizes, bit masks) **get a
-named constant with a one-line why.** Inside a small mapping table, an inline why-comment
-on the literal is enough. Obvious literals (`0`, `1`, the empty string, list indices)
+**Non-obvious literals** (status codes, thresholds, timeouts, sizes, bit masks) **name
+their meaning via a constant or an inline why-comment; the form is free.** Obvious literals (`0`, `1`, the empty string, list indices)
 stay literal. *Prevents:* "voodoo constants" copied with the wrong meaning.
 
 WRONG (bare literal with no reason):

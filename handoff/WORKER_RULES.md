@@ -69,9 +69,11 @@ Report exactly what happened. If a self-check failed, say so and paste the outpu
 something, say so and why. A report that claims PASS without the command output counts as a failed
 phase.
 
-## Sealed held-out set (Phase 9 on)
+## Sealed held-out set (Phase 9 on; updated by O-12)
 
-Never open, read, grep, list or reference `evals-v2/heldout.json`, `evals-v2/heldout.md` or anything
-under `evals-v2/heldout/`. They are the sealed test set (STANDARDS §8.5 rule 3). Reading them
-invalidates the kit's "performance on new tasks" numbers.
+Never open, read, grep, list or reference `evals-v2/heldout-v3.json` or `evals-v2/heldout-v3.md` (sealed final test set, scored once). `evals-v2/heldout-v2.*` is also off-limits until the moderator demotes it. They are
+the sealed test set (STANDARDS §8.5 rule 3); reading them invalidates the kit's "performance on new tasks"
+numbers.
 
+`evals-v2/heldout.json` and `evals-v2/heldout.md` (held-out v1) are **no longer sealed** (O-12). You are
+asked to rename them to `evals-v2/heldout-v1-dev.*`.

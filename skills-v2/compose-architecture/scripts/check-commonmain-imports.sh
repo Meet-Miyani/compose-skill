@@ -24,6 +24,11 @@ case "$ROOT" in
   */) ROOT="${ROOT%/}" ;;
 esac
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 fail=0
 listing="$(find "$ROOT" -type d -name commonMain -path '*/src/*' -print)"
 if [ -z "$listing" ]; then exit 0; fi
@@ -31,10 +36,13 @@ OLDIFS="$IFS"
 IFS='
 '
 for dir in $listing; do
+  drel="${dir#$ROOT/}"
+  composekit_skip_path "$drel" && continue
   files="$(find "$dir" -type f -name '*.kt' -print)"
   if [ -z "$files" ]; then continue; fi
   for f in $files; do
     rel="${f#$ROOT/}"
+    composekit_skip_path "$rel" && continue
     case "$rel" in
       .git/*|*/.git/*) continue ;;
     esac

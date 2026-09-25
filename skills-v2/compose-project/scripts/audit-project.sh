@@ -24,6 +24,14 @@ case "$ROOT" in
   */) ROOT="${ROOT%/}" ;;
 esac
 
+# Generated and installed trees are never audited (agentic trial T1).
+# The canonical exclusion list lives in the compose-architecture helper;
+# source it when present (always true inside this repo).
+SKIP_HELPER="$(cd "$(dirname "$0")/../../compose-architecture/scripts" && pwd)/lib/composekit-skip.sh"
+if [ -f "$SKIP_HELPER" ]; then
+  . "$SKIP_HELPER"
+fi
+
 echo "== modules (from settings.gradle.kts) =="
 if [ -f "$ROOT/settings.gradle.kts" ]; then
   grep -E -e '^[[:space:]]*include\(' "$ROOT/settings.gradle.kts" 2>/dev/null || echo "(no include() lines found)"
@@ -41,6 +49,9 @@ if [ -n "$listing" ]; then
 '
   for f in $listing; do
     rel="${f#$ROOT/}"
+    if command -v composekit_skip_path >/dev/null 2>&1; then
+      composekit_skip_path "$rel" && continue
+    fi
     case "$rel" in
       build-logic/*) continue ;;
     esac
@@ -61,6 +72,9 @@ if [ -n "$listing" ]; then
 '
   for f in $listing; do
     rel="${f#$ROOT/}"
+    if command -v composekit_skip_path >/dev/null 2>&1; then
+      composekit_skip_path "$rel" && continue
+    fi
     case "$rel" in
       build-logic/*) continue ;;
     esac

@@ -28,6 +28,15 @@ for src in "$SCRIPT_DIR"/check-*.sh "$SCRIPT_DIR"/run-checks.sh; do
     count=$((count + 1))
 done
 
+if [ -d "$SCRIPT_DIR/lib" ]; then
+    mkdir -p "$DEST/lib"
+    for lib in "$SCRIPT_DIR"/lib/*.sh; do
+        [ -f "$lib" ] || continue
+        cp "$lib" "$DEST/lib/"
+    done
+    echo "installed shared guard helpers to scripts/composekit/lib/"
+fi
+
 if [ -f "$ROOT/.composekit.conf" ]; then
     echo "kept existing .composekit.conf (not overwritten)"
 else

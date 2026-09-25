@@ -114,6 +114,40 @@ git init -q "$SCRATCH/cleaninstall" 2>/dev/null
 expect_pass "install-guards.sh installs into the clean tree" bash "$SCRIPTS_DIR/install-guards.sh" "$SCRATCH/cleaninstall"
 expect_pass "check-placeholders passes with untracked guard scripts and clean sources" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/cleaninstall"
 
+# Agentic trial T1: generated and installed trees are never scanned. Every
+# violation below sits under build/ or .opencode/ (plus one .gradle-adjacent
+# commonMain copy), so every check must pass on this tree. The tree is a git
+# work tree with everything untracked, so check-placeholders takes its git
+# branch (tracked diff plus untracked files), the mode that caught the trial.
+T1="$SCRATCH/t1-skip"
+mkdir -p "$T1/feature/demo/src/commonMain/kotlin/com/example/feature/demo/presentation/demo"
+mkdir -p "$T1/feature/demo/build/generated/compose/resourceGenerator/kotlin/presentation/gen"
+mkdir -p "$T1/feature/demo/build/generated/compose/resourceGenerator/kotlin"
+mkdir -p "$T1/feature/demo/build/src/commonMain/kotlin"
+mkdir -p "$T1/feature/demo/build/generated/compose/resourceGenerator/res/values"
+mkdir -p "$T1/feature/demo/build/generated/compose/resourceGenerator/res/values-de"
+mkdir -p "$T1/.opencode/skills/demo/fixtures/bad/src/commonMain/kotlin"
+mkdir -p "$T1/.opencode/skills/demo/fixtures/bad/res/values"
+mkdir -p "$T1/.opencode/skills/demo/fixtures/bad/res/values-de"
+cp "$GOOD/.composekit.conf" "$T1/.composekit.conf"
+printf '%s\n' 'package com.example.feature.demo.presentation.demo' 'fun demo(): String = "hi"' > "$T1/feature/demo/src/commonMain/kotlin/com/example/feature/demo/presentation/demo/DemoScreen.kt"
+printf '%s\n' 'package com.example.gen' '// TODO: regenerate this file' 'import com.example.feature.other.domain.OtherThing' 'import androidx.compose.ui.graphics.Color' 'val accent = Color(0xFF000000)' > "$T1/feature/demo/build/generated/compose/resourceGenerator/kotlin/GenScreen.kt"
+printf '%s\n' 'package com.example.gen.presentation' '// TODO: regenerate this file' 'var genCache = 0' 'data class GenDto(val id: Long)' > "$T1/feature/demo/build/generated/compose/resourceGenerator/kotlin/presentation/gen/GenState.kt"
+printf '%s\n' 'package com.example.gen' '// TODO: regenerate this file' 'import java.util.UUID' 'val genId: UUID? = null' > "$T1/feature/demo/build/src/commonMain/kotlin/GenRes.kt"
+printf '%s\n' '<resources>' '    <string name="gen_ok">ok</string>' '</resources>' > "$T1/feature/demo/build/generated/compose/resourceGenerator/res/values/strings.xml"
+printf '%s\n' '<resources>' '    <string name="gen_ok">ok</string>' '    <string name="gen_extra">extra</string>' '</resources>' > "$T1/feature/demo/build/generated/compose/resourceGenerator/res/values-de/strings.xml"
+printf '%s\n' 'package demo.bad' '// TODO: bad fixture copy' 'class BadContract' > "$T1/.opencode/skills/demo/fixtures/bad/BadContract.kt"
+printf '%s\n' 'package demo.bad' '// TODO: bad fixture copy' 'fun load() { launchGuarded { reload() } }' > "$T1/.opencode/skills/demo/fixtures/bad/BadViewModel.kt"
+printf '%s\n' 'package demo.bad' '// TODO: bad fixture copy' 'data class BadKey(val id: Long) : NavKey' > "$T1/.opencode/skills/demo/fixtures/bad/BadNavKey.kt"
+printf '%s\n' 'package demo.bad' '// TODO: bad fixture copy' 'import java.util.UUID' 'val badId: UUID? = null' > "$T1/.opencode/skills/demo/fixtures/bad/src/commonMain/kotlin/BadCommon.kt"
+printf '%s\n' '<resources>' '    <string name="bad_ok">ok</string>' '</resources>' > "$T1/.opencode/skills/demo/fixtures/bad/res/values/strings.xml"
+printf '%s\n' '<resources>' '    <string name="bad_ok">ok</string>' '    <string name="bad_extra">extra</string>' '</resources>' > "$T1/.opencode/skills/demo/fixtures/bad/res/values-de/strings.xml"
+git init -q "$T1" 2>/dev/null
+for t1check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-placeholders check-locale-parity check-hardcoded-colors check-commonmain-imports; do
+    expect_pass "$t1check skips build/ and .opencode/ trees" bash "$SCRIPTS_DIR/$t1check.sh" "$T1"
+done
+expect_pass "run-checks.sh passes with only build/ and .opencode/ violations" bash "$SCRIPTS_DIR/run-checks.sh" "$T1"
+
 # The compose-feature scaffold (Tags/Tag) ships SEAM markers: a fresh
 # scaffold fails only check-placeholders, and passes the full registry
 # once the SEAM lines are implemented (stripped here). M-11: both the
@@ -171,11 +205,11 @@ esac
 # install-guards.sh installs scripts plus a fresh conf into a project.
 mkdir -p "$SCRATCH/installed"
 expect_pass "install-guards.sh installs into a project dir" bash "$SCRIPTS_DIR/install-guards.sh" "$SCRATCH/installed"
-if [ -f "$SCRATCH/installed/scripts/composekit/run-checks.sh" ] && [ -f "$SCRATCH/installed/.composekit.conf" ]; then
-    echo "PASS: installed tree holds run-checks.sh and .composekit.conf"
+if [ -f "$SCRATCH/installed/scripts/composekit/run-checks.sh" ] && [ -f "$SCRATCH/installed/.composekit.conf" ] && [ -f "$SCRATCH/installed/scripts/composekit/lib/composekit-skip.sh" ]; then
+    echo "PASS: installed tree holds run-checks.sh, .composekit.conf and lib/composekit-skip.sh"
     pass=$((pass + 1))
 else
-    echo "FAIL: installed tree is missing run-checks.sh or .composekit.conf"
+    echo "FAIL: installed tree is missing run-checks.sh, .composekit.conf or lib/composekit-skip.sh"
     fail=$((fail + 1))
 fi
 

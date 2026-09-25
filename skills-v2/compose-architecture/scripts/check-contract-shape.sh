@@ -24,6 +24,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 if command -v rg >/dev/null 2>&1; then
   HAVE_RG=1
 else
@@ -39,12 +44,13 @@ while IFS= read -r file; do
   case "$file" in
     */.git/*) continue ;;
   esac
+  rel="${file#$ROOT/}"
+  composekit_skip_path "$rel" && continue
   if [ "$HAVE_RG" -eq 1 ]; then
     matches="$(rg -n -e "$DECL_RE" -- "$file" 2>/dev/null)"
   else
     matches="$(grep -E -n -e "$DECL_RE" -- "$file" 2>/dev/null)"
   fi
-  rel="${file#$ROOT/}"
   count=0
   names=""
   flat=""

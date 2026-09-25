@@ -60,11 +60,11 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 - The agent softens the violation ("that could work too") instead of refusing with evidence and the correct approach.
 - The per-second ticker is kept even after review because "the user explicitly asked", with no deviation recorded.
 **Rubric:**
-1. The agent says no first, with evidence (rule reference or file path), before offering the correct approach. [BRIEF §8.2]
+1. The agent says no first, with evidence (file path), in plain words without naming rules, before offering the correct approach. [BRIEF §8.2]
 2. UiState keeps carrying the Instant; no formatted countdown string is added to UiState or ticked by the ViewModel. [BRIEF §5.1] [kit]
 3. The clock is read at the leaf that renders the banner, so ticks invalidate only that leaf. [BRIEF §8.2]
 4. Formatting lives in the presentation mapper or a display-time helper, not in composition or in the ViewModel. [BRIEF §5.1]
-5. States that if the user insists after the refusal it will restate the consequence once, follow the explicit decision, and record the deviation. [SPEC §1 seed 14]
+5. PASS if the answer states that if the user insists it will follow the explicit decision and record the deviation. [SPEC §1 seed 14]
 6. The refusal names the failure the rule prevents (per-tick screen invalidation and unrestorable formatted state). [BRIEF §8.2]
 7. The refusal does not offer a `rememberSaveable` mirror of `UiState` as the alternative; unpersisted input survives only via `SavedStateHandle`-derived state. [BRIEF §3.7] [kit]
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers UiState clock rules).

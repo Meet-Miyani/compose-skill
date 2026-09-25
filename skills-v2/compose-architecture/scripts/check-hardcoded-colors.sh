@@ -31,6 +31,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
 # DESIGN_SYSTEM_MODULE stays a one-item alias: when DESIGN_SYSTEM_DIRS is
 # empty, the single module is the whole allowlist (branding/theme modules
 # count; palette colors legitimately live there).
@@ -59,6 +64,7 @@ while IFS= read -r hit; do
   rest="${hit#*:}"
   num="${rest%%:*}"
   rel="$(relpath "$path")"
+  composekit_skip_path "$rel" && continue
   case "$rel" in
     .git/*|*/.git/*) continue ;;
   esac

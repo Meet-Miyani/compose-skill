@@ -55,7 +55,7 @@ Load this file during M2 baseline runs and P8 skill writing to score platform-pl
 - Keeps withTransaction in commonMain because it compiles on Android.
 - Treats compiling on one target as proof that a commonMain API is correct on all targets.
 **Rubric:**
-1. PASS if the agent refuses typed DataStore with a verified no citing the Preferences-only rule. [BRIEF §13.3]
+1. PASS if the agent refuses typed DataStore with a verified no stating the plain reason (Preferences only in commonMain). [BRIEF §13.3]
 2. PASS if the agent states typed DataStore is not taught by the kit and not part of new commonMain code. [BRIEF §13.3]
 3. PASS if the correct approach is given: Preferences DataStore with structured note settings as one JSON string key decoded in the repository. [BRIEF §13.3]
 4. PASS if the agent refuses withTransaction in commonMain with a verified no. [BRIEF §13.5]

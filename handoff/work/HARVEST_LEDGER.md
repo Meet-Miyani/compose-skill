@@ -129,7 +129,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | SKL-40 | 124 | ViewModel event-to-state-to-effect tests via Turbine in commonTest; validators/calculators as pure functions; platform bindings per target | DUP | DROP: split into SKL-61–SKL-63 | — |
 | SKL-61 | 124 | ViewModel event-to-state-to-effect tests run via Turbine in commonTest | DUP | DROP: dup of brief §9.1 | — |
 | SKL-62 | 124 | Validators and calculators are tested as pure functions | DUP | DROP: dup of brief §9.5 | — |
-| SKL-63 | 124 | Platform bindings are tested per target | GENERIC | DROP: model already knows | — |
+| SKL-63 | 124 | Platform bindings are tested per target | GOTCHA | compose-feature/references/testing.md#gotchas | restored (P9 probe) |
 | SKL-41 | 130-140 | Do list: model raw text separately, immutable equality-friendly state, reuse unchanged nested objects, semantic effects, preserve old content, map to UI state at presentation boundary, feature-specific VM names, stable list keys, top-of-file imports with aliases, guard no-op emissions, respect existing MVI conventions | DUP | DROP: split into SKL-64–SKL-74 | — |
 | SKL-64 | 130-140 | Model raw editable text separately from parsed values | DUP | DROP: dup of ARCH-21 | — |
 | SKL-65 | 130-140 | Keep state immutable and equality-friendly | DUP | DROP: dup of ANTI-04 | — |
@@ -211,15 +211,15 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 |---|---|---|---|---|---|
 | ANADV-01 | 7 | Shared element transitions available in Jetpack Compose and CMP since CMP 1.7+ | GOTCHA | DROP: optional depth — version floor, UNVERIFIED | UNVERIFIED: CMP 1.7 floor not re-checked against current release notes |
 | ANADV-02 | 11-27 | SharedTransitionLayout plus AnimatedContent core setup code | API | DROP: tutorial code | — |
-| ANADV-03 | 31-36 | sharedElement vs sharedBounds decision: same content hero vs visually-different container transform; text prefers sharedBounds | DECISION | compose-ui/references/motion.md#shared-elements | ✓ landed |
+| ANADV-03 | 31-36 | sharedElement vs sharedBounds decision: same content hero vs visually-different container transform; text prefers sharedBounds | DECISION | compose-ui/references/shared-elements.md#shared-elements | ✓ landed |
 | ANADV-04 | 41-56 | sharedElement / sharedBounds modifier usage with rememberSharedContentState and ResizeMode | API | DROP: tutorial code | — |
-| ANADV-05 | 60-63 | Use unique structured shared-element keys (id, origin, type enum) | RULE | compose-ui/references/motion.md#shared-elements | ✓ landed |
+| ANADV-05 | 60-63 | Use unique structured shared-element keys (id, origin, type enum) | RULE | compose-ui/references/shared-elements.md#shared-elements | ✓ landed |
 | ANADV-06 | 67-79 | boundsTransform keyframes customization code | API | DROP: tutorial code | — |
-| ANADV-07 | 83-84 | ResizeMode: ScaleToBounds for Text, RemeasureToBounds for different aspect ratios | DECISION | compose-ui/references/motion.md#shared-elements | UNVERIFIED: not re-checked against current official docs · ✓ landed |
+| ANADV-07 | 83-84 | ResizeMode: ScaleToBounds for Text, RemeasureToBounds for different aspect ratios | DECISION | compose-ui/references/shared-elements.md#shared-elements | UNVERIFIED: not re-checked against current official docs · ✓ landed |
 | ANADV-08 | 88-101 | Wrap NavHost in SharedTransitionLayout and pass both scopes to screens | API | DROP: tutorial code | — |
 | ANADV-09 | 107-119 | Coil shared-element pattern: matching memoryCacheKey plus placeholderMemoryCacheKey between source and destination | DUP | DROP: dup of IMG-12 | UNVERIFIED: not re-checked against current Coil docs |
-| ANADV-10 | 123-125 | renderInSharedTransitionScopeOverlay for chrome, clipInOverlayDuringTransition, skipToLookaheadSize for text reflow | GOTCHA | compose-ui/references/motion.md#overlay | UNVERIFIED: not re-checked against current official docs · ✓ landed |
-| ANADV-11 | 129 | Size modifiers go AFTER sharedElement(); inconsistent modifier order between matched elements causes visual jumps | GOTCHA | compose-ui/references/motion.md#order | ✓ landed |
+| ANADV-10 | 123-125 | renderInSharedTransitionScopeOverlay for chrome, clipInOverlayDuringTransition, skipToLookaheadSize for text reflow | GOTCHA | compose-ui/references/shared-elements.md#overlay | UNVERIFIED: not re-checked against current official docs · ✓ landed |
+| ANADV-11 | 129 | Size modifiers go AFTER sharedElement(); inconsistent modifier order between matched elements causes visual jumps | GOTCHA | compose-ui/references/shared-elements.md#order | ✓ landed |
 | ANADV-12 | 136-150 | Tap-to-animate pointerInput plus Animatable pattern code | API | DROP: tutorial code | — |
 | ANADV-13 | 152 | Interruption rule: tapping during animation cancels current and starts new, maintaining velocity | DUP | DROP: dup of ANIM-10 | — |
 | ANADV-14 | 156-187 | swipeToDismiss custom modifier implementation code | API | DROP: tutorial code | — |
@@ -265,7 +265,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ANIM-13 | 127-142 | AnimatedVisibility enter/exit catalog plus combinators plus per-child overrides plus parent delegation | DUP | DROP: split into ANIM-48–ANIM-51 | — |
 | ANIM-48 | 127-142 | AnimatedVisibility enter and exit transition catalog | API | DROP: tutorial code | — |
 | ANIM-49 | 127-142 | Combine enter and exit transitions with the plus operator | GENERIC | DROP: model already knows | — |
-| ANIM-50 | 127-142 | Override transitions per child with animateEnterExit | GENERIC | DROP: model already knows | — |
+| ANIM-50 | 127-142 | Override transitions per child with animateEnterExit | GOTCHA | compose-ui/references/motion.md#api-choice | restored (P9 probe): https://developer.android.com/develop/ui/compose/animation/composables-modifiers |
 | ANIM-51 | 127-142 | Delegate transition choice to children with Enter and Exit None on the parent | GENERIC | DROP: model already knows | — |
 | ANIM-14 | 146-166 | AnimatedContent directional transitionSpec with SizeTransform; always use the lambda target parameter never the outer variable | DUP | DROP: split into ANIM-52–ANIM-53 | — |
 | ANIM-52 | 146-166 | Control inter-state size animation with SizeTransform | RULE | compose-ui/references/motion.md#content | ✓ landed |
@@ -432,7 +432,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CLEAN-08 | 45 | Lighter state holder suffices for tab selection, expansion, scroll affordance, tooltip/menu visibility | DUP | DROP: dup of SKL-46 | — |
 | CLEAN-09 | 49-53 | Extract reusable UI only with real reuse, stable API, meaningful boundary (MoneyField, ResultCard, ValidationMessage, SettingsToggleRow); never one-line Text wrappers, modifier forwarders, single-use theoretical reuse, or props harder than inline code | DUP | DROP: split into CLEAN-35–CLEAN-40 | — |
 | CLEAN-35 | 49-53 | Extract a reusable UI component only with real reuse across screens | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
-| CLEAN-36 | 49-53 | Extracted components need a stable API and a meaningful boundary | GENERIC | DROP: model already knows | — |
+| CLEAN-36 | 49-53 | Extracted components need a stable API and a meaningful boundary | RULE | compose-architecture/references/naming-and-packages.md#extraction | restored (P9 probe) |
 | CLEAN-37 | 49-53 | Never extract one-line wrappers around Text or Spacer | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | CLEAN-38 | 49-53 | Never extract wrappers that only forward modifiers | RULE | compose-architecture/references/naming-and-packages.md#extraction | ✓ landed |
 | CLEAN-39 | 49-53 | Never extract components reusable only in theory but used once | GENERIC | DROP: model already knows | — |
@@ -481,7 +481,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | CESS-09 | 105-114 | Prefer dispatching events to ViewModel over rememberCoroutineScope; scope only for UI-local async (scroll, snackbar); rememberUpdatedState for latest callbacks; SideEffect sparingly; produceState defers to ViewModel StateFlow in MVI | DUP | DROP: split into CESS-20–CESS-23 | — |
 | CESS-20 | 105-114 | Dispatch events to the ViewModel instead of launching from rememberCoroutineScope | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-21 | 105-114 | Reserve rememberCoroutineScope for UI-local async work | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
-| CESS-22 | 105-114 | Capture latest callbacks with rememberUpdatedState in long-running effects | GENERIC | DROP: model already knows | — |
+| CESS-22 | 105-114 | Capture latest callbacks with rememberUpdatedState in long-running effects | RULE | compose-architecture/references/state-ownership.md#effect-capture | restored (P9 probe): already covered by CB-13/CB-17, no new text |
 | CESS-23 | 105-114 | Prefer ViewModel StateFlow over produceState in MVI screens | RULE | DROP: out of scope — ownership rule (state-ownership/feature scope) | — |
 | CESS-10 | 124-130 | collectAsStateWithLifecycle over collectAsState to collect only in STARTED; available in CMP via lifecycle-runtime-compose with version-dependent KMP surface | GOTCHA | compose-ui/references/state-reads-and-stability.md#collect | https://developer.android.com/jetpack/androidx/releases/lifecycle · ✓ landed |
 | CESS-11 | 136-146 | CollectEffect lifecycle-aware effect collector (repeatOnLifecycle STARTED); collect one-offs at route level | RULE | compose-architecture/templates/core/mvi/CollectEffect.kt#collect | ✓ landed |
@@ -647,7 +647,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | GRAD-37 | 41-74 | Omit version.ref on BOM-managed libraries | GENERIC | DROP: model already knows | — |
 | GRAD-03 | 78-85 | Bundles group always-together libs as one alias for convenience only; CMP projects rarely need them since commonMain already groups | RULE | compose-project/references/version-catalog.md#bundles | — |
 | GRAD-04 | 89-110 | settings.gradle.kts pattern: TYPESAFE_PROJECT_ACCESSORS, scoped google/mavenCentral repos, FAIL_ON_PROJECT_REPOS, module includes | API | DROP: tutorial code | — |
-| GRAD-05 | 114-125 | Root build file declares plugins with apply false; no allprojects/subprojects; convention plugins at scale | GENERIC | DROP: model already knows (Opus test) | — |
+| GRAD-05 | 114-125 | Root build file declares plugins with apply false; no allprojects/subprojects; convention plugins at scale | GOTCHA | compose-project/references/convention-plugins.md#gotchas | restored (P9 probe): https://docs.gradle.org/current/userguide/plugins.html |
 | GRAD-06 | 131 | AGP 9 includes Kotlin; never apply org.jetbrains.kotlin.android in app modules | DUP | DROP: covered by AND-38 (kept in EXTERNAL_LEDGER) | UNVERIFIED: AGP 9 built-in Kotlin claim not re-checked against current AGP docs |
 | GRAD-07 | 143 | New KMP library plugin com.android.kotlin.multiplatform.library for Android-targeting KMP modules | DUP | DROP: covered by CMP-99 (kept in EXTERNAL_LEDGER) | https://developer.android.com/kotlin/multiplatform/plugin |
 | GRAD-08 | 155-167 | New compileSdk DSL release(35) for applications vs integer for KMP androidLibrary blocks | GOTCHA | DROP: optional depth — AGP-9 compileSdk DSL minutiae | UNVERIFIED: compileSdk DSL shape not re-checked against current AGP docs |
@@ -655,7 +655,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | GRAD-10 | 186-228 | CMP shared-module plus thin-Android-shell plus desktop-module patterns with plugin alias sets | API | DROP: tutorial code | — |
 | GRAD-11 | 231-247 | gradle.properties performance plus correctness flags (configuration cache, caching, parallel, official code style, nonTransitiveRClass, cInterop commonization) | DUP | DROP: split into GRAD-16–GRAD-17 | — |
 | GRAD-16 | 231-247 | Enable configuration cache, build cache, and parallel builds | GENERIC | DROP: model already knows (Opus test) | — |
-| GRAD-17 | 231-247 | Enforce official code style plus nonTransitiveRClass | GENERIC | DROP: model already knows (Opus test) | — |
+| GRAD-17 | 231-247 | Enforce official code style plus nonTransitiveRClass | GOTCHA | compose-project/references/bootstrap.md#gotchas | restored (P9 probe): https://developer.android.com/build/releases/agp-8-0-0-release-notes, https://developer.android.com/build/optimize-your-build |
 | GRAD-12 | 251-266 | KSP per-target wiring (kspAndroid, kspIosArm64, kspIosSimulatorArm64) plus KOIN_USE_COMPOSE_VIEWMODEL and KOIN_CONFIG_CHECK args plus KspTask dependency | API | DROP: tutorial code | UNVERIFIED: Koin KSP argument names not re-checked against current Koin docs |
 | GRAD-13 | 270-282 | Conditional includeBuild guarded by path.exists() so CI works without the checkout | RULE | compose-project/references/version-catalog.md#composite | — |
 | GRAD-14 | 286 | Convention plugins at 3+ duplicated modules via build-logic included build; not needed at 3 or fewer modules | RULE | DROP: conflicts with kit decision | CONFLICT: kit mandates convention plugins for every module with zero target config in module files |
@@ -768,8 +768,8 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 |---|---|---|---|---|---|
 | KOIN-01 | 15-32 | CMP versus Android-only Koin package-set sample | API | DROP: tutorial code | UNVERIFIED: navigation artifact name must be re-verified; current Koin docs reference io.insert-koin:koin-compose-navigation3, see https://insert-koin.io/docs/reference/koin-compose/compose |
 | KOIN-02 | 35-41 | Koin package purposes plus full Android/iOS/Desktop support with experimental Web | DUP | DROP: split into KOIN-21–KOIN-22 | UNVERIFIED: package list not re-checked against current Koin docs |
-| KOIN-21 | 35-41 | Include koin-core, koin-compose, and koin-compose-viewmodel for the injection surface | GENERIC | DROP: model already knows (Opus test) | UNVERIFIED: package list not re-checked against current Koin docs |
-| KOIN-22 | 35-41 | Koin supports Android, iOS, and Desktop fully with Web experimental | GENERIC | DROP: model already knows (Opus test) | UNVERIFIED: not re-checked against current Koin docs |
+| KOIN-21 | 35-41 | Include koin-core, koin-compose, and koin-compose-viewmodel for the injection surface | GOTCHA | compose-architecture/references/dependency-injection.md#gotchas | restored (P9 probe): https://insert-koin.io/docs/reference/koin-compose/compose |
+| KOIN-22 | 35-41 | Koin supports Android, iOS, and Desktop fully with Web experimental | GOTCHA | compose-architecture/references/dependency-injection.md#gotchas | restored (P9 probe): https://insert-koin.io/docs/reference/koin-compose/compose |
 | KOIN-03 | 49-65 | Shared initKoin with platform config; Android Application wiring; iOS do-prefixed Swift call; Compose-managed alternative | DUP | DROP: split into KOIN-23–KOIN-26 | — |
 | KOIN-23 | 49-65 | Start Koin once from a shared initKoin with an optional platform config lambda | RULE | compose-architecture/references/dependency-injection.md#setup | ✓ landed |
 | KOIN-24 | 49-65 | Wire androidContext and androidLogger in the Android Application class | GENERIC | DROP: model already knows | — |
@@ -852,7 +852,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | MTRL-04 | 58-70 | Color-role pairing table (primary/onPrimary through error/onError containers) | RULE | DROP: optional depth — android/skills styles | — |
 | MTRL-05 | 73-75 | Always use the matching on* color; never mix unrelated pairs; paired tonal palettes guarantee 3:1+ contrast | DUP | DROP: split into MTRL-30–MTRL-31 | — |
 | MTRL-30 | 73-75 | Always use the matching on* color for text and icons on a container | GENERIC | DROP: model already knows | — |
-| MTRL-31 | 73-75 | Correctly paired tonal palettes guarantee 3:1+ contrast | GENERIC | DROP: model already knows (Opus test) | — |
+| MTRL-31 | 73-75 | Correctly paired tonal palettes guarantee 3:1+ contrast | GOTCHA | compose-ui/references/design-system.md#gotchas | restored (P9 probe): https://m3.material.io/styles/color/roles |
 | MTRL-06 | 79-83 | Material color Do/Don't: matching pairs, colorScheme over hex, both-themes testing | DUP | DROP: split into MTRL-35–MTRL-37 | — |
 | MTRL-35 | 79-83 | Pair container colors with matching content colors | GENERIC | DROP: model already knows | — |
 | MTRL-36 | 79-83 | Read colors from colorScheme instead of hardcoding hex | DUP | DROP: dup of ACC-15 | — |
@@ -1252,7 +1252,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | ID | Lines | Item | Class | Destination | Evidence |
 |---|---|---|---|---|---|
 | RES-01 | 5-20 | Android R versus CMP Res resource-access mapping table | API | DROP: tutorial code | — |
-| RES-02 | 23-27 | Res import convention ({group}.{module}.generated.resources.Res with per-accessor imports) | GENERIC | DROP: model already knows | — |
+| RES-02 | 23-27 | Res import convention ({group}.{module}.generated.resources.Res with per-accessor imports) | GOTCHA | compose-ui/references/resources.md#imports | restored (P9 probe): https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html |
 | RES-03 | 31-47 | composeResources layout plus qualifier combination plus unqualified fallback | DUP | DROP: split into RES-26–RES-28 | — |
 | RES-26 | 31-47 | Lay out shared resources under composeResources per source set | GENERIC | DROP: model already knows | — |
 | RES-27 | 31-47 | Combine qualifiers with hyphens for locale, theme, and density | DUP | DROP: covered by CMP-05 (kept in EXTERNAL_LEDGER) | — |
@@ -1262,13 +1262,13 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | RES-06 | 73-79 | painterResource covers raster and vector drawables; raster-only and vector-only APIs stay specialized | DUP | DROP: split into RES-29–RES-30 | — |
 | RES-29 | 73-79 | Prefer painterResource as the primary drawable API | GENERIC | DROP: model already knows (Opus test) | — |
 | RES-30 | 73-79 | Reserve imageResource and vectorResource for raster-only and vector-only reads | GENERIC | DROP: model already knows | — |
-| RES-07 | 83-92 | Material Symbols XML icon pipeline: Android XML variant into drawable/, fillColor black, tint removed, runtime tint via ColorFilter | RULE | compose-ui/references/resources.md#icons | ✓ landed |
+| RES-07 | 83-92 | Material Symbols XML icon pipeline: Android XML variant into drawable/, fillColor black, tint removed, runtime tint via ColorFilter | RULE | compose-ui/references/resources-media.md#icons | ✓ landed |
 | RES-08 | 98-103 | String/template/array/plural XML-to-API table (composable plus suspend accessors) | API | DROP: tutorial code | — |
 | RES-09 | 122-123 | Resource string rules: no @/? escaping, plural count-plus-args semantics, quantity set | DUP | DROP: split into RES-31–RES-33 | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-31 | 122-123 | Skip @ and ? escaping in CMP strings unlike Android | GOTCHA | DROP: optional depth — string-escaping minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-32 | 122-123 | Pass count for plural selection plus format arguments separately | GOTCHA | DROP: optional depth — plural minutiae | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-33 | 122-123 | Cover all plural quantities including zero, few, and many | DUP | DROP: covered by CMP-15 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
-| RES-10 | 126-140 | Font() is composable in CMP so Typography construction must be composable too | GOTCHA | compose-ui/references/resources.md#fonts | UNVERIFIED: not re-checked against current CMP resources docs · ✓ landed |
+| RES-10 | 126-140 | Font() is composable in CMP so Typography construction must be composable too | GOTCHA | compose-ui/references/resources-media.md#fonts | UNVERIFIED: not re-checked against current CMP resources docs · ✓ landed |
 | RES-11 | 146-159 | Raw-file access through Res.readBytes and decode helpers plus platform URIs through Res.getUri; CMP 1.7+ packs resources into Android assets | DUP | DROP: split into RES-34–RES-37 | UNVERIFIED: 1.7 floor and SVG-except-Android not re-checked against current docs |
 | RES-34 | 146-159 | Read raw files with suspend Res.readBytes | DUP | DROP: covered by CMP-09 (kept in EXTERNAL_LEDGER) | UNVERIFIED: not re-checked against current CMP resources docs |
 | RES-35 | 146-159 | Decode raw bytes with the bitmap, vector, and SVG helpers | DUP | DROP: covered by CMP-21 (kept in EXTERNAL_LEDGER) | UNVERIFIED: SVG-except-Android not re-checked against current docs |
@@ -1368,7 +1368,7 @@ Destination format: `<skill>/<file>#<section>`, e.g. `compose-data/references/pa
 | TEST-09 | 144-160 | Fake repositories (not mocks) with success/failure control via shouldThrow | DUP | DROP: dup of brief §9.2 | — |
 | TEST-10 | 164 | CMP common UI testing uses runComposeUiTest not Android JUnit TestRule | DUP | DROP: covered by CMP-67 (kept in EXTERNAL_LEDGER) | UNVERIFIED: runner name not re-checked against current CMP testing docs |
 | TEST-11 | 166-173 | UI test targets: field-entry flows, submit enablement, error visibility, placeholder/content swap, refresh preservation, critical-control a11y labels | DUP | DROP: split into TEST-22–TEST-27 | — |
-| TEST-22 | 166-173 | UI-test critical field-entry flows | GENERIC | DROP: model already knows | — |
+| TEST-22 | 166-173 | UI-test critical field-entry flows | GENERIC | DROP: already covered in kit (compose-feature/references/ui-testing.md scope line); no new rule per P9 probe | — |
 | TEST-23 | 166-173 | UI-test submit enable and disable behavior | DUP | DROP: dup of brief §9.6 | — |
 | TEST-24 | 166-173 | UI-test error visibility | DUP | DROP: dup of brief §9.6 | — |
 | TEST-25 | 166-173 | UI-test loading placeholder and content swap | DUP | DROP: dup of brief §9.6 | — |

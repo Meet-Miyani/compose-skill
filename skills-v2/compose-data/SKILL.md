@@ -1,6 +1,6 @@
 ---
 name: compose-data
-description: Owns repositories, data sources and mapping for Compose and Compose Multiplatform apps: DTO to domain to UiModel boundaries, Ktor clients and bearer auth, WebSocket and SSE, Room, DataStore, Paging 3, offline-first and data-layer tests. Use when writing or reviewing a repository, data source, DTO, mapper, HttpClient, bearer token, WebSocket, SSE, Room DAO, migration, DataStore, PagingSource, RemoteMediator, offline cache or MockEngine test. Do NOT use for ViewModel or UI wiring (compose-feature), composables (compose-ui), the MVI contract or error tiers (compose-architecture), or Gradle modules (compose-project).
+description: Owns repositories, data sources and mapping for Compose and Compose Multiplatform apps: DTO to domain to UiModel boundaries, Ktor clients and bearer auth, WebSocket and SSE, Room, DataStore, Paging 3, offline-first and data-layer tests. Use when writing or reviewing a repository, data source, DTO, mapper, HttpClient, bearer token, WebSocket, SSE, Room DAO, migration, DataStore, PagingSource, RemoteMediator, offline cache or MockEngine test. Do NOT use for ViewModel or UI wiring (compose-feature), composables (compose-ui), the MVI contract or error tiers (compose-architecture), Gradle modules (compose-project), or commonMain vs platform splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---
@@ -16,8 +16,8 @@ The data layer is a boundary guard, not a pass-through. Every wire type stops he
 ### Validate-before-you-answer contract
 
 1. **Verify, do not recall.** Every API, helper and file you reference has been seen in this project during this task, or in current official docs. A plausible name is not a verified one. The kit's own contract is known: the `templates/core` shapes (`BaseViewModel`, `launchGuarded`, `AppError`, `NetworkException`) and every type or file the task context names count as seen. Never call an invented third-party method.
-2. **Check the question before answering it.** Read the code, check the non-negotiables below, answer **yes or no first** with evidence (file path, rule number, doc URL).
-3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete.
+2. **Check the question before answering it.** Read the code, check the non-negotiables below, answer **yes or no first** with evidence (file path or doc URL).
+3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete. Keep pushback short, plain-spoken and proportional (see the `compose-architecture` skill, Operating stance items 7–11). Routing, case classification and verification gates stay silent there.
 4. **Unverifiable means say so.** Say what you would need to check. Never present a guess as a fact.
 5. **Fresh docs before new library code.** Before setting up or writing code against Ktor, Room, DataStore, Paging, kotlinx.serialization or any new SDK: read the version in `gradle/libs.versions.toml`, read the **current official docs** for that version, then write. Unreachable docs means marking the code unverified. The full contract lives in the `compose-architecture` skill.
 
@@ -36,13 +36,13 @@ Rules 1–10 are **non-negotiables**. Rule 11 is a **default**: a recorded proje
 
 1. **DTOs and entities stay `internal` to the data layer.** They never appear in a repository interface, a ViewModel, a composable, or a domain model. The mapper is required even when the fields are identical today. *Prevents:* a wire rename becoming a UI change.
 2. **Domain models carry `kotlin.time.Instant`, never wire strings, and no serialization annotations.** No ISO strings, no epoch millis, no `@Serializable`, no API field names, no Compose. *Prevents:* hot-path parsing on every bind.
-3. **DTO-to-domain mapping is mandatory and pure; domain-to-UiModel mapping follows the M-11 rule.** Every aggregate maps DTO to domain with one pure `toDomain()` in `data/remote/mapper/`. Domain to UiModel happens only when an M-11 trigger fires — see the `compose-architecture` skill (`references/naming-and-packages.md`, "UiModel triggers (M-11)"), which owns the triggers; this skill does not restate them. *Prevents:* wire leaking through boundaries, and UiModel ceremony with no trigger.
+3. **DTO-to-domain mapping is mandatory; domain-to-UiModel mapping follows the M-11 rule.** Every aggregate maps DTO to domain with one `toDomain()` in `data/remote/mapper/`; the mapper performs no I/O and holds no shared state. Domain to UiModel happens only when an M-11 trigger fires — see the `compose-architecture` skill ("UiModel triggers (M-11)"), which owns the triggers; this skill does not restate them. *Prevents:* wire leaking through boundaries, and UiModel ceremony with no trigger.
 4. **A missing field never becomes a valid business value.** Preserve absence (`null`) or drop the record. Never substitute "now", zero, an empty string, or an empty-but-valid default. Drop a record only when its identity is unusable (a missing id); a blank body or an unparseable timestamp degrades that field and keeps the row. *Prevents:* silent loss of a record the user needed.
 5. **Transport failures propagate to `launchGuarded`. No `catch` in a repository or data source swallows them.** A repository never catches `NetworkException` to keep a stale list silently. The ViewModel's `onError` decides the tier. *Prevents:* stale data with no message and no retry.
 6. **`PagingData` is a separate `Flow`, never a `UiState` field.** Copying state re-emits the list and it jumps to the top. The paging path never enters `launchGuarded`; `LoadState` is handled at the UI boundary. *Prevents:* scroll-reset and swallowed page failures.
-7. **A detail destination fetches by identity from the key, never only from an in-memory cache.** Process death restores the destination with a cold cache; a key that resolves only to `null` is broken on restore. *Prevents:* destinations that are broken on restore.
+7. **A detail destination fetches by identity from the key.** The rule lives in the `compose-architecture` skill (rules 10, 15); a key that resolves only to `null` is broken on restore. *Prevents:* destinations that are broken on restore.
 8. **`expectSuccess = true` on the Ktor client.** Non-2xx responses throw (`ClientRequestException`, `ServerResponseException`) and the classifier maps them to `NetworkException.Http`. Manual per-call status inspection is error-tossing. *Prevents:* per-call status checks that hide the error path.
-9. **`commonMain` never imports `java.*`, `android.*`, or Android-only artifacts.** Time is `kotlin.time.Instant`; storage paths come from the platform source sets. Say the platform next to every data API that is Android-only. *Prevents:* shared code that compiles on one target only.
+9. **Shared-code imports live in the `compose-ui` skill (rule 11).** Say the platform next to every data API that is Android-only. *Prevents:* shared code that compiles on one target only.
 10. **One DataStore instance per file, injected as a Koin `single`. Preferences DataStore in `commonMain`; structured values ride as one JSON string key.** Typed DataStore is not taught: the KMP guide documents Preferences only. Never point Desktop storage at the shared temp directory. *Prevents:* store corruption and Android-only storage in shared code.
 11. **Repository reads name their async contract (default).** `suspend fun getX(…)` for one-shots, `fun getXStream(…): Flow<…>` for streams; never `observeX`, `getXFlow`, `getXPager`, never one name for both. Owned by the `compose-architecture` skill (rule 12); the detail lives there. *Prevents:* async-contract confusion.
 
@@ -86,11 +86,11 @@ A paged list over a changing network source uses `RemoteMediator` plus Room; the
 | "I'll keep the timestamp as a string in the domain; parsing is cheap." | No. Rule 2: domain carries `Instant`. Every card re-parses it on every bind. |
 | "I'll default the missing reminder to now so the field is never null." | No. Rule 4: absence stays `null`. "Now" is a fabricated business value. |
 | "I'll catch `NetworkException` in the repository and keep the stale list." | No. Rule 5: failures propagate to `launchGuarded`. Stale with no retry is silent data loss. |
-| "I'll map the timeout to `isMissing` so the empty state shows." | No. Failure and business state are separate fields; collapsing discards the failure. |
+| "I'll map the timeout to `isMissing` so the empty state shows." | No. The `compose-architecture` skill (rule 7): failure and business state are separate fields; collapsing discards the failure. |
 | "I'll put `PagingData` in `UiState` so everything is in one place." | No. Rule 6: a separate `Flow`. State copies re-emit and the list jumps. |
 | "I'll resolve the detail note from the cached list; it is faster." | No. Rule 7: fetch by identity. The cache is cold after restore. |
 | "I'll check the status code at each call site for control." | No. Rule 8: `expectSuccess = true`. Per-call inspection is error-tossing. |
-| "I'll use `java.time` in `commonMain`; it is the same API." | No. Rule 9: `kotlin.time.Instant`. `java.*` never appears in shared code. |
+| "I'll use `java.time` in `commonMain`; it is the same API." | No. The `compose-ui` skill (rule 11): `kotlin.time.Instant`. `java.*` never appears in shared code. |
 | "I'll add a `NoteUiModel` plus mapper for consistency." | No. Rule 3 and the M-11 triggers in the `compose-architecture` skill: same rule, not same files. Name the trigger or skip the pair. |
 | "This method probably exists on the client builder." | Stop and verify now (stance item 1). Inventing a third-party API does not compile. |
 
@@ -101,7 +101,7 @@ A paged list over a changing network source uses `RemoteMediator` plus Room; the
 - [ ] No public `*Dto` or `*Entity`: `grep -rn "public .*Dto\|^class .*Dto\|^data class .*Dto" --include='*.kt' <data-root>` shows only `internal` declarations.
 - [ ] No wire strings in domain: `grep -rn "String.*[Aa]t\b\|.*Date.*String\|@SerialName\|@Serializable" --include='*.kt' <domain-model-root>` returns nothing.
 - [ ] No swallowed transport failure: `grep -rn "catch.*NetworkException" --include='*.kt' <data-root>` returns nothing.
-- [ ] Every `Flow`-returning repository read ends in `Stream`; no `observeX`, `getXFlow`, `getXPager`: yes or no.
+- [ ] Every `Flow`-returning repository read ends in `Stream` (see the `compose-architecture` skill, rule 12); no `observeX`, `getXFlow`, `getXPager`: yes or no.
 - [ ] Every `commonMain` data file is free of `^import (java|android)\.`: yes or no.
 - [ ] Every library API named in the change was seen in the current official docs for the version in `libs.versions.toml`: yes or no.
 - [ ] Every UiModel added names its M-11 trigger in a one-line comment: yes or no.

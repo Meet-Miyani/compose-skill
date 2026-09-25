@@ -89,6 +89,7 @@ Test validators and calculators as pure functions next to the function: parsing,
 Platform tests (shell wiring, deep-link entry, nav-host integration, share/clipboard/haptic bindings, lifecycle edges, keyboard and safe-area regressions) and Compose UI tests (field-entry flows, submit gating, error visibility, placeholder/content swap, refresh preserves content, accessibility labels) run on-device for real platform behavior; semantic assertions are the default, visual goldens cover a few high-value screens.
 
 ## Gotchas
+- A platform binding verified on one target is unverified on the others; run binding tests on every target the project ships. (SKL-63)
 - A `runTest` without `setMain` leaves `viewModelScope` on a live dispatcher; the test asserts before the load runs.
 - Reading `state.value` before `advanceUntilIdle()` reads the loading frame; advance first, then read.
 - Collecting effects after `onAction` misses the emission; launch the collector before driving actions.

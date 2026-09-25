@@ -34,6 +34,7 @@ SKILL.md rule 1: a `:feature:tags` build file applies the feature plugin and dec
 
 ## Gotchas
 
+- The root build file declares plugins with `apply false` only; shared setup ships as convention plugins, never `allprojects`/`subprojects` blocks. Sources: the JetBrains KMP-App-Template root `build.gradle.kts` (seven `alias(...) apply false` lines, no applied plugin) https://raw.githubusercontent.com/Kotlin/KMP-App-Template/main/build.gradle.kts and the Gradle sharing-build-logic guide ("Avoid cross-project configuration using `subprojects` and `allprojects`") https://docs.gradle.org/current/userguide/sharing_build_logic_between_subprojects.html (GRAD-05)
 - Built-in Kotlin collides with the `kotlin-android` plugin: remove it from module files, root file, and catalog together. https://github.com/android/skills/blob/main/build-system/agp/agp-9-upgrade/references/android/build/migrate-to-built-in-kotlin.md
 - Register extra Kotlin sources only under `android.sourceSets` kotlin directories; `kotlin.sourceSets` / java-directory entries stop working on AGP 9. Same URL as above.
 - App R class compiles non-final on AGP 9: `switch` over R fields becomes chained `if`s. https://github.com/android/skills/blob/main/build-system/agp/agp-9-upgrade/references/android/build/releases/agp-9-0-0-release-notes.md

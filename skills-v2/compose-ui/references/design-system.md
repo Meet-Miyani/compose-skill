@@ -78,6 +78,7 @@ Contents:
 
 ## Gotchas
 
+- Pair colors only in their intended roles (`on-primary` on `primary`, never crossed); intended pairs hold a minimum 3:1 contrast, crossed pairs break it. Source: https://m3.material.io/styles/color/roles (MTRL-31)
 - Hold dismiss closed during in-flight mutations with the block-dismiss guard; a swipe that cancels a note save loses the write. (brief §11.6)
 - A slot-scope receiver on an internal layout leaks the layout contract to every caller of the notes card. (CB-53)
 

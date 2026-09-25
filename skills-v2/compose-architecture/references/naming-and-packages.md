@@ -133,7 +133,7 @@ Gotcha: an inline fully qualified name hides a layer violation from review; a to
 
 ## Extraction, layout, and size review triggers
 
-Extract a reusable UI component only with real reuse across screens (CLEAN-35). Extract only meaningful boundaries; too many trivial composables fragment reading (ANTI-15). Two shapes never earn extraction (CLEAN-37, CLEAN-38): one-line wrappers around `Text` or `Spacer`, and wrappers that only forward modifiers.
+Extract a reusable UI component only with real reuse across screens (CLEAN-35). An extracted component carries a stable API over a meaningful boundary (CLEAN-36); too many trivial composables fragment reading (ANTI-15). Two shapes never earn extraction (CLEAN-37, CLEAN-38): one-line wrappers around `Text` or `Spacer`, and wrappers that only forward modifiers.
 
 Scale the file layout with the destination (ARCH-20): one file suits a small screen; split contract, ViewModel, screen, and route for a medium one; extract collaborators for a large one. No nested holders per card by default.
 

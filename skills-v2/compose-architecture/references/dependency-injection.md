@@ -127,6 +127,8 @@ The composition root's `adapter/` package holds every host implementation of a `
 
 ## Gotchas
 
+- The injection surface is `koin-core` plus `koin-compose` (base Compose API) plus `koin-compose-viewmodel` (ViewModel injection); all three are multiplatform, so CMP declares them in `commonMain`. Source: https://insert-koin.io/docs/reference/koin-compose/compose (KOIN-21)
+- Koin Compose supports Android, iOS, and Desktop fully; Web is experimental, so never promise Web parity in shared DI setup. Source: https://insert-koin.io/docs/reference/koin-compose/compose (KOIN-22)
 - Two `@InjectedParam` values of the same type silently swap; wrap two or more values in one `Params` class. (§6.3)
 - A broad `@ComponentScan` in two data modules double-registers providers; prefer explicit `@Configuration` providers in `:data:` modules. (§6.2)
 - `koinInject()` in a Screen compiles and hides the dependency from the Route signature; keep Screens Koin-free so every dependency is visible at the call site. (SKILL.md rule 14)

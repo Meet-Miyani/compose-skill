@@ -21,6 +21,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 fail=0
 report() { printf '%s:%s: %s\n' "$1" "$2" "$3"; fail=1; }
 
@@ -83,6 +88,8 @@ check_gradle_dirs() {
     [ -n "$files" ] || continue
     while IFS= read -r file || [ -n "$file" ]; do
       [ -n "$file" ] || continue
+      frel="${file#$ROOT/}"
+      composekit_skip_path "$frel" && continue
       check_gradle_file "${file#$ROOT/}" "$scope"
     done <<< "$files"
   done
@@ -100,6 +107,7 @@ check_import_dirs() {
       file="${result%%:*}"; rest="${result#*:}"
       lineno="${rest%%:*}"; content="${rest#*:}"
       rel="${file#$ROOT/}"; imp="${content#import }"; imp="${imp%% *}"
+      composekit_skip_path "$rel" && continue
       tail="${rel#$d/}"; ownseg="${tail%%/*}"
       if [ "$scope" = "feature" ]; then
         seg="$(printf '%s\n' "$content" | sed -n -e "s/^import $BASE_ESC\\.feature\\.\\([A-Za-z0-9_][A-Za-z0-9_]*\\).*/\\1/p")"

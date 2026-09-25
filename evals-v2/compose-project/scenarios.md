@@ -93,7 +93,7 @@ Load this file during M2 baseline runs and P8 skill writing.
 - Treats the guard baseline as a failure to fix by rewriting instead of a baseline to burn down incrementally.
 **Rubric:**
 1. Says no to the immediate full rewrite first, with the reason, before offering any plan. [STANDARDS §6]
-2. Classifies the project as existing-project case 2 and states the never-mix-two-patterns bar for the change at hand. [STANDARDS §6 case 2]
+2. Treats the project as a coherent different architecture without printing a case label: new code follows the feature's own pattern and two patterns never mix in one feature. [STANDARDS §6 case 2]
 3. Produces an incremental adoption plan: guards first in WARN mode, then convention plugins, then the base contract for new features. [SPEC §5] [kit]
 4. Requires the guards to run in WARN mode and reach a clean baseline before any of them becomes blocking. [SPEC §5 seed 4]
 5. Never rewrites working features to the kit as a side effect of another task. [SPEC §5]

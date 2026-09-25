@@ -7,12 +7,12 @@ Load this file during M2 baseline runs and P3 skill writing.
 **Hypothesised baseline defects:**
 - Starts writing code or naming libraries without routing to an owning skill first.
 - Routes to a data or UI skill for what is a full vertical slice (repository plus ViewModel plus UI plus navigation plus DI plus tests).
-- Never states the existing-project case, so the kit-vs-project-pattern decision stays implicit.
+- Leaves the kit-vs-project-pattern decision unsettled, so the plan mixes kit rules with project patterns.
 - Describes the plan in tutorial terms instead of the owning skill's workflow steps.
 **Rubric:**
-1. Names `compose-feature` as the owning skill before any code or exploration plan [SPEC §1 Workflow] [kit]
-2. States existing-project case 1 (new feature work follows the kit strictly) explicitly [STANDARDS §6 case 1; SPEC §1 Workflow]
-3. Names `compose-feature` as the owner and gives only the plan, deferring file-level implementation to that skill [SPEC §1 Workflow]
+1. Decides `compose-feature` owns the slice silently and leads with the plan, without printing routing, skill names, or case labels [SPEC §1 Workflow] [kit]
+2. Treats the work as new-feature work that follows the kit strictly, without stating a case number [STANDARDS §6 case 1; SPEC §1 Workflow]
+3. Gives only the plan, deferring file-level implementation to the owning skill's workflow [SPEC §1 Workflow]
 4. Keeps the new tags state out of `:feature:catalog` and out of either feature's private store, pointing at the shared `:data:` owner [SPEC §1 seed 2]
 5. Requires the slice to follow the MVI contract (`BaseViewModel`, single `onAction` entry, one `Contract.kt`) [SPEC §1 seed 4] [kit]
 6. Requires the slice to use the five feature packages and no other top-level package [SPEC §1 seed 10]
@@ -64,8 +64,8 @@ Load this file during M2 baseline runs and P3 skill writing.
 - Treats the existing files as permission to copy the old pattern into the new screen or vice versa.
 - Starts scaffolding without challenging the request itself.
 **Rubric:**
-1. Answers no first, with the violated rule and the project evidence, before offering any build plan [SPEC §1 seed 14]
-2. Cites the existing-project case 2 bar: follow the feature's own pattern and never mix two patterns in one feature [STANDARDS §6 case 2; SPEC §1 Workflow]
+1. Answers no first, with a plain reason and the project evidence, before offering any build plan [SPEC §1 seed 14]
+2. Follows the coherent-project bar without printing a case label: build in the feature's own pattern and never mix two patterns in one feature [STANDARDS §6 case 2; SPEC §1 Workflow]
 3. States the project diverges from the kit and refuses migration-by-stealth inside the feature slice [STANDARDS §6 case 2; SPEC §1 Workflow]
 4. Gives the correct approach: build the screen in the feature's MVVM/Hilt pattern, and propose kit migration as a separate task [STANDARDS §6 case 2; SPEC §1 Workflow]
 5. Rejects precedent-as-permission: copying a neighboring file that violates a non-negotiable copies the defect [STANDARDS §6 case 4; SPEC §1 seed 14]

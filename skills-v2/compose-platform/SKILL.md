@@ -1,6 +1,6 @@
 ---
 name: compose-platform
-description: Owns platform splits for Compose Multiplatform apps: places declarations in commonMain, chooses expect/actual vs interface plus DI, wires host adapters and ports, and validates iOS/Swift interop, desktop and web targets, and platform lifecycle. Use when touching commonMain, expect, actual, iosMain, Swift, SKIE, Flow to Swift, desktop, wasm, web target, or platform-specific code. Do NOT use for Gradle target setup (compose-project).
+description: Owns platform splits for Compose Multiplatform apps: places declarations in commonMain, chooses expect/actual vs interface plus DI, wires host adapters and ports, and validates iOS/Swift interop, desktop and web targets, and platform lifecycle. Use when touching commonMain, expect, actual, iosMain, Swift, SKIE, Flow to Swift, desktop, wasm, web target, or platform-specific code. Do NOT use for routing or architecture (compose-architecture), feature slices (compose-feature), composables or resources (compose-ui), repositories or persistence (compose-data), or Gradle target setup (compose-project).
 metadata:
   last-reviewed: 2026-09-25
 ---
@@ -16,8 +16,8 @@ Shared code is a promise to every target. Code that compiles on Android and brea
 ### Validate-before-you-answer contract (condensed; full text in the `compose-architecture` skill)
 
 1. **Verify, do not recall.** Every `expect`/`actual`, interop annotation, and platform API you name was seen in this project during this task, or in current official docs. A plausible interop name is not a verified one. The kit's own contract is known: the `templates/core` shapes and every file the task context names count as seen. Never call an invented platform method.
-2. **Check the question before answering it.** Read the source sets, check the non-negotiables, answer **yes or no first** with evidence (file path, rule number, doc URL).
-3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete.
+2. **Check the question before answering it.** Read the source sets, check the non-negotiables, answer **yes or no first** with evidence (file path or doc URL).
+3. **Say no when the answer is no.** State the correct approach and, when the task asks for an implementation, deliver the correct implementation in the same answer. A refusal without it is incomplete. Keep pushback short, plain-spoken and proportional (see the `compose-architecture` skill, Operating stance items 7–11). Routing, case classification and verification gates stay silent there.
 4. **Unverifiable means say so.** Say what you would need to check. Never present a guess as a fact.
 5. **Fresh docs before new platform code.** Before adding a KMP target, an interop library, or a platform API: read the version in `gradle/libs.versions.toml`, read the **current official docs** for that version, then write. "It compiles on Android" is never evidence for `commonMain`.
 
@@ -25,7 +25,7 @@ Shared code is a promise to every target. Code that compiles on Android and brea
 
 | Task | Use instead |
 |---|---|
-| Route first, choose the owning skill, state the existing-project case | the `compose-architecture` skill, before anything below |
+| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
 | Gradle target setup, convention plugins, version catalog, CI | the `compose-project` skill |
 | ViewModels, Contracts, repositories, Ktor, Room, DataStore, Paging | the `compose-feature` skill and the `compose-data` skill |
 | Composables, stability, resources, images | the `compose-ui` skill |
@@ -36,7 +36,7 @@ Rules 1–7 are **non-negotiables**. Rules 8–9 are **defaults**: a recorded pr
 
 1. **ViewModels, Contracts, and repository interfaces live in `commonMain`.** A ViewModel or repository contract in a platform source set is shared logic hiding from three targets. Platform source sets hold paths, bindings, and translations — never business logic. *Prevents:* logic that three targets cannot reach.
 2. **`commonMain` never imports `java.*`, `javax.*`, `android.*`, `LocalContext`, or `R`.** Time is `kotlin.time.Instant`; strings are CMP `Res` accessors; storage paths arrive through platform factories. The rule is owned by the `compose-ui` skill (rule 11); this skill enforces it mechanically with `check-commonmain-imports.sh`. *Prevents:* shared code that compiles on Android only.
-3. **Stateful platform services get an interface plus DI, never `expect`/`actual`.** Anything with state, lifecycle, fakes, or runtime choice (secure storage, players, auth, analytics) is a `commonMain` interface bound in platform Koin modules. `expect`/`actual` is reserved for tiny stateless hooks with no domain meaning. *Prevents:* untestable platform singletons.
+3. **Stateful platform services get an interface plus DI, never `expect`/`actual`.** Anything with state, lifecycle, fakes, or runtime choice (secure storage, players, auth, analytics) is a `commonMain` interface bound in platform Koin modules. `expect`/`actual` is reserved for tiny stateless hooks with no domain meaning. Every platform-provided binding (e.g. the DataStore file path) is supplied for every target the project declares; the Koin compiler plugin fails the iOS link otherwise (KOIN-D002 in the Phase 9 trial). *Prevents:* untestable platform singletons.
 4. **No `withTransaction` in `commonMain`.** Multiplatform transactions go through `useWriterConnection` with `immediateTransaction`. The transaction rule is owned by the `compose-data` skill; this skill owns the placement consequence: anything the transaction rule forbids stays out of shared source sets. *Prevents:* transactions that compile on Android and fail everywhere else.
 5. **One DataStore instance per file, with platform path factories.** The store shape is owned by the `compose-data` skill (Preferences in `commonMain`, structured values as one JSON string key, typed DataStore not taught). This skill owns the seam: file paths are defined per platform source set and passed into the `commonMain` factory; Desktop storage uses an app-specific folder, never the shared temp directory. *Prevents:* two writers to one settings file and desktop data in a temp folder.
 6. **Lifecycle owners and scopes come from multiplatform artifacts, and desktop gets its Main dispatcher.** `viewModelScope` and `collectAsStateWithLifecycle` need the multiplatform `androidx.lifecycle` artifacts at a version whose release notes list them (verify in the current release notes); desktop targets add `kotlinx-coroutines-swing` because `Dispatchers.Main.immediate` is unavailable there by default. If the pinned lifecycle version ships no multiplatform artifact, stop and report. *Prevents:* scopes that silently never run on desktop.

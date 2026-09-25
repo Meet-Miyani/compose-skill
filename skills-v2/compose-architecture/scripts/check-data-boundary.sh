@@ -28,6 +28,11 @@ if [ -f "$ROOT/.composekit.conf" ]; then
   . "$ROOT/.composekit.conf"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
+  . "$SCRIPT_DIR/lib/composekit-skip.sh"
+fi
+
 search_kt() {
   pat="$1"
   dir="$2"
@@ -70,6 +75,7 @@ for d in $SEARCH_DIRS; do
     done
     if [ -z "$name" ]; then name="Dto"; fi
     rel="$(relpath "$path")"
+    composekit_skip_path "$rel" && continue
     printf '%s:%s: public DTO/Entity must be internal: %s\n' "$rel" "$num" "$name"
     fail=1
   done < <(search_kt "$DTO_PAT" "$dir")
@@ -84,6 +90,7 @@ for d in $SEARCH_DIRS; do
     esac
     imp="${text#import }"
     rel="$(relpath "$path")"
+    composekit_skip_path "$rel" && continue
     printf '%s:%s: domain must not import infrastructure: %s\n' "$rel" "$num" "$imp"
     fail=1
   done < <(search_kt "$IMP_PAT" "$dir")
@@ -105,6 +112,7 @@ for d in $SEARCH_DIRS; do
     done
     if [ -z "$fname" ]; then fname="timestamp"; fi
     rel="$(relpath "$path")"
+    composekit_skip_path "$rel" && continue
     printf '%s:%s: domain timestamp must be Instant, not String: %s\n' "$rel" "$num" "$fname"
     fail=1
   done < <(search_kt "$STR_PAT" "$dir")

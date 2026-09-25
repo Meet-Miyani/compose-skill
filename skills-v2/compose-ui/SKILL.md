@@ -1,6 +1,6 @@
 ---
 name: compose-ui
-description: Writes and reviews composables for Jetpack Compose and Compose Multiplatform: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable functions, recomposition or stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme or colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI contract, error tiers, or module-graph questions (compose-architecture), ViewModel or data work (compose-feature, compose-data).
+description: Writes and reviews composables for Compose and CMP: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable code, recomposition, stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme, colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI, error tiers, or module graph (compose-architecture), ViewModel or data work (compose-feature, compose-data), Gradle or module work (compose-project), or expect/actual splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---
@@ -17,17 +17,18 @@ You reason about scope, not vibes. "Wrapping it in `remember`" and "adding `@Imm
 
 1. **Verify, do not recall.** Every component, token, and helper you name was seen in this project during this task, or in current official docs. Name an unverified need as an open gap, never call it.
 2. **Check the question before answering it.** Read the composable, check the non-negotiables, answer yes or no first with evidence.
-3. **Say no when the answer is no.** State the correct approach. If the user insists, restate the consequence once, follow the decision, record the deviation.
+3. **Say no when the answer is no.** State the correct approach. If the user insists, restate the consequence once, follow the decision, record the deviation. Keep pushback short, plain-spoken and proportional (see the `compose-architecture` skill, Operating stance items 7–11). Routing, case classification and verification gates stay silent there.
 4. **Fresh docs before new library code.** Read `gradle/libs.versions.toml` and the current official docs first; unreachable docs means marking the code unverified.
 
 ## When NOT to use
 
 | Task | Use instead |
 |---|---|
-| Route first, choose the owning skill, state the existing-project case | the `compose-architecture` skill, before anything below |
+| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
 | Add, change or review a screen, destination or slice | the `compose-feature` skill |
 | Repositories, Ktor, Room, DataStore, Paging, offline-first | the `compose-data` skill |
 | `commonMain` sharing, `expect`/`actual`, iOS/Swift, desktop, web | the `compose-platform` skill |
+| New project or module, convention plugins, version catalog, CI, guards | the `compose-project` skill |
 | Navigation 3 API mechanics (scenes, decorators, deep-link recipes) | the android/skills `navigation-3` skill, if installed; optional depth only |
 | Compiler-report internals beyond the loop in `performance-diagnostics.md` | the skydoves `diagnosing-compose-stability` skill, if installed; optional depth only |
 
@@ -43,8 +44,8 @@ Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recor
 4. **[Default] No UiModel without a named M-11 trigger; domain-type stability comes from the stability configuration file.** Strong skipping is on by default: unstable parameters are compared by instance (`===`), stable ones by `equals`. Types from a module built without the Compose compiler are never inferred stable, so declare the domain-model packages and `kotlin.collections.*` in the stability configuration file (wired by the `compose-project` build-logic). That validity rests on immutable domain models: `val`s, read-only collections, no mutation after construction. `@Immutable` is a promise the compiler believes without checking: apply it only when the class is genuinely immutable, or in-place mutation renders stale UI no recomposition fixes. Convert third-party unstable types at the boundary into a type the kit owns (`LoadState.Error` holds a `Throwable`; present `AppError` instead). Never add a wrapper only for stability. *Prevents:* lost skipping and stale UI (brief F-16, F-17; M-11).
 5. **Colors come from theme tokens only; no hex literals in feature code.** A hardcoded badge color misses every theme change. *Prevents:* theme breakage the guard catches.
 6. **Reuse before writing: search the design-system module first. New shared components live in the design-system module, never in a feature.** Copy a component together with the conditions at its call site. *Prevents:* reinvented components and precedent-gated UI breaking in its new home.
-7. **Never clear or hide existing content during a refresh. Skeletons appear only for the cold load with a known layout; refresh keeps content with an indicator; a failed refresh keeps the items and surfaces the error with a Retry holding it.** *Prevents:* wiped content and trapped screens.
-8. **Every lazy list item has a stable key from domain identity plus a `contentType`; no heavy work runs in item scope.** Never the index; never allocate per item per tick. *Prevents:* scrambled row state and per-tick parsing.
+7. **Never clear or hide existing content during a refresh.** Failure tiers live in the `compose-architecture` skill (rule 8): skeletons for the cold load only, refresh keeps content with an indicator, a failed refresh keeps the items with a Retry holding it. *Prevents:* wiped content and trapped screens.
+8. **Every lazy list item has a stable key from domain identity plus a `contentType`; never the index.** Keep item scope light: hoist parsing and formatting out of item scope. *Prevents:* scrambled row state and per-tick parsing.
 9. **Every user-facing string is a resource, present in every locale. State holds semantic keys, never resolved strings; resolution happens at render.** *Prevents:* untranslated UI and locale drift the guard catches.
 10. **Branch panes on the received size class and apply WindowInsets exactly once per screen.** Panes mount through the Navigation 3 scene strategy so Back, deep link, and restore reach them; the detail leaf never reads window size. Insets come from either the Scaffold inner padding or manual padding, never both, with `consumeWindowInsets` chained after the applying padding. *Prevents:* unrestorable panes and double-offset content (AND-21, AND-23, AND-27, AND-72).
 11. **Code in `commonMain` never imports `java.*`, `android.*`, `LocalContext`, or `R`, and never names `Dispatchers.IO`.** A `java.time.Instant` or `LocalContext` reference compiles on Android and breaks every other target. Time is `kotlin.time.Instant`; strings are CMP `Res` accessors. `Dispatchers.IO` is JVM/Android-only and does not exist on Kotlin/Native; shared code defaults to `Dispatchers.Default` or takes the dispatcher as an injected constructor parameter. *Prevents:* shared code that compiles on Android only.
@@ -92,7 +93,7 @@ Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recor
 ## Verification
 
 - [ ] Only the Route references the ViewModel; the Screen takes state plus callbacks (`rg -n "ViewModel|koinViewModel|collectAsState" --glob '*Screen.kt' --glob '*Sheet.kt'` shows ViewModel reads only in `*Route.kt`).
-- [ ] No `rememberSaveable` mirror of a `UiState` field and no `LaunchedEffect` syncing two copies of one value: yes or no.
+- [ ] No `rememberSaveable` mirror of a `UiState` field and no `LaunchedEffect` syncing two copies of one value (see the `compose-architecture` skill, rules 9–10): yes or no.
 - [ ] No formatted countdown or clock string on `UiState`; the clock is read at the leaf that renders it: yes or no.
 - [ ] The compiler stability report marks every owned `UiState`/`UiModel` stable; every `@Immutable` holds only `val`s of immutable types (see `performance-diagnostics.md` for the loop).
 - [ ] `rg -n "Color\(0x" --glob '*.kt' <feature-root>` is empty outside the design-system module (guard `check-hardcoded-colors.sh`).
@@ -107,10 +108,12 @@ Load exactly one reference, only when needed. One level deep.
 - [state-reads-and-stability.md](references/state-reads-and-stability.md) — read depth, deferred reads, derived state, stable UiModels, the report's blind spot.
 - [ux-states.md](references/ux-states.md) — skeleton vs keep-content vs spinner, validation, disabled vs hidden.
 - [lists.md](references/lists.md) — keys, contentType, item-scope work, grids, nesting, paging hookup.
-- [motion.md](references/motion.md) — animation API choice, shared elements, graphicsLayer, gestures.
+- [motion.md](references/motion.md) — animation API choice, graphicsLayer, gestures.
+- [shared-elements.md](references/shared-elements.md) — shared-element choice, keys, modifier order, overlay.
 - [accessibility.md](references/accessibility.md) — semantics, touch targets, contrast, actions, RTL.
 - [design-system.md](references/design-system.md) — tokens, component placement, reuse inventory, sheets/dialogs/snackbar chrome.
-- [resources.md](references/resources.md) — CMP `Res` vs Android `R`, qualifiers, locale parity, icons, fonts.
+- [resources.md](references/resources.md) — CMP `Res` vs Android `R`, qualifiers, locale parity, imports, maps.
+- [resources-media.md](references/resources-media.md) — icons, fonts, raw files and remote content.
 - [images.md](references/images.md) — Coil 3 setup and API choice, placeholders, caching, CMP placement.
 - [keyboard-and-focus.md](references/keyboard-and-focus.md) — focus on arrival, IME actions, dismiss rules.
 - [modifiers.md](references/modifiers.md) — modifier order, custom `Modifier.Node`, lambda (deferred-read) modifiers.
