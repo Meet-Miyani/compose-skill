@@ -1,0 +1,25 @@
+name: composekit guards
+
+# The guard job calls the run-checks.sh registry (SKILL.md rule 10),
+# never individual check scripts. Shape follows the official JetBrains
+# KMP-App-Template workflows (checkout plus JDK setup, then Gradle).
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  guards:
+    name: Guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 21
+      - name: composekit guards
+        run: bash scripts/composekit/run-checks.sh .

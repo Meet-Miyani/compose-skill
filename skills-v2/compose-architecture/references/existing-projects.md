@@ -36,6 +36,8 @@ MVVM: in a coherent MVVM project, write the notes screen in MVVM for the change 
 
 Result wrappers: in a project that uses `Result` wrappers or its own base class consistently, follow that shape for the change at hand. New kit work never adopts wrappers. (ARCH-19; SKILL.md rule 6)
 
+Koin flavours: new kit code uses the compiler plugin, where `@KoinViewModel` is `org.koin.core.annotation.KoinViewModel` (ruling M-13). Projects on the KSP flavour keep `org.koin.android.annotation.KoinViewModel` for the change at hand (STANDARDS §6 case 2).
+
 ## Pressure script
 
 Answer no first, with the violated rule and the project evidence. State the correct approach in the project's own pattern. Name the consequence in one sentence. (Stance item 3; SKILL.md rule 1)

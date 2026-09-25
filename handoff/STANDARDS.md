@@ -390,6 +390,46 @@ Some rules derive from a private production app (read-only source; see WORKER_RU
 
 ---
 
+## 8.5 Iteration and stopping rules (moderator; owner direction 2026-09-25, O-10)
+
+The sources behind these rules:
+
+- **Anthropic, "Skill authoring best practices"**
+  (https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices): evaluation-driven
+  development, "aim for instructions that work well with all" models, iteration based on observed real
+  usage, and degrees of freedom matched to fragility.
+- **Hamel Husain, "LLM evals FAQ"** (https://hamel.dev/blog/posts/evals-faq/): train/dev/test split,
+  "after many rounds, it may do well on the dev set but poorly on new examples. This is overfitting",
+  "Be wary of optimizing for high eval pass rates", error analysis first, and binary pass/fail over
+  Likert scales.
+
+The rules:
+
+1. **Error analysis before any fix.** Read the failing answers, then classify each failure:
+   - a kit defect: a rule is missing, wrong, ambiguous, or its wording backfires
+   - a rubric flaw: no answer can pass the item, or the item tests the wrong thing
+   - a model limit: API precision, compile-level slips, or truncation
+
+   Only kit defects change the kit. Only rubric flaws change the evals. Model limits are recorded.
+2. **Fix the class, not the case.** A fix must be a rule, an example or a loophole-closer that applies
+   beyond the failing scenario. Never add scenario-specific text; that is teaching the exam.
+3. **Dev and test sets are separate.** The gate scenarios are the dev set and may drive fixes. The
+   held-out set (`evals-v2/heldout.json`) is the test set: sealed, never read by the worker, never used
+   to change the kit. Only held-out numbers are quoted as "performance on new tasks".
+4. **Bounded rounds.** At most **two** fix rounds per gate for the primary targets (DeepSeek, Muse), and
+   at most **one** for other models (O-10). A round is justified only by a kit defect found through
+   rule 1. When no kit defect remains, stop, even below the bar, and record residuals.
+5. **Do not chase 100%.** A near-perfect dev score after several rounds is a warning sign of overfitting,
+   not a win. Check it against the held-out set.
+6. **Binary checks are primary.** Rubric items are pass/fail. The 1–10 quality score is a secondary
+   signal with measured noise (±2 per scenario). Never decide on a quality difference smaller than the
+   noise.
+7. **Judge alignment.** At M9, two graders score each packet, and the agreement rate is reported. Before
+   the README quotes numbers, the owner or the moderator spot-labels about 20 rubric items, and the
+   graders' agreement with those labels is reported.
+8. **Real usage beats the eval.** Observations from an agentic trial (a model working in a real project
+   with the skills installed) outrank single-shot gate results when the two disagree.
+
 ## 9. Quality bar checklist (the worker self-checks before every phase report)
 
 - [ ] Every non-negotiable has a reason and a *Prevents:* line.

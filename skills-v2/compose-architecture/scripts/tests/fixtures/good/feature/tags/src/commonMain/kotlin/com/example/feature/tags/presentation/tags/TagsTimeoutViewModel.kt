@@ -4,7 +4,7 @@ import com.example.core.mvi.BaseViewModel
 import com.example.feature.tags.domain.repository.TagsRepository
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 // GOOD regression fixture for check-error-handling.sh (b): catching
 // TimeoutCancellationException from our own withTimeout and translating it

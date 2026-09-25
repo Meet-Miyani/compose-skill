@@ -5,7 +5,7 @@ import com.example.core.mvi.BaseViewModel
 import com.example.feature.tags.domain.model.Tag
 import com.example.feature.tags.domain.repository.TagsRepository
 import kotlinx.coroutines.CancellationException
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 // BAD fixture for check-error-handling.sh: do not copy these patterns.
 // It trips all three rules: a guarded launch with no error handler,

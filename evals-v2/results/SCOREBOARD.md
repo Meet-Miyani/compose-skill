@@ -60,6 +60,11 @@ All 24 scenarios, 161 rubric items. Report: `2026-09-24-M2-baseline.md`.
 | compose-data | MiniMax M3 | 38% | **88%** (23/26) | 6.5 | held | 0 | same |
 | compose-data | Claude Opus 5.5, no kit | 72% (M2) | 69% (18/26) | 7.25 | **folded** | 0 | same |
 
+| compose-project + compose-platform | DeepSeek V4.1 Flash | 54% (M2) | **90%** (59/65) | **8.0** | 3/3 held | 0 | `handoff/reviews/phase-8.md` (gate-p8) |
+| compose-project + compose-platform | Muse Spark 1.3 | 56% (M2) | **93%** (61/65) | **7.0** | 3/3 held | 0 | same |
+| compose-project + compose-platform | MiniMax M3 | 30% | **87%** (57/65) | 6.3 | 3/3 held | 1 | same |
+| compose-project + compose-platform | Claude Opus 5.5, no kit | 72% (M2) | 61% (40/65) | 6.0 | **2/3** | 0 | same |
+
 The gate history for `compose-architecture` (the first attempt found defects, which were fixed):
 
 - run 1: DeepSeek 93%, Muse 93% (`…gate-p3-…`)
@@ -90,6 +95,10 @@ For `compose-data`, the gate passed on the first run. DeepSeek and Muse beat Opu
 quality. DATA-02 #7 was excluded because all five answers failed it; it was a rubric flaw, since
 rewritten. The "before" values for DeepSeek, Muse and Opus are their overall M2 baselines; MiniMax's is
 its blind no-kit run.
+
+For `compose-project` + `compose-platform`, the gate ran once, on 10 scenarios, and all three weak models
+beat Opus on quality. PLAT-01 #3 was excluded because all five answers failed it; it was a rubric flaw,
+since rewritten. The gate ran on the pre-fix skill, and M9 re-measures the final kit.
 
 ## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
 

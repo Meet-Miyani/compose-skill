@@ -3,7 +3,7 @@ package com.example.feature.tags.presentation.tags
 import com.example.core.mvi.BaseViewModel
 import com.example.feature.tags.domain.repository.TagsRepository
 import kotlinx.coroutines.CancellationException
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 
 // GOOD fixture for check-error-handling.sh (b): a CancellationException
 // catch that rethrows after comment lines, followed by a finally block.

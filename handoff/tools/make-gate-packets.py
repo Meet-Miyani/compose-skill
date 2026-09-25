@@ -31,7 +31,9 @@ Rules:
 - QUALITY (independent of the rubric): score each answer 1–10 as a senior staff mobile engineer
   reviewing a PR. Weigh: correctness (APIs real and used correctly, would compile), completeness
   (every needed file, nothing truncated or duplicated), architecture soundness, and NO
-  over-engineering (no abstraction without need). One line of justification each.
+  over-engineering (no abstraction without need), and readability (intent-revealing names; KDoc on
+  public/cross-module APIs; comments explain why, not what; no noise or commented-out code). One line
+  of justification each.
 - ACCEPTED PATTERNS (official sources; never a defect on their own):
   - domain models held directly in UiState (Android architecture recommendations: "ViewModel can
     include data layer models in UiState classes"; Now in Android does this)

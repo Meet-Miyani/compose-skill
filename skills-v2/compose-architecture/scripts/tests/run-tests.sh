@@ -91,6 +91,7 @@ expect_pass "check-locale-parity honors the LOCALE_DIRS override" bash "$SCRIPTS
 printf '%s\n' 'LOCALE_DIRS=""' > "$OVR/.composekit.conf"
 expect_fail "check-locale-parity discovers the broken root without the override" "missing" bash "$SCRIPTS_DIR/check-locale-parity.sh" "$OVR"
 check check-hardcoded-colors "outside the design-system"
+check check-commonmain-imports "platform import"
 
 # The compose-feature scaffold (Tags/Tag) ships SEAM markers: a fresh
 # scaffold fails only check-placeholders, and passes the full registry
@@ -101,7 +102,7 @@ scaffold_case() {
     mkdir -p "$dir"
     expect_pass "new-feature.sh scaffolds Tags/Tag $tag" bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$dir" "$@"
     cp "$GOOD/.composekit.conf" "$dir/.composekit.conf"
-    for check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-locale-parity check-hardcoded-colors; do
+    for check in check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-locale-parity check-hardcoded-colors check-commonmain-imports; do
         expect_pass "$check passes on the fresh scaffold $tag" bash "$SCRIPTS_DIR/$check.sh" "$dir"
     done
     # Root-only placeholders follows `git diff --name-only` inside a work tree,

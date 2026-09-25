@@ -16,7 +16,7 @@ ROOT="${1:-}"
 if [ -z "$ROOT" ]; then echo "usage: run-checks.sh <project-root>" >&2; exit 2; fi
 if [ ! -d "$ROOT" ]; then echo "error: not a directory: $ROOT" >&2; exit 2; fi
 
-CHECKS="check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-placeholders check-locale-parity check-hardcoded-colors"
+CHECKS="check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-placeholders check-locale-parity check-hardcoded-colors check-commonmain-imports"
 
 pass=0
 fail=0

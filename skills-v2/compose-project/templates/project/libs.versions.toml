@@ -1,0 +1,73 @@
+# Version catalog template. Every version lives here exactly once
+# (SKILL.md rule 7); module build files resolve through libs.* accessors.
+# Every pin below was verified against its current release page at
+# template-write time; re-verify each pin against that page at bootstrap
+# time and bump what moved (see version-catalog.md).
+# Coordinates below are verified against the official JetBrains
+# KMP-App-Template catalog and the current Koin/SKIE docs; confirm them
+# against those pages for the versions you pin (see version-catalog.md).
+[versions]
+# ---- Build ----
+# AGP 9 or newer: shared modules use the Android-KMP library plugin and a
+# separate androidApp shell; needs Gradle 9.1 or newer.
+agp = "9.1.1"
+kotlin = "2.4.10"
+# Current stable per https://github.com/JetBrains/compose-multiplatform/releases
+# (1.12.1, 2026-09-22; bundles JetBrains lifecycle 2.11.0).
+compose-multiplatform = "1.12.1"
+# Koin compiler plugin needs Kotlin 2.3.20+; its plugin artifact is
+# versioned separately from koin-core.
+koin = "4.2.2"
+koin-plugin = "1.0.0"
+# SKIE supports a bounded Kotlin range (currently 2.0.0-2.4.10) and
+# Swift 5.8+ / Xcode 14.3+. FILL IN the current release from
+# https://skie.touchlab.co after checking it against kotlin above.
+skie = "FILL-IN"
+
+# ---- AndroidX / JetBrains ----
+androidx-activity = "1.13.0"
+# Stable JetBrains lifecycle line per the CMP 1.12.1 release notes
+# (https://github.com/JetBrains/compose-multiplatform/releases):
+# org.jetbrains.androidx.lifecycle:lifecycle-*:2.11.0. No pre-release
+# default: AndroidX lifecycle 2.11.0 is stable, so the catalog pins stable.
+androidx-lifecycle = "2.11.0"
+
+# ---- Networking ----
+ktor = "3.5.1"
+
+# ---- Coroutines ----
+kotlinx-coroutines = "1.11.0"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-lifecycle-runtimeCompose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
+compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+# compileOnly for build-logic: extension classes the convention plugins
+# configure (coordinates per Now in Android's build-logic).
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compilerPlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }
+# In-repo convention plugins carry no version.
+composekit-kmp-library = { id = "composekit.kmp.library" }
+composekit-kmp-compose = { id = "composekit.kmp.compose" }
+composekit-kmp-feature = { id = "composekit.kmp.feature" }
+composekit-koin = { id = "composekit.koin" }

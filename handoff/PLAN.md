@@ -500,6 +500,84 @@ templates are internally consistent (plugin ids referenced by module templates e
 
 ---
 
+## Phase 8.5 — Code craft (added 2026-09-25; owner goal: human-readable, staff-level code)
+
+**Why.** The owner's goal includes code that a human reads easily: meaningful names, comments that
+explain *why*, proper KDoc, no noise. A moderator grep on 2026-09-25 found no code-craft rules in any of
+the six skills; comment and KDoc guidance appears only incidentally. AI-written Kotlin fails both ways:
+no KDoc on public APIs, and noise comments that restate the code.
+
+**Tasks (worker).**
+
+1. Write `compose-architecture/references/code-craft.md`. It is the single home for code-level craft
+   across the kit. Cover:
+   - **KDoc is proportional (owner direction).** Say what a developer needs, in the simplest words:
+     - a one-line summary for most declarations
+     - `@param`/`@return`/`@throws` only when they add information the signature does not
+     - a short paragraph only for genuinely complex contracts (threading, error tiers, lifecycle)
+     - never a 20+ line essay
+     - required on public or cross-module APIs (repository interfaces, base-contract types, public
+       design-system composables) and on anything non-obvious
+     - not required on a private or small declaration whose name says it all
+
+     WRONG/RIGHT pair: a bloated KDoc vs a one-line one.
+   - **Inline comments on non-obvious logic (owner direction).** Business rules, branching with several
+     conditions, loops, and multi-step collection pipelines (`filter`/`map`/`groupBy`/`sortedBy` chains)
+     carry a short comment that states the **intent**, and the reason when it is not obvious ("keep
+     only notes due today, newest first; the widget shows one day"). Never restate an obvious line
+     (`// set loading to true`). No commented-out code. No TODO without an owner or issue link.
+     WRONG/RIGHT pairs: an uncommented pipeline vs an intent comment, and a noise comment vs no comment.
+   - **Clean, linear, readable shape (owner direction).**
+     - **Braces on every `if`/`else`, `for`, `while` and `when` branch body**, even single-line ones.
+       Verify on the Android Kotlin style guide whether a one-line `if`/`else` *expression* (`val x = if
+       (a) b else c`) is the documented exception. If it is, the kit keeps it as the only exception,
+       labelled **default** so a project can record "no exceptions".
+     - Early return instead of deep nesting.
+     - One chained call per line once a chain wraps.
+     - Named intermediate `val`s instead of nested calls several levels deep.
+     - One level of abstraction per function. A function fits on one screen or is split at a named
+       concept; this is a review trigger per D1-6, not a hard limit.
+   - **Naming.** Names state intent in domain words. No `data`, `info`, `manager`, `helper` or `util`
+     suffixes without meaning. Booleans read as questions (`isMissing`, `canRetry`). Functions are
+     verbs.
+   - **Magic values.** Named constants with a one-line *why* ("voodoo constants" are a defect).
+   - **Formatting.** Follow the official Kotlin coding conventions, and ktlint/detekt when the project
+     has them. The kit adds no formatter of its own.
+
+   Every rule cites a fetched source: https://kotlinlang.org/docs/coding-conventions.html,
+   https://kotlinlang.org/docs/kotlin-doc.html, and https://developer.android.com/kotlin/style-guide.
+   Label each rule non-negotiable or default (M-12). Include WRONG/RIGHT pairs for a noise comment,
+   missing KDoc, and a *why* comment.
+2. Add **one** non-negotiable to `compose-architecture/SKILL.md` ("Code reads as intent: short KDoc
+   on cross-module APIs, intent comments on non-obvious logic, braces on every branch, no noise or dead
+   code"), plus three red flags:
+   - "I'll comment every line so it's clear"
+   - "The name is obvious; no KDoc needed on this public repository"
+   - "It's one line; braces are noise"
+
+   Link `code-craft.md` from the reference index, within budget.
+3. **Templates model the craft.** `templates/core/**` and `compose-feature/templates/feature/**` get
+   exemplary KDoc on public/internal APIs and *why* comments where a choice is non-obvious. Remove any
+   noise comments. Templates are what models copy most faithfully.
+4. **Evals.**
+   - Add one binary rubric item to 3–4 existing implementation scenarios (FEAT, DATA, UI): "Public or
+     cross-module declarations the answer adds carry short KDoc; non-obvious logic (pipelines,
+     multi-condition branches) carries an intent comment; every if/else/for/when body has braces; no
+     noise or commented-out code."
+   - The moderator updates the grader prompt so that quality weighs readability (names, KDoc,
+     comments).
+
+**Acceptance.**
+
+- budget, validate, ledger and dest-load checks pass
+- the guard suite is green
+- templates compile-ready, with no placeholder residue
+- the report lists the fetched URLs
+
+Review and gate follow the usual flow. The gate re-runs only the scenarios that gained the new item.
+
+---
+
 ## Phase 9 — Integration pass
 
 **Tasks.**
@@ -529,6 +607,39 @@ templates are internally consistent (plugin ids referenced by module templates e
    - Every item that either model gets wrong is restored as a one-line gotcha in its natural owner
      skill, within budget.
    - Record the counts: probed, known, restored.
+
+**Proof-of-kit tasks (added 2026-09-25 after the owner's "brutal truth" review; they run in Phase 9 before M9; iteration follows STANDARDS §8.5):**
+
+A. **Compile gate (moderator-run, scratch dir only).**
+   1. Build a real project from the `compose-project` templates.
+   2. Add two features with `new-feature.sh`, one of them with `--ui-model`.
+   3. Wire the Koin modules and nav entries at the composition root.
+   4. Run the Gradle wrapper: Android debug assemble, desktop compile, and iOS framework link where Xcode
+      allows. Then run `run-checks.sh`.
+
+   Every build or guard failure becomes a required change for the worker. The gate passes when the
+   scratch project builds for Android and desktop and the guards are clean. This is independent of the
+   later CLI tool.
+B. **Held-out eval set.**
+   - An independent subagent writes about 8 new scenarios with rubrics, one or two per skill. It reads
+     only the scope sections of `SKILL_SPECS`, never `skills-v2/`.
+   - They are stored sealed in `evals-v2/heldout.json` and never used to change the kit.
+   - M9 reports them separately. The README quotes held-out numbers.
+C. **Agentic trial.**
+   - One real OpenCode session with the six skills installed into the compile-gate project.
+   - DeepSeek (or Muse) builds a feature end to end: it reads files, writes code, compiles, and runs
+     the guards.
+   - Record whether the right skills loaded, compile errors and fix loops, and guard results.
+D. **Technical re-review of Phases 3–4** (`compose-architecture`, `compose-feature`) with the Phase 6–8
+   rigour: every API or version claim is checked against a fetched page or the library source.
+E. **Two graders per packet at M9.** Report the agreement rate. Quote a number only with its
+   agreement.
+F. **README honesty.** Quote results as "on the kit's scenario set (tuned) / held-out set / builds
+   verified". State the circularity caveat: the rubric checks kit conventions, and quality scores plus
+   strong-models-with-kit are the fair comparison.
+
+**Model effort (O-10).** The ≥ 90% bar binds DeepSeek and Muse. MiniMax and the panel models are
+best-effort, with at most one targeted fix round, and residuals are recorded honestly.
 
 **Moderator step M9** also runs Claude Opus 5.5 and Sonnet **with** the kit (M-10): strong-model quality with the kit must not drop below without it.
 

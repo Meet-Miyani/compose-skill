@@ -10,7 +10,7 @@ Load this file during M2 baseline runs and P8 skill writing to score platform-pl
 **Rubric:**
 1. PASS if the notes and tags ViewModels and their UiState, UiAction, and UiEffect contracts live in commonMain. [SPEC §6] [kit]
 2. PASS if repository interfaces for notes, tags, and settings live in commonMain, not in a platform source set. [SPEC §6]
-3. PASS if note settings use Preferences DataStore in commonMain with structured settings stored as one JSON string key. [BRIEF §13.3]
+3. PASS if note settings use Preferences DataStore in commonMain: a structured setting is one JSON string key, while a single primitive setting (as here, the note-settings toggle) may use its typed Preferences key. [BRIEF §13.3]
 4. PASS if the DataStore factory is defined once in commonMain with a path lambda and file paths are defined per platform source set. [BRIEF §13.3]
 5. PASS if exactly one DataStore instance per file is bound as a Koin single. [BRIEF §13.3] [kit]
 6. PASS if Desktop storage uses an app-specific folder and never a shared temp directory. [BRIEF §13.3]

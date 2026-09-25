@@ -22,7 +22,7 @@ The annotation surface is six names. (§6.1; §13.2)
 
 | Annotation | Job |
 |---|---|
-| `@KoinViewModel` (`org.koin.android.annotation`, KMP/CMP supported) | Marks a destination ViewModel for lifecycle-aware resolution |
+| `@KoinViewModel` (`org.koin.core.annotation`, compiler plugin; KMP/CMP supported) | Marks a destination ViewModel for lifecycle-aware resolution |
 | `@Module` + `@ComponentScan` | Declares a feature module and scans its package |
 | `@Single` | One app-lifetime instance (KOIN-27) |
 | `@Factory` | A fresh instance per injection (KOIN-28) |

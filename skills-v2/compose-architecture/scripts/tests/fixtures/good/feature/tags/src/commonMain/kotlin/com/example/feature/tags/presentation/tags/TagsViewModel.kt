@@ -5,7 +5,7 @@ import com.example.core.mvi.BaseViewModel
 import com.example.feature.tags.domain.repository.TagsRepository
 import com.example.feature.tags.presentation.tags.mapper.toUiModel
 import kotlinx.coroutines.Job
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.InjectedParam
 
 data class TagsParams(val tagId: Long)
