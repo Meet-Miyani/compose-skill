@@ -20,6 +20,7 @@ The agent works on a fresh note-editor destination: Contract, ViewModel, Route, 
 6. ViewModel tests cover the seven house rows plus process-death restore using hand-written fakes and advanceUntilIdle [BRIEF §9.3]
 7. No TODO, stub, or noted-but-unfixed defect remains; a placeholder grep over changed files is empty [SPEC §2 seed]
 8. Typed editor input survives process-death restore via `SavedStateHandle` while the record itself is re-fetched by identity from the nav key [BRIEF §3.7] [kit]
+9. Public or cross-module declarations the answer adds carry short KDoc; non-obvious logic (pipelines, multi-condition branches) carries an intent comment; every if/else/for/while body has braces; multi-line when branches are braced; no noise or commented-out code [compose-architecture/code-craft.md] [kit]
 **Guard scripts that must pass:**
 - scripts/check-contract-shape.sh (prospective Phase-5 name)
 - scripts/check-placeholders.sh (prospective Phase-5 name)

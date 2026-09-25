@@ -578,6 +578,77 @@ Review and gate follow the usual flow. The gate re-runs only the scenarios that 
 
 ---
 
+## Phase 8.6 — Modern Kotlin + Kotlin skill-set harvest (added 2026-09-25; owner direction, O-11)
+
+**Why.**
+
+- The owner asked for current Kotlin language knowledge (evolving syntax, value classes, `when`
+  improvements) held to global industry standards.
+- The official `Kotlin/kotlin-agent-skills` repo (Apache-2.0, about 1k stars) was **not** harvested in
+  P2.5.
+- No skill has a home for modern language idioms.
+
+**Tasks (worker).**
+
+1. **Harvest (G8), rows in `EXTERNAL_LEDGER.md`, prefix `KAS` / `JBS` / `KFG`:**
+   - **`Kotlin/kotlin-agent-skills`** (Apache-2.0; read every SKILL.md in full). Absorb gotchas relevant
+     to the kit: AGP 9 migration, CocoaPods→SPM migration, native build performance, immutable-collections
+     0.5.x migration, Java→Kotlin in existing projects. Put them in the owning skill (compose-project,
+     compose-platform, compose-ui/data, compose-architecture `existing-projects.md`), or record a
+     deferral pointer ("optional depth — Kotlin/kotlin-agent-skills <name>"). Attribute in
+     `skills-v2/NOTICE.md`.
+   - **`JetBrains/skills`**: **no license**. List only the skills relevant to Compose/KMP/Gradle as
+     deferral pointers. **Copy no text.**
+   - **`maxrave-dev/kotlin-footguns`**: **GPL-3.0**. **Copy no text.** Use its topic list only as a
+     gap checklist against our six skills. Any gap you land is re-derived and cited from an official
+     source (Kotlin, Android or JetBrains docs), never from that repo. Record which topics were checked.
+2. **New reference `compose-architecture/references/modern-kotlin.md`** (default-labelled idioms,
+   ~20 rules max):
+   - Every feature is gated on the Kotlin version in `libs.versions.toml`, and on stability. **Stable
+     features only by default. Preview, experimental or beta features are used only when the project
+     has already opted in** (the compiler flag is present), and never introduced by the kit.
+   - Cover, each verified on the fetched "What's new in Kotlin" page for its version and
+     https://kotlinlang.org/docs/idioms.html:
+     - sealed interfaces with an exhaustive `when` and **no `else`** over a sealed type
+     - `data object`
+     - `@JvmInline value class` for single-field domain identities (link CB-107/108)
+     - `entries` over `values()`
+     - `..<`
+     - guard conditions in `when` (state the version where it became stable)
+     - non-local `break`/`continue` and multi-dollar interpolation (state their stability)
+     - context parameters (state their stability; not a kit default while preview)
+     - `kotlin.time` and `kotlin.uuid` (M-8)
+     - `buildList`/`buildMap`
+     - `require`/`check`/`error` for preconditions
+     - scope functions with restraint (one `let`/`apply` per expression, no nested scope chains)
+     - expression bodies for one-liners
+     - named arguments for boolean and same-type parameters
+   - Each rule gets a *Prevents:* line and a WRONG/RIGHT pair where it helps, with labels outside the
+     fence.
+   - A **"Kotlin evolves" gate**: before using a language feature newer than the project's Kotlin
+     version, stop and report.
+3. **Apply M-14 (braces)** in `code-craft.md` §3.1 and the templates. Match the Android guide exactly,
+   show "braces always" as a sample project decision, and update the rubric wording in FEAT-01, DATA-01
+   and UI-03 to match.
+4. `code-craft.md` links to `modern-kotlin.md`. SKILL.md gains one index line; there is no new
+   non-negotiable. Stay within budget: compose-architecture SKILL.md is currently 4,079 tokens, under the
+   5,000 max.
+5. **Evals:** add one binary item to FEAT-01 or DATA-01: "a `when` over a sealed type is exhaustive with
+   no `else` branch". Sync `scenarios.md` and `evals.json`.
+
+**Acceptance.**
+
+- budget, validate, ledger (new rows complete) and dest-load checks pass
+- NOTICE is updated
+- the guard suite is green and the scaffold is clean
+- the report lists every fetched URL and, for each language feature, the Kotlin version and stability
+  it was verified at
+
+**Gate.** One combined gate for 8.5 and 8.6, on FEAT-01, DATA-01 and UI-03, with the three kit models
+against Opus (STANDARDS §8.5).
+
+---
+
 ## Phase 9 — Integration pass
 
 **Tasks.**
@@ -653,6 +724,46 @@ best-effort, with at most one targeted fix round, and residuals are recorded hon
     contradictions, over-engineering, and rules without evidence.
   - The moderator verifies every finding before any change, then sends accepted findings to the
     worker as a review file.
+
+## Phase 11 — Freshness loop (later scope, after P10 and the CLI; owner request 2026-09-25)
+
+**Goal.** The kit never silently goes stale. It is built to age well (rules instead of tutorials,
+version gates on `libs.versions.toml`, and the O-6 fresh-docs rule), so staleness mostly hits:
+
+- template pins
+- version floors
+- a few API gotchas
+
+**Cadence.** Every 2 weeks for releases, plus a full review monthly. Runs as a scheduled job, e.g. a
+GitHub Action or a scheduled agent task.
+
+1. **Watch list.** Release notes and changelogs for:
+   - Kotlin
+   - Compose Multiplatform and the JetBrains lifecycle and navigation artifacts
+   - AndroidX (Compose, lifecycle, Navigation 3, Room, Paging, DataStore)
+   - AGP and Gradle
+   - Koin
+   - Ktor
+   - kotlinx (coroutines, serialization, datetime)
+   - SKIE
+   - Coil
+
+   The watched sources also include the external skill sets the kit points to (android/skills,
+   skydoves, chrisbanes, Kotlin/kotlin-agent-skills).
+2. **Diff against the kit.** Flag, with the release-note URL:
+   - every version gate
+   - every template pin in `libs.versions.toml`
+   - every `last-reviewed` date older than the cadence
+   - every rule citing a changed API
+3. **Verify.** Run the compile gate (P9 task A) on bumped pins, then the guard suite and the held-out
+   eval set.
+4. **Change.** Edit the rule in place (STANDARDS §3.2 item 5: replace, never append) and bump
+   `last-reviewed`. New features enter as stable only (see the "Kotlin evolves" gate in P8.6).
+5. **Ship.** One reviewed PR per cycle, with a changelog entry and scoreboard deltas. It never
+   auto-merges.
+
+Template pins can additionally use Renovate or Dependabot on the template catalog. A human or moderator
+still reviews every bump that touches a rule.
 
 **Moderator step M9.** The moderator runs the scenarios with the skills (compared with the M2
 baselines), reviews end to end, and signs off. Then Phase 10 (cut-over to `skills/`, catalog and CLI

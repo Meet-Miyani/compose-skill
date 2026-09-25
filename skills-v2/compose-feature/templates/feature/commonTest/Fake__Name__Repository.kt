@@ -37,6 +37,7 @@ class Fake__Name__Repository : __Name__Repository {
 
     override suspend fun get__Item__(id: Long): __Item__? {
         getCalls += 1
+        // By-id read: null when absent; the armed failure throws only when no row matches.
         return backing.value.firstOrNull { it.id == id } ?: shouldThrow?.let { throw it }
     }
 

@@ -35,7 +35,9 @@ fun __Name__Screen(
             Button(onClick = onBack) { Text("Back") } // SEAM: string resource
         }
         else -> Column {
-            if (state.isRefreshing) Text("Refreshing…") // SEAM: string resource
+            if (state.isRefreshing) {
+                Text("Refreshing…") // SEAM: string resource
+            }
             state.items.forEach { item -> Text(item.title ?: "") }
             OutlinedTextField(
                 value = state.draftTitle,

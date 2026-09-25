@@ -55,12 +55,14 @@ fun NetworkException.toAppError(): AppError = when (this) {
     is NetworkException.SslHandshake -> AppError(AppErrorType.Tls)
     is NetworkException.Serialization -> AppError(AppErrorType.Generic)
     is NetworkException.Unknown -> AppError(AppErrorType.Generic)
-    is NetworkException.Http -> AppError(
-        type = typeFor(statusCode),
-        serverTitle = error?.title,
-        serverMessage = error?.message,
-        httpStatus = statusCode,
-    )
+    is NetworkException.Http -> {
+        AppError(
+            type = typeFor(statusCode),
+            serverTitle = error?.title,
+            serverMessage = error?.message,
+            httpStatus = statusCode,
+        )
+    }
 }
 
 /** Picks the presentation type for an HTTP status code. */

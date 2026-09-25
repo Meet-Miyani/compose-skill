@@ -34,6 +34,7 @@ fun __Name__Route(
         onTitleChange = { viewModel.onAction(__Name__UiAction.OnTitleChanged(it)) },
         onSave = { viewModel.onAction(__Name__UiAction.OnSaveClick) },
         onRetry = {
+            // Retry holds the error it retries; no-op when no error is showing.
             viewModel.onAction(__Name__UiAction.OnRetryClick(state.error ?: return@__Name__Screen))
         },
         onBack = { viewModel.onAction(__Name__UiAction.OnBackClick) },

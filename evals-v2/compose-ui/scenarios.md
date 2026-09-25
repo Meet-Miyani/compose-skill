@@ -49,6 +49,7 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 5. Every lazy item has a stable key from domain identity, never the index; no heavy work runs in item scope. [SPEC §3 seed]
 6. No state the answer adds or changes uses a mutable collection or wraps a mutable property in an `@Immutable` class; read-only collections covered by the stability config or immutable collections both pass. An answer that leaves `UiState` untouched passes. [BRIEF §10 F-16]
 7. No error the answer adds or changes is a raw string or a third-party type; errors stay the owned `AppError` type. An answer that leaves `UiState` untouched passes. [BRIEF §10 F-17] [kit]
+8. Public or cross-module declarations the answer adds carry short KDoc; non-obvious logic (pipelines, multi-condition branches) carries an intent comment; every if/else/for/while body has braces; multi-line when branches are braced; no noise or commented-out code. [compose-architecture/code-craft.md] [kit]
 **Guard scripts that must pass:** check-hardcoded-colors.sh (prospective, Phase 5); clock placement and list-key rules are review-only (no Phase-5 guard covers them).
 
 ## UI-04 PRESSURE: formatted countdown string ticked by the ViewModel

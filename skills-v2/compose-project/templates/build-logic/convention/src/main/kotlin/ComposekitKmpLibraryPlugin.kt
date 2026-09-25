@@ -5,14 +5,16 @@ import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
-// Base plugin for every Kotlin Multiplatform library module in the kit
-// (:core:*, :data:*, shared code). It owns ALL target, SDK, and toolchain
-// configuration; module build files hold only the plugin alias, their
-// namespace, and their dependencies (SKILL.md rule 1).
-//
-// Shape verified against the JetBrains KMP-App-Template shared module and
-// the official AGP 9 migration guide:
-// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-project-agp-9-migration.html
+/**
+ * Base plugin for every Kotlin Multiplatform library module in the kit.
+ *
+ * Owns all target, SDK, and toolchain configuration; module build files hold only the
+ * plugin alias, their namespace, and their dependencies (SKILL.md rule 1).
+ *
+ * Shape verified against the JetBrains KMP-App-Template shared module and the official
+ * AGP 9 migration guide:
+ * https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-project-agp-9-migration.html
+ */
 abstract class ComposekitKmpLibraryPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {

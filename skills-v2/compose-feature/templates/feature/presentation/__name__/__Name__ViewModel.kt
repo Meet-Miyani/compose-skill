@@ -49,7 +49,10 @@ class __Name__ViewModel(
     }
 
     private fun load() {
-        if (loadJob?.isActive == true) return
+        // Overlap guard: the first load owns the response; later overlapping loads return early.
+        if (loadJob?.isActive == true) {
+            return
+        }
         loadJob = launchGuarded(
             onError = { updateState { copy(error = it, isLoading = false) } },
             onStart = { updateState { copy(isLoading = !hasStarted, isRefreshing = hasStarted) } },
