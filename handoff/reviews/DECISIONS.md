@@ -45,3 +45,43 @@ disagree, this log wins. The worker reads it at the start of every phase.
 - **Verification:** fresh tasks the kit has never seen (moderator-written after the fixes land), plus
   the existing guard tests and self-checks.
 - **Held-out v3 stays sealed** for the worker, and its numbers are not re-reported as if post-fix.
+
+## O-14: Qwen 3.8 Max and GLM 5.3 are deferred from the final held-out test (v4) (owner-approved 2026-09-28)
+
+- **Decided before v4 exists or has run; not based on any score.**
+- **Reason: throughput.** On held-out v3 their kit-sized prompts ran 25–77 minutes per large answer,
+  with repeated 65–77-minute read timeouts and server errors. Their long and failed calls consumed the
+  account-wide OpenCode 5-hour window.
+    - GLM completed 3 of 8 kit-arm answers.
+    - Qwen completed 7 of 8 per arm after retries.
+- **Reporting:**
+    - Their held-out v3 results stay in every report as measured: Qwen on 6 shared tasks, GLM on 3,
+      both labelled partial.
+    - The final-test tables state: "Qwen 3.8 Max and GLM 5.3 were run on held-out v3 (tables above)
+      and deferred from v4 because their endpoints could not complete kit-sized prompts in reasonable
+      time; they will be re-run later."
+- **Re-run trigger:** the CLI's lighter kit loading (smaller prompts), or a faster endpoint for either
+  model.
+
+## O-15: new low-priority candidates for the final test (owner-approved 2026-09-28)
+
+**Added at LOW priority,** below the current panel:
+
+- MiMo V2.6 Pro (Xiaomi)
+- Qwen 3.8 Flash (Alibaba)
+- GLM-5.3 Flash (Zhipu)
+- GPT-6-Luna via the Go API (a direct-API run, next to its Codex harness results)
+- Claude Haiku 4.5 (Anthropic cheap tier, Claude-side)
+- Optional: MiMo V2.6 Flash and Grok 4.7
+
+**Rules, written before any results:**
+
+- **Order:** the current panel runs first. The candidates only use leftover budget and windows, and never
+  block a panel model.
+- **Screening pilot:** each candidate first answers 2 scratch tasks (not from v4), with and without the
+  kit.
+    - It is deferred, with the reason recorded, if an answer exceeds 20 minutes, returns empty, or
+      refuses more than once.
+    - Candidates that pass join v4, at the end of the queue.
+- **Evidence:** third-party benchmark numbers for these models are unverified; our own runs are the
+  only evidence.

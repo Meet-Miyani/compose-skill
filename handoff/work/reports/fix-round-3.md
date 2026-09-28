@@ -373,3 +373,136 @@ Guard suite (`bash skills-v2/_tests/compose-architecture/run-tests.sh`; the lite
 ```
 
 FIX ROUND 3 FOLLOW-UP COMPLETE
+
+## Follow-up R2b — narrow R2 so it cannot be read as declining the requested feature (2026-09-28)
+
+Scope: applied exactly the R2b change from `handoff/reviews/fix-round-3.md` §R2b. Two edits in `skills-v2/compose-feature/SKILL.md` (existing-destination row + verification checklist). No change to `skills-v2/compose-architecture/SKILL.md` stance item 9 (reason below). R2 protection text kept intact. Every file within budget (SKILL.md <= 5,000 tokens).
+
+Before (existing-destination row, `skills-v2/compose-feature/SKILL.md:72`):
+
+```
+| Change to an existing destination | Hand-write the smallest correct diff; never re-scaffold over it. Never remove, rename, or relocate existing working behaviour (actions, state fields, effects, tests, routes, error wiring such as `HandleAppErrors`) that the task did not name. Code that looks like a leftover or conflicts with the change stays; report it in one line as a follow-up. Restructure only on request |
+```
+
+After (same row, protection unchanged, one plain sentence appended per R2b):
+
+```
+| Change to an existing destination | Hand-write the smallest correct diff; never re-scaffold over it. Never remove, rename, or relocate existing working behaviour (actions, state fields, effects, tests, routes, error wiring such as `HandleAppErrors`) that the task did not name. Code that looks like a leftover or conflicts with the change stays; report it in one line as a follow-up. Restructure only on request. Adding what the task needs (new actions, state, repository operations, list rendering, wiring) is always in scope; 'restructure only on request' means rewriting or moving existing working code, never declining to build the requested feature |
+```
+
+Before (verification checklist, `skills-v2/compose-feature/SKILL.md:139-140`):
+
+```
+- [ ] The diff removes nothing the task did not name: yes or no.
+- [ ] Deviations are reported in plain words: what diverged and the revisit trigger.
+```
+
+After (one checklist item added per R2b; existing R2 item untouched):
+
+```
+- [ ] The diff removes nothing the task did not name: yes or no.
+- [ ] The requested feature is delivered (or the one blocker is named with the smallest step to unblock it): yes or no.
+- [ ] Deviations are reported in plain words: what diverged and the revisit trigger.
+```
+
+Architecture stance item 9 (`skills-v2/compose-architecture/SKILL.md:29`): NO CHANGE. Text stays:
+
+```
+9. **Reuse before rebuild.** Extend the existing repository, mapper or screen. Never rebuild a slice to put it "in kit shape" unless asked. Never remove working behaviour the task did not name; the keep-what-works rule lives in the `compose-feature` skill.
+```
+
+Why no change: item 9 contains no "restructure only on request" phrasing and already opens with the in-scope direction ("Extend the existing repository, mapper or screen"), so it cannot be misread as declining the requested feature the way the R2 row was. Per R2b ("No other change") and the prompt's "only if it needs the same one-sentence scope clarification to stay consistent", it does not need it; leaving it also keeps the file at its current 4,820 tokens, safely under the 5,000-token SKILL.md cap.
+
+Self-checks re-run (verbatim):
+
+budget.sh — RESULT: PASS:
+
+```
+LEVEL   LINES TOKENS CODE%  FILE
+WARN      167   4820    0%  skills-v2/compose-architecture/SKILL.md
+ok        182   2064   20%  skills-v2/compose-architecture/references/code-craft.md
+ok        151   3257   13%  skills-v2/compose-architecture/references/coroutines-flow.md
+ok        162   3299   10%  skills-v2/compose-architecture/references/dependency-injection.md
+ok        143   3328   23%  skills-v2/compose-architecture/references/error-handling.md
+ok         65   1685    0%  skills-v2/compose-architecture/references/existing-projects.md
+ok        136   2502   19%  skills-v2/compose-architecture/references/modern-kotlin.md
+ok        153   2832    7%  skills-v2/compose-architecture/references/module-graph.md
+ok        162   2800   11%  skills-v2/compose-architecture/references/mvi-contract.md
+ok        174   3471    5%  skills-v2/compose-architecture/references/naming-and-packages.md
+ok        169   3055   14%  skills-v2/compose-architecture/references/navigation.md
+ok        246   3479    3%  skills-v2/compose-architecture/references/state-ownership.md
+tmpl       49    586    0%  skills-v2/compose-architecture/templates/core/README.md
+ok        120   3201    0%  skills-v2/compose-data/SKILL.md
+ok         42   1615    0%  skills-v2/compose-data/references/auth-and-realtime.md
+ok         73   2183    6%  skills-v2/compose-data/references/boundaries-and-mapping.md
+ok         39   2029    0%  skills-v2/compose-data/references/data-testing.md
+ok         54   2540    0%  skills-v2/compose-data/references/datastore.md
+ok         54   2253    0%  skills-v2/compose-data/references/networking-ktor.md
+ok         35   1272    0%  skills-v2/compose-data/references/offline-first.md
+ok         62   2252    0%  skills-v2/compose-data/references/paging.md
+ok         74   1970    0%  skills-v2/compose-data/references/room.md
+ok        151   3466    2%  skills-v2/compose-feature/SKILL.md
+ok        280   2188   30%  skills-v2/compose-feature/examples.md
+ok         74   1955    0%  skills-v2/compose-feature/references/review-mode.md
+ok        114   3298   14%  skills-v2/compose-feature/references/testing.md
+ok         79   1115    0%  skills-v2/compose-feature/references/ui-testing.md
+tmpl       41    469   19%  skills-v2/compose-feature/templates/feature/README.md
+ok        115   2978    5%  skills-v2/compose-platform/SKILL.md
+ok         41   1724    0%  skills-v2/compose-platform/references/desktop-and-web.md
+ok         52   1830    0%  skills-v2/compose-platform/references/ios-swift-interop.md
+ok         53   1406    3%  skills-v2/compose-platform/references/sharing-and-bridges.md
+WARN      147   3658    0%  skills-v2/compose-project/SKILL.md
+ok         38   1235    2%  skills-v2/compose-project/references/adopt-existing.md
+ok         58   2448    0%  skills-v2/compose-project/references/bootstrap.md
+ok         42   2029    0%  skills-v2/compose-project/references/convention-plugins.md
+ok         59   1395    5%  skills-v2/compose-project/references/dependency-rules.md
+ok         55   1845    0%  skills-v2/compose-project/references/distribution.md
+ok        110   2075   27%  skills-v2/compose-project/references/enforcement.md
+ok         41   1817   17%  skills-v2/compose-project/references/version-catalog.md
+tmpl       26    355    0%  skills-v2/compose-project/templates/build-logic/README.md
+tmpl       21    295    0%  skills-v2/compose-project/templates/composition/README.md
+tmpl       19    273    0%  skills-v2/compose-project/templates/project/README.md
+WARN      121   3621    0%  skills-v2/compose-ui/SKILL.md
+ok         97   1943    0%  skills-v2/compose-ui/references/accessibility.md
+ok         95   2159    2%  skills-v2/compose-ui/references/adaptive-and-insets.md
+ok        107   2603    0%  skills-v2/compose-ui/references/design-system.md
+ok        115   1920    2%  skills-v2/compose-ui/references/images.md
+ok        135   2220    5%  skills-v2/compose-ui/references/keyboard-and-focus.md
+ok        169   2436    7%  skills-v2/compose-ui/references/lists.md
+ok        138   2404    1%  skills-v2/compose-ui/references/modifiers.md
+ok        120   1857    0%  skills-v2/compose-ui/references/motion.md
+ok        141   2476    0%  skills-v2/compose-ui/references/performance-diagnostics.md
+ok         31    533    0%  skills-v2/compose-ui/references/resources-media.md
+ok         80   1697    0%  skills-v2/compose-ui/references/resources.md
+ok         36    471    0%  skills-v2/compose-ui/references/shared-elements.md
+WARN      129   3643    5%  skills-v2/compose-ui/references/state-reads-and-stability.md
+ok        172   2116    0%  skills-v2/compose-ui/references/ux-states.md
+RESULT: PASS
+```
+
+Note: content-policy WARN lines omitted here for length; the run's RESULT was PASS with WARNs only (same pre-existing version-floor and out-of-kit-stack notes as the prior run). Every file is within hard budget: compose-feature/SKILL.md `ok 151 3466` (<= 5,000 tokens), compose-architecture/SKILL.md unchanged at 4,820 tokens (WARN-level target-zone only, not a failure).
+
+validate-v2.sh --score-only:
+
+```
+=== compose-architecture ===
+90/100 A
+=== compose-data ===
+90/100 A
+=== compose-feature ===
+97/100 A+
+=== compose-platform ===
+92/100 A
+=== compose-project ===
+90/100 A
+=== compose-ui ===
+90/100 A
+```
+
+Guard suite (`bash skills-v2/_tests/compose-architecture/run-tests.sh`; the literal `/bin/bash` spelling is blocked by the environment gate; banner proves bash 3.2.57, i.e. /bin/bash):
+
+```
+73 passed, 0 failed
+```
+
+FIX ROUND 3 R2b COMPLETE

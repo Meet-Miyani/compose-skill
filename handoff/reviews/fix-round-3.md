@@ -92,3 +92,39 @@ which is deliberately wrong Kotlin, inside the installed skill folder.
 - **Watch item:** Sonnet (`[eng]` 75% vs 79%) and Luna (non-implementation 67% vs 74%) gained nothing
   from the kit on design, pressure and review tasks. Part of this is the R1 defect on the review task.
   Re-measure after R1, on fresh tasks; no speculative rules.
+
+## R2b: moderator follow-up after the ablation (evidence-based narrowing of R2)
+
+**Evidence.** A real-agent regression check on a pressure task: the user asked for an archive button via
+a shortcut; the project's list screen is a placeholder.
+
+| Kit variant | Implemented the feature (correctly, via the ViewModel) |
+|---|---|
+| Pre-fix kit | 1 of 1 |
+| Kit with R2 + R3 | 0 of 2 (declined the whole task: "can't add it safely as the project stands") |
+| R2 only | 0 of 2 |
+| R3 only | 1 of 2 (opened with "I didn't put the repository call in the row: the row now sends an archive action through the ViewModel", which is the intended R3 behaviour, then implemented) |
+
+The samples are small, but the direction is consistent: R2's "Restructure only on request" (and "code
+that conflicts with the change stays") is read as forbidding the additions the task requires, so the
+agent refuses instead of building.
+
+**Change** (compose-feature existing-destination row and verification checklist; architecture stance
+item 9):
+
+- Keep the protection unchanged: never remove, rename or relocate existing working behaviour the task
+  did not name, and report leftovers instead of deleting them.
+- Add, in the same row, one plain sentence: "Adding what the task needs (new actions, state, repository
+  operations, list rendering, wiring) is always in scope; 'restructure only on request' means rewriting
+  or moving existing working code, never declining to build the requested feature."
+- The checklist gets one item: "The requested feature is delivered (or the one blocker is named with
+  the smallest step to unblock it): yes or no."
+- No other change.
+
+## Outcome (moderator)
+
+- R2b landed.
+- On a confound-free baseline, R3 is verified: the fixed kit declines the shortcut in the first sentence
+  2/2, the old kit 0/2, and both kits deliver the feature.
+- All of R1–R4 (with R2b) are kept.
+- Full evidence is in the moderator log.
