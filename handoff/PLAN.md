@@ -470,7 +470,7 @@ non-negotiables of P3 and P4.
    - bash 3.2 compatible; use `rg` when available, falling back to `grep -R`.
    - No network; no writes outside the target directory.
 
-**Acceptance.** `bash skills-v2/compose-architecture/scripts/tests/run-tests.sh` exits 0; paste its
+**Acceptance.** `bash skills-v2/_tests/compose-architecture/run-tests.sh` exits 0; paste its
 output in the report. Every check has a good and a bad fixture.
 
 ---

@@ -8,7 +8,7 @@ Contents:
 - Keys: stable identity, never the index
 - contentType for mixed item types
 - Item-scope work: no heavy work or per-item allocation
-- Per-item callbacks without per-frame allocation
+- Per-item callbacks need no hand memoization (strong skipping)
 - Grids: Fixed vs Adaptive
 - Nesting rules
 - Item animations
@@ -70,17 +70,16 @@ Hoist painters, color resolutions, shapes, and borders above the `items` lambda.
 
 ## Per-item callbacks
 
-There is no auto-memoization inside lazy item builders: hoist stable lambdas by hand instead of allocating a fresh closure per item per composition (SKY-59).
-
-Prefer a remembered id-keyed handler for per-item callbacks (SKY-61):
+On Kotlin 2.0.20 or later strong skipping is on by default, and the compiler remembers every lambda inside a composable automatically, keyed by its captures. Pass per-item callbacks straight into the row: no hand-hoisting, no `remember` wrapper. Evidence: https://developer.android.com/develop/ui/compose/performance/stability/strongskipping and https://kotlinlang.org/docs/whatsnew2020.html. If `gradle/libs.versions.toml` shows Kotlin below 2.0.20, stop and report instead of applying this paragraph; only those projects hoist stable lambdas by hand (SKY-59).
 
 ```kotlin
 val onOpenNote: (Long) -> Unit = { id -> onAction(NotesUiAction.OnNoteClick(id)) }
 items(notes, key = { it.id }) { note ->
-    val open = remember(note.id, onOpenNote) { { onOpenNote(note.id) } }
-    NoteRow(note = note, onOpen = open)
+    NoteRow(note = note, onOpen = { onOpenNote(note.id) })
 }
 ```
+
+Never wrap the callback in `remember(note.id) { { onOpenNote(note.id) } }`: a hand `remember` whose keys do not cover everything the lambda captures (for example the whole item, or an un-keyed callback) keeps returning the first closure, so the row calls back with stale values; strong skipping keys on all captures, so leave the lambda unwrapped.
 
 ## Grids
 
@@ -138,6 +137,7 @@ Prefer the platform pausable-prefetch default before any manual window tuning (S
 - Fresh objects in the key lambda defeat identity comparison (LIST-15).
 - An unstable row parameter cancels key and content-type gains; stabilize first (SKY-80).
 - `remember` does not change which scope a read invalidates; move the read (SKILL.md rule 2).
+- A hand `remember` around item callbacks whose keys do not cover everything the lambda captures (for example the whole item, or an un-keyed callback) keeps returning the first closure, so the row calls back with stale values; strong skipping keys on all captures, so leave the lambda unwrapped (SKY-59 is pre-2.0.20 only).
 - Animations without a stable key silently no-op (SKY-78).
 
 ## Red flags
@@ -156,7 +156,7 @@ Prefer the platform pausable-prefetch default before any manual window tuning (S
 
 - [ ] Every `items(` call carries `key` from domain identity and a `contentType` where types mix: yes or no.
 - [ ] No index key in any lazy layout (`rg -n "key = \{ *(index|it\.index)" --glob '*.kt'` is empty): yes or no.
-- [ ] No filter, sort, parse, or allocation inside item lambdas: yes or no.
+- [ ] No filter, sort, parse, or object allocation inside item lambdas (plain closures need no hand memoization on Kotlin 2.0.20 or later): yes or no.
 - [ ] No clock or formatted-countdown read above the leaf that renders it: yes or no.
 - [ ] No `PagingData` field on any `UiState`: yes or no.
 - [ ] `LoadState.Error` never reaches a composable or `UiState`; the boundary maps it to `AppError`: yes or no.

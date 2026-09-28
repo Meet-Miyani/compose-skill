@@ -5,8 +5,11 @@
 # flags, no sed -i. No network. Writes only inside handoff/work/scratch/.
 #
 # Usage (from the repo root):
-#   bash skills-v2/compose-architecture/scripts/tests/run-tests.sh
+#   bash skills-v2/_tests/compose-architecture/run-tests.sh
 #
+# The suite lives outside the installed skill folders so shipped skills
+# contain no fixtures. Guard scripts under test live in
+# skills-v2/compose-architecture/scripts/.
 # Asserts every check exits 0 on `fixtures/good/` and exits non-zero
 # with the expected message on its own `fixtures/bad/<check>/` tree,
 # then asserts the `compose-feature` scaffold fails only
@@ -16,8 +19,8 @@
 set -u
 
 TESTS_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCRIPTS_DIR="$(dirname "$TESTS_DIR")"
-REPO_ROOT="$(cd "$TESTS_DIR/../../../.." && pwd)"
+REPO_ROOT="$(cd "$TESTS_DIR/../../.." && pwd)"
+SCRIPTS_DIR="$REPO_ROOT/skills-v2/compose-architecture/scripts"
 GOOD="$TESTS_DIR/fixtures/good"
 BAD="$TESTS_DIR/fixtures/bad"
 SCRATCH="$REPO_ROOT/handoff/work/scratch/phase5-tmp"

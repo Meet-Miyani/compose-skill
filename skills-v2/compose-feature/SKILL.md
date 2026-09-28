@@ -69,7 +69,7 @@ scripts/new-feature.sh --name Notes --item Note --package com.example.feature.no
 | Situation | Action |
 |---|---|
 | New destination in a kit-shaped module | Scaffold with `new-feature.sh`, then implement the marked `SEAM`s |
-| Change to an existing destination | Hand-write the smallest correct diff; never re-scaffold over it |
+| Change to an existing destination | Hand-write the smallest correct diff; never re-scaffold over it. Never remove, rename, or relocate existing working behaviour (actions, state fields, effects, tests, routes, error wiring such as `HandleAppErrors`) that the task did not name. Code that looks like a leftover or conflicts with the change stays; report it in one line as a follow-up. Restructure only on request |
 | Precedent is incoherent (competing patterns) | Use the kit shape for new code, name the incoherence, propose migration separately |
 
 ### Drop or degrade a bad record
@@ -136,6 +136,7 @@ rg -n "SEAM" <module>
 - [ ] ViewModel tests cover the state matrix with hand-written fakes; settle deterministically (any fake-compatible idle-advance).
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
 - [ ] `scripts/composekit/run-checks.sh` exits 0 when installed (guards land in Phase 5; until then verify by hand).
+- [ ] The diff removes nothing the task did not name: yes or no.
 - [ ] Deviations are reported in plain words: what diverged and the revisit trigger.
 
 ## Reference lookup

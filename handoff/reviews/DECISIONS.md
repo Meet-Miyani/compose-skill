@@ -32,3 +32,16 @@ disagree, this log wins. The worker reads it at the start of every phase.
 | M-14 | 2026-09-25 | moderator | **Braces follow the Android Kotlin style guide exactly** (https://developer.android.com/kotlin/style-guide, quoted in the Phase 8.5 report). Braces are required on every multi-line `if`/`for`/`while`/`do`/`when` body. They may be omitted only on single-line `when` branches and on `if` expressions with at most one `else` that fit on one line, e.g. `if (x) return` and `val v = if (a) b else c`. "Braces always, even on guards" is shown as a sample project decision. This amends the Phase 8.5 rule 3.1 (O-11). |
 | M-15 | 2026-09-25 | moderator | **CMP target shape follows the official JetBrains AGP 9 template.** The shape is a KMP **`:composeApp`**, which is the composition root; a thin **`:androidApp`** shell (`com.android.application` plus Compose, depending on `projects.composeApp`); and the `iosApp` Xcode project. `:composeApp` holds the shared `App()` composable, Koin startup, and the Navigation 3 `NavDisplay` with every feature's entries in `commonMain`, plus the desktop `main()` in `jvmMain` and the iOS framework export. **Evidence:** https://kotlinlang.org/docs/multiplatform/multiplatform-project-agp-9-migration.html (the androidApp module's `implementation(projects.composeApp)`), and the Phase 9 compile gate: the Android-only `:app` root forced a duplicated desktop root (defect #18). The Android-only shape keeps `:app`. `.composekit.conf` sets `COMPOSITION_ROOT="composeApp"` for CMP. |
 | O-12 | 2026-09-25 | owner | **After M9 finding F-M9-1, fix the defect class, then use a fresh held-out set.** The kit lectured (rule-number citations) and over-applied (every item a blocker, rebuilding instead of reusing), so engineering outcomes on new tasks fell from 83% to 72%. Fix the class with a "proportional, plain-spoken senior" rule set, not case-specific text. Held-out v1 is now contaminated; it is demoted to extra dev material (`evals-v2/heldout-v1-dev.*`). A new independent writer produces sealed held-out **v2** in a new domain. Only v2 numbers are quoted as performance on new tasks. The panel resumes after Muse is re-run on the fixed kit. |
+
+## O-13: fix round 3 is a correctness/residual round (owner-approved 2026-09-28)
+
+- STANDARDS §8.5 rule 4 caps primary-model fix rounds at 2. K and L are used.
+- The owner approved a third round, limited to defects found by **new evidence** after the kit froze:
+    - a stale third-party fact (F-A-3)
+    - a packaging defect (F-H-1)
+    - two behaviour gaps seen in real agent harnesses on moderator-written tasks (F-H-2, F-H-4)
+- **Not allowed:** edits shaped to any held-out v3 answer or rubric wording, and new rules without an
+  official source or recorded evidence.
+- **Verification:** fresh tasks the kit has never seen (moderator-written after the fixes land), plus
+  the existing guard tests and self-checks.
+- **Held-out v3 stays sealed** for the worker, and its numbers are not re-reported as if post-fix.

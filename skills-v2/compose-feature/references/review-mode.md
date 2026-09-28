@@ -30,6 +30,7 @@ Answer the verdict on line one, then findings in plain words with file-path evid
 - A kit-convention deviation in working code (naming, file layout, two first-load owners with no bug, DI style) is **worth doing later**, unless the task is kit adoption or the user asked for a convention review.
 - `Not shippable` or `request changes` is used only when a blocking item exists.
 - Every review ends with a short **fine as is** line naming what needs no change.
+- Lambda allocation inside composables is fine as is on Kotlin 2.0.20 or later: a fresh closure per recomposition and per-item callbacks passed without a hand `remember` are memoized automatically by capture, so they are never a finding, never blocking, and never worth doing later. Evidence: https://developer.android.com/develop/ui/compose/performance/stability/strongskipping. If `gradle/libs.versions.toml` shows Kotlin below 2.0.20, the old hand-hoisting note may apply instead.
 
 Output shape, in this order: 1. verdict, 2. blocking (usually 0–2 items), 3. worth doing later, 4. fine as is.
 
