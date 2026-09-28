@@ -71,7 +71,7 @@ phase.
 
 ## Sealed held-out set (Phase 9 on; updated by O-12)
 
-Never open, read, grep, list or reference `evals-v2/heldout-v3.json` or `evals-v2/heldout-v3.md` (sealed final test set, scored once). `evals-v2/heldout-v2.*` is also off-limits until the moderator demotes it. They are
+Never open, read, grep, list or reference `evals-v2/heldout-v4*` (the sealed final test set, scored once), `evals-v2/heldout-v3.json` or `evals-v2/heldout-v3.md`. `evals-v2/heldout-v2.*` is also off-limits until the moderator demotes it. They are
 the sealed test set (STANDARDS §8.5 rule 3); reading them invalidates the kit's "performance on new tasks"
 numbers.
 
