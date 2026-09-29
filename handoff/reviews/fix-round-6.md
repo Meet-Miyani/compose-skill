@@ -1,5 +1,9 @@
 # Fix round 6: release plan steps 1-4 (worker brief)
 
+> **Status 2026-09-30: waiting for plan resets (owner).** Codex was at 42% of its week, past the owner's 30%
+> guard; its weekly limit resets 2026-10-05 10:57 IST. OpenCode Go was at 95% on 2026-09-29 and resets around
+> 2026-10-05. Check both limits again before launching.
+
 **Worker:** GPT-6-Sol via Codex (O-16), unless the owner names another. **Rules:** `handoff/WORKER_RULES.md`
 applies in full. Write only under `skills-v2/**` and `handoff/work/**`. Never commit. Never open
 `evals-v2/heldout*`.
