@@ -151,17 +151,24 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 
 ## Reference lookup
 
-Load exactly one reference, only when needed. One level deep.
+Load only what the task needs. Paths are relative to `skills-v2/`.
 
-- [module-graph.md](references/module-graph.md) — modules, cross-feature state/navigation, dependency errors.
-- [mvi-contract.md](references/mvi-contract.md) — ViewModels, `Contract.kt`, `onAction`, effect collection.
-- [error-handling.md](references/error-handling.md) — failure paths, tier choice, `AppError` mapping.
-- [state-ownership.md](references/state-ownership.md) — value placement, process death, lifecycle guards.
-- [naming-and-packages.md](references/naming-and-packages.md) — file/type names, placement, read names, imports.
-- [dependency-injection.md](references/dependency-injection.md) — Koin modules, ViewModel injection, nav args, `SavedStateHandle`.
-- [navigation.md](references/navigation.md) — `NavKey`s, entries, back stack, results, sheets and dialogs.
-- [coroutines-flow.md](references/coroutines-flow.md) — `Channel` vs `SharedFlow`, sharing flows, cancellation, dispatchers.
-- [existing-projects.md](references/existing-projects.md) — kit divergences, migrating from Navigation 2, Hilt or MVVM.
-- [code-craft.md](references/code-craft.md) — KDoc, intent comments, braces, naming, magic values; load when writing or reviewing Kotlin.
-- [modern-kotlin.md](references/modern-kotlin.md) — language idioms with version gates; load when the code could use one.
-- [README.md](templates/core/README.md) — creating `:core:mvi`, `:core:error`.
+| Task kind | Owning skill | Read when relevant (at most three) |
+|---|---|---|
+| New feature or destination | `compose-feature` | `compose-architecture/references/mvi-contract.md`, `compose-architecture/references/navigation.md` |
+| Change to an existing destination | `compose-feature` | `compose-architecture/references/existing-projects.md`, `compose-architecture/references/state-ownership.md` |
+| Bug fix | Skill owning the affected code | `compose-feature/references/testing.md`, `compose-architecture/references/error-handling.md` |
+| Code review | Skill owning the reviewed code | `compose-feature/references/review-mode.md`, `compose-architecture/references/code-craft.md` |
+| Data/persistence or file storage | `compose-data` | `compose-architecture/references/coroutines-flow.md`, `compose-architecture/references/error-handling.md`, `compose-data/references/datastore.md` |
+| Networking | `compose-data` | `compose-data/references/networking-ktor.md`, `compose-architecture/references/error-handling.md` |
+| New module or project change | `compose-project` | `compose-architecture/references/module-graph.md`, `compose-architecture/references/dependency-injection.md` |
+| Platform capability (notifications, permissions, background work) | `compose-platform` | `compose-platform/references/sharing-and-bridges.md`, `compose-architecture/references/dependency-injection.md` |
+| UI-only change | `compose-ui` | `compose-ui/references/state-reads-and-stability.md`, `compose-feature/references/ui-testing.md` |
+
+Other architecture references:
+
+- [code craft](references/code-craft.md), [coroutines](references/coroutines-flow.md), [DI](references/dependency-injection.md)
+- [errors](references/error-handling.md), [existing projects](references/existing-projects.md)
+- [modern Kotlin](references/modern-kotlin.md), [modules](references/module-graph.md)
+- [MVI](references/mvi-contract.md), [naming](references/naming-and-packages.md)
+- [navigation](references/navigation.md), [state](references/state-ownership.md), [core templates](templates/core/README.md)

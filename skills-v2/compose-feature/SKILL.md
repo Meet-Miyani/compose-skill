@@ -142,7 +142,12 @@ rg -n "SEAM" <module>
 
 ## Reference lookup
 
-Load exactly one reference, only when needed. One level deep.
+Load only the references this task needs. One level deep.
+
+- Also read [mvi-contract.md](../compose-architecture/references/mvi-contract.md) for a new destination.
+- Also read [navigation.md](../compose-architecture/references/navigation.md) when wiring a destination.
+- Also read [state-ownership.md](../compose-architecture/references/state-ownership.md) when changing existing state.
+- Also read [error-handling.md](../compose-architecture/references/error-handling.md) for failure paths.
 
 - [testing.md](references/testing.md) — ViewModel test convention, fakes, the state matrix rows.
 - [ui-testing.md](references/ui-testing.md) — Compose UI test rules: finders, assertions, sync, lazy lists, restoration, KMP runners.

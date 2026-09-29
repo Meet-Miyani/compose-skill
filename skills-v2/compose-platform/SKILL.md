@@ -108,7 +108,10 @@ interface NoteLockStorage {
 
 ## Reference lookup
 
-Load exactly one reference, only when needed. One level deep.
+Load only the references this task needs. One level deep.
+
+- Also read [dependency-injection.md](../compose-architecture/references/dependency-injection.md) for platform service bindings.
+- Also read [coroutines-flow.md](../compose-architecture/references/coroutines-flow.md) for asynchronous platform services.
 
 - [sharing-and-bridges.md](references/sharing-and-bridges.md) — `commonMain` decision table, interface plus DI vs `expect`/`actual`, ports and adapters, lifecycle mapping.
 - [ios-swift-interop.md](references/ios-swift-interop.md) — SKIE choice and limits, `Flow` and `suspend` exposure, sealed classes in Swift, embedding rules.

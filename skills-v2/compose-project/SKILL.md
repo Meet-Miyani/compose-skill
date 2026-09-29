@@ -136,7 +136,10 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 
 ## Reference lookup
 
-Load exactly one reference, only when needed. One level deep.
+Load only the references this task needs. One level deep.
+
+- Also read [module-graph.md](../compose-architecture/references/module-graph.md) when adding a module.
+- Also read [dependency-injection.md](../compose-architecture/references/dependency-injection.md) when wiring module bindings.
 
 - [bootstrap.md](references/bootstrap.md) — new-project workflow: target selection, module skeleton, guard install, first feature, `## Project decisions`, every `.composekit.conf` key.
 - [adopt-existing.md](references/adopt-existing.md) — audit checklist, gap-report format, incremental order, WARN-mode guards, what never to force-migrate.

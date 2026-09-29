@@ -103,7 +103,10 @@ Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recor
 
 ## Reference lookup
 
-Load exactly one reference, only when needed. One level deep.
+Load only the references this task needs. One level deep.
+
+- Also read [review-mode.md](../compose-feature/references/review-mode.md) when reviewing a feature UI change.
+- Also read [ui-testing.md](../compose-feature/references/ui-testing.md) when changing UI behavior.
 
 - [state-reads-and-stability.md](references/state-reads-and-stability.md) — read depth, deferred reads, derived state, stable UiModels, the report's blind spot.
 - [ux-states.md](references/ux-states.md) — skeleton vs keep-content vs spinner, validation, disabled vs hidden.
