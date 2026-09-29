@@ -93,7 +93,7 @@ Claude graders, two passes, adjudicated.**
 | DeepSeek V4 Pro | 56 | 75 |
 | Gemini 3.8 Flash | 57 | 75 |
 | DeepSeek V4.1 Flash | 68 | 76 |
-| MiniMax M3 | 54 | 59 (lift not met: pass A was a tie) |
+| MiniMax M3 | 54 | 59 (small lift after adjudication, m9:1491; before adjudication pass A was a tie) |
 | GPT-6-Luna | 49 | 48 (no lift) |
 
 - GPT-6-Sol re-graded a sample and agreed on 84% of items. It was stricter on kit answers.
@@ -219,6 +219,9 @@ loading on those tasks.
 
 ## 8. Next steps (in order, each with a finish condition)
 
+> **Superseded 2026-09-30 (O-17):** the approved release plan is `handoff/reviews/review-gpt-astra-verified.md` §5.
+> The steps below are kept as history.
+
 0. **Run the independent review first** (`handoff/REVIEW-PROMPT.md`). Its verdict can change the steps below.
 1. **Fix content and loading inside the 20k budget**, using §5:
    - Write the four missing lifecycle rules and resolve the four contradictions (§5).
@@ -252,7 +255,7 @@ loading on those tasks.
    - an agentic eval in a real repo, where the build must pass
    - harvest valuable legacy knowledge (Phase 0 ledger)
 
-### 8a. Loading and guidance design: proposal, not yet decided
+### 8a. Loading and guidance design (decided 2026-09-30 as O-17, with a new minimal entry skill; see the verification file §3)
 
 This is the moderator's proposal after an owner question (2026-09-29). It is **not an owner decision**. Weigh it
 against the independent review, and decide with the owner.
