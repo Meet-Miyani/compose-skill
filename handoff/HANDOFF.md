@@ -252,6 +252,26 @@ loading on those tasks.
    - an agentic eval in a real repo, where the build must pass
    - harvest valuable legacy knowledge (Phase 0 ledger)
 
+### 8a. Loading design direction (owner, 2026-09-29)
+
+Progressive loading through a small controller, routed by a decision table to **exact reference files, not whole
+skills**:
+
+| Layer | When loaded | Target size |
+|---|---|---|
+| Always-on pointer (AGENTS.md / CLAUDE.md / GEMINI.md snippet) | always | ~1k |
+| Controller skill: the must-know cross-cutting rules, plus a task → files decision table | every task | ~4k |
+| One task skill's SKILL.md (procedure) | when the table picks it | ~3–4k |
+| 2–4 small references, each with a "load when…" line | only when the table says so | ~6–8k |
+| **Per task** | | **~15–18k (≤ 20k)** |
+
+- Rules every task needs live in the controller, never only in a reference.
+- Split large references into smaller, single-purpose files.
+- Today's harness does the routing for the model. The v5 test must also measure **routing accuracy**: whether the
+  model itself loads the right files, in a real agent. Vercel measured skills going unused in 56% of cases, so do
+  not assume the table is followed.
+- The independent review may propose a better shape. Weigh it on evidence.
+
 **Loose ends from this session:**
 - Pre-registered GPT-6-Sol cross-grades of `g-son3-h4-a` and `g-core6-h4-a` (H4-02, 03, 07, 11): not run. Optional, since the direction is already confirmed by Gemini.
 - Disputed grading point: `UNMutableNotificationContent` `title =` vs `setTitle(...)` in Kotlin/Native. Check it against the Kotlin/Native ObjC interop docs.
