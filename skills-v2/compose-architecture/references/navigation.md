@@ -79,19 +79,24 @@ Each nav entry is built once in the composition root. Resolve the nav-scoped Vie
 
 One bare injected param is fine. Two or more construction values travel as one `Params` class through `parametersOf`. Koin matches injected params by type, so two raw strings silently rebind. (CONTRACT_BRIEF §6.3)
 
-Every `NavDisplay` carries the view-model-store entry decorator, an explicit scene strategy, and an explicit back handler. The decorator comes from `androidx.lifecycle.viewmodel.navigation3`; the strategy from `androidx.navigation3.scene`; `NavDisplay` itself from `androidx.navigation3.ui`. On CMP the UI artifact resolves from the JetBrains fork group with identical packages and imports (see the `compose-project` skill, `version-catalog.md`):
+Every `NavDisplay` carries the saveable-state-holder and view-model-store entry decorators, an explicit scene strategy, and an explicit back handler. The view-model-store decorator comes from `androidx.lifecycle.viewmodel.navigation3`; the saveable decorator from `androidx.navigation3.runtime`; `NavDisplay` from `androidx.navigation3.ui`; the strategy from `androidx.navigation3.scene`. On CMP the UI artifact resolves from the JetBrains fork group with identical packages and imports (see the `compose-project` skill, `version-catalog.md`):
 
 ```kotlin
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+
 NavDisplay(
     backStack = backStack,
-    entryDecorators = listOf(rememberViewModelStoreNavEntryDecorator()),
+    entryDecorators = listOf(
+        rememberSaveableStateHolderNavEntryDecorator(),
+        rememberViewModelStoreNavEntryDecorator(),
+    ),
     sceneStrategies = listOf(SinglePaneSceneStrategy()),
     onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
     entryProvider = entryProvider { /* one entry<> per destination */ },
 )
 ```
 
-One decorator alone leaves distinct keys sharing a single store, and ViewModels fall back to activity scope. For decorator mechanics, the android/skills `navigation-3` skill goes deeper, if installed. (AND-03; CMP-30)
+The saveable decorator backs entry state and nav-scoped `SavedStateHandle` (https://developer.android.com/guide/navigation/navigation-3/save-state). One decorator alone leaves distinct keys sharing a single store, and ViewModels fall back to activity scope. For decorator mechanics, the android/skills `navigation-3` skill goes deeper, if installed. (AND-03; CMP-30)
 
 ## Back stack
 
@@ -166,4 +171,4 @@ Navigation 2 is not taught.
 - [ ] `grep -rn "^private var \|^var \|^internal var " --include="*.kt" feature/*/navigation/ feature/*/presentation/` returns nothing.
 - [ ] `grep -rn "import com.example.feature" --include="*.kt" feature/` returns no cross-feature navigation import (shared `:data:` imports are fine).
 - [ ] Every key carries only identifiers, enums, or short hints; no key references a `*UiModel` or aggregate: yes or no.
-- [ ] Every `NavDisplay` call site passes the view-model-store entry decorator, a scene strategy, and `onBack`: yes or no.
+- [ ] Every `NavDisplay` call site has both decorators present, saveable first, plus a scene strategy and `onBack`: yes or no.

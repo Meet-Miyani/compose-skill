@@ -26,7 +26,8 @@ kotlin {
         implementation(projects.core.mvi)
         implementation(projects.core.error)
         implementation(projects.core.designsystem)
-        implementation(projects.data.notes)
+        // EDIT: add this line only when a shared :data:<domain> module exists:
+        // implementation(projects.data.notes)
         implementation(libs.androidx.activity.compose)
         implementation(libs.compose.uiToolingPreview)
         implementation(libs.compose.foundation)

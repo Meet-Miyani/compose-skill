@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.core.mvi.CollectEffect
-import com.example.core.mvi.UiEffect
 import com.example.designsystem.error.HandleAppErrors
 
 /** Entry for the __Name__ destination; owns lifecycle, effect collection, and error forwarding. */
@@ -19,7 +18,7 @@ import com.example.designsystem.error.HandleAppErrors
 fun __Name__Route(
     viewModel: __Name__ViewModel,
     __item__Id: Long,
-    onEffect: suspend (UiEffect) -> Unit,
+    onEffect: suspend (__Name__UiEffect) -> Unit,
 ) {
     LifecycleStartEffect(__item__Id) {
         viewModel.onAction(__Name__UiAction.OnScreenStarted)

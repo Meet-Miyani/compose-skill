@@ -4,8 +4,14 @@ Load this reference when writing or reviewing the Ktor `HttpClient` factory, plu
 
 ## Client factory and plugins
 
+**SEAM — `createHttpClient(engine)`**: supply one injected Ktor client factory in the project network module. It must set `expectSuccess = true`, install `ContentNegotiation` and `HttpTimeout` with request/connect/socket limits, and follow the engine, retry, logging, and header rules below. The kit does not ship this factory.
+
+**SEAM — `NetworkExceptionMapper.mapOrNull`**: supply a call-executor classifier that walks causes, maps the recognised failures in rules 14–20 to `NetworkException`, rethrows cancellation, and propagates anything unclassified. The kit does not ship this classifier.
+
 1. (non-negotiable) **Build one shared `HttpClient` in a single factory and inject it; never construct a client per request.** A per-request client opens a fresh connection pool and engine per call, leaking sockets and bypassing shared plugin config on every notes sync. *Prevents:* connection-pool exhaustion. <!-- NK-03 -->
 2. (non-negotiable) **Set `expectSuccess = true` on the client; never inspect status codes at call sites.** With `true` the client throws `RedirectResponseException` (3xx), `ClientRequestException` (4xx), `ServerResponseException` (5xx), and the classifier maps them to `NetworkException.Http`; manual per-call checks re-introduce error-tossing. *Prevents:* per-call status checks hiding the error path. <!-- NK-04, NK-09 -->
+
+For a by-identity read returning a nullable record, the remote data source may catch `ClientRequestException` solely to turn HTTP 404 into `null`; it must rethrow every other status. Other reads keep the normal classifier path; `AppErrorType.NotFound` is for non-identity reads. Ktor documents 4xx as `ClientRequestException`: https://ktor.io/docs/client-response-validation.html.
 3. (default) **Install `HttpRequestRetry` before `HttpTimeout` and fix the plugin order once in the client factory; never install or reorder plugins per call.** If `HttpTimeout` is installed, `HttpRequestRetry` goes first so timeouts can be configured for retry (verified: https://ktor.io/docs/client-request-retry.html); per-call plugin changes fork client behavior silently. *Prevents:* timeouts that never retry. <!-- NK-06 -->
 4. (default) **Set the `HttpTimeout` triple (`requestTimeoutMillis`, `connectTimeoutMillis`, `socketTimeoutMillis`) in the factory with project-tuned values; the kit mandates the triple, not the numbers.** A missing socket timeout hangs a stalled catalog page fetch with no deadline. *Prevents:* hung requests. <!-- NK-07 -->
 5. (default) **Put the base URL and static headers in `DefaultRequest` via `defaultRequest { url(...); header(...) }`, never string-concatenated per call.** Per-call URL building drops path segments when the base lacks a trailing slash and duplicates auth headers. *Prevents:* malformed URLs and duplicated headers. <!-- NKA-21 -->

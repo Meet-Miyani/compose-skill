@@ -130,6 +130,26 @@ class __Name__ViewModelTest {
     }
 
     @Test
+    fun `reconcile failure keeps content and clears refreshing`() = runTest(testScheduler) {
+        val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
+        val viewModel = viewModel(fake)
+        val errors = mutableListOf<com.example.core.error.AppError>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.errors.toList(errors) }
+
+        viewModel.onAction(__Name__UiAction.OnScreenStarted)
+        advanceUntilIdle()
+        fake.shouldThrow = NetworkException.Connection()
+        viewModel.onAction(__Name__UiAction.OnScreenStarted)
+        advanceUntilIdle()
+
+        assertEquals("Title", viewModel.state.value.items.single().title)
+        assertNull(viewModel.state.value.error)
+        assertFalse(viewModel.state.value.isRefreshing)
+        assertFalse(viewModel.state.value.isLoading)
+        assertEquals(1, errors.size)
+    }
+
+    @Test
     fun `save persists draft and emits saved`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { seed(listOf(note())) }
         val viewModel = viewModel(fake)
@@ -210,6 +230,8 @@ class __Name__ViewModelTest {
         val handle = SavedStateHandle()
         handle["draftTitle"] = "half-typed"
         val viewModel = viewModel(fake, handle = handle)
+
+        assertEquals("half-typed", viewModel.state.value.draftTitle)
 
         viewModel.onAction(__Name__UiAction.OnScreenStarted)
         advanceUntilIdle()

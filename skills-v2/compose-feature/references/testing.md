@@ -45,6 +45,7 @@ One line per row: arrange the fake, drive the action, assert state and effects. 
 - Cold load: fake returns two notes; send `OnScreenStarted` with no prior data; assert content, `isLoading` false, no error, no effect.
 - Reconcile: preload one list, return an updated list on next `OnScreenStarted`; assert prior content stays until the fresh list replaces it.
 - Refreshing: set content, send a second `OnScreenStarted` against a slow fake; assert old content stays plus `isRefreshing` true, then fresh content with false.
+- Reconcile fails, content kept: set content, make the next by-id read throw, send a second `OnScreenStarted`; assert old content remains, both loading flags clear, and one popup error is emitted.
 - Error: set `fake.shouldThrow`; send `OnScreenStarted` on empty content; assert `error` holds the mapped `AppError` with Retry available.
 - Retry: keep the failed error, clear `shouldThrow`, send `OnRetryClick`; assert content on success or the same error when still failing.
 - Empty: fake returns zero rows; assert the empty business flag with no `AppError` set.
@@ -68,7 +69,7 @@ Assert in-flight states (loading, refreshing) by holding the fake's call open wi
 *Trace: CONTRACT_BRIEF §9.2; TEST-39 (derived values through ViewModel state); SMP-57 (replaying hot flows, empty defaults, test-only setters); SMP-58 (stateIn starts on collect: collectors first); SMP-59 (explicit loading value; pin loading-to-success).*
 
 ## Dispatchers and determinism
-Inject dispatchers as constructor parameters on the ViewModel and on any repository that dispatches. The only allowed `Dispatchers.IO` occurrence in production is a `= Dispatchers.IO` default on an injected parameter; never look it up at a call site. The callee switches with the injected dispatcher. *Prevents:* untestable threading. *Trace: CONTRACT_BRIEF §3.6, §9.4.*
+Inject dispatchers as constructor parameters on the ViewModel and on any repository that dispatches. Use `Dispatchers.Default` as the `commonMain` default; `Dispatchers.IO` exists on Kotlin/Native since coroutines 1.7.0 but is unavailable when the module also targets JS/Wasm. Never look it up at a call site. The callee switches with the injected dispatcher. *Prevents:* untestable threading. *Trace: CONTRACT_BRIEF §3.6, §9.4.*
 Default to queuing `StandardTestDispatcher` on one shared `TestCoroutineScheduler`: `setMain` a `Main` instance in setUp, pass that scheduler to `runTest`, and build the injected dispatcher as a separate instance on the same scheduler, never the same instance as `Main`. *Prevents:* assertions that race the dispatcher, and a `withContext` on the shared instance that never suspends, hiding the loading frame.
 Use `UnconfinedTestDispatcher(testScheduler)` for collectors that must not miss an emission: effect collection in `backgroundScope`, and hot-flow collector setup. State the reason in a comment. *Prevents:* eager execution hiding an ordering defect, and a `trySend` handoff the queue never drains.
 *Trace: SKT-60 (queuing dispatcher default; unconfined only for hot-flow collector setup with stated reason); SKT-61 (set Main; one scheduler shared).*
@@ -109,6 +110,6 @@ Platform tests (shell wiring, deep-link entry, nav-host integration, share/clipb
 - [ ] Stream fakes preload empty defaults with test-only setters; collectors launch before actions (yes/no).
 - [ ] No derived value is asserted mapper-only when the ViewModel owns the field (yes/no).
 - [ ] Loading-to-success is pinned where a loading flag exists (yes/no).
-- [ ] No production file references `Dispatchers.IO` outside a constructor default value (run `rg -n "Dispatchers\.IO" --glob '*.kt'`; every hit is a `= Dispatchers.IO` default on an injected dispatcher parameter, never a call-site lookup).
+- [ ] `commonMain` injected dispatcher defaults use `Dispatchers.Default`; no call site looks up `Dispatchers.IO` (run `rg -n "Dispatchers\.IO" --glob '*.kt'` and inspect every hit).
 - [ ] `verify()` lives in `commonTest`; ViewModel tests hold no Koin rule (yes/no).
 - [ ] Shared asserts use `kotlin.test` only (yes/no).

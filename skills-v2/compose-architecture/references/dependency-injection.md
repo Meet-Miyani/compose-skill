@@ -137,6 +137,7 @@ The composition root's `adapter/` package holds every host implementation of a `
 - An Android `Context` reference in `commonMain` breaks non-Android targets; platform types enter shared code only through an interface bound in the composition root. (KOIN-36)
 - Resolving a ViewModel anywhere except the composition-root entry builder or its Route orphans it from the nav scope; entry resolution stays in the root. (§6.3)
 - The typed `startKoin<T>()` for a `@KoinApplication` is `org.koin.plugin.module.dsl.startKoin`, not `org.koin.core.context.startKoin`; without that import the call fails overload resolution. The migration page snippet leaves it unqualified.
+- The typed `startKoin<T>()` only works in a module that applies the Koin compiler plugin (`composekit.koin`). Platform shells that do not apply it call the composition root's `initKoin()`; otherwise the first `koinViewModel()` throws `NoDefinitionFoundException`.
 
 ## Red flags
 

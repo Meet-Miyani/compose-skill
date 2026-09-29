@@ -1,6 +1,6 @@
 // :androidApp template — the thin Android shell of the CMP shape (M-15).
 // Copy to androidApp/build.gradle.kts and set the namespace.
-// It starts DI, applies platform chrome, and renders the shared App
+// Its Application starts DI; the Activity renders the shared App
 // composable from :composeApp. No business logic lives here (SKILL.md
 // rule 6). Depends on projects.composeApp; never on a feature directly.
 plugins {
@@ -15,7 +15,7 @@ kotlin {
     dependencies {
         implementation(projects.composeApp)
         implementation(libs.androidx.activity.compose)
-        // MainActivity calls startKoin, which lives in koin-core.
+        // MainApplication calls startKoin, which lives in koin-core.
         implementation(libs.koin.core)
     }
 }

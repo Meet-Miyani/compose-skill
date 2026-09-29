@@ -141,7 +141,7 @@ Two questions cover most placements. Each row has exactly one answer.
 
 ## Verification
 
-- [ ] `run-checks.sh` exits 0 for the touched project root (guards land in Phase 5; until then verify the items below by hand).
+- [ ] `run-checks.sh` exits 0 for the touched project root.
 - [ ] No `:feature:*` module declares a dependency on another `:feature:*` module: yes or no?
 - [ ] No `:feature:*`, `:core:*`, or `:data:*` module declares a dependency on the composition root: yes or no?
 - [ ] No `:core:*` module imports a `:feature:*`, `:data:*`, or design-system type: yes or no?

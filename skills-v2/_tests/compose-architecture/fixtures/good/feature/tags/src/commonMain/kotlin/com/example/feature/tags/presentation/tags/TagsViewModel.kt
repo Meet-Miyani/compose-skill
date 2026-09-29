@@ -10,6 +10,9 @@ import org.koin.core.annotation.InjectedParam
 
 data class TagsParams(val tagId: Long)
 
+// The error guard must not mistake a named result type for kotlin.Result.
+data class LoadResult<T>(val value: T)
+
 @KoinViewModel
 class TagsViewModel(
     private val repository: TagsRepository,

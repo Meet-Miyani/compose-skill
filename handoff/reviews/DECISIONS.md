@@ -85,3 +85,13 @@ disagree, this log wins. The worker reads it at the start of every phase.
     - Candidates that pass join v4, at the end of the queue.
 - **Evidence:** third-party benchmark numbers for these models are unverified; our own runs are the
   only evidence.
+
+## O-16: Codex (GPT-6-Sol) is the worker for fix round 4 only (owner-approved 2026-09-29)
+
+The OpenCode Go weekly pool is exhausted until ~2026-10-05, so the usual worker (Muse via OpenCode) cannot
+run. For fix round 4 only, GPT-6-Sol through Codex CLI (`codex exec`, workspace-write sandbox, repo root)
+acts as the worker under `handoff/WORKER_RULES.md` unchanged: it writes only under `skills-v2/**` and
+`handoff/work/**`, never commits, never reads `evals-v2/heldout*`. Scope: the O-9 Fable review's 2 blockers
+and 8 majors plus five surgical minors (`handoff/reviews/fix-round-4.md`). The moderator reviews every diff and
+verifies by rendering a fresh project from the templates and building it. Held-out v4 numbers are not
+re-scored (the v4 result stands for the kit as tested). Muse resumes as the worker after the Go reset.

@@ -2,6 +2,11 @@
 
 ComposeKit is a CLI for installing and updating AI coding skills for Jetpack Compose, Compose Multiplatform, and Kotlin Multiplatform workflows.
 
+> [!TIP]
+> **New: [Compose Kit (`skills-v2`)](skills-v2/README.md)**, six task-shaped skills plus templates and guards that
+> make agents build Compose apps one consistent way. Tested blind on 12 unseen tasks across 8 models: it lifted
+> 6 of 7 models, and one cheap model reached Opus level. [See the results →](skills-v2/README.md#results)
+
 ## Install
 
 ### macOS/Linux

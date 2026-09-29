@@ -18,12 +18,14 @@ Lay out the skeleton from `templates/project/` in bootstrap order: root settings
 
 ## Rules
 
+The composition templates include `MainApplication.kt`; copy it beside `MainActivity.kt` in the Android shell and keep the manifest's `android:name` pointing at it (https://insert-koin.io/docs/reference/koin-android/start/).
+
 1. (non-negotiable) **Choose the target shape once and keep every module inside it.** A CMP app keeps shared code in `:composeApp`, the Android entry point in the thin `:androidApp` shell, and iOS in the Xcode project. *Prevents:* a second Android entry point or a Gradle-ized `iosApp` that fails sync.
 2. (non-negotiable) **Module build files hold only the plugin alias plus namespace plus dependencies; see SKILL.md rule 1.** Convention plugins in `build-logic/` own every target, SDK, and toolchain block. *Prevents:* per-module SDK drift (brief §12.1).
 3. (non-negotiable) **Every version is declared once in `gradle/libs.versions.toml`; see SKILL.md rule 7.** A version written in two places diverges at the first bump. *Prevents:* version drift across modules.
 4. (non-negotiable) **Install the guards from the first commit and register every module; see SKILL.md rule 4.** Run `install-guards.sh` into the project, list every module in `.composekit.conf`, and keep `run-checks.sh` green. *Prevents:* unguarded modules and a green run that skipped them.
 5. (non-negotiable) **Park no business logic in the composition root; see SKILL.md rule 6 and brief §12.3.** Root slices are temporary scaffolds deleted when the target module ships. *Prevents:* root-as-junk-drawer.
-6. (non-negotiable) **Keep platform entry points thin and delegate all UI to the shared App composable.** Each entry point starts DI, applies platform chrome such as edge-to-edge, and renders the shared App; iOS goes through a single view-controller factory (SMP-49). *Prevents:* platform forks of the same screen.
+6. (non-negotiable) **Keep platform entry points thin and delegate all UI to the shared App composable.** Each shell calls the composition root's `initKoin()` once (Android: in the `Application`); entry points apply platform chrome such as edge-to-edge and render the shared App; iOS goes through a single view-controller factory (SMP-49). *Prevents:* platform forks of the same screen.
 7. (non-negotiable) **Compose previews need an Android target; on CMP 1.10 or newer use the AndroidX Preview annotation; preview tooling is `androidRuntimeClasspath` under the `android-kmp-library` plugin.** Verify the annotation and the dependency configuration against current docs (CMP-75..CMP-78; https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-previews.html). *Prevents:* previews that never render and tooling that never resolves.
 8. (non-negotiable) **Test fakes live in test source sets or test-only modules consumed through `testImplementation`.** Production source sets hold no fakes (SMP-28). *Prevents:* test doubles shipped to users.
 9. (default) **The `UI_MODEL` scaffold switch stays at `when-needed` unless the project records `always`; see SKILL.md rule 9.** `when-needed` emits the UiModel pair only when an M-11 trigger fires; `always` emits it for every feature. A recorded `## Project decisions` entry wins with no argument (M-12). *Prevents:* wrapper boilerplate on every feature by default.
@@ -51,7 +53,7 @@ Create one `## Project decisions` section in the project's agent instructions fi
 
 ## First feature and verification
 
-Scaffold the notes list as the first feature through the `compose-feature` skill, copy `templates/project/composekit.yml` as the CI job from the first commit, and add the one-line kit-activation pointer from `enforcement.md`.
+Scaffold the notes detail as the first feature through the `compose-feature` skill, copy `templates/project/composekit.yml` as the CI job from the first commit, and add the one-line kit-activation pointer from `enforcement.md`.
 
 Gotchas: giving the app and shared modules the same namespace collides the build, so use different namespaces and verify against current docs. Nesting the `kotlin` block inside the `android` block fails sync on AGP 9, so keep the blocks as siblings. Dropping `kotlin.code.style=official` or `android.nonTransitiveRClass=true` from `gradle.properties` reverts formatting and inflates every module's R class, so keep both (AGP 8 makes non-transitive R the default; GRAD-17). Adding `iosApp` as a Gradle module fails sync, because it is an Xcode project. Adding preview tooling as `debugImplementation` under the `android-kmp-library` plugin never resolves, so use `androidRuntimeClasspath` and verify against current docs. Using the older JetBrains preview annotation on CMP 1.10 or newer draws a deprecation, so use the AndroidX Preview annotation. Placing a fake in a production source set ships it, so keep fakes in test source sets or test-only modules behind `testImplementation`.
 

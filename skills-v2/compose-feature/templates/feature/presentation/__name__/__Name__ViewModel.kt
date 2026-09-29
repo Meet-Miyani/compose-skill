@@ -12,7 +12,6 @@ import com.example.core.mvi.BaseViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.InjectedParam
@@ -26,13 +25,11 @@ class __Name__ViewModel(
     private val repository: __Name__Repository,
     @InjectedParam private val params: __Name__Params,
     private val savedStateHandle: SavedStateHandle,
-    // Dispatchers.Default, not Dispatchers.IO: IO is JVM/Android-only and
-    // does not exist on Kotlin/Native, so shared code never names it.
+    // Inject the dispatcher; Default is the commonMain default across targets.
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
-) : BaseViewModel<__Name__UiAction, __Name__UiState, __Name__UiEffect>(__Name__UiState()) {
-
-    private val draftTitle: StateFlow<String> =
-        savedStateHandle.getStateFlow("draftTitle", "")
+) : BaseViewModel<__Name__UiAction, __Name__UiState, __Name__UiEffect>(
+    __Name__UiState(draftTitle = savedStateHandle["draftTitle"] ?: ""),
+) {
 
     private var loadJob: Job? = null
     private var hasStarted: Boolean = false
@@ -54,20 +51,19 @@ class __Name__ViewModel(
         // Overlap guard: the first load owns the response; later overlapping loads return early.
         if (loadJob?.isActive == true) return
         loadJob = launchGuarded(
-            onError = { updateState { copy(error = it, isLoading = false) } },
+            onError = { error ->
+                if (hasStarted) emitError(error) else updateState { copy(error = error) }
+            },
             onStart = { updateState { copy(isLoading = !hasStarted, isRefreshing = hasStarted) } },
+            onComplete = { updateState { copy(isLoading = false, isRefreshing = false) } },
         ) {
             val item = withContext(ioDispatcher) { repository.get__Item__(params.__item__Id) }
-            // Read the draft before updateState: inside its lambda the bare
-            // draftTitle name resolves to the UiState field, not this flow.
-            val currentDraftTitle = draftTitle.value
             updateState {
                 copy(
                     isLoading = false,
                     isRefreshing = false,
                     isMissing = item == null,
                     items = listOfNotNull(item),
-                    draftTitle = currentDraftTitle,
                 )
             }
             hasStarted = true

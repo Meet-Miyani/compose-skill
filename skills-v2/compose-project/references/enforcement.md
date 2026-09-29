@@ -39,7 +39,7 @@ Kit activation (the compose-project skill owns this; a request to wire hooks is 
 ## 3. CI job
 
 5. **The guard step lives in the build job and runs on every change. (non-negotiable)** Guards that run nightly or on release branches find violations after they compound. *Prevents:* late-found boundary breaks (brief §11.14).
-6. **[Default] Copy `templates/project/composekit.yml` as the CI job; keep the shape generic across forges.** The template checks out the repo, sets up Java 21, then assembles Android on macOS, desktop on Linux, and iOS via `xcodebuild` on macOS with a pinned Xcode. *Prevents:* forge-locked CI that cannot move (SMP-64, SMP-67 pattern).
+6. **[Default] Copy `templates/project/composekit.yml` for CI guards; keep the shape generic across forges.** The template checks out the repo, sets up Java 21, and runs guards only. Add the build and test legs from `distribution.md` §4. *Prevents:* claiming CI compilation coverage that the template does not run (SMP-64, SMP-67 pattern).
 
 The only guard line in any CI job is:
 

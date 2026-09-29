@@ -1,7 +1,7 @@
 /**
  * Navigation keys for the __Name__ feature.
  *
- * Notes list and detail destinations share one sealed hierarchy.
+ * Detail destination key for this feature.
  */
 package __PACKAGE__.navigation
 
@@ -17,12 +17,6 @@ import kotlinx.serialization.modules.subclassesOfSealed
  */
 @Serializable
 sealed interface __Name__NavKey : NavKey
-
-/**
- * List destination key for __Name__.
- */
-@Serializable
-data object __Name__ListKey : __Name__NavKey
 
 /**
  * Detail destination key carrying the __item__ identity.

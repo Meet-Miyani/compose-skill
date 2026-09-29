@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" width="760" height="300" role="img" aria-labelledby="t d">
+
+<style>
+  .surface { fill: #fcfcfb; }
+  .t1 { fill: #0b0b0b; } .t2 { fill: #52514e; } .t3 { fill: #898781; }
+  .grid { stroke: #e1e0d9; } .base { stroke: #c3c2b7; }
+  .before { fill: #86b6ef; } .after { fill: #1c5cab; } .link { stroke: #b7d3f6; }
+  .ref { stroke: #898781; }
+  .s-none { fill: #b4b2a9; } .s-generic { fill: #eb6834; } .s-kit { fill: #2a78d6; }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    .surface { fill: #1a1a19; }
+    .t1 { fill: #ffffff; } .t2 { fill: #c3c2b7; } .t3 { fill: #898781; }
+    .grid { stroke: #2c2c2a; } .base { stroke: #383835; }
+    .before { fill: #1c5cab; } .after { fill: #6da7ec; } .link { stroke: #184f95; }
+    .s-none { fill: #6b6a64; } .s-generic { fill: #d95926; } .s-kit { fill: #3987e5; }
+  }
+</style>
+<title id="t">Control test on Gemini 3.8 Flash</title>
+<desc id="d">Engineering items: no prompt 61%, generic prompt 77%, kit 72%. House-style items: no prompt 43%, generic prompt 57%, kit 86%.</desc>
+<rect class="surface" width="760" height="300" rx="12"/>
+<text class="t1" x="24" y="36" font-size="18" font-weight="600">Control test: the kit vs a one-page senior-engineer prompt</text>
+<text class="t2" x="24" y="58" font-size="13">Gemini 3.8 Flash, same 12 tasks, blind-graded twice</text>
+<rect class="s-none" x="24" y="74" width="12" height="12" rx="2"/>
+<text class="t2" x="42" y="84" font-size="12">No prompt</text>
+<rect class="s-generic" x="115" y="74" width="12" height="12" rx="2"/>
+<text class="t2" x="133" y="84" font-size="12">Generic senior prompt</text>
+<rect class="s-kit" x="283" y="74" width="12" height="12" rx="2"/>
+<text class="t2" x="301" y="84" font-size="12">The kit</text>
+<text class="t1" x="24" y="122" font-size="14" font-weight="600">Engineering items <tspan class="t3" font-weight="400">[eng]</tspan></text>
+<text class="t2" x="164" y="155" font-size="12" text-anchor="end">No prompt</text>
+<rect class="s-none" x="174" y="140" width="103.7" height="22" rx="4"/>
+<text class="t1" x="285.7" y="155" font-size="12" font-weight="600">61%</text>
+<text class="t2" x="164" y="195" font-size="12" text-anchor="end">Generic senior prompt</text>
+<rect class="s-generic" x="174" y="180" width="130.9" height="22" rx="4"/>
+<text class="t1" x="312.9" y="195" font-size="12" font-weight="600">77%</text>
+<text class="t2" x="164" y="235" font-size="12" text-anchor="end">The kit</text>
+<rect class="s-kit" x="174" y="220" width="122.4" height="22" rx="4"/>
+<text class="t1" x="304.4" y="235" font-size="12" font-weight="600">72%</text>
+<line class="base" x1="174" y1="136" x2="174" y2="246" stroke-width="1"/>
+<text class="t1" x="396" y="122" font-size="14" font-weight="600">House-style items <tspan class="t3" font-weight="400">[kit]</tspan></text>
+<text class="t2" x="536" y="155" font-size="12" text-anchor="end">No prompt</text>
+<rect class="s-none" x="546" y="140" width="73.1" height="22" rx="4"/>
+<text class="t1" x="627.1" y="155" font-size="12" font-weight="600">43%</text>
+<text class="t2" x="536" y="195" font-size="12" text-anchor="end">Generic senior prompt</text>
+<rect class="s-generic" x="546" y="180" width="96.9" height="22" rx="4"/>
+<text class="t1" x="650.9" y="195" font-size="12" font-weight="600">57%</text>
+<text class="t2" x="536" y="235" font-size="12" text-anchor="end">The kit</text>
+<rect class="s-kit" x="546" y="220" width="146.2" height="22" rx="4"/>
+<text class="t1" x="700.2" y="235" font-size="12" font-weight="600">86%</text>
+<line class="base" x1="546" y1="136" x2="546" y2="246" stroke-width="1"/>
+<text class="t3" x="24" y="284" font-size="11">Most of the engineering lift comes from a careful stance; the kit's distinct win is one consistent house style.</text>
+</svg>

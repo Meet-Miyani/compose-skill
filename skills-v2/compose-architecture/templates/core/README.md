@@ -40,6 +40,10 @@ compiles standalone; move them when the network module exists and keep the
 rule that repositories never call them (ViewModels reach them only through
 `launchGuarded`).
 
+**SEAM — Ktor client factory:** the project must provide one injected `createHttpClient(engine)` in its network module with `expectSuccess = true`, `ContentNegotiation`, and the `HttpTimeout` request/connect/socket triple; follow `compose-data/references/networking-ktor.md` for plugin, engine, and logging rules. No factory is shipped here.
+
+**SEAM — transport classifier:** the project must provide `NetworkExceptionMapper.mapOrNull` at the call executor, walking the cause chain, mapping recognised HTTP, timeout, connection, TLS, and serialization failures to `NetworkException`, rethrowing cancellation and unclassified failures. No classifier implementation is shipped here.
+
 ## What not to copy
 
 - No `Result`, `NetworkResult`, or `safeApiCall` wrappers. Failures travel

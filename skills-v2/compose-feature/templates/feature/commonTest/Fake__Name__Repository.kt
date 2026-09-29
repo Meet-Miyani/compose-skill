@@ -10,9 +10,7 @@ import __PACKAGE__.domain.model.__Item__
 import __PACKAGE__.domain.repository.__Name__Repository
 import com.example.core.error.NetworkException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /** Test-only fake backing the __Name__ ViewModel tests. */
@@ -40,11 +38,9 @@ class Fake__Name__Repository : __Name__Repository {
     override suspend fun get__Item__(id: Long): __Item__? {
         gate?.await()
         getCalls += 1
-        // By-id read: null when absent; the armed failure throws only when no row matches.
-        return backing.value.firstOrNull { it.id == id } ?: shouldThrow?.let { throw it }
+        shouldThrow?.let { throw it }
+        return backing.value.firstOrNull { it.id == id }
     }
-
-    override fun get__Item__sStream(): Flow<List<__Item__>> = backing.asStateFlow()
 
     override suspend fun delete__Item__(id: Long) {
         backing.update { list -> list.filterNot { it.id == id } }

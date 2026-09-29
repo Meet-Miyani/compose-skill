@@ -10,6 +10,7 @@ project's `BASE_PACKAGE` (see `.composekit.conf`).
 | `DesktopMain.kt` | `composeApp/src/jvmMain/kotlin/<pkg>/Main.kt` (rename on copy) |
 | `MainViewController.kt` | `composeApp/src/iosMain/kotlin/<pkg>/MainViewController.kt` |
 | `MainActivity.kt` | `androidApp/src/main/kotlin/<pkg>/MainActivity.kt` |
+| `MainApplication.kt` | `androidApp/src/main/kotlin/<pkg>/MainApplication.kt` |
 | `AndroidManifest.xml` (in `templates/modules/`) | `androidApp/src/main/AndroidManifest.xml` |
 
 `App()` is the single entry every platform shell renders. `AppModule.kt`

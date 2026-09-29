@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 fun __Name__Screen(
@@ -21,19 +22,20 @@ fun __Name__Screen(
     onSave: () -> Unit,
     onRetry: () -> Unit,
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     when {
-        state.isLoading -> CircularProgressIndicator()
-        state.error != null -> Column {
+        state.isLoading -> CircularProgressIndicator(modifier = modifier)
+        state.error != null && state.items.isEmpty() -> Column(modifier = modifier) {
             Text("Something went wrong.") // SEAM: string resource
             Button(onClick = onRetry) { Text("Retry") } // SEAM: string resource
             Button(onClick = onBack) { Text("Back") } // SEAM: string resource
         }
-        state.isMissing -> Column {
+        state.isMissing -> Column(modifier = modifier) {
             Text("This note no longer exists.") // SEAM: string resource
             Button(onClick = onBack) { Text("Back") } // SEAM: string resource
         }
-        else -> Column {
+        else -> Column(modifier = modifier) {
             if (state.isRefreshing) {
                 Text("Refreshing…") // SEAM: string resource
             }

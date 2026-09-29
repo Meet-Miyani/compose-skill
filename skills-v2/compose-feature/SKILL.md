@@ -132,10 +132,10 @@ rg -n "SEAM" <module>
 - [ ] Every named helper, token, and import was seen in the project or current docs; nothing invented.
 - [ ] Every repository method called is declared on its interface.
 - [ ] Dropped records had unusable identity; degraded fields kept their rows with nulls, never invented defaults.
-- [ ] Strings exist in every locale folder with identical keys (see the `compose-ui` skill, rule 9; Phase 5 automates this; until then check by hand).
+- [ ] Strings exist in every locale folder with identical keys (see the `compose-ui` skill, rule 9).
 - [ ] ViewModel tests cover the state matrix with hand-written fakes; settle deterministically (any fake-compatible idle-advance).
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
-- [ ] `scripts/composekit/run-checks.sh` exits 0 when installed (guards land in Phase 5; until then verify by hand).
+- [ ] `scripts/composekit/run-checks.sh` exits 0 when installed.
 - [ ] The diff removes nothing the task did not name: yes or no.
 - [ ] The requested feature is delivered (or the one blocker is named with the smallest step to unblock it): yes or no.
 - [ ] Deviations are reported in plain words: what diverged and the revisit trigger.

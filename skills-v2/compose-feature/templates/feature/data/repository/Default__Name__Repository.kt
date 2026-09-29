@@ -9,8 +9,6 @@ import __PACKAGE__.data.remote.mapper.toDomain
 import __PACKAGE__.data.remote.__Name__RemoteDataSource
 import __PACKAGE__.domain.model.__Item__
 import __PACKAGE__.domain.repository.__Name__Repository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.koin.core.annotation.Factory
 
 /**
@@ -25,14 +23,6 @@ internal class Default__Name__Repository(
      */
     override suspend fun get__Item__(id: Long): __Item__? {
         return remote.fetch__Item__(id)?.toDomain()
-    }
-
-    /**
-     * Observes the __item__ list.
-     */
-    override fun get__Item__sStream(): Flow<List<__Item__>> {
-        // SEAM: cache and stream wiring is owned by the compose-data skill.
-        return flowOf(emptyList())
     }
 
     /**

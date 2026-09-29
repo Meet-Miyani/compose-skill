@@ -355,7 +355,7 @@ END {
 C_AWK='{ pos = index($0, ":"); lineno = substr($0, 1, pos - 1); content = substr($0, pos + 1); token = "";
   if (index(content, "NetworkResult") > 0) token = "NetworkResult";
   else if (index(content, "safeApiCall") > 0) token = "safeApiCall";
-  else if (index(content, "Result<") > 0) token = "Result<";
+  else if (content ~ /(^|[^[:alnum:]_])Result</) token = "Result<";
   if (token != "") printf "%s:%s: forbidden wrapper in ViewModel: %s\n", rel, lineno, token }'
 
 ab_out="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/src/*Test*/*' -prune -o -type f -name '*.kt' -print | sort | while IFS= read -r kt; do
@@ -370,9 +370,9 @@ c_out="$(find "$ROOT" -path '*/.git/*' -prune -o -path '*/src/*Test*/*' -prune -
   krel="${kt#$ROOT/}"
   composekit_skip_path "$krel" && continue
   if [ "$HAVE_RG" -eq 1 ]; then
-    rg -n --no-filename -e 'NetworkResult|safeApiCall|Result<' "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$C_AWK"
+    rg -n --no-filename -e 'NetworkResult|safeApiCall|(^|[^[:alnum:]_])Result<' "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$C_AWK"
   else
-    grep -n -E -e 'NetworkResult|safeApiCall|Result<' "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$C_AWK"
+    grep -n -E -e 'NetworkResult|safeApiCall|(^|[^[:alnum:]_])Result<' "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$C_AWK"
   fi
 done)"
 

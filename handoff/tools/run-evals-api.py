@@ -127,13 +127,13 @@ def scenarios(path=""):
 
 
 def run_scenario(sc, a):
-    system = SYSTEM_BASE + skill_text(sc["skill"], a.skill_mode)
+    system = SYSTEM_BASE + (("\n" + open(a.system_extra).read()) if a.system_extra else "") + skill_text(sc["skill"], a.skill_mode)
     user = "PROJECT CONTEXT:\n" + sc["context"] + "\n\nTASK:\n" + sc["prompt"]
     t = time.time()
     text, usage, err = call(a.model, system, user, a.max_out)
     el = round(time.time() - t, 1)
     with open(os.path.join(a.out, f"{sc['id']}.md"), "w") as f:
-        f.write(f"# {sc['id']} — {sc['skill']}\n\n- model: {a.model}\n- skill-mode: {a.skill_mode}\n"
+        f.write(f"# {sc['id']} — {sc['skill']}\n\n- model: {a.model}\n- skill-mode: {a.skill_mode}{' + ' + os.path.basename(a.system_extra) if a.system_extra else ''}\n"
                 f"- seconds: {el}\n- usage: {json.dumps(usage)}\n- error: {err or 'none'}\n\n"
                 f"## Prompt\n\n{sc['prompt']}\n\n## Answer\n\n{text}\n")
     return sc["id"], "ok" if text else "error", el, len(text), err or ""
@@ -186,6 +186,7 @@ def main():
     ap.add_argument("--model", required=True, help="opencode-go model id, e.g. deepseek-v4.1-flash")
     ap.add_argument("--out", required=True)
     ap.add_argument("--skill-mode", choices=["none", "skill", "full"], default="none")
+    ap.add_argument("--system-extra", default="", help="file appended to the system prompt (control arms)")
     ap.add_argument("--triggers", action="store_true")
     ap.add_argument("--only", default="")
     ap.add_argument("--jobs", type=int, default=6)

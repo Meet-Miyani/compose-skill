@@ -28,7 +28,7 @@ enum class AppErrorType {
 Gotcha: never synthesize an `AppError` for "empty" or "not found"; those are `UiState` fields (§4.6).
 
 ## NetworkException subtypes and classifier (§4.2)
-`NetworkException` lives in `:core:network`. It models wire shape, not presentation.
+`NetworkException` lives in `:core:error` in the shipped template. It models wire shape, not presentation.
 ```kotlin
 sealed class NetworkException(message: String, cause: Throwable? = null) : Exception(message, cause) {
   class Http(val statusCode: Int, val error: DecodedHttpError?, cause: Throwable? = null) : NetworkException("http $statusCode", cause)
