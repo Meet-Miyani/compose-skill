@@ -47,7 +47,9 @@ entry = tokens(ENTRY)
 rows = []
 for l1, f1 in q1:
     for i, (l2, f2) in enumerate(q2):
-        extra = [q2[j][1] for j in range(i + 1, len(q2))] if two_areas else [set()]
+        # a second area loads only its reference, never its SKILL.md (compose tree, fix round 10)
+        extra = ([{f for f in q2[j][1] if not f.endswith("SKILL.md")} for j in range(len(q2)) if j != i]
+                 if two_areas else [set()])
         for f3 in extra:
             files = f1 | f2 | f3
             rows.append((entry + sum(tokens(f) for f in files), l1, l2, len(files)))

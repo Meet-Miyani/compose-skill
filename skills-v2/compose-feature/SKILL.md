@@ -52,7 +52,7 @@ Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow ab
 - [ ] Inventory existing components, formatters, and tokens before writing anything.
 - [ ] Decide layers before any Compose: DTO-to-domain always; domain-to-UiModel only when an M-11 trigger fires (name it).
 - [ ] Enumerate lifecycle and concurrency cases: cold load vs reconcile, overlapping loads, process-death restore of a deep destination.
-- [ ] Read `examples.md` (step 6 load; the only home for WRONG/RIGHT pairs).
+- [ ] Read `examples.md` only when a pattern is unclear.
 - [ ] Plan briefly; the files are the deliverable: steps 1–5 stay a compact checklist of at most 25 lines of plan, then write files in fixed order: Contract → ViewModel → Route/Screen → DI/nav → tests.
 - [ ] Scaffold with `scripts/new-feature.sh`, or write the smallest correct code. Prefer feature-specific code over generic frameworks.
 - [ ] Register the new feature's Koin module in the composition root. *Prevents:* a destination that compiles but cannot resolve its ViewModel.
@@ -145,13 +145,13 @@ rg -n "SEAM" <module>
 
 Load only the references this task needs. One level deep.
 
-- Also read [mvi-contract.md](../compose-architecture/references/mvi-contract.md) for a new destination.
-- Also read [navigation.md](../compose-architecture/references/navigation.md) when wiring a destination.
+- Also read [mvi-contract.md](../compose-architecture/references/mvi-contract.md) for a new destination only when the scaffold template does not already cover it.
+- Also read [navigation.md](../compose-architecture/references/navigation.md) when wiring a destination only when the scaffold template does not already cover it.
 - Also read [state-ownership.md](../compose-architecture/references/state-ownership.md) when changing existing state.
 - Also read [error-handling.md](../compose-architecture/references/error-handling.md) for failure paths.
 
 - [testing.md](references/testing.md) — ViewModel test convention, fakes, the state matrix rows.
 - [ui-testing.md](references/ui-testing.md) — Compose UI test rules: finders, assertions, sync, lazy lists, restoration, KMP runners.
 - [review-mode.md](references/review-mode.md) — reviewing someone else's feature change with these gates.
-- [examples.md](examples.md) — the 12 WRONG/RIGHT pairs; load at workflow step 6.
+- [examples.md](examples.md) — the 12 WRONG/RIGHT pairs; read only when a pattern is unclear.
 - [README.md](templates/feature/README.md) — placeholders, scaffold command, composition-root entry shape.
