@@ -7,7 +7,6 @@ out/
 # Gradle and Kotlin caches.
 .gradle/
 .kotlin/
-gradle/wrapper/gradle-wrapper.jar
 
 # Local SDK and signing config.
 local.properties

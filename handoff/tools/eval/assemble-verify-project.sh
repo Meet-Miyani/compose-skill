@@ -16,9 +16,9 @@ mkdir -p gradle/wrapper .github/workflows
 cp "$T/project/libs.versions.toml" gradle/
 cp "$T/project/gradle/wrapper/gradle-wrapper.properties" gradle/wrapper/
 cp "$T/project/composekit.yml" .github/workflows/
-# the wrapper jar and scripts are binary artefacts of Gradle itself, not kit content
-cp "$REPO/handoff/work/scratch/compile-gate-project/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/
-cp "$REPO/handoff/work/scratch/compile-gate-project/gradlew" .; chmod +x gradlew
+# the committed, checksum-verified Gradle wrapper ships with the template (fix round 9, R16)
+cp "$T/project/gradle/wrapper/gradle-wrapper.jar" gradle/wrapper/
+cp "$T/project/gradlew" "$T/project/gradlew.bat" .; chmod +x gradlew
 echo "sdk.dir=$HOME/Library/Android/sdk" > local.properties
 
 # 2. build-logic
