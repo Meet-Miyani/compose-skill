@@ -99,3 +99,31 @@ The first set was rejected. Fix every point:
 4. **Conformance items.** T8 #1-#2 name the base class and the contract types. Remove them; keep behaviour
    unchanged, tests passing and no unrelated edits.
 5. **Two prompts must be one short line** with details left out (T4 and T5 were fine).
+
+## Third attempt (2026-09-30): the script is the only proof
+
+The second set was rejected. On a fresh copy of the base:
+- **No setup builds.** `scaffold.sh` renames Notes→Workouts everywhere except `androidApp`, so
+  `MainApplication.kt` breaks. Your "BUILD SUCCESSFUL" came from a hand-patched working copy.
+- **`HiddenT5Test.kt` does not compile.** Its own fake repository misses an abstract member.
+- **`HiddenT4Test.kt` tests an internal key name**, not behaviour.
+
+Keep the 8 task ideas and the domain; they are good. Fix these:
+
+1. **Proof is `verify.sh` in this folder, nothing else.** Run `bash verify.sh project out out/verify-work`. It clones
+   a fresh copy per task, runs your setup, builds, runs every JVM test, and checks each hidden test fails before
+   and passes after your fix. Iterate until it prints `ALL 8 TASKS VERIFIED`. Paste its complete output into
+   `out/verification.md` and write nothing else there. The moderator re-runs the same script.
+2. **Ship `out/fix/T4.patch` and `out/fix/T5.patch`:** minimal `git diff` patches of a correct fix, relative to the
+   setup state. They are used only for verification; the agents never see them.
+3. **Hidden tests test behaviour through the project's existing test setup.** Use the existing fakes and the
+   existing test-dispatcher pattern in `commonTest`; read the existing ViewModel tests first.
+   - T4: create the ViewModel with a `SavedStateHandle`, type a title, then create a **new** ViewModel with the
+     **same** handle (simulated process death) and assert its state shows the typed title.
+   - T5: two add actions before the dispatcher advances produce one repository add.
+4. **Rubric wording:**
+   - T4 #1 states an outcome, not `SavedStateHandle`.
+   - T6 #3-4 and T7 #3-4 become "does not call <X> blocking" (the agent passes if it does not raise it, or raises it
+     as non-blocking).
+   - Remove T3 #4 (the prompt never asks for a notification).
+5. **Neutral commit messages.** T4 "Fix state saving" hints at the bug; use e.g. "Add workout editor".
