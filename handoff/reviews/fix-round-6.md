@@ -1,6 +1,8 @@
 # Fix round 6: release plan steps 1-4 (worker brief)
 
-> **Status 2026-09-30: waiting for plan resets (owner).** Codex was at 42% of its week, past the owner's 30%
+> **Launched 2026-09-30 ~08:20 IST on Codex (GPT-6-Sol, medium).** The owner lifted the weekly guard for this
+> week and next ("I will be using the codex in this project only"). Earlier the same day:
+> **waiting for plan resets.** Codex was at 42% of its week, past the owner's 30%
 > guard; its weekly limit resets 2026-10-05 10:57 IST. OpenCode Go was at 95% on 2026-09-29 and resets around
 > 2026-10-05. Check both limits again before launching.
 
