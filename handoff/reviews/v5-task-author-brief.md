@@ -48,6 +48,8 @@ Two of the 8 prompts must be deliberately short, one line with some details left
 - `hidden/T<n>/`: for each bug fix, a test file plus a one-line `DEST` file naming where the harness copies it.
   The test must **fail** on the setup state and **pass** once the bug is fixed in any reasonable way. Test
   behaviour through the existing public API only, never through names a fix would have to invent.
+  Name the test file `Hidden<Task>Test.kt` (e.g. `HiddenT4Test.kt`) so it can never overwrite a test the agent
+  writes, and make sure the task's `Checks:` line runs it.
 - `verification.md`: the commands you ran and their results (see below).
 
 ## Rubric rules
