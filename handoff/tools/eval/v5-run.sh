@@ -9,6 +9,8 @@ REPO=/Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill
 W=$REPO/handoff/work/scratch/v5
 V5=$REPO/evals-v2/heldout-v5
 TOOL=$1; MODEL=$2; TASK=$3; ARM=$4
+# Pause point between cells: while PAUSE exists, no new cell starts (running cells finish normally).
+while [ -f "$W/PAUSE" ]; do sleep 30; done
 OUT=$W/runs/$MODEL/$TASK-$ARM
 [ -f "$OUT/meta.txt" ] && { echo "done already: $OUT"; exit 0; }
 rm -rf "$OUT"; mkdir -p "$OUT"
