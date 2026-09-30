@@ -25,7 +25,7 @@ You reason about scope, not vibes. "Wrapping it in `remember`" and "adding `@Imm
 
 | Task | Use instead |
 |---|---|
-| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
+| Route first: decide the task path and files to read | the `compose` skill, before anything below |
 | Add, change or review a screen, destination or slice | the `compose-feature` skill |
 | Repositories, Ktor, Room, DataStore, Paging, offline-first | the `compose-data` skill |
 | `commonMain` sharing, `expect`/`actual`, iOS/Swift, desktop, web | the `compose-platform` skill |

@@ -2,14 +2,14 @@
 
 # Compose Kit
 
-**Six agent skills that teach AI coding agents one house architecture for Jetpack Compose and Compose Multiplatform apps: MVI on one BaseViewModel, Koin annotations, Navigation 3 and one error contract.**
+**An entry skill plus six topic skills that teach AI coding agents one house architecture for Jetpack Compose and Compose Multiplatform apps: MVI on one BaseViewModel, Koin annotations, Navigation 3 and one error contract.**
 
-![Skills](https://img.shields.io/badge/skills-6-2a78d6)
+![Skills](https://img.shields.io/badge/skills-7-2a78d6)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-Android%20%C2%B7%20iOS%20%C2%B7%20Desktop-1c5cab)
 ![Completed v4 paired runs](https://img.shields.io/badge/v4%20paired%20runs-7%20endpoints-52514e)
 ![V4 grading](https://img.shields.io/badge/v4%20candidate-adjudicated%20two--pass%20grading-52514e)
 
-[What it is](#what-it-is) · [Results](#results) · [Honest limits](#honest-limits) · [The six skills](#the-six-skills) · [Quick start](#quick-start) · [How it was tested](#how-it-was-tested)
+[What it is](#what-it-is) · [Results](#results) · [Honest limits](#honest-limits) · [The entry skill and six topic skills](#the-entry-skill-and-six-topic-skills) · [Quick start](#quick-start) · [How it was tested](#how-it-was-tested)
 
 </div>
 
@@ -26,7 +26,7 @@ workflow, and it ships templates and checks for applying them:
 | 🧭 **Rules with reasons** | Each rule says what it prevents, so an agent can apply it to a case the rule never named. |
 | 🧱 **Templates** | A feature scaffold and project templates; one moderator-assembled project was reported to build, while clean bootstrap from the distributed artifact remains unverified. |
 | 🛡️ **Guards** | Shell checks for layering, contracts, error handling, hardcoded colours, locale parity and more. CI and hook integration is provided; enforcement coverage is not established. |
-| 🗂️ **Routing** | `compose-architecture` gives routing instructions. Native activation and routing reliability have not been established. |
+| 🗂️ **Routing** | The `compose` entry skill picks the task path and the exact kit files to read; `compose-architecture` is a topic skill. Native activation and routing reliability have not been established. |
 
 The house stack: **MVI** on one `BaseViewModel` contract · **Koin** annotations · **Navigation 3** ·
 feature-owned `data` / `domain` / `presentation` · typed error tiers · `kotlin.time.Instant` · Kotlin 2.4,
@@ -111,11 +111,12 @@ The panel does not isolate a general kit effect or show that every project follo
 
 ---
 
-## The six skills
+## The entry skill and six topic skills
 
 | Skill | Loads when the task… |
 |---|---|
-| `compose-architecture` | Writes, changes or reviews any Kotlin in a Compose/CMP project. **Loads first**: decides the owning skill and the existing-project case. Owns the module graph, MVI contract, error tiers, state ownership, naming, Koin, Navigation 3 and code craft. |
+| `compose` | Starts any Compose/CMP task and picks the task path and exact files to read. |
+| `compose-architecture` | Touches the house contract: module graph, MVI, error tiers, state ownership, naming, Koin, Navigation 3 or coroutines. |
 | `compose-feature` | Adds, changes or reviews a screen, sheet, dialog or destination end to end: Contract → ViewModel → Route/Screen → DI/nav → tests. |
 | `compose-ui` | Touches `@Composable` code: Route/Screen/leaf split, state reads, lists, motion, accessibility, tokens, resources, images, focus. |
 | `compose-data` | Touches repositories, data sources or mapping: DTO → domain → UiModel, Ktor, Room, DataStore, Paging 3, offline-first. |
@@ -124,15 +125,16 @@ The panel does not isolate a general kit effect or show that every project follo
 
 ```mermaid
 flowchart LR
-    T[Task] --> A[compose-architecture<br/>routes and sets the case]
-    A --> F[compose-feature]
-    A --> U[compose-ui]
-    A --> D[compose-data]
-    A --> P[compose-project]
-    A --> M[compose-platform]
-    F & U & D & P & M --> G{{Guards<br/>run-checks.sh}}
+    T[Task] --> C[compose<br/>picks task path and files]
+    C --> A[compose-architecture]
+    C --> F[compose-feature]
+    C --> U[compose-ui]
+    C --> D[compose-data]
+    C --> P[compose-project]
+    C --> M[compose-platform]
+    A & F & U & D & P & M --> G{{Guards<br/>run-checks.sh}}
     G -->|pass| Done[Done]
-    G -->|fail| A
+    G -->|fail| C
 ```
 
 Each skill has a `When NOT to use` table pointing to related skills. Some rules appear in more than one place;

@@ -102,9 +102,27 @@ check() {
     expect_fail "$name fails on fixtures/bad/$name" "$substring" bash "$SCRIPTS_DIR/$name.sh" "$BAD/$name"
 }
 
-for skill in compose-architecture compose-data compose-feature compose-platform compose-project compose-ui; do
+for skill in compose compose-architecture compose-data compose-feature compose-platform compose-project compose-ui; do
     expect_pass "$skill frontmatter parses and matches schema" frontmatter_check "$REPO_ROOT/skills-v2/$skill/SKILL.md" "$skill"
 done
+expect_pass "compose backticked file paths exist" python3 - "$REPO_ROOT/skills-v2/compose/SKILL.md" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+skill = Path(sys.argv[1])
+paths = re.findall(r'`(\.\./[^`]+)`', skill.read_text(encoding='utf-8'))
+assert paths, 'no file paths found'
+missing = [path for path in paths if not (skill.parent / path).is_file()]
+assert not missing, f'missing paths: {missing}'
+PY
+expect_pass "compose stays within 12000 characters" python3 - "$REPO_ROOT/skills-v2/compose/SKILL.md" <<'PY'
+from pathlib import Path
+import sys
+
+count = len(Path(sys.argv[1]).read_text(encoding='utf-8'))
+assert count <= 12000, f'{count} characters exceeds 12000'
+PY
 mkdir -p "$SCRATCH/frontmatter-bad"
 printf '%s\n' '---' 'name: compose-bad' 'description: invalid: unquoted colon' '---' > "$SCRATCH/frontmatter-bad/SKILL.md"
 expect_fail "unquoted colon in description fails frontmatter" "invalid frontmatter" frontmatter_check "$SCRATCH/frontmatter-bad/SKILL.md" "compose-bad"

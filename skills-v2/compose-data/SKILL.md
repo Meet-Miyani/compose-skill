@@ -26,6 +26,7 @@ The data layer is a boundary guard, not a pass-through. Every wire type stops he
 
 | Task | Use instead |
 |---|---|
+| Route first: decide the task path and files to read | the `compose` skill, before anything below |
 | ViewModel, Contract, Route, error tier choice, `launchGuarded` wiring | the `compose-architecture` skill (tiers) and the `compose-feature` skill (workflow) |
 | Composables, lists, stability, resources | the `compose-ui` skill |
 | `commonMain` vs platform splits, `expect`/`actual`, iOS/Swift export | the `compose-platform` skill |

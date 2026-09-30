@@ -26,7 +26,7 @@ Shared code is a promise to every target. Code that compiles on Android and brea
 
 | Task | Use instead |
 |---|---|
-| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
+| Route first: decide the task path and files to read | the `compose` skill, before anything below |
 | Gradle target setup, convention plugins, version catalog, CI | the `compose-project` skill |
 | ViewModels, Contracts, repositories, Ktor, Room, DataStore, Paging | the `compose-feature` skill and the `compose-data` skill |
 | Composables, stability, resources, images | the `compose-ui` skill |

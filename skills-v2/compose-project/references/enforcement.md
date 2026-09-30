@@ -23,7 +23,7 @@ Agent hook snippets (run before finishing a Compose change):
 
 Kit activation (the compose-project skill owns this; a request to wire hooks is consent):
   1. Add one line to the project's AGENTS.md / CLAUDE.md:
-     Compose/CMP work: load compose-architecture first; it routes to the owning skill.
+     Compose/CMP work: load the compose skill first; it picks the path and the files to read.
   2. Optional Claude Code SessionStart hook that injects compose-architecture's
      routing section; see the compose-project skill (references/enforcement.md)
      for the exact snippet. A user's request to wire CI or agent hooks is consent:
@@ -57,7 +57,7 @@ The only guard line in any CI job is:
 
 Activation makes routing reliable without depending on skill matching.
 
-9. **Every project carries the one-line kit pointer in `AGENTS.md`/`CLAUDE.md`. (non-negotiable)** Exact line: `Compose/CMP work: load compose-architecture first; it routes to the owning skill`. *Prevents:* routing by description-match luck (SKILL_SPECS §5 item 4).
+9. **Every project carries the one-line kit pointer in `AGENTS.md`/`CLAUDE.md`. (non-negotiable)** Exact line: `Compose/CMP work: load the compose skill first; it picks the path and the files to read.` *Prevents:* routing by description-match luck (SKILL_SPECS §5 item 4).
 10. **[Default] Offer the optional Claude Code SessionStart hook that injects the routing excerpt (a short excerpt, never the whole skill).** Exact snippet for `.claude/settings.json`:
 
 ```json
@@ -68,7 +68,7 @@ Activation makes routing reliable without depending on skill matching.
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s\\n' 'Compose/CMP work: load compose-architecture first; it routes to the owning skill (feature, UI, data, build, platform).'"
+            "command": "printf '%s\\n' 'Compose/CMP work: load the compose skill first; it picks the path and the files to read.'"
           }
         ]
       }

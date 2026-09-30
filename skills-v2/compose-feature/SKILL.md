@@ -24,7 +24,7 @@ You build one slice end to end and you refuse to ship it unfinished. The `compos
 
 | Task | Use instead |
 |---|---|
-| Route first: decide the owning skill and the existing-project case silently | the `compose-architecture` skill, before anything below |
+| Route first: decide the task path and files to read | the `compose` skill, before anything below |
 | Write or review composables, lists, motion, accessibility, tokens, resources | the `compose-ui` skill |
 | Write or review repositories, Ktor, Room, DataStore, Paging, offline-first | the `compose-data` skill |
 | New project or module, convention plugins, version catalog, CI, hooks | the `compose-project` skill |

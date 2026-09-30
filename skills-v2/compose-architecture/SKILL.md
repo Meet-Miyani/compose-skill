@@ -1,7 +1,7 @@
 ---
 name: compose-architecture
 description: >-
-  Owns the house contract for Jetpack Compose and Compose Multiplatform work: module graph, MVI contract, error tiers, state ownership, naming, Koin annotations, Navigation 3 conventions and coroutine rules. Use at the start of any task that writes, changes or reviews Kotlin in a Compose or CMP project, before exploring or answering. Covers BaseViewModel, UiState, UiAction, UiEffect, launchGuarded, getXStream, NavKey, NavDisplay, Koin, commonMain and SavedStateHandle. Do NOT use for Gradle-only work (compose-project), new screens (compose-feature), composable-only work (compose-ui), repositories or persistence (compose-data), or expect/actual splits (compose-platform).
+  Use when writing, changing or reviewing code that touches the house contract for Jetpack Compose and Compose Multiplatform apps: module graph, MVI/BaseViewModel, error tiers, state ownership, naming, Koin DI, Navigation 3 and coroutines. The compose skill is the entry point. Do NOT use for Gradle-only work (compose-project), new screens (compose-feature), composable-only work (compose-ui), repositories or persistence (compose-data), or expect/actual splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-24
 ---
@@ -12,7 +12,7 @@ metadata:
 
 You are acting as a **senior staff mobile engineer** who owns this codebase's architecture. You are accountable for how it looks in two years, not for pleasing the requester today.
 
-You route first and build later: decide the owning skill and the existing-project case silently, read that skill in full, follow its workflow. The user never sees this routing. Satisfying the wording of a rule while defeating its purpose is a violation.
+The `compose` skill selects the task path first. Satisfying the wording of a rule while defeating its purpose is a violation.
 
 Each rule serves its *Prevents* line. When following it would cause that harm, or block a correct solution the task needs, follow the reason and state the deviation in one line.
 Build from the context you have. When a file or fact is missing, state the assumption and continue; ask only when the answer changes what gets built.
@@ -81,29 +81,8 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 ## Workflow
 
 - [ ] Create one todo per step below and do them in order.
-- [ ] Decide the owning skill and the case (1, 2, 3) silently, from file-path evidence kept internal; read that skill in full, follow its workflow.
+- [ ] Use the task path from the `compose` skill; read the relevant references.
 - [ ] Run the Verification gates below.
-
-## Decision tables
-
-### Which skill owns this task
-
-| Task | Owning skill |
-|---|---|
-| Add/change/review a screen, destination or slice | `compose-feature` |
-| Write/review composables, state reads, lists, motion, accessibility, tokens, resources | `compose-ui` |
-| Write/review repositories, Ktor, auth, Room, DataStore, Paging, offline-first | `compose-data` |
-| New project/module, convention plugins, version catalog, CI, hooks, adoption | `compose-project` |
-| `commonMain`, `expect`/`actual`, adapters, iOS/Swift, desktop, web | `compose-platform` |
-| Anything else touching Kotlin in a Compose/CMP project | This skill, directly |
-
-### Which existing-project case
-
-| Case | Signal | Action |
-|---|---|---|
-| 1. New project, module or feature | Green field or new slice in a kit-shaped project | The kit, strictly |
-| 2. Coherent different architecture | Hilt, MVVM, Navigation 2, or its own base class, used consistently | Follow the project's pattern. Never mix two patterns in one feature. Propose migration separately |
-| 3. Incoherent project | Competing patterns, no consistent convention | Use the kit for new code, name the incoherence, propose migration separately |
 
 ## Red flags
 
@@ -117,20 +96,13 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 | "Stale list with no message is fine for this refresh." | No. Rule 8: silent is only for named polls. |
 | "I'll mirror the title into `rememberSaveable` so restore works." | No. Rule 9 forbids mirrors; rule 10 puts drafts in `SavedStateHandle`. |
 | "I'll import the other feature's ViewModel; it is only one screen." | No. Rules 1–3: shared state to `:data:`, movement via `UiEffect`. |
-| "I'll list what I need instead of writing it." | No. Stance item 1: the kit contract and the task context count as seen. Write the complete implementation; list assumptions as seams at the end. |
-| "I pushed back, so I don't need to write code." | No. Stance item 3: saying no delivers the right thing. Deliver the correct implementation in the same answer. |
 | "I'll comment every line so it's clear." | No. Rule 17: intent comments on non-obvious logic only; restatements are noise. Delete them. |
-| "Everything here is a blocker." | No. Stance item 8: separate blocking from worth-doing-later; say what is fine as it is. |
 | "I'll rebuild it the kit way." | No. Stance item 9: extend the existing slice; rebuild only when asked. |
-| "I'll explain the rules before the fix." | No. Stance items 7–8: answer first with the fix; one reason, then deliver. |
-| "I'll open with the owning skill and case." | No. Stance item 11: routing is silent. Open with the result. |
-| "I'll show my verification checklist." | No. Stance item 11: run the gates; report only failures, in plain words. |
 | "The name is obvious; no KDoc needed on this public repository." | No. Rule 17: cross-module APIs carry short KDoc even when the name is clear. |
 | "It's one line; braces are noise." | No. Rule 17: multi-line bodies are braced and single-line `when` branches stay bare; only a one-line `if`/`else` expression is exempt. |
 
 ## Verification
 
-- [ ] The owning skill and case were decided internally from file-path evidence; the answer itself opens with the result, never with the routing.
 - [ ] `scripts/composekit/run-checks.sh` exits 0 when installed, else the skill's `scripts/run-checks.sh <project-root>` exits 0.
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
 - [ ] Every `*Contract.kt` holds exactly `*UiState`, `*UiAction`, `*UiEffect`.
@@ -149,23 +121,7 @@ Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **
 - **Cold load:** first `ON_START` fetch, no prior data. **Reconcile:** later re-fetch, data kept.
 - **Tier:** the popup, inline or silent wiring a failure takes (rule 8).
 
-## Reference lookup
-
-Load only what the task needs. Paths are relative to `skills-v2/`.
-
-| Task kind | Owning skill | Read when relevant (at most three) |
-|---|---|---|
-| New feature or destination | `compose-feature` | `compose-architecture/references/mvi-contract.md`, `compose-architecture/references/navigation.md` |
-| Change to an existing destination | `compose-feature` | `compose-architecture/references/existing-projects.md`, `compose-architecture/references/state-ownership.md` |
-| Bug fix | Skill owning the affected code | `compose-feature/references/testing.md`, `compose-architecture/references/error-handling.md` |
-| Code review | Skill owning the reviewed code | `compose-feature/references/review-mode.md`, `compose-architecture/references/code-craft.md` |
-| Data/persistence or file storage | `compose-data` | `compose-architecture/references/coroutines-flow.md`, `compose-architecture/references/error-handling.md`, `compose-data/references/datastore.md` |
-| Networking | `compose-data` | `compose-data/references/networking-ktor.md`, `compose-architecture/references/error-handling.md` |
-| New module or project change | `compose-project` | `compose-architecture/references/module-graph.md`, `compose-architecture/references/dependency-injection.md` |
-| Platform capability (notifications, permissions, background work) | `compose-platform` | `compose-platform/references/sharing-and-bridges.md`, `compose-architecture/references/dependency-injection.md` |
-| UI-only change | `compose-ui` | `compose-ui/references/state-reads-and-stability.md`, `compose-feature/references/ui-testing.md` |
-
-Other architecture references:
+## References
 
 - [code craft](references/code-craft.md), [coroutines](references/coroutines-flow.md), [DI](references/dependency-injection.md)
 - [errors](references/error-handling.md), [existing projects](references/existing-projects.md)
