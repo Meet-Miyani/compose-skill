@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # check-placeholders.sh — feature rule 2: no TODO/FIXME/stub reaches done.
 # bash 3.2 safe (no assoc arrays/mapfile/read -d/[[ =~ ]]/sed -i/GNU grep).
-# No network; no writes. Usage: check-placeholders.sh <project-root> [file ...]
-# File args: scan exactly those (each must exist). Otherwise: `git diff
-# --name-only` plus untracked files (`git ls-files --others
+# No network; no writes. Usage: check-placeholders.sh <project-root> [--base <ref>] [file ...]
+# File args: scan exactly those (each must exist). Otherwise: unstaged,
+# staged, base...HEAD when requested, and untracked files (`git ls-files --others
 # --exclude-standard`) in a work tree, filtered to source and resource
 # files and excluding the installed guard directory, else *.kt/*.kts/*.xml
 # under the configured module dirs. SEAM is a placeholder too: template
@@ -17,6 +17,14 @@ if [ $# -lt 1 ]; then
 fi
 ROOT="$1"
 shift
+BASE=""
+if [ "${1:-}" = "--base" ]; then
+  if [ $# -lt 2 ] || [ -z "$2" ] || [ "${2#--}" != "$2" ]; then
+    echo "error: --base requires a ref" >&2; exit 2
+  fi
+  BASE="$2"
+  shift 2
+fi
 if [ ! -d "$ROOT" ]; then
   echo "error: not a directory: $ROOT" >&2
   exit 2
@@ -71,6 +79,7 @@ check_file() {
 }
 
 if [ $# -gt 0 ]; then
+  echo "scanned $# files"
   for f in "$@"; do
     if [ ! -f "$f" ]; then
       echo "error: no such file: $f" >&2
@@ -83,9 +92,19 @@ fi
 
 if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   difflist="$(git -C "$ROOT" diff --name-only 2>/dev/null)"
+  staged="$(git -C "$ROOT" diff --name-only --cached 2>/dev/null)"
   untracked="$(git -C "$ROOT" ls-files --others --exclude-standard 2>/dev/null)"
+  committed=""
+  if [ -n "$BASE" ]; then
+    git -C "$ROOT" rev-parse --verify "$BASE^{commit}" >/dev/null 2>&1 || { echo "error: invalid base ref: $BASE" >&2; exit 2; }
+    committed="$(git -C "$ROOT" diff --name-only "$BASE...HEAD")" || exit 2
+  fi
   difflist="$difflist
+$staged
+$committed
 $untracked"
+  difflist="$(printf '%s\n' "$difflist" | sort -u)"
+  scanned=0
   while IFS= read -r entry || [ -n "$entry" ]; do
     [ -n "$entry" ] || continue
     # Generated and installed trees are never scanned (agentic trial T1):
@@ -103,10 +122,15 @@ $untracked"
     esac
     cand="$ROOT/$entry"
     [ -f "$cand" ] || continue
+    scanned=$((scanned + 1))
     check_file "$cand" "$entry"
   done <<< "$difflist"
+  echo "scanned $scanned files"
+  [ "$scanned" -gt 0 ] || echo "warning: no source files scanned"
   exit "$fail"
 fi
+
+[ -z "$BASE" ] || { echo "error: --base requires a git work tree" >&2; exit 2; }
 
 filelist=""
 for d in $FEATURE_DIRS $CORE_DIRS $DATA_DIRS $COMPOSITION_ROOT $DESIGN_SYSTEM_MODULE; do
@@ -116,11 +140,15 @@ for d in $FEATURE_DIRS $CORE_DIRS $DATA_DIRS $COMPOSITION_ROOT $DESIGN_SYSTEM_MO
 $found"
 done
 sorted="$(printf '%s\n' "$filelist" | sort -u)"
+scanned=0
 while IFS= read -r kt || [ -n "$kt" ]; do
   [ -n "$kt" ] || continue
   [ -f "$kt" ] || continue
   krel="${kt#$ROOT/}"
   composekit_skip_path "$krel" && continue
+  scanned=$((scanned + 1))
   check_file "$kt" "${kt#$ROOT/}"
 done <<< "$sorted"
+echo "scanned $scanned files"
+[ "$scanned" -gt 0 ] || echo "warning: no source files scanned"
 exit "$fail"

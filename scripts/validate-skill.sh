@@ -443,7 +443,7 @@ check_frontmatter() {
     local inline_desc
     inline_desc=$(echo "$frontmatter" | sed -n "${desc_line}p" | sed 's/^description:[[:space:]]*//')
 
-    if [ -n "$inline_desc" ] && ! echo "$inline_desc" | grep -qE '^\s*[>|]\s*$'; then
+    if [ -n "$inline_desc" ] && ! echo "$inline_desc" | grep -qE '^\s*[>|][-+]?\s*$'; then
       desc="$inline_desc"
     else
       desc=$(echo "$frontmatter" | sed -n "$((desc_line+1)),\$p" | sed '/^[a-zA-Z_-]*:/,$d' | tr '\n' ' ' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')

@@ -32,6 +32,7 @@ class __Name__ViewModel(
 ) {
 
     private var loadJob: Job? = null
+    private var saveJob: Job? = null
     private var hasStarted: Boolean = false
 
     override fun onAction(action: __Name__UiAction) {
@@ -71,9 +72,11 @@ class __Name__ViewModel(
     }
 
     private fun save() {
-        launchGuarded(onError = ::emitError) {
+        if (saveJob?.isActive == true) return
+        val draftTitle = currentState.draftTitle
+        saveJob = launchGuarded(onError = ::emitError) {
             withContext(ioDispatcher) {
-                repository.save__Item__Draft(params.__item__Id, savedStateHandle.get<String>("draftTitle") ?: "")
+                repository.save__Item__Draft(params.__item__Id, draftTitle)
             }
             sendEffect(__Name__UiEffect.Saved)
         }

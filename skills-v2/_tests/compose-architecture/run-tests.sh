@@ -31,6 +31,43 @@ echo "run-tests.sh under bash $BASH_VERSION"
 pass=0
 fail=0
 
+frontmatter_check() {
+    file="$1" expected="$2"
+    if python3 -c 'import yaml' >/dev/null 2>&1; then
+        python3 - "$file" "$expected" <<'PY'
+import sys, yaml
+path, expected = sys.argv[1:]
+try:
+    parts = open(path, encoding="utf-8").read().split("---", 2)
+    assert len(parts) == 3 and not parts[0].strip()
+    data = yaml.safe_load(parts[1])
+    assert isinstance(data, dict)
+    assert data.get("name") == expected
+    assert isinstance(data.get("description"), str)
+    assert len(data["description"]) <= 1024
+except (OSError, yaml.YAMLError, AssertionError) as exc:
+    print(f"invalid frontmatter: {path}: {exc}")
+    sys.exit(1)
+PY
+    elif command -v ruby >/dev/null 2>&1 && ruby -ryaml -e '' >/dev/null 2>&1; then
+        ruby -ryaml - "$file" "$expected" <<'RUBY'
+path, expected = ARGV
+begin
+  parts = File.read(path).split('---', 3)
+  raise 'missing delimiters' unless parts.length == 3 && parts[0].strip.empty?
+  data = YAML.safe_load(parts[1])
+  raise 'invalid fields' unless data.is_a?(Hash) && data['name'] == expected && data['description'].is_a?(String) && data['description'].length <= 1024
+rescue => e
+  warn "invalid frontmatter: #{path}: #{e}"
+  exit 1
+end
+RUBY
+    else
+        echo "error: frontmatter tests require python3 with PyYAML or ruby with yaml" >&2
+        return 2
+    fi
+}
+
 expect_pass() {
     label="$1"; shift
     out="$("$@" 2>&1)"; st=$?
@@ -65,7 +102,23 @@ check() {
     expect_fail "$name fails on fixtures/bad/$name" "$substring" bash "$SCRIPTS_DIR/$name.sh" "$BAD/$name"
 }
 
+for skill in compose-architecture compose-data compose-feature compose-platform compose-project compose-ui; do
+    expect_pass "$skill frontmatter parses and matches schema" frontmatter_check "$REPO_ROOT/skills-v2/$skill/SKILL.md" "$skill"
+done
+mkdir -p "$SCRATCH/frontmatter-bad"
+printf '%s\n' '---' 'name: compose-bad' 'description: invalid: unquoted colon' '---' > "$SCRATCH/frontmatter-bad/SKILL.md"
+expect_fail "unquoted colon in description fails frontmatter" "invalid frontmatter" frontmatter_check "$SCRATCH/frontmatter-bad/SKILL.md" "compose-bad"
+
 check check-layering "depends on another feature"
+# Dependency guards must catch type-safe accessors as well as literal paths.
+LAYERS="$SCRATCH/layer-edges"
+mkdir -p "$LAYERS/feature/a" "$LAYERS/core/model"
+printf '%s\n' 'implementation(projects.feature.b)' > "$LAYERS/feature/a/build.gradle.kts"
+expect_fail "check-layering catches projects.feature.b" "depends on another feature" bash "$SCRIPTS_DIR/check-layering.sh" "$LAYERS"
+printf '%s\n' 'implementation(projects.feature.noteDetail)' > "$LAYERS/feature/a/build.gradle.kts"
+expect_fail "check-layering converts camelCase accessors" "feature/note-detail" bash "$SCRIPTS_DIR/check-layering.sh" "$LAYERS"
+printf '%s\n' 'implementation(projects.data.notes)' > "$LAYERS/core/model/build.gradle.kts"
+expect_fail "check-layering catches core to data" "depends on data" bash "$SCRIPTS_DIR/check-layering.sh" "$LAYERS"
 check check-contract-shape "exactly"
 check check-packages "five feature packages"
 check check-data-boundary "must be internal"
@@ -97,6 +150,15 @@ expect_fail "check-locale-parity discovers the broken root without the override"
 check check-hardcoded-colors "outside the design-system"
 check check-commonmain-imports "platform import"
 
+out="$(bash "$NEW_FEATURE" --name 2>&1)"; st=$?
+if [ "$st" -eq 2 ]; then
+    echo "PASS: new-feature.sh --name without value exits 2"
+    pass=$((pass + 1))
+else
+    echo "FAIL: new-feature.sh --name without value exited $st (expected 2)"
+    fail=$((fail + 1))
+fi
+
 # Untracked files count in a git work tree: an untracked file with TODO
 # fails check-placeholders in root-only mode (defect #9). A fresh scaffold
 # failing on its SEAMs stays the intended behaviour.
@@ -105,6 +167,24 @@ printf '%s\n' 'FEATURE_DIRS="feature"' 'COMPOSITION_ROOT="app"' > "$SCRATCH/untr
 printf '%s\n' 'package demo' '// TODO: implement the demo' > "$SCRATCH/untracked/feature/demo/src/commonMain/kotlin/demo/Demo.kt"
 git init -q "$SCRATCH/untracked" 2>/dev/null
 expect_fail "check-placeholders fails on an untracked TODO file" "TODO" bash "$SCRIPTS_DIR/check-placeholders.sh" "$SCRATCH/untracked"
+
+# Build two scratch commits with git plumbing; never invoke git commit.
+HISTORY="$SCRATCH/placeholder-history"
+mkdir -p "$HISTORY/feature/demo"
+git init -q "$HISTORY" 2>/dev/null
+printf '%s\n' 'fun demo() = 1' > "$HISTORY/feature/demo/Demo.kt"
+git -C "$HISTORY" add feature/demo/Demo.kt
+tree="$(git -C "$HISTORY" write-tree)"
+base="$(printf 'base\n' | git -C "$HISTORY" -c user.name=Test -c user.email=test@example.invalid commit-tree "$tree")"
+git -C "$HISTORY" update-ref HEAD "$base"
+printf '%s\n' '// TODO: staged' >> "$HISTORY/feature/demo/Demo.kt"
+git -C "$HISTORY" add feature/demo/Demo.kt
+expect_fail "check-placeholders catches staged TODO" "TODO" bash "$SCRIPTS_DIR/check-placeholders.sh" "$HISTORY"
+tree="$(git -C "$HISTORY" write-tree)"
+head="$(printf 'second\n' | git -C "$HISTORY" -c user.name=Test -c user.email=test@example.invalid commit-tree "$tree" -p "$base")"
+git -C "$HISTORY" update-ref HEAD "$head"
+expect_fail "check-placeholders catches committed TODO with --base" "TODO" bash "$SCRIPTS_DIR/check-placeholders.sh" "$HISTORY" --base "$base"
+expect_fail "run-checks passes --base to placeholders" "TODO" bash "$SCRIPTS_DIR/run-checks.sh" "$HISTORY" --base "$base"
 
 # A fresh guard install leaves untracked scripts plus wrapper files beside a
 # clean source tree: the git scan skips the installed guard directory and

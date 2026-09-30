@@ -37,7 +37,7 @@ private val _nav = MutableStateFlow<NotesUiEffect?>(null)
 // RIGHT: buffered handoff survives the gap and delivers once.
 private val _effect = Channel<NotesUiEffect>(Channel.BUFFERED)
 ```
-Gotcha: `trySend` on the base class channel fails only on a closed channel; never rely on a specific capacity — one-shots are small (§3.4).
+Gotcha: `trySend` on the base class channel can fail when its buffer is full or the channel is closed; check its returned Boolean when delivery matters (§3.4).
 Gotcha: anything the user must still see after returning is state, not an effect; effects cover navigation, snackbar, share, and haptics (§3.4).
 
 ## Collect at the Route (§3.4)
@@ -107,10 +107,10 @@ Switch dispatchers in the callee with `withContext`. Launch plainly at the calle
 suspend fun refreshNotes() = withContext(ioDispatcher) { store.refresh() }
 ```
 Gotcha: `launchGuarded` returns its `Job`; the call site guards overlap with `loadJob?.isActive` (§3.6, §8.3).
-Gotcha: sequential poll or reconcile work prefers `runGuarded`; a sibling job plus `join` risks overlapping ticks or deadlock under a single-threaded test dispatcher (§3.6).
+Gotcha: sequential poll or reconcile work prefers `runGuarded`; a sibling job can overlap ticks, while `join` suspends (§3.6).
 
 ## Overlap and foreground signals (§8.3, §8.5)
-Guard overlapping loads explicitly. Skip, not cancel. The in-flight load keeps owning the response. Two overlapping loads never both write.
+Guard overlapping loads explicitly. Skip a reload of the same input; use latest-wins cancellation when input changes, a single-flight guard for submits, and sequential execution for ordered writes. For a skipped reload, the in-flight load keeps owning the response.
 The first `LifecycleStartEffect` `ON_START` is the cold load. Later `ON_START` calls are reconcile. Key the effect by the nav-key id. A repository stream needs no split; collect the stream and let re-emission reconcile.
 App-wide reconcile uses `AppForegroundSignals.returnedToForeground` collected in `viewModelScope`. Never use a Screen collector or a shell-wide refresh registry for app reconcile.
 No network call or must-not-lose write runs in `wentToBackground`. Cancellation and pause only. The destination `ON_STOP` already covers a destination-scoped poll.

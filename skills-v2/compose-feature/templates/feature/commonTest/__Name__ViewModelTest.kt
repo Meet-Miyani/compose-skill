@@ -166,6 +166,32 @@ class __Name__ViewModelTest {
     }
 
     @Test
+    fun `double save makes one repository write`() = runTest(testScheduler) {
+        val fake = Fake__Name__Repository()
+        val viewModel = viewModel(fake)
+        viewModel.onAction(__Name__UiAction.OnTitleChanged("edited"))
+
+        viewModel.onAction(__Name__UiAction.OnSaveClick)
+        viewModel.onAction(__Name__UiAction.OnSaveClick)
+        advanceUntilIdle()
+
+        assertEquals(1, fake.saveCalls)
+    }
+
+    @Test
+    fun `save uses title at click time`() = runTest(testScheduler) {
+        val fake = Fake__Name__Repository()
+        val viewModel = viewModel(fake)
+        viewModel.onAction(__Name__UiAction.OnTitleChanged("at click"))
+
+        viewModel.onAction(__Name__UiAction.OnSaveClick)
+        viewModel.onAction(__Name__UiAction.OnTitleChanged("later"))
+        advanceUntilIdle()
+
+        assertEquals(1L to "at click", fake.lastSavedDraft)
+    }
+
+    @Test
     fun `inline error on throw then retry succeeds`() = runTest(testScheduler) {
         val fake = Fake__Name__Repository().apply { shouldThrow = NetworkException.Connection() }
         val viewModel = viewModel(fake)

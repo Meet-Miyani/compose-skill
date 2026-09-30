@@ -170,11 +170,15 @@ ViewModel tests cover the full state matrix. The matrix lives in the `compose-fe
 
 ## Overlap guard
 
-Guard overlapping loads explicitly. Skip, not cancel. (§8.3; F-11)
+Choose the overlap policy for the operation (§8.3; F-11):
+- Skip for a reload of the same input.
+- Latest wins (cancel the previous job) when the input changed, such as search or filter.
+- Single-flight guard for submits.
+- Sequential execution for ordered writes.
 
 `launchGuarded` returns its `Job`. Store it. Check `loadJob?.isActive` before starting a second load. A pull-to-refresh landing on an in-flight reconcile returns early. The in-flight load keeps owning the response. (CONTRACT_BRIEF §3.6; §8.3; F-11)
 
-Cancelling the in-flight load to restart it trades one owner for restart churn with no fresher data guaranteed. (§8.3)
+For the same input, cancelling the in-flight load to restart it trades one owner for restart churn with no fresher data guaranteed. (§8.3)
 
 ```kotlin
 private var loadJob: Job? = null

@@ -1,6 +1,7 @@
 ---
 name: compose-project
-description: Owns project and build-level work for Compose and Compose Multiplatform apps: bootstrapping a new project, adopting the kit in an existing project, adding or extracting a module, convention plugins in build-logic, the version catalog, and CI plus agent hooks. Use when starting a Compose Multiplatform app, adding a module, or editing settings.gradle.kts, build.gradle.kts, build-logic, libs.versions.toml, or packaging. Do NOT use for routing and architecture choices (compose-architecture), feature code (compose-feature), repositories and persistence (compose-data), composables or resources (compose-ui), or commonMain vs platform code (compose-platform).
+description: >-
+  Owns project and build-level work for Compose and Compose Multiplatform apps: bootstrapping a new project, adopting the kit in an existing project, adding or extracting a module, convention plugins in build-logic, the version catalog, and CI plus agent hooks. Use when starting a Compose Multiplatform app, adding a module, or editing settings.gradle.kts, build.gradle.kts, build-logic, libs.versions.toml, or packaging. Do NOT use for routing and architecture choices (compose-architecture), feature code (compose-feature), repositories and persistence (compose-data), composables or resources (compose-ui), or commonMain vs platform code (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---

@@ -49,7 +49,7 @@ then reference siblings as `implementation(projects.feature.notes)` style access
 
 ## Guard
 
-12. (non-negotiable) **Run `check-layering.sh` after every dependency change.** It machine-checks direction (no feature-to-feature, no depends-on-root, no core-on-feature/data edges) plus DTO/entity visibility. A review that only eyeballs the diff is not verification. *Prevents:* rationalized direction violations landing uncaught.
+12. (non-negotiable) **Run `check-layering.sh` after every dependency change.** It machine-checks direction (no feature-to-feature, no depends-on-root, no core-on-feature/data edges). `check-data-boundary.sh` checks DTO/entity visibility. A review that only eyeballs the diff is not verification. *Prevents:* rationalized direction violations landing uncaught.
 
 ## Gotchas
 

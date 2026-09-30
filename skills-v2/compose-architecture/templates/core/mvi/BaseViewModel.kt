@@ -73,17 +73,15 @@ abstract class BaseViewModel<Action : UiAction, State : UiState, Effect : UiEffe
 
     /**
      * Enqueues a one-shot command. Uses `trySend` so the call preserves
-     * caller-thread sequencing, buffers while the UI is stopped, and
-     * replays on resume. `trySend` fails only on a closed channel.
+     * caller-thread sequencing and buffers while the UI is stopped.
+     * Delivery is at most once; an outcome the user must still see belongs
+     * in state, not an effect. `trySend` fails when the buffer is full or
+     * the channel is closed; callers can inspect the returned Boolean.
      */
-    protected fun sendEffect(effect: Effect) {
-        _effect.trySend(effect)
-    }
+    protected fun sendEffect(effect: Effect): Boolean = _effect.trySend(effect).isSuccess
 
     /** Enqueues a popup-tier failure for the app error host. */
-    protected fun emitError(error: AppError) {
-        _errors.trySend(error)
-    }
+    protected fun emitError(error: AppError): Boolean = _errors.trySend(error).isSuccess
 
     /**
      * Launches [block] on `viewModelScope`. Runs [onStart] before the
@@ -111,8 +109,7 @@ abstract class BaseViewModel<Action : UiAction, State : UiState, Effect : UiEffe
     /**
      * Same contract as [launchGuarded], as a `suspend` function inside an
      * existing coroutine. Prefer this for sequential work (a poll loop, a
-     * reconcile fetch) where launching a sibling job and joining it would
-     * overlap ticks or deadlock under a single-threaded test dispatcher.
+     * reconcile fetch) where launching a sibling job can overlap ticks.
      */
     protected suspend fun runGuarded(
         onError: (AppError) -> Unit,

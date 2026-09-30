@@ -1,6 +1,7 @@
 ---
 name: compose-platform
-description: Owns platform splits for Compose Multiplatform apps: places declarations in commonMain, chooses expect/actual vs interface plus DI, wires host adapters and ports, and validates iOS/Swift interop, desktop and web targets, and platform lifecycle. Use when touching commonMain, expect, actual, iosMain, Swift, SKIE, Flow to Swift, desktop, wasm, web target, or platform-specific code. Do NOT use for routing or architecture (compose-architecture), feature slices (compose-feature), composables or resources (compose-ui), repositories or persistence (compose-data), or Gradle target setup (compose-project).
+description: >-
+  Owns platform splits for Compose Multiplatform apps: places declarations in commonMain, chooses expect/actual vs interface plus DI, wires host adapters and ports, and validates iOS/Swift interop, desktop and web targets, and platform lifecycle. Use when touching commonMain, expect, actual, iosMain, Swift, SKIE, Flow to Swift, desktop, wasm, web target, or platform-specific code. Do NOT use for routing or architecture (compose-architecture), feature slices (compose-feature), composables or resources (compose-ui), repositories or persistence (compose-data), or Gradle target setup (compose-project).
 metadata:
   last-reviewed: 2026-09-25
 ---

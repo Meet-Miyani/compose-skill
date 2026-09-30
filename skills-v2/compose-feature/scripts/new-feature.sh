@@ -43,6 +43,12 @@ dryrun=0
 
 while [ $# -gt 0 ]; do
     case "${1:-}" in
+        --name|--item|--package|--root|--module-dir)
+            case "${2:-}" in
+                ""|--*) echo "error: $1 requires a value" >&2; usage; exit 2 ;;
+            esac ;;
+    esac
+    case "${1:-}" in
         --name) name="${2:-}"; shift 2 ;;
         --item) item="${2:-}"; shift 2 ;;
         --package) package="${2:-}"; shift 2 ;;

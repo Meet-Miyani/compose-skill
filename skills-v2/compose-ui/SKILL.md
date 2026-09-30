@@ -1,6 +1,7 @@
 ---
 name: compose-ui
-description: Writes and reviews composables for Compose and CMP: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable code, recomposition, stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme, colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI, error tiers, or module graph (compose-architecture), ViewModel or data work (compose-feature, compose-data), Gradle or module work (compose-project), or expect/actual splits (compose-platform).
+description: >-
+  Writes and reviews composables for Compose and CMP: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable code, recomposition, stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme, colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI, error tiers, or module graph (compose-architecture), ViewModel or data work (compose-feature, compose-data), Gradle or module work (compose-project), or expect/actual splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---

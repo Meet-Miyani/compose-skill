@@ -5,7 +5,7 @@
 # flags, no sed -i. No network; no writes anywhere.
 #
 # Usage:
-#   run-checks.sh <project-root>
+#   run-checks.sh <project-root> [--base <ref>]
 #
 # Reads `<project-root>/.composekit.conf` (each check reads it itself).
 # Exits 0 when every check passes, 1 otherwise.
@@ -13,8 +13,15 @@ set -u
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="${1:-}"
-if [ -z "$ROOT" ]; then echo "usage: run-checks.sh <project-root>" >&2; exit 2; fi
+if [ -z "$ROOT" ]; then echo "usage: run-checks.sh <project-root> [--base <ref>]" >&2; exit 2; fi
 if [ ! -d "$ROOT" ]; then echo "error: not a directory: $ROOT" >&2; exit 2; fi
+BASE=""
+if [ $# -gt 1 ]; then
+    if [ $# -ne 3 ] || [ "$2" != "--base" ] || [ -z "$3" ] || [ "${3#--}" != "$3" ]; then
+        echo "usage: run-checks.sh <project-root> [--base <ref>]" >&2; exit 2
+    fi
+    BASE="$3"
+fi
 
 CHECKS="check-layering check-contract-shape check-packages check-data-boundary check-error-handling check-file-level-state check-nav-keys check-placeholders check-locale-parity check-hardcoded-colors check-commonmain-imports"
 
@@ -30,10 +37,19 @@ for check in $CHECKS; do
         failed_list="$failed_list $check"
         continue
     fi
-    output="$(bash "$script" "$ROOT" 2>&1)"
+    if [ "$check" = "check-placeholders" ] && [ -n "$BASE" ]; then
+        output="$(bash "$script" "$ROOT" --base "$BASE" 2>&1)"
+    else
+        output="$(bash "$script" "$ROOT" 2>&1)"
+    fi
     status=$?
     if [ $status -eq 0 ]; then
-        printf '%-24s %s\n' "$check" "PASS"
+        case "$check:$output" in
+            check-placeholders:*"warning: no source files scanned"*)
+                printf '%-24s %s\n' "$check" "WARN (0 files)" ;;
+            *) printf '%-24s %s\n' "$check" "PASS" ;;
+        esac
+        [ "$check" = "check-placeholders" ] && printf '%s\n' "$output" | sed 's/^/    /'
         pass=$((pass + 1))
     else
         printf '%-24s %s\n' "$check" "FAIL"

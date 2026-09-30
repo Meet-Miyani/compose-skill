@@ -16,10 +16,19 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 21
       - name: composekit guards
-        run: bash scripts/composekit/run-checks.sh .
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$PR_BASE" ]; then
+            bash scripts/composekit/run-checks.sh . --base "$PR_BASE"
+          else
+            bash scripts/composekit/run-checks.sh .
+          fi

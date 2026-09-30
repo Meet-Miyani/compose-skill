@@ -45,12 +45,12 @@ search_sources() {
 # Dots in the base package must match literally inside the ERE.
 BASE_ESC="$(printf '%s' "$BASE_PACKAGE" | sed -e 's/\./\\./g')"
 IMPORT_ERE="^import $BASE_ESC\\.feature\\."
-# One converted target path from a build file. Scope: feature | coredata.
+# One converted target path from a build file. Scope: feature | core | data.
 check_target() {
   rel="$1"; lineno="$2"; own="$3"; scope="$4"; target_path="$5"
   if [ "$target_path" = "$COMPOSITION_ROOT" ]; then
     [ "$scope" = "feature" ] && report "$rel" "$lineno" "module $own depends on the composition root: $target_path"
-    [ "$scope" = "coredata" ] && report "$rel" "$lineno" "core/data module $own depends on the composition root: $target_path"
+    [ "$scope" != "feature" ] && report "$rel" "$lineno" "core/data module $own depends on the composition root: $target_path"
     return
   fi
   for fd in $FEATURE_DIRS; do
@@ -58,10 +58,17 @@ check_target() {
       "$fd"/*)
         [ "$target_path" = "$own" ] && continue
         [ "$scope" = "feature" ] && report "$rel" "$lineno" "feature $own depends on another feature: $target_path"
-        [ "$scope" = "coredata" ] && report "$rel" "$lineno" "core/data module $own depends on a feature: $target_path"
+        [ "$scope" != "feature" ] && report "$rel" "$lineno" "core/data module $own depends on a feature: $target_path"
         ;;
     esac
   done
+  if [ "$scope" = "core" ]; then
+    for dd in $DATA_DIRS; do
+      case "$target_path" in
+        "$dd"/*) report "$rel" "$lineno" "core module $own depends on data: $target_path" ;;
+      esac
+    done
+  fi
 }
 # Every project() target in one build file. Args: <rel-path> <scope>.
 check_gradle_file() {
@@ -69,6 +76,13 @@ check_gradle_file() {
   while IFS= read -r line || [ -n "$line" ]; do
     lineno=$((lineno + 1))
     targets="$(printf '%s\n' "$line" | sed -n -e 's/.*project( *"\([^"]*\)".*/\1/p' -e "s/.*project( *'\([^']*\)'.*/\1/p")"
+    # Type-safe Gradle accessors: projects.feature.noteDetail -> feature/note-detail.
+    accessors="$(printf '%s\n' "$line" | grep -o -E 'projects(\.[A-Za-z][A-Za-z0-9]*)+' || true)"
+    while IFS= read -r accessor || [ -n "$accessor" ]; do
+      [ -n "$accessor" ] || continue
+      target_path="$(printf '%s' "${accessor#projects.}" | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' | tr '[:upper:].' '[:lower:]/')"
+      check_target "$rel" "$lineno" "$own" "$scope" "$target_path"
+    done <<< "$accessors"
     [ -n "$targets" ] || continue
     while IFS= read -r target || [ -n "$target" ]; do
       [ -n "$target" ] || continue
@@ -122,7 +136,8 @@ check_import_dirs() {
 }
 
 check_gradle_dirs "$FEATURE_DIRS" "feature"
-check_gradle_dirs "$CORE_DIRS $DATA_DIRS" "coredata"
+check_gradle_dirs "$CORE_DIRS" "core"
+check_gradle_dirs "$DATA_DIRS" "data"
 check_import_dirs "$FEATURE_DIRS" "feature"
 check_import_dirs "$CORE_DIRS $DATA_DIRS" "coredata"
 

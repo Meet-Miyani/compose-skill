@@ -1,6 +1,7 @@
 ---
 name: compose-data
-description: Owns repositories, data sources and mapping for Compose and Compose Multiplatform apps: DTO to domain to UiModel boundaries, Ktor clients and bearer auth, WebSocket and SSE, Room, DataStore, Paging 3, offline-first and data-layer tests. Use when writing or reviewing a repository, data source, DTO, mapper, HttpClient, bearer token, WebSocket, SSE, Room DAO, migration, DataStore, PagingSource, RemoteMediator, offline cache or MockEngine test. Do NOT use for ViewModel or UI wiring (compose-feature), composables (compose-ui), the MVI contract or error tiers (compose-architecture), Gradle modules (compose-project), or commonMain vs platform splits (compose-platform).
+description: >-
+  Owns repositories, data sources and mapping for Compose and Compose Multiplatform apps: DTO to domain to UiModel boundaries, Ktor clients and bearer auth, WebSocket and SSE, Room, DataStore, Paging 3, offline-first and data-layer tests. Use when writing or reviewing a repository, data source, DTO, mapper, HttpClient, bearer token, WebSocket, SSE, Room DAO, migration, DataStore, PagingSource, RemoteMediator, offline cache or MockEngine test. Do NOT use for ViewModel or UI wiring (compose-feature), composables (compose-ui), the MVI contract or error tiers (compose-architecture), Gradle modules (compose-project), or commonMain vs platform splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-25
 ---

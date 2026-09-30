@@ -2,13 +2,12 @@
 
 # Compose Kit
 
-**Six agent skills that make AI coding models build Jetpack Compose and Compose Multiplatform apps
-the same way every time: one architecture, one file layout, one error-handling contract.**
+**Six agent skills that teach AI coding agents one house architecture for Jetpack Compose and Compose Multiplatform apps: MVI on one BaseViewModel, Koin annotations, Navigation 3 and one error contract.**
 
 ![Skills](https://img.shields.io/badge/skills-6-2a78d6)
 ![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-Android%20%C2%B7%20iOS%20%C2%B7%20Desktop-1c5cab)
-![Tested models](https://img.shields.io/badge/tested%20on-8%20models%2C%206%20vendors-52514e)
-![Final test](https://img.shields.io/badge/final%20test-12%20unseen%20tasks%2C%20blind--graded-52514e)
+![Completed v4 paired runs](https://img.shields.io/badge/v4%20paired%20runs-7%20endpoints-52514e)
+![V4 grading](https://img.shields.io/badge/v4%20candidate-adjudicated%20two--pass%20grading-52514e)
 
 [What it is](#what-it-is) · [Results](#results) · [Honest limits](#honest-limits) · [The six skills](#the-six-skills) · [Quick start](#quick-start) · [How it was tested](#how-it-was-tested)
 
@@ -20,14 +19,14 @@ the same way every time: one architecture, one file layout, one error-handling c
 
 An opinionated, strict **house kit** for agents such as Claude Code, Codex, Gemini/Antigravity, Cursor and
 OpenCode. It is not a Compose tutorial. It teaches the kit's decisions, the non-obvious failures, and the
-workflow, and it ships the pieces that make those decisions stick:
+workflow, and it ships templates and checks for applying them:
 
 | | |
 |---|---|
 | 🧭 **Rules with reasons** | Each rule says what it prevents, so an agent can apply it to a case the rule never named. |
-| 🧱 **Templates** | A feature scaffold and project templates that build on Android, desktop and iOS from the first commit. |
-| 🛡️ **Guards** | Shell checks for layering, contracts, error handling, hardcoded colours, locale parity and more, run by CI and agent hooks. |
-| 🗂️ **Routing** | `compose-architecture` loads first and hands each task to the one skill that owns it. |
+| 🧱 **Templates** | A feature scaffold and project templates; one moderator-assembled project was reported to build, while clean bootstrap from the distributed artifact remains unverified. |
+| 🛡️ **Guards** | Shell checks for layering, contracts, error handling, hardcoded colours, locale parity and more. CI and hook integration is provided; enforcement coverage is not established. |
+| 🗂️ **Routing** | `compose-architecture` gives routing instructions. Native activation and routing reliability have not been established. |
 
 The house stack: **MVI** on one `BaseViewModel` contract · **Koin** annotations · **Navigation 3** ·
 feature-owned `data` / `domain` / `presentation` · typed error tiers · `kotlin.time.Instant` · Kotlin 2.4,
@@ -38,38 +37,44 @@ CMP 1.12, AGP 9.
 ## Results
 
 > [!NOTE]
-> Every number below comes from a **sealed final test**: 12 tasks in a plant-care app the kit had never seen,
-> answered by each model **with and without the kit**, then graded **blind** against a 63-item checklist by two
-> independent graders, with a third model breaking ties. Nothing in the kit was changed after seeing it.
+> The scores below describe the **v4 candidate, adjudicated two-pass grading** at `ef9e499`:
+> 12 plant-care tasks answered with and without the kit, scored against a 63-item checklist in two blind
+> grading passes with tie adjudication. This limited answer set does not establish repeatable lift or general
+> capability parity.
+
+The kit has changed since v4 (fix rounds 4-6); these scores describe the v4 candidate only.
+The table covers seven completed paired endpoints. Development runs, partial runs and reference-only answers
+are separate; the badge makes no vendor-count claim.
 
 <p align="center">
   <img src="docs/results-final-test.svg" alt="Dumbbell chart of rubric scores without and with the kit for seven models; the table below lists every value." width="760">
 </p>
 
-| Model | Without the kit | With the kit | Kit helps? ¹ | Reaches Opus level? ² |
+| Model | Without the kit | With the kit | Higher v4 rubric score? ¹ | Within 5 rubric points? ² |
 |---|---:|---:|:---:|:---:|
 | Opus 5.5 | 87% | **94%** | ✅ | — |
 | Muse Spark 1.3 | 65% | **87%** | ✅ | ✅ ³ |
 | DeepSeek V4.1 Flash | 68% | **76%** | ✅ | ❌ |
 | Gemini 3.8 Flash | 57% | **75%** | ✅ | ❌ |
 | DeepSeek V4 Pro | 56% | **75%** | ✅ | ❌ |
-| MiniMax M3 | 54% | **59%** | ✅ small | ❌ |
+| MiniMax M3 | 54% | **59%** | ✅ small ⁴ | ❌ |
 | GPT-6-Luna | 49% | 48% | ❌ | ❌ |
 
-<sub>¹ The kit arm beats the no-kit arm in both blind grading passes. ² Within 5 points of Opus 5.5 without the
-kit on the same tasks. ³ See the tuning caveat under [Honest limits](#honest-limits). Rules fixed before any
-answer was read.</sub>
+<sub>All scores: v4 candidate, adjudicated two-pass grading at `ef9e499`. ¹ Higher on this answer set under
+the stated rubric; not a repeatability claim. ² Within 5 rubric points of the Opus 5.5 no-kit answers on these
+tasks; not capability equivalence. ³ See the tuning caveat under [Honest limits](#honest-limits). ⁴ MiniMax had a
+small lift after adjudication (pass A was a tie before adjudication).</sub>
 
 ### What the kit changes most
 
-- **It stops dangerous shortcuts.** Asked to use `GlobalScope` or to store photos as database BLOBs, most models
-  without the kit simply complied. With it, Gemini went from **0/4 to 4/4** refusals-with-a-safe-fix, and Luna
-  from **0/4 to 4/4**. GPT-6-Astra, a frontier reference, complied every time.
-- **It builds complete features.** On the "care log screen" task, answers with the kit carried the contract,
-  guarded error path, retry, process-death-safe draft and tests; answers without it mostly did not
-  (Gemini 2/7 → 7/7 checklist items).
-- **It makes every project look the same.** House-style items rose from **43% to 86%** for Gemini: this is the
-  kit's core job.
+- **Pressure-task answers:** On two tasks asking for `GlobalScope` or database photo BLOBs, both v4 grading
+  passes accepted Gemini's **0/4 → 4/4** and Luna's **0/4 → 4/4** rubric outcomes. Other runs recorded unsafe
+  scope substitutions, so these scores do not establish a broad safety effect.
+- **Feature-answer checklist:** On the "care log screen" task, Gemini rose from **2/7 → 7/7** selected items.
+  The text included a contract, error path, retry, draft and tests; runtime lifecycle and process-death behavior
+  was not established by that score.
+- **House conformity:** Gemini's house-style items rose from **43% to 86%** on this v4 answer set. Consistency
+  across projects has not been measured.
 
 ### Kit vs a good generic prompt
 
@@ -77,12 +82,10 @@ answer was read.</sub>
   <img src="docs/results-control-test.svg" alt="Bar charts comparing no prompt, a generic senior-engineer prompt, and the kit on engineering items and on house-style items; values are in the text." width="760">
 </p>
 
-We also tested the kit against a **one-page "act as a senior Android engineer" prompt** (Gemini 3.8 Flash).
-The generic prompt did slightly better on general engineering items (**77% vs 72%**), and both fixed the
-pressure tasks equally. The kit won overall (75% vs 72%) because of consistency: **86% vs 57%** on house-style
-items. Read plainly: much of the engineering lift comes from telling a model to act like a careful senior; the
-kit's distinct value is that every project comes out in one house style. The next version folds that stance
-into the kit.
+In one Gemini 3.8 Flash control panel, a **one-page "act as a senior Android engineer" prompt** scored higher
+on general engineering items (**77% vs 72%**); the kit scored higher on house-style items (**86% vs 57%**)
+and overall (**75% vs 72%**). These are v4 candidate, adjudicated two-pass grading scores at `ef9e499`.
+The panel does not isolate a general kit effect or show that every project follows one style.
 
 ---
 
@@ -97,12 +100,12 @@ into the kit.
 - **Some common topics are thin:** local notifications, adaptive list-detail layouts, background work, and
   non-network failures (storage, validation).
 - **Bug fixes don't force a regression test.** Opus with the kit wrote one; weaker models did not.
-- **Muse was the model used most while developing the kit,** so its "Opus level" result carries a tuning
-  caveat until a wording-swap test rules it out.
-- **The grading leans Claude.** Most grading was done by Claude models. A GPT-6-Sol cross-check on 18 packets
-  (3 per model) agreed 84% item by item; it kept the kit ahead for Muse, DeepSeek V4 Pro and Opus, and put it one
-  item behind for Gemini and DeepSeek V4.1 Flash. It is stricter on kit answers, so treat the margins above as
-  upper bounds.
+- **Muse was the model used most while developing the kit.** Authorship effects remain unresolved; its
+  within-five-points result is limited to this rubric and answer set.
+- **The grading leans Claude.** Most grading was done by Claude models. A limited GPT-6-Sol cross-check on 18
+  packets (3 per model) agreed 84% item by item; it kept the kit ahead for Muse, DeepSeek V4 Pro and Opus, and
+  put it one item behind for Gemini and DeepSeek V4.1 Flash. Grader effects remain unresolved; this sample
+  cannot bound the true effect.
 - **Pending:** Kimi K3's final-test run and Muse's generic-prompt run wait for a plan reset. Qwen 3.8 Max and
   GLM 5.3 were tested on an earlier round only.
 
@@ -132,8 +135,8 @@ flowchart LR
     G -->|fail| A
 ```
 
-Each skill's `When NOT to use` table routes to its siblings. A rule has exactly one home; other skills link to it
-by name.
+Each skill has a `When NOT to use` table pointing to related skills. Some rules appear in more than one place;
+the routing instructions and native activation have not been independently verified.
 
 ---
 
@@ -157,8 +160,9 @@ skills-v2/compose-feature/scripts/new-feature.sh --name Notes --item Note \
 ```
 
 It emits the contract, ViewModel, Route, Screen, NavKey, DI module and a state-matrix test. The project templates
-in `compose-project/templates/` give a composition root that builds on Android, desktop and iOS; the Android app
-launches and survives rotation (verified on an emulator).
+in `compose-project/templates/` give a composition root. A moderator-assembled project was reported to build
+for Android, desktop and iOS and to survive rotation on an emulator; clean bootstrap from the distributed kit
+remains unverified.
 
 **3. Activate the kit** with the one-line pointer and optional SessionStart hook from
 `compose-project/references/enforcement.md`, and record your choices under `## Project decisions` (below).
@@ -204,17 +208,17 @@ The kit is self-sufficient. These external skills go deeper if installed; none i
 <details>
 <summary><b>Method, in short</b></summary>
 
-- **Development:** the kit was written by one model and reviewed by another, through three practice test sets and
-  three fix rounds. Each practice set was retired once used, so the kit never saw its final test.
-- **Final test (sealed):** 12 scenarios in a new domain, 63 checklist items (49 general engineering, 14 house
+- **Development:** the v4 candidate was written and reviewed through three practice test sets and three fix
+  rounds. Later fix rounds changed the kit after the v4 answers were examined.
+- **V4 candidate test:** 12 scenarios in a new domain, 63 checklist items (49 general engineering, 14 house
   style), including two "pressure" tasks that ask for a harmful shortcut and one code review.
 - **Grading:** blind, shuffled packets with both frontier references (Opus 5.5 and GPT-6-Astra, no kit) in every
   packet; two independent Claude passes; Fable 5.1 broke ties on 75 split items; GPT-6-Sol re-graded 18 packets as
   a cross-vendor check. All claim rules were written down before any answer was read.
 - **Control:** the same tasks with a one-page generic senior-engineer prompt instead of the kit.
-- **Independent review:** Fable 5.1 reviewed the whole kit and found 2 blockers and 8 majors in the templates; all
-  were fixed and verified by building a fresh project on Android, desktop and iOS, running its tests, and launching
-  it on an emulator.
+- **Review and build record:** Fable 5.1 found 2 blockers and 8 majors, followed by maintainer-reported fixes,
+  builds, tests and an emulator launch for one assembled project. A later independent review found further defects;
+  independent clean-bootstrap reproduction is pending.
 
 </details>
 

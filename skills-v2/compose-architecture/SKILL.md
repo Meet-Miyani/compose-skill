@@ -1,6 +1,7 @@
 ---
 name: compose-architecture
-description: Owns the house contract for Jetpack Compose and Compose Multiplatform work: module graph, MVI contract, error tiers, state ownership, naming, Koin annotations, Navigation 3 conventions and coroutine rules. Use at the start of any task that writes, changes or reviews Kotlin in a Compose or CMP project, before exploring or answering. Covers BaseViewModel, UiState, UiAction, UiEffect, launchGuarded, getXStream, NavKey, NavDisplay, Koin, commonMain and SavedStateHandle. Do NOT use for Gradle-only work (compose-project), new screens (compose-feature), composable-only work (compose-ui), repositories or persistence (compose-data), or expect/actual splits (compose-platform).
+description: >-
+  Owns the house contract for Jetpack Compose and Compose Multiplatform work: module graph, MVI contract, error tiers, state ownership, naming, Koin annotations, Navigation 3 conventions and coroutine rules. Use at the start of any task that writes, changes or reviews Kotlin in a Compose or CMP project, before exploring or answering. Covers BaseViewModel, UiState, UiAction, UiEffect, launchGuarded, getXStream, NavKey, NavDisplay, Koin, commonMain and SavedStateHandle. Do NOT use for Gradle-only work (compose-project), new screens (compose-feature), composable-only work (compose-ui), repositories or persistence (compose-data), or expect/actual splits (compose-platform).
 metadata:
   last-reviewed: 2026-09-24
 ---

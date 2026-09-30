@@ -29,6 +29,7 @@ class Fake__Name__Repository : __Name__Repository {
 
     /** Last draft the fake was asked to persist; the save test asserts this. */
     var lastSavedDraft: Pair<Long, String>? = null
+    var saveCalls: Int = 0
 
     /** Test-only helper that replaces the stored list. */
     fun seed(items: List<__Item__>) {
@@ -47,6 +48,7 @@ class Fake__Name__Repository : __Name__Repository {
     }
 
     override suspend fun save__Item__Draft(id: Long, title: String) {
+        saveCalls += 1
         lastSavedDraft = id to title
     }
 }
