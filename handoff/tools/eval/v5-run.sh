@@ -4,6 +4,7 @@
 # Clones the finished base app, installs the arm, applies the task setup, runs the agent headless, then adds the
 # hidden test (bug fixes) and runs the task's checks. Outputs in handoff/work/scratch/v5/runs/<model>/<task>-<arm>/.
 set -u
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-23.jdk/Contents/Home
 REPO=/Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill
 W=$REPO/handoff/work/scratch/v5
 V5=$REPO/evals-v2/heldout-v5
@@ -37,9 +38,11 @@ case "$ARM" in
          cp -R "$REPO/skills-v2/$s" "$SK/"; done ;;
 esac
 [ "$TOOL" = agy ] && [ -f AGENTS.md ] && cp AGENTS.md GEMINI.md
-# 2. task setup
-case "$SETUP" in none|"") ;; *) bash "$V5/setup/$TASK.sh" > "$OUT/setup.log" 2>&1 || { echo "setup failed" >&2; exit 3; } ;; esac
-git add -A && git -c user.name=dev -c user.email=dev@example.com commit -qm "start ($ARM)"
+git add -A && git -c user.name=dev -c user.email=dev@example.com commit -qm "Project setup"
+# 2. task setup, as its own commit so a review task's "PR" is visible in git history
+TITLE=$(field Commit); [ -n "$TITLE" ] || TITLE="Update"
+case "$SETUP" in none|"") ;; *) bash "$V5/setup/$TASK.sh" > "$OUT/setup.log" 2>&1 || { echo "setup failed" >&2; exit 3; }
+  git add -A && git -c user.name=dev -c user.email=dev@example.com commit -qm "$TITLE" ;; esac
 START_SHA=$(git rev-parse HEAD)
 
 # 3. agent (60 min hard cap)
@@ -51,7 +54,7 @@ case "$TOOL" in
   codex)  cap codex exec --disable memories -m "$MODEL" -s workspace-write --add-dir "$HOME/.gradle" --add-dir "$HOME/.konan" \
             -c sandbox_workspace_write.network_access=true --json -o "$OUT/final.md" "$PROMPT" < /dev/null \
             > "$OUT/agent.jsonl" 2> "$OUT/agent.err" ;;
-  agy)    cap agy --print "$PROMPT" --model "$MODEL" --dangerously-skip-permissions --sandbox \
+  agy)    cap agy --print "$PROMPT" --model "$MODEL" --dangerously-skip-permissions \
             --output-format stream-json --print-timeout 60m < /dev/null > "$OUT/agent.jsonl" 2> "$OUT/agent.err" ;;
 esac
 echo "agent_exit=$? seconds=$(( $(date +%s) - T0 ))" > "$OUT/meta.tmp"

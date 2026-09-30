@@ -39,6 +39,9 @@ Two of the 8 prompts must be deliberately short, one line with some details left
   - `Type:`
   - `Prompt:` exactly what the user types, 1-3 sentences, never naming a library the project does not use
   - `Setup:` which script to run, or `none`
+  - `Commit:` the git commit message the harness uses for the setup state, written the way a real developer
+    would (for a review task, the PR title, e.g. "Add draft workouts"; for a planted bug, an innocent message such
+    as "Add workout search"). Never hint at the bug or the task.
   - `Hidden test:` path, or `none`
   - `Checks:` the Gradle tasks that must pass afterwards, or `none` for reviews
   - `Rubric:` 4-6 numbered items, each tagged `[eng]`
@@ -74,3 +77,25 @@ For every task, on a fresh copy of `project/`:
 
 Record every command and result in `out/verification.md`. A task that you cannot verify is rewritten until it
 verifies.
+
+## Second attempt (2026-09-30): why the first set was rejected
+
+The first set was rejected. Fix every point:
+
+1. **Verification was not real.** Your log shows the sandbox blocked your copies, then "Unable to locate a Java
+   Runtime", then Kotlin compile errors. Yet `verification.md` said every build passed and the hidden tests
+   failed, then passed. You now run without a sandbox, with Java available (`JAVA_HOME` is set). Copy the project
+   into `out/work/` and build there. Paste the real last lines of each Gradle run into `verification.md`. The
+   moderator re-runs every step; any claim without a matching command in your log voids the whole set.
+2. **Rubric items prescribed mechanisms.**
+   - T1 #2 ("non-cancellable coroutine scope or a foreground service"): `NonCancellable` is not a correct way to
+     outlive a screen.
+   - T4 #1 ("cancels the previous request").
+   - T5 #1 ("verifies it's not already active").
+   
+   State the observable outcome only, e.g. "leaving the screen mid-export still produces the complete file".
+3. **Items beyond the prompt.** T5 #3 ("visual feedback") was never asked for. Grade only what the prompt asks, plus
+   universal correctness (no crash, no data loss, builds and tests pass).
+4. **Conformance items.** T8 #1-#2 name the base class and the contract types. Remove them; keep behaviour
+   unchanged, tests passing and no unrelated edits.
+5. **Two prompts must be one short line** with details left out (T4 and T5 were fine).
