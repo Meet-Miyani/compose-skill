@@ -18,5 +18,6 @@ enum class AppErrorType {
     NotFound,
     ServerError,
     UpdateRequired,
+    Storage,
     Generic,
 }

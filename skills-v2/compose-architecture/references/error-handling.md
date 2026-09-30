@@ -1,5 +1,20 @@
 # Error Handling
-Load this when wiring any failure path, choosing a tier, or mapping transport failures to AppError.
+Load when: choosing a failure type and its UI tier.
+
+## Choose
+
+- Is this invalid user input rather than a failed operation?
+  - Yes: hold validation in `UiState`, with a field message; do not throw. *Prevents:* ordinary input becoming an exception.
+  - No: is it a defect rather than an expected failure?
+    - Yes: let it propagate for diagnosis. *Prevents:* a programming bug disguised as retryable UI.
+    - No: is it a network failure?
+      - Yes: map `NetworkException` through `toAppError()` at the ViewModel boundary. *Prevents:* transport details leaking into UI.
+      - No: for expected storage or IO failure, wrap at the data-source boundary as `StorageException`, then map to `AppErrorType.Storage`. *Prevents:* a recoverable local failure crashing the screen.
+- Is there no content yet, visible content, or a named background poll?
+  - No content: show an inline error with Retry. *Prevents:* an empty screen with no recovery.
+  - Visible content or a user action: show a popup, or an inline field error where it can be fixed. *Prevents:* a hidden action failure.
+  - Named background poll: silent is allowed. *Prevents:* repeated nuisance popups.
+- Not covered here → use judgement and state the assumption.
 
 ## Contents
 - AppError and AppErrorType shape (§4.1)
@@ -22,7 +37,7 @@ data class AppError(
 )
 enum class AppErrorType {
   NoNetwork, Timeout, Tls, Unauthorized, Forbidden,
-  NotFound, ServerError, UpdateRequired, Generic,
+  NotFound, ServerError, UpdateRequired, Storage, Generic,
 }
 ```
 Gotcha: never synthesize an `AppError` for "empty" or "not found"; those are `UiState` fields (§4.6).
@@ -54,8 +69,11 @@ fun NetworkException.toAppError(): AppError = when (this) {
   is NetworkException.Http -> AppError(type = typeFor(statusCode), serverTitle = error?.title, serverMessage = error?.message, httpStatus = statusCode)
 }
 ```
-Repositories never call `toAppError`. ViewModels reach it through `launchGuarded`. The HTTP branch picks `AppErrorType` by status code and preserves server title, server message, and status.
-Gotcha: never call `toAppError` in a repository or mapper; transport stays transport until `launchGuarded` (§4.3).
+Repositories never call `toAppError`. ViewModels reach it through `launchGuarded`; paging `LoadState.Error` is the exception: `LoadState.Error.toAppError()` in the feature's presentation package or a shared paging-UI module maps at the UI boundary. The HTTP branch preserves status and server copy. `StorageException.toAppError()` maps expected local failure to `Storage`.
+
+At a data-source boundary, wrap `IOException` and database constraint failures as `StorageException(cause)`; never catch a defect or `CancellationException` as storage. https://developer.android.com/reference/android/database/sqlite/SQLiteConstraintException *Prevents:* recoverable local failures crashing while defects remain visible.
+
+When adding Paging, define one `LoadState.Error.toAppError()` extension in a module that already depends on Paging (the feature's presentation package or a shared paging-UI module): map `NetworkException` and `StorageException` from `error`, and map other throwables to `AppErrorType.Generic`. The standalone core template has no Paging dependency. https://developer.android.com/reference/kotlin/androidx/paging/LoadState.Error
 
 ## launchGuarded and runGuarded (§3.6)
 Every async call site in a ViewModel goes through `launchGuarded`. No hand-rolled `try/catch` chains. No `Result`, `safeApiCall`, or `NetworkResult` wrappers.
@@ -63,7 +81,7 @@ Every async call site in a ViewModel goes through `launchGuarded`. No hand-rolle
 fun launchGuarded(onError: (AppError) -> Unit, onStart: () -> Unit = {}, onComplete: () -> Unit = {}, block: suspend () -> Unit): Job
 suspend fun runGuarded(onError: (AppError) -> Unit, onStart: () -> Unit = {}, onComplete: () -> Unit = {}, block: suspend () -> Unit)
 ```
-`onError` is required. Each call site chooses silent, popup, or inline. `launchGuarded` launches on `viewModelScope`. It runs `onStart` before the block. It runs `onComplete` in `finally`. It catches `NetworkException` and converts it via `toAppError`. It rethrows `CancellationException`. Anything else propagates as a programming defect. `launchGuarded` returns its `Job` so call sites guard overlap with `loadJob?.isActive`. `runGuarded` carries the same contract inside an existing coroutine. Prefer `runGuarded` for sequential work such as a poll loop or a reconcile fetch. A sibling job can overlap ticks; `join` suspends. Switch dispatchers in the callee with `withContext`. Launch plainly at the caller. Inject dispatchers as constructor parameters for testability.
+`onError` is required. Each call site chooses silent, popup, or inline. `launchGuarded` launches on `viewModelScope`. It runs `onStart` before the block and `onComplete` in `finally`. It catches `NetworkException` and `StorageException`, converting each with `toAppError`; it rethrows `CancellationException`. Other exceptions propagate as defects. `runGuarded` has the same contract inside an existing coroutine. A sibling job can overlap ticks; `join` suspends. Switch dispatchers in the callee with `withContext`.
 Gotcha: `onError = {}` is legal only on a named background poll; anywhere else it is swallowing (§4.4).
 
 ## Two channels: effect plus errors (§3.4)
@@ -118,17 +136,6 @@ Nothing swallows a failure on the way to the user. Silent handling is allowed on
 
 For repository and persistence mechanics behind these rows, see the `compose-data` skill. For screen wiring and Route collection, see the `compose-feature` skill.
 
-## Red flags
-| Thought | Reality |
-|---|---|
-| "I will wrap this call in a `Result` so the ViewModel stays clean." | No. Rule 6 forbids `Result` wrappers; they hide the error from tier wiring. |
-| "A `try/catch` here is simpler than `launchGuarded`." | No. Rule 6: every async call site goes through `launchGuarded` with an explicit `onError`, and `CancellationException` is rethrown. |
-| "First-load failure goes to the popup host; the host handles errors." | No. First load with no content is inline with a Retry holding the error (rule 8). A popup over an empty screen leaves nothing to retry in place. |
-| "Stale Notes list with no message is fine for this refresh." | No. Rule 8: nothing swallows a failure; silent is only for named background polls. |
-| "I will map this timeout to `isMissing` so the screen shows something." | No. Rule 7: failures and business states are separate fields; a timeout is an `AppError`, absence is `isMissing`. |
-| "I will put this one-shot navigation flag in state as a boolean." | No. Rule 5: one-shots travel on the `effect` channel; booleans replay on configuration change. |
-| "I will skip `HandleAppErrors` on this Route; the screen has its own snackbar." | No. Rule 8: every Route forwards `viewModel.errors`; popup-tier errors need the shared host. |
-| "401 is just another popup error." | No. Rule 8: 401 is none of the tiers; the session sign-out path owns it. |
 
 ## Verification
 - [ ] Every `launchGuarded` call passes an explicit `onError` (yes/no).

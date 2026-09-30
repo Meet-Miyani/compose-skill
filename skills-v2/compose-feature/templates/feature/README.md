@@ -24,6 +24,8 @@ The default scaffold holds the domain `__Item__` in `UiState` directly: no `mode
 
 The script copies `templates/feature/` and renames `__Name__`, `__name__`, `__Item__`, `__item__`, and `__PACKAGE__` in paths and contents.
 
+Register the generated `__Name__FeatureModule` in the composition root's Koin module after scaffolding. *Prevents:* a destination whose ViewModel has no binding.
+
 ## Composition-root entry
 
 Entries live in the composition root, never in the feature. Register the detail key there:

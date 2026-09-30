@@ -42,8 +42,10 @@ data class DecodedHttpError(
 
 /**
  * The only conversion from transport to presentation. Pure and
- * side-effect free. ViewModels reach it exclusively through
- * `launchGuarded`; repositories never call it.
+ * side-effect free. ViewModels reach it through `launchGuarded`;
+ * repositories never call it. Paging load-state mapping is the UI-boundary
+ * exception in a Paging-dependent presentation module, as described in
+ * `error-handling.md`.
  *
  * Production note: in a real project this mapper lives in `:core:network`
  * next to the classifier, not in `:core:error`. It is kept here so this

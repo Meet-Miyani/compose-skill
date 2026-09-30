@@ -14,7 +14,7 @@ Contents:
 Answer the verdict on line one, then findings in plain words with file-path evidence. Never name rules, skills, cases, iron laws, sections, or reference files. Routing, rule lookups, and this checklist run silently; the reader sees only the verdict, the fixes, a plain *why* per finding, and what is fine as it is.
 
 - Start with `Shippable` or `Not shippable — <file path>: <fact in plain words>`. Then list fixes, most serious first.
-- FEAT-02 pattern: a Notes `Contract.kt` holding five declarations is not shippable. Name the count violation first in plain words (five present, three allowed), before any other defect.
+- FEAT-02 pattern: a Notes `Contract.kt` holding five declarations blocks a kit-adoption or convention review; otherwise it is worth doing later. Name the count in plain words.
 - Require the extra enum (for example tag step) moved to `presentation/<dest>/model/` or its own file (arch rule 4).
 - Require the extra constant (for example tag limit) moved out of `Contract.kt` to `model/` or its own file (arch rule 4).
 - Require every TODO resolved before done. No placeholder reaches done.

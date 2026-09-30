@@ -15,7 +15,7 @@ Gotcha: `kotlin.time.Instant` is the only timestamp type in domain and `UiState`
 
 ## Parse at the boundary
 
-5. (non-negotiable) **Wire-to-domain mapping is the one place parsing happens.** ISO strings become `Instant` here; numbers become typed values here. UiModels format; they never parse. *Prevents:* every card re-parsing a timestamp on each tick.
+5. (non-negotiable) **Wire-to-domain mapping is the one place parsing happens.** ISO strings become `Instant` here; numbers become typed values here. UiModels may format static labels and prices; time stays `Instant` and is formatted at display (compose-ui rule 3). *Prevents:* every card re-parsing a timestamp on each tick.
 6. (non-negotiable) **A missing field never becomes a valid business value.** Preserve absence (`null`) or drop the record. Never substitute "now", zero, an empty string, or an empty-but-valid default. `?: 0` in a DTO mapper is the canonical defect: a missing Catalog page count becomes "zero pages", which the UI renders as a real fact. *Prevents:* silent loss of a record the user needed; fabricated business values.
 
 ```kotlin

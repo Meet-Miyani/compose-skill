@@ -29,7 +29,7 @@ Load this when exposing Kotlin to Swift, embedding Compose in a SwiftUI app, or 
 ## ObjC boundary gotchas
 
 5. **Declare every Kotlin exception a Swift caller may see in `Throws` (non-negotiable).** Undeclared exception types terminate the app; `suspend` without `Throws` forwards only `CancellationException`. *Prevents:* Swift-side crashes on ordinary failures.
-6. **(default) Keep the iOS-exported surface small and concrete.** No generics, no `Unit` returns, no mutable collections at the Swift boundary; hide internals with `HiddenFromObjC` and rename exports with `ObjCName`; link the framework statically (`isStatic`). A recorded project decision for a wider surface wins; state the cost once. *Prevents:* double-copied collections, `KotlinUnit` at call sites, and non-exhaustive switches (see the `compose-platform` skill, rule 9).
+6. **(default) Keep the iOS-exported surface small and concrete.** A plain `Unit` return exports as `Void`; `KotlinUnit` appears in function types such as callbacks and in generics, so narrow those surfaces. Limit mutable collections; hide internals with `HiddenFromObjC` and rename exports with `ObjCName`; link the framework statically (`isStatic`). https://kotlinlang.org/docs/native-objc-interop.html *Prevents:* awkward callback and generic bridges and double-copied collections.
 
 - Kotlin enums export as classes with one property per entry, so every Swift `switch` over them needs a `default` case to compile.
 - Kotlin collections cross into Swift through an Objective-C copy plus a Swift copy — batch results in Kotlin, never iterate across the boundary in a loop.

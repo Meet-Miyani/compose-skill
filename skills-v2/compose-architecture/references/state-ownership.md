@@ -1,5 +1,18 @@
 # State Ownership
 
+Load when: repeated work can overlap.
+
+## Choose
+
+- Must writes run in their original order?
+  - Yes: queue them sequentially in one coroutine with `runGuarded`. *Prevents:* a later write overtaking an earlier one.
+  - No: is this a user submit that must run only once until completion?
+    - Yes: keep the `launchGuarded` job and ignore another submit while it is active. *Prevents:* a double tap writing twice.
+    - No: did the input change?
+      - Yes: cancel the prior job or use `flatMapLatest` for a stream, then run the latest input. *Prevents:* stale search results replacing newer ones.
+      - No: keep the in-flight job and skip the duplicate refresh. *Prevents:* redundant requests and response races.
+- Not covered here → use judgement and state the assumption.
+
 Load this reference when deciding where a value lives, handling process death, or reviewing lifecycle and load guards.
 
 Contents
@@ -12,7 +25,7 @@ Contents
 - Cold, reconcile, refresh, and the overlap guard.
 - Process-death restore and detail by identity.
 - Foreground signals and background work.
-- Results through the repository.
+- Results by lifetime (see `navigation.md`).
 - Red flags, Verification, Sources.
 
 ## Ownership
@@ -170,15 +183,7 @@ ViewModel tests cover the full state matrix. The matrix lives in the `compose-fe
 
 ## Overlap guard
 
-Choose the overlap policy for the operation (§8.3; F-11):
-- Skip for a reload of the same input.
-- Latest wins (cancel the previous job) when the input changed, such as search or filter.
-- Single-flight guard for submits.
-- Sequential execution for ordered writes.
-
-`launchGuarded` returns its `Job`. Store it. Check `loadJob?.isActive` before starting a second load. A pull-to-refresh landing on an in-flight reconcile returns early. The in-flight load keeps owning the response. (CONTRACT_BRIEF §3.6; §8.3; F-11)
-
-For the same input, cancelling the in-flight load to restart it trades one owner for restart churn with no fresher data guaranteed. (§8.3)
+For a same-input refresh, `launchGuarded` returns the job to store and check. A pull-to-refresh during reconcile leaves that job owning the response. (CONTRACT_BRIEF §3.6; §8.3; F-11)
 
 ```kotlin
 private var loadJob: Job? = null
@@ -208,28 +213,10 @@ App-wide reconcile uses `AppForegroundSignals.returnedToForeground`, collected i
 
 A destination-scoped poll is already covered by `ON_STOP`. It needs no process-level signal. Only a job that must survive a tab switch but stop on home pairs `wentToBackground` with `returnedToForeground` in the same ViewModel. No network call and no must-not-lose write runs in `wentToBackground`. Cancellation and pause only. (CONTRACT_BRIEF §8.5)
 
-## Results through the repository
+## Results
 
-Results travel through the repository. Never through the nav key. Never through file-level mutable state. (CONTRACT_BRIEF §7.6; rule 13; F-09)
+Use `navigation.md`'s result tree: a transient picker returns an event, a draft lives in `SavedStateHandle`, and a committed domain change travels through the repository. File-level mutable callbacks have no lifecycle owner. (CONTRACT_BRIEF §7.6; F-09)
 
-The child destination commits a real domain write. The parent observes the committed state through its repository stream. If the value is genuinely navigational, it belongs in the nav key. (CONTRACT_BRIEF §7.6)
-
-A file-level `private var pendingCallback` leaks the parent, is null after process-death restore, is shared by two panes on wide screens, and is not thread-safe. (CONTRACT_BRIEF §7.6; F-09)
-
-## Red flags
-
-| Thought | Reality |
-|---|---|
-| "I'll mirror the title into `rememberSaveable` so restore works." | No. Rule 9 forbids mirrors. Rule 10 puts drafts in `SavedStateHandle` with `UiState` derived. |
-| "I'll add a `LaunchedEffect` to keep the two copies in sync." | No. Rule 9: no sync effects between two owners. One owner per field. |
-| "I'll read the clock at the top of the catalog screen; one read is simpler." | No. Rule 9: the ticking read belongs in the leaf that renders it, or every tick invalidates the list. |
-| "I'll stash the list scroll position in the ViewModel so it survives." | No. Rule 9: runtime objects stay in composition or a plain holder. Pass derived values only. |
-| "I'll pass the whole `UiState` to every leaf; slicing is ceremony." | No. Rule 9: pass the narrowest slice. Leaves never observe the ViewModel. |
-| "I'll key this effect on `Unit`; it only runs once anyway." | No. Rule 9: key by the semantic input. `Unit` hides the identity that should restart it. |
-| "I'll refetch in `LifecycleResumeEffect` so data is always fresh." | No. Rule 9 with §8.3: reconcile belongs to `LifecycleStartEffect` keyed by nav-key id. Resume refires on every sheet dismiss. |
-| "I'll pass this editor result back through a file-level callback." | No. Rule 13: results travel through a repository write or the nav key. File-level mutable state is forbidden. |
-| "I'll resolve the detail from the cached list; the key id is right there." | No. Rules 10 and 15: detail fetches by identity from the key. A cold cache has no list. |
-| "I'll skip the overlap guard; two loads rarely collide." | No. Rule 9: overlapping loads need the `isActive` guard. The stale response wins without it. |
 
 ## Verification
 

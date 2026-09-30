@@ -76,6 +76,7 @@ Version gates: read `gradle/libs.versions.toml` before writing. If AGP is below 
 - [ ] Apply the owning convention plugin; the module file holds the plugin alias plus namespace plus dependencies, nothing else.
 - [ ] Declare dependencies through type-safe project accessors; use `api()` only per rule 2.
 - [ ] Register the module in `.composekit.conf` and run `run-checks.sh`.
+- [ ] Register the new module's Koin module in the composition root. *Prevents:* a compiled module with unresolved runtime bindings.
 - [ ] When extracting from the composition root, delete the root slice in the same change.
 
 ### Wire CI and agent hooks

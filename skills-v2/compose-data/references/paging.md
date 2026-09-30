@@ -26,12 +26,21 @@ Load this reference when wiring a Catalog (or any paged) list through a reposito
 
 12. (non-negotiable) **Key paged items with `itemKey` from domain identity and declare `itemContentType`; prefer `items` over `itemsIndexed`.** Position-based identity breaks when prepend shifts indices, and a missing content type forces recomposition of every visible row. *Prevents:* item identity churn on prepend. <!-- PG-28, PG-30 -->
 13. (non-negotiable) **Branch `LoadState` on `itemCount`: full-screen loading or error states only when `itemCount` is zero, inline indicators plus `retry()` otherwise.** A full-screen spinner over a populated Catalog wipes visible content on every append. *Prevents:* content wipe on append loads. <!-- PG-09 -->
-14. (non-negotiable) **Surface both refresh and append `LoadState.Error` with a retry path; map the error to `AppError` at the boundary and never drop it.** Surfacing only refresh leaves append failures silent, and rendering a failure as an empty list removes the retry. *Prevents:* silent append failures with no recovery. <!-- DATA-03-3, DATA-03-4 -->
+14. (non-negotiable) **Surface both refresh and append `LoadState.Error` with a retry path; call `LoadState.Error.toAppError()` at the UI boundary, defined as a small extension in a module that already depends on Paging (the feature's presentation package or a shared paging-UI module).** Repositories never call it; Paging errors do not pass through `launchGuarded`. https://developer.android.com/reference/kotlin/androidx/paging/LoadState.Error *Prevents:* silent append failures with no recovery. <!-- DATA-03-3, DATA-03-4 -->
+
+```kotlin
+fun LoadState.Error.toAppError(): AppError = when (val e = error) {
+    is NetworkException -> e.toAppError()
+    is StorageException -> e.toAppError()
+    else -> AppError(AppErrorType.Generic)
+}
+```
+
 15. (non-negotiable) **Never route the paging path through `launchGuarded` and never wrap the paging `Flow` in `try/catch` in the repository.** Page failures arrive as `LoadState.Error` at the UI boundary, not as thrown exceptions; guarding the flow swallows the load-state signal. *Prevents:* swallowed page failures. <!-- DATA-03-5 --> (SKILL.md rule 6)
 
 ## Transforms and MVI hookup
 
-16. (non-negotiable) **Apply `map`, `filter` and `insertSeparators` to the outer `Flow` before `cachedIn`, with domain-to-UI mapping in the same pre-cache step.** Post-cache transforms run once and are lost on cache hits, so separators vanish after rotation. *Prevents:* transforms lost on cache hit. <!-- PG-11, PGMT-01 -->
+16. (non-negotiable) **Apply `map`, `filter` and `insertSeparators` to the outer `Flow` before `cachedIn`, with domain-to-UI mapping in the same pre-cache step.** Post-cache transforms are re-run on each new collection; pre-cache avoids repeating that work. https://developer.android.com/topic/libraries/architecture/paging/v3-transform *Prevents:* repeated mapping work after rotation. <!-- PG-11, PGMT-01 -->
 17. (non-negotiable) **Keep the MVI dual flow: a `StateFlow` for filters, selection and errors plus a separate `PagingData` `Flow`.** Merging page data into state reintroduces the scroll-reset of rule 1 through the back door. *Prevents:* state-driven list resets. <!-- PGMT-01 -->
 18. (non-negotiable) **Collect both state and `collectAsLazyPagingItems()` in the Route and pass them into a dumb Screen.** A Screen that collects the pager itself cannot be previewed and splits ownership of the list between two layers. *Prevents:* split list ownership. <!-- PGMT-02 -->
 19. (non-negotiable) **Never call `refresh()` from the composable body; call it from an event handler or an effect with a stable key.** A body-level refresh re-triggers on every recomposition and the list reloads forever. *Prevents:* infinite refresh loops. <!-- PGMT-13 -->

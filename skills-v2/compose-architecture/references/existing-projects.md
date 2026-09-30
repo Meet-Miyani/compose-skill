@@ -1,12 +1,23 @@
 # Existing Projects
 
-Load this reference when the project diverges from the kit, or when migrating from Navigation 2, Hilt, or MVVM.
+Load when: deciding whether an existing project's conventions or kit defaults apply.
+
+## Choose
+
+- Is this a kit project or green field?
+  - Yes: follow the kit for new code. *Prevents:* inconsistent foundations.
+  - No: does the project use one coherent pattern, such as Hilt, MVVM, Navigation 2, or its own base class?
+    - Yes: follow that pattern for this change, with no waiver. *Prevents:* a mixed feature and surprise migration.
+    - No: use the kit for new code and name the incoherence. *Prevents:* adding another competing pattern silently.
+- Did the user ask to conform existing code?
+  - Yes: run the guards, fix blocking items and agreed deviations, and keep behaviour intact. See `../../compose-feature/references/review-mode.md`. *Prevents:* a style pass becoming a rewrite.
+- Not covered here → use judgement and state the assumption.
 
 ## Policy
 
 Decide the case silently from project evidence before writing code; it never appears in a user-facing answer. (STANDARDS §6)
 
-1. **New project, new module, new feature: the kit's architecture, strictly.** A green field or a new slice in a kit-shaped project takes every non-negotiable. (STANDARDS §6; SKILL.md rules 1-16)
+1. **New project or new code in a kit-shaped project: use the kit.** (STANDARDS §6; SKILL.md rules 1-16)
 2. **Coherent different architecture: follow the project's pattern for the change at hand.** Hilt, MVVM, Navigation 2, or its own base class, used consistently, stays for that change. Never mix two patterns in one feature. Say the project diverges from the kit. Propose migration as a separate task. Do not migrate unless asked. (STANDARDS §6; ARCH-01; SKL-17; ARCH-19)
 3. **Incoherent project: use the kit's pattern for new code.** Several competing patterns with no consistent convention means new code follows the kit. Name the incoherence. Propose migration as a separate task. (STANDARDS §6)
 4. **Precedent is evidence, not permission.** A neighboring file that violates a non-negotiable does not license a copy. Copying it copies the defect. Check the file against the rules first. (STANDARDS §6)
@@ -46,15 +57,6 @@ Answer no first, with a plain reason and the project evidence. State the correct
 
 If the requester insists, restate the consequence once. Then follow the explicit decision and record the deviation. Never soften a violation into silent agreement. (Stance item 3)
 
-## Red flags
-
-| Thought | Reality |
-|---|---|
-| "I'll just add one kit MVI screen inside this MVVM feature to save time." | No. SKILL.md rule 1 forbids mixing two patterns in one feature. Build in the feature pattern and propose migration separately. |
-| "The file next to mine uses a `Result` wrapper, so I will copy it." | Precedent is evidence, not permission (STANDARDS §6 case 4). SKILL.md rule 6 forbids wrappers in kit work; in a coherent wrapper project, case 2 applies instead. |
-| "I'll migrate this Hilt feature to Koin while I am here." | No. SKILL.md rule 14 mandates Koin annotations for new kit code, but STANDARDS §6 case 2 forbids unasked migration. Propose it as a separate task. |
-| "I'll rewrite this Navigation 2 graph to Navigation 3 in the same change." | No. SKILL.md rule 15 mandates Navigation 3 for new kit work, but migration ships leaf screens first as its own task (NAVMIG-09). |
-| "This screen is 300 lines, so I must split it now." | No. Size is a review trigger, not a failure (CONTRACT_BRIEF §12.4). SKILL.md rule 1 moves structural changes to a separate task: propose the split and ship the fix. |
 
 ## Verification
 

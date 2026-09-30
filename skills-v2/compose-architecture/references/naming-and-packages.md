@@ -58,7 +58,7 @@ Mapper placement follows the output (§5.4): DTO-to-domain mappers live in `data
 
 DTO-to-domain mapping is mandatory: DTOs stay `internal` to the data layer, and one pure `toDomain()` in `data/remote/mapper/` isolates wire changes. Domain-to-UiModel mapping is conditional. `UiState` holds the domain model directly unless at least one trigger fires (ruling M-11; CONTRACT_BRIEF §5.1):
 
-1. **Derived or formatted values** the screen would otherwise compute in composition on every recomposition: display labels, combined names, status derived from several fields. Formatting one `Instant` at the leaf is not a trigger by itself.
+1. **Derived or static formatted values** the screen would otherwise compute in composition on every recomposition: display labels, prices, combined names, status derived from several fields. Time stays `Instant` and is formatted at display; formatting one `Instant` is not a trigger by itself.
 2. **Several sources merged** into one row: a note plus its tag names plus sync status.
 3. **UI-only fields per item**: `isSelected`, `isExpanded`, a swipe state held in the ViewModel.
 4. **The screen must not see some domain fields** (privacy or feature boundary).

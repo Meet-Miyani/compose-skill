@@ -32,6 +32,7 @@ for the `Exception` subtype only). No Compose, no Ktor, no serialization.
 | `error/AppError.kt` | the only error ViewModels and `UiState` may hold |
 | `error/AppErrorType.kt` | semantic presentation kinds |
 | `error/NetworkException.kt` | wire-shape transport failure plus classification notes |
+| `error/StorageException.kt` | expected local IO or constraint failure plus `Storage` mapping |
 
 Production split to apply on copy: the `toAppError()` mapper and the
 `NetworkExceptionMapper` classifier live in `:core:network`, not in

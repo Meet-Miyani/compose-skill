@@ -2,6 +2,8 @@
 
 Load when placing a declaration in `commonMain` vs a platform source set, or when choosing interface+DI vs `expect`/`actual`.
 
+For notifications, reminders, permission denial and scheduling, see [notifications and background work](notifications-and-background-work.md).
+
 ## Placement decision table
 
 1. **Place every declaration with this table; name the row. (non-negotiable)** Guessing placement puts Android code in the wrong directory and breaks iOS. *Prevents:* shared code that compiles on one target only.

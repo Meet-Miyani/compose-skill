@@ -1,7 +1,8 @@
 /**
  * Domain-to-UiModel mapping for the __Name__ destination.
  *
- * UiModels format; they never parse. Keep this mapping pure.
+ * UiModels may format static values (labels, prices); time values stay Instant
+ * and are formatted at display (compose-ui rule 3). Keep this mapping pure.
  */
 package __PACKAGE__.presentation.__name__.mapper
 

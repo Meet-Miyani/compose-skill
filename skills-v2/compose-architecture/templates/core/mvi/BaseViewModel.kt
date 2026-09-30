@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.error.AppError
 import com.example.core.error.NetworkException
+import com.example.core.error.StorageException
 import com.example.core.error.toAppError
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -85,8 +86,9 @@ abstract class BaseViewModel<Action : UiAction, State : UiState, Effect : UiEffe
 
     /**
      * Launches [block] on `viewModelScope`. Runs [onStart] before the
-     * block and [onComplete] in a `finally`. Converts `NetworkException`
-     * to [AppError] via `toAppError()` and routes it to [onError].
+     * block and [onComplete] in a `finally`. Converts expected
+     * `NetworkException` and `StorageException` failures to [AppError]
+     * via `toAppError()` and routes them to [onError].
      * Rethrows `CancellationException`. Anything else propagates as a
      * programming defect.
      *
@@ -123,6 +125,8 @@ abstract class BaseViewModel<Action : UiAction, State : UiState, Effect : UiEffe
         } catch (e: CancellationException) {
             throw e
         } catch (e: NetworkException) {
+            onError(e.toAppError())
+        } catch (e: StorageException) {
             onError(e.toAppError())
         } finally {
             onComplete()

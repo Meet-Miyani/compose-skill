@@ -170,10 +170,9 @@ remains unverified.
 <details>
 <summary><b>Existing projects</b></summary>
 
-1. New project, module or feature: the kit, strictly.
-2. A coherent different architecture (Hilt, MVVM, Navigation 2, its own base class): follow the project's pattern
-   for the change at hand. Never mix two patterns in one feature. State the divergence and propose migration
-   separately.
+1. New project or new code in a kit-shaped project: follow the kit.
+2. A new feature or change in a coherent non-kit project (Hilt, MVVM, Navigation 2, its own base class): follow
+   that project's pattern, with no waiver needed. Keep one pattern per feature; propose migration separately.
 3. An incoherent project: use the kit for new code, name the incoherence, and propose migration separately.
 4. Precedent is evidence, not permission.
 

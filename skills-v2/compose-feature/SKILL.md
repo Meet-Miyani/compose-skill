@@ -55,6 +55,7 @@ Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow ab
 - [ ] Read `examples.md` (step 6 load; the only home for WRONG/RIGHT pairs).
 - [ ] Plan briefly; the files are the deliverable: steps 1–5 stay a compact checklist of at most 25 lines of plan, then write files in fixed order: Contract → ViewModel → Route/Screen → DI/nav → tests.
 - [ ] Scaffold with `scripts/new-feature.sh`, or write the smallest correct code. Prefer feature-specific code over generic frameworks.
+- [ ] Register the new feature's Koin module in the composition root. *Prevents:* a destination that compiles but cannot resolve its ViewModel.
 
 ```sh
 scripts/new-feature.sh --name Notes --item Note --package com.example.feature.notes --root <project-root>

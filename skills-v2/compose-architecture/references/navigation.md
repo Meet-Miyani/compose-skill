@@ -1,6 +1,15 @@
 # Navigation
 
-Load this reference when defining NavKeys, registering entries, owning the back stack, passing results, or opening sheets and dialogs.
+Load when: deciding how a result returns from a destination.
+
+## Choose
+
+- Is this a committed domain change?
+  - Yes: write through the repository; the parent observes its stream. *Prevents:* a result that disappears after restore.
+  - No: must unfinished user input survive process death?
+    - Yes: keep the draft in the parent's `SavedStateHandle` and derive `UiState` from it. *Prevents:* lost edits and two state owners.
+    - No: for a transient picker selection, use the Navigation 3 results recipe's `ResultEventBusNavEntryDecorator` and `ResultEffect`, then pop the picker. *Prevents:* persisting a cancelled selection. https://github.com/android/nav3-recipes/blob/main/app/src/main/java/com/example/nav3recipes/results/event/README.md
+- Not covered here → use judgement and state the assumption.
 
 Contents
 - One sealed key hierarchy per feature (#keys)
@@ -118,19 +127,7 @@ State two features share lives in a `:data:<domain>` module both features depend
 
 ## Results
 
-Results travel through a repository write. The child destination commits a real domain write. The parent observes the committed state through its repository stream. (CONTRACT_BRIEF §7.6)
-
-Never pass a result through a file-level mutable. A file-level callback leaks the parent, is null after process-death restore, is shared by two panes on wide screens, and is not thread-safe. (CONTRACT_BRIEF §7.6)
-
-A value that is genuinely navigational belongs in the nav key as identity. Everything else belongs in the repository. (CONTRACT_BRIEF §7.6)
-
-```kotlin
-// WRONG because: the editor reaches into the back stack for another entry's ViewModel.
-val tags = backStack.previousEntry?.viewModel<TagPickerViewModel>()?.pickedTags
-// RIGHT: the picker writes through the repository; the editor observes the stream.
-tagsRepository.savePickedTags(ids)         // picker ViewModel, inside launchGuarded
-tagsRepository.getPickedTagsStream()       // editor ViewModel collects this
-```
+Never pass a result through file-level mutable state or reach into another entry's ViewModel. A transient result does not survive process death in the Navigation 3 recipe; put restorable drafts in `SavedStateHandle` and real writes in the repository. https://github.com/android/nav3-recipes/blob/main/app/src/main/java/com/example/nav3recipes/results/state/README.md
 
 ## Scenes
 
@@ -150,18 +147,6 @@ Deep-link recipes (static URIs, matchers per key, fallback on no match) stay def
 
 Navigation 2 is not taught.
 
-## Red flags
-
-| Thought | Reality |
-|---|---|
-| "I'll pass the whole `NoteUiModel` in the key so detail skips the fetch." | No. Rule 15: keys carry identity; detail re-fetches by identity, or restore breaks on a cold cache. |
-| "I'll import the tags feature's key; it is only one screen." | No. Rules 1 and 3: cross-feature travel is a `UiEffect` mapped in the composition root. |
-| "A file-level `var` is the simplest result callback." | No. Rule 13: results travel through a repository write; a file-level callback leaks and dies on restore. |
-| "I'll grab the result from the previous entry/ViewModel." | No. Rule 13: the picker writes through the repository; the editor observes it via a `getXStream`. |
-| "I'll hold the stack in a plain state list; it recomposes fine." | No. Rule 15: `rememberNavBackStack` persists the stack; a plain list loses it on process death. |
-| "I'll pass the back-stack handle into the ViewModel to keep routing simple." | No. Rules 4 and 15: the ViewModel emits semantic effects; the Route translates them into stack calls. |
-| "One decorator is enough; the screens look right." | No. Rule 15: the view-model-store decorator is required, or distinct keys share one store. |
-| "I'll add the new destination to the shared global key hierarchy." | No. Rule 15: one sealed hierarchy per feature, aggregated in the root. |
 
 ## Verification
 

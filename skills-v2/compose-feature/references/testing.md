@@ -1,6 +1,8 @@
 # Feature Testing: ViewModel Tests, Fakes, and the State Matrix
 Load this when writing or reviewing a ViewModel test, a fake repository, dispatcher setup, or state-matrix coverage.
 
+For a bug fix, write a test that fails for the reported bug before the fix and passes afterward. *Prevents:* a patch that looks right without reproducing the failure.
+
 ## Contents
 - House ViewModel-test convention (§9.1–9.2) and verified test APIs
 - Canonical skeleton: setUp/tearDown plus one cold-load test
@@ -82,8 +84,7 @@ Keep pure logic plus ViewModel tests in the host source set (`commonTest`, JVM r
 *Trace: SKT-85 (host source set for pure logic plus ViewModel tests; device source set for device UI tests); SMP-60 (commonTest coroutine-test support; JVM runner in jvmTest).*
 Share assertions with `kotlin.test`; never split assertion libraries per platform. *Prevents:* two dialects for one expectation.
 *Trace: SKT-90 (kotlin.test shared asserts).*
-The Koin module dry-run check (`verify()`) belongs in `commonTest`. ViewModel tests construct fakes directly and never touch Koin. *Prevents:* graph failures surfacing as ViewModel failures.
-*Trace: KOIN-13 (verify() dry-run check in commonTest; ViewModel tests use no Koin).*
+The Koin module dry-run check (`verify()`) is JVM-only and belongs in `jvmTest`; alternatively rely on the Koin compiler plugin's compile-time check. ViewModel tests construct fakes directly. https://insert-koin.io/docs/reference/koin-test/verify/ https://insert-koin.io/docs/migration/from-ksp-to-compiler-plugin/ *Prevents:* an unavailable API in `commonTest`.
 
 ## Validators, UI/platform reservation
 Test validators and calculators as pure functions next to the function: parsing, rounding, invariants, fixtures. No ViewModel, no dispatcher, no fake. *Prevents:* rules reachable only behind a full screen. *Trace: CONTRACT_BRIEF §9.5.*
@@ -111,5 +112,5 @@ Platform tests (shell wiring, deep-link entry, nav-host integration, share/clipb
 - [ ] No derived value is asserted mapper-only when the ViewModel owns the field (yes/no).
 - [ ] Loading-to-success is pinned where a loading flag exists (yes/no).
 - [ ] `commonMain` injected dispatcher defaults use `Dispatchers.Default`; no call site looks up `Dispatchers.IO` (run `rg -n "Dispatchers\.IO" --glob '*.kt'` and inspect every hit).
-- [ ] `verify()` lives in `commonTest`; ViewModel tests hold no Koin rule (yes/no).
+- [ ] `verify()` lives in `jvmTest`, if used; ViewModel tests hold no Koin rule (yes/no).
 - [ ] Shared asserts use `kotlin.test` only (yes/no).

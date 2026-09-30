@@ -39,7 +39,7 @@ Rules 1–7 are **non-negotiables**. Rules 8–9 are **defaults**: a recorded pr
 2. **`commonMain` never imports `java.*`, `javax.*`, `android.*`, `LocalContext`, or `R`.** Time is `kotlin.time.Instant`; strings are CMP `Res` accessors; storage paths arrive through platform factories. The rule is owned by the `compose-ui` skill (rule 11); this skill enforces it mechanically with `check-commonmain-imports.sh`. *Prevents:* shared code that compiles on Android only.
 3. **Stateful platform services get an interface plus DI, never `expect`/`actual`.** Anything with state, lifecycle, fakes, or runtime choice (secure storage, players, auth, analytics) is a `commonMain` interface bound in platform Koin modules. `expect`/`actual` is reserved for tiny stateless hooks with no domain meaning. Every platform-provided binding (e.g. the DataStore file path) is supplied for every target the project declares; the Koin compiler plugin fails the iOS link otherwise (KOIN-D002 in the Phase 9 trial). *Prevents:* untestable platform singletons.
 4. **No `withTransaction` in `commonMain`.** Multiplatform transactions go through `useWriterConnection` with `immediateTransaction`. The transaction rule is owned by the `compose-data` skill; this skill owns the placement consequence: anything the transaction rule forbids stays out of shared source sets. *Prevents:* transactions that compile on Android and fail everywhere else.
-5. **One DataStore instance per file, with platform path factories.** The store shape is owned by the `compose-data` skill (Preferences in `commonMain`, structured values as one JSON string key, typed DataStore not taught). This skill owns the seam: file paths are defined per platform source set and passed into the `commonMain` factory; Desktop storage uses an app-specific folder, never the shared temp directory. *Prevents:* two writers to one settings file and desktop data in a temp folder.
+5. **One DataStore instance per file, with platform path factories.** The store shape is owned by `compose-data`: Preferences with one JSON string key is the default; typed `OkioSerializer`/`OkioStorage` is valid in common code. This skill owns platform paths. Desktop uses an app folder, never shared temp. https://github.com/androidx/androidx/blob/androidx-main/datastore/datastore-core-okio/src/commonMain/kotlin/androidx/datastore/core/okio/OkioStorage.kt *Prevents:* competing instances and temporary desktop storage.
 6. **Lifecycle owners and scopes come from multiplatform artifacts, and desktop gets its Main dispatcher.** `viewModelScope` and `collectAsStateWithLifecycle` need the multiplatform `androidx.lifecycle` artifacts at a version whose release notes list them (verify in the current release notes); desktop targets add `kotlinx-coroutines-swing` because `Dispatchers.Main.immediate` is unavailable there by default. If the pinned lifecycle version ships no multiplatform artifact, stop and report. *Prevents:* scopes that silently never run on desktop.
 7. **Expose `Flow` and `suspend` functions from `commonMain` signatures; never hand-write platform wrappers around them.** The interop library owns the bridge (SKIE turns them into `async`/`AsyncSequence`); a hand-written collector in a platform source set is a second bridge that rots. *Prevents:* parallel interop layers.
 8. **[Default] SKIE is the interop default for new projects.** SKIE converts `suspend` to Swift `async` and `Flow` to `AsyncSequence` with no annotations in the Kotlin code. Read the Kotlin and Swift versions in `libs.versions.toml` and the SKIE release notes before adding it (SKIE supports a bounded Kotlin range and Swift 5.8 with Xcode 14.3 and newer). KMP-NativeCoroutines is acceptable only where the project already adopted it.
@@ -84,18 +84,6 @@ interface NoteLockStorage {
 // bound as the port interface in a platform Koin module
 ```
 
-## Red flags
-
-| Thought | Reality |
-|---|---|
-| "I'll put the ViewModel in `androidMain`; iOS gets its own later." | No. Rule 1: ViewModels live in `commonMain`. "Later" is a second codebase. |
-| "I'll use `java.time` in `commonMain`; it is the same API." | No. Rule 2: `kotlin.time.Instant`. The guard fails the import. |
-| "I'll declare this lock storage with `expect`/`actual`; it is platform code." | No. Rule 3: stateful services get an interface plus DI. `expect` cannot be faked. |
-| "I'll keep `withTransaction`; it compiles on Android." | No. Rule 4: one target's compile proves nothing. Use the multiplatform transaction shape. |
-| "I'll add typed DataStore to `commonMain`; it is the modern API." | No. Rule 5 and the `compose-data` skill (rule 10): Preferences only in `commonMain`, structured values as one JSON string key. Say no first, then show the correct shape. |
-| "I'll add the NativeCoroutines annotations; they are explicit." | No. Rule 8: SKIE is the default for new projects. Annotations stay only where already adopted. |
-| "I'll wrap this Flow in a platform collector for Swift." | No. Rule 7: expose the `Flow` from `commonMain`; the interop library bridges it. |
-| "I'll expose this generic result type; Swift handles generics." | No. Rule 9: concrete types at the boundary. Generics erase unpredictably across ObjC. |
 
 ## Verification
 
@@ -103,7 +91,7 @@ interface NoteLockStorage {
 - [ ] No `^import (java|javax|android)\.` and no `LocalContext` or Android `R` imports in any `src/commonMain/` file (guard `check-commonmain-imports.sh`).
 - [ ] Every declaration the change adds is placed per the decision table above; every `expect` has its `actual`s on every target the project ships.
 - [ ] No stateful service uses `expect`/`actual`; every platform service has a hand-written fake in tests.
-- [ ] No `withTransaction` in `commonMain`; no typed DataStore in `commonMain`.
+- [ ] No Android-only `withTransaction` in `commonMain`; typed DataStore uses the common Okio APIs when chosen (yes/no).
 - [ ] Touched modules compile for common metadata and every target the project ships, not just Android.
 - [ ] Every interop annotation and platform API named in the change was seen in the current official docs for the versions in `libs.versions.toml`: yes or no.
 
@@ -117,3 +105,4 @@ Load only the references this task needs. One level deep.
 - [sharing-and-bridges.md](references/sharing-and-bridges.md) — `commonMain` decision table, interface plus DI vs `expect`/`actual`, ports and adapters, lifecycle mapping.
 - [ios-swift-interop.md](references/ios-swift-interop.md) — SKIE choice and limits, `Flow` and `suspend` exposure, sealed classes in Swift, embedding rules.
 - [desktop-and-web.md](references/desktop-and-web.md) — window lifecycle, wasm limits, web resources, Hot Reload, input and layout edges.
+- [notifications](references/notifications-and-background-work.md) — permissions, reminders, durable work.

@@ -1,4 +1,15 @@
 # Coroutines and Flow
+Load when: deciding how long coroutine work must live.
+
+## Choose
+
+- Does the work matter only while this screen is visible?
+  - Yes: launch it from the ViewModel with `launchGuarded`; its scope ends with the screen. *Prevents:* work continuing after its owner leaves.
+  - No: must it finish after the app process dies?
+    - Yes: use WorkManager on Android or BGTaskScheduler on iOS behind a `commonMain` interface bound in DI. See `../../compose-platform/references/notifications-and-background-work.md`. *Prevents:* process death losing required work. https://developer.android.com/develop/background-work/background-tasks/persistent/getting-started/define-work https://developer.apple.com/documentation/backgroundtasks
+    - No: inject one app-scoped `CoroutineScope` as a Koin `single` with a `SupervisorJob`; never create a private class scope or use `GlobalScope`. *Prevents:* screen cancellation stopping app work or an unowned scope leaking. https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-supervisor-job.html
+- Not covered here → use judgement and state the assumption.
+
 Load this when choosing Channel vs SharedFlow, sharing a flow, handling cancellation, or placing dispatchers.
 
 ## Contents
@@ -94,8 +105,7 @@ Gotcha: `map` on `StateFlow` returns a plain `Flow`; only `stateIn` restores syn
 Gotcha: the Catalog stream shared with `WhileSubscribed` may replay a cached page; that staleness is the accepted cost.
 
 ## Scopes, cancellation, and dispatchers (§3.6)
-Replace stored, injected, lazily created, or function-local scopes on non-UI classes with suspending APIs. A cancelled stored scope silently swallows all future launches.
-Allow a non-suspending launch only at the UI state-holder boundary. The holder owns UI state. Its scope dies with that surface. The caller is a real UI event or lifecycle hook. Lower layers stay suspending.
+Non-UI classes expose suspend functions or `Flow` by default. An app-lifetime operation may use the injected app scope chosen above.
 Always rethrow `CancellationException` from a broad catch around suspension. Narrow timeouts convert beside their own call. Non-cancellation subtype catches are the only safe alternatives.
 ```kotlin
 try { repository.refreshNotes() }
@@ -106,7 +116,7 @@ Switch dispatchers in the callee with `withContext`. Launch plainly at the calle
 ```kotlin
 suspend fun refreshNotes() = withContext(ioDispatcher) { store.refresh() }
 ```
-Gotcha: `launchGuarded` returns its `Job`; the call site guards overlap with `loadJob?.isActive` (§3.6, §8.3).
+Gotcha: `launchGuarded` returns its `Job`; choose the overlap policy in `state-ownership.md` before guarding it (§3.6, §8.3).
 Gotcha: sequential poll or reconcile work prefers `runGuarded`; a sibling job can overlap ticks, while `join` suspends (§3.6).
 
 ## Overlap and foreground signals (§8.3, §8.5)
@@ -120,19 +130,6 @@ A pull-to-refresh landing on an in-flight reconcile skips. The skipped trigger n
 `wentToBackground` stops timers and cancels polls. The paired `returnedToForeground` restarts them. Neither block performs network work.
 For screen wiring and Route collection, see the `compose-feature` skill. For repository streams and persistence mechanics, see the `compose-data` skill. For leaf clock reads, see the `compose-ui` skill.
 
-## Red flags
-| Thought | Reality |
-|---|---|
-| "I will hold this navigation command in a `StateFlow` so the Route always has it." | No. Rule 5: one-shots travel on the `effect` channel; `StateFlow` replays on configuration change. |
-| "A `SharedFlow` with no replay worked in the last project for effects." | No. Rule 5: `Channel(BUFFERED)` exposed as `Flow`; `SharedFlow(replay = 0)` loses effects while the UI is detached. |
-| "A rendezvous channel is simpler; the sender waits for the Route." | No. Rule 5: rendezvous suspends the sender; effects use `BUFFERED`. |
-| "I will collect this flow with `collectAsState()`; lifecycle handling is optional." | No. Rule 5: the Route reads state lifecycle-aware and collects effects once with `CollectEffect`. |
-| "I will sync these two copies with a `LaunchedEffect` so restore works." | No. Rule 9: one owner per value; no `rememberSaveable` mirror and no syncing effect. |
-| "A `try/catch` here is simpler than `launchGuarded`." | No. Rule 6: every async call site goes through `launchGuarded` with an explicit `onError`, and `CancellationException` is rethrown. |
-| "I will keep a scope field on this repository for background writes." | No. Rule 6: launches live only at the UI holder boundary; lower layers expose suspending APIs. |
-| "I will hardcode `Dispatchers.IO` here; injection adds noise." | No. Rule 6: dispatchers arrive as constructor parameters; the callee switches with `withContext`. |
-| "Silent handling is fine here; the poll pattern covers any background work." | No. Rule 8: silent is only for named background polls; a user-visible load needs popup or inline. |
-| "I will share this stream from a function so each caller gets a fresh share." | No. Rule 9: one owner per value; sharing lives in one declared val, never per call. |
 
 ## Verification
 - [ ] Every one-shot travels on a `Channel(BUFFERED)` exposed as `Flow`; no `SharedFlow` holds UI effects (yes/no).
@@ -142,7 +139,7 @@ For screen wiring and Route collection, see the `compose-feature` skill. For rep
 - [ ] Every `snapshotFlow` sits inside an effect with a terminal `collect` (yes/no).
 - [ ] Every `update` lambda is pure and fast; IO, clocks, and random ids are read before it (yes/no).
 - [ ] Every `stateIn` or `shareIn` is a declared val, never a per-call expression (yes/no).
-- [ ] No non-UI class holds a stored, injected, or function-local `CoroutineScope` (yes/no).
+- [ ] Any non-UI scope is the single app scope injected from DI; no class creates its own scope (yes/no).
 - [ ] Every broad catch rethrows `CancellationException` (yes/no).
 - [ ] No `wentToBackground` block performs network work or a must-not-lose write (yes/no).
 - [ ] Overlapping loads skip while `loadJob?.isActive` holds; no second writer runs beside the first (yes/no).

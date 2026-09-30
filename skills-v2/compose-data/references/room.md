@@ -17,7 +17,7 @@ Setup, queries, transactions, relations, indexes, migrations. API shape always r
 
 ## DAOs and queries
 
-6. (non-negotiable) **KMP `@Dao` functions are `suspend` or return `Flow`; nothing else.** Blocking returns suspend the single writer connection and stall every queued write. *Prevents:* writer-connection starvation behind a forgotten blocking call.
+6. (non-negotiable) **KMP `@Dao` functions are `suspend`, return `Flow`, or return `PagingSource` with room-paging.** Room Paging became KMP in 2.7.0-alpha08; use the pinned version's release notes. https://developer.android.com/jetpack/androidx/releases/room *Prevents:* blocking calls starving the writer connection or excluding supported paging.
 7. (default) **Keep `@Query` SQL compile-verified by building after every query change; Room validates SQL at compile time, so a green build is the query test.**
 8. (default) **Page unbounded scrolling (notes list, catalog list) through Paging against the DAO source; never `SELECT *` with no limit into a list the UI holds whole.**
 9. (non-negotiable) **Prefer `@Upsert` over hand-rolled `REPLACE` semantics where foreign keys exist.** `REPLACE` deletes then re-inserts, firing cascading deletes on child rows that an update would have kept. *Prevents:* child rows of a note (tags, links) vanishing on a parent refresh.
@@ -43,7 +43,7 @@ Setup, queries, transactions, relations, indexes, migrations. API shape always r
 ## Migrations
 
 19. (non-negotiable) **Every version bump ships a versioned `Migration` object or an `AutoMigration`; exported schema stays in version control.** Without the schema history a migration cannot be generated or tested. *Prevents:* upgrades that crash on launch with no path back.
-20. (default) **Use `AutoMigration` for simple changes (add column/table); hand-write `Migration` for renames, deletes, or data moves.**
+20. (default) **Use `AutoMigration` for schema changes, including renames and deletes with an `AutoMigrationSpec`; hand-write `Migration` for data moves.** https://developer.android.com/training/data-storage/room/migrating-db-versions *Prevents:* unnecessary hand migrations and lost row transforms.
 21. (non-negotiable) **Destructive fallback is early-development only and never the sole strategy.** It deletes user notes on upgrade to avoid writing a migration. *Prevents:* shipping data loss as a migration policy.
 
 ## Boundary
