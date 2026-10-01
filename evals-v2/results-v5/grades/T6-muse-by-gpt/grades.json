@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "It says denial is ignored and the feature pretends permission succeeded."},
+    "2": {"pass": true, "why": "It identifies the 24dp tap area as too small."},
+    "3": {"pass": false, "why": "It lists GlobalScope use as a blocking defect."},
+    "4": {"pass": false, "why": "It lists the hardcoded 12:00:00 value under blocking findings."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It has separate blocking, later, and fine-as-is sections."},
+    "7": {"pass": false, "why": "Its proposed Save action requests permission again after denial, allowing repeated prompts."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "It identifies the ignored denial path as silent success."},
+    "2": {"pass": true, "why": "It identifies the 24dp clickable target as below the 48dp minimum."},
+    "3": {"pass": false, "why": "It calls GlobalScope the leading must-fix issue."},
+    "4": {"pass": false, "why": "It puts the hardcoded time in the must-fix list."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It separates must-fix and later items but says nothing is fine as it is."},
+    "7": {"pass": false, "why": "It gives no alerts-off flow that keeps the feature usable without repeated prompts."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "It says the unused permission result lets denial proceed."},
+    "2": {"pass": true, "why": "It flags the 24dp target as far below the 48dp minimum."},
+    "3": {"pass": false, "why": "It includes GlobalScope in its blocking-defects list."},
+    "4": {"pass": false, "why": "It includes the hardcoded time in its blocking-defects list."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It does not separate later improvements or say what is fine as it is."},
+    "7": {"pass": false, "why": "It proposes a denial path but not usable alerts-off behavior without repeated prompts."}
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The export button dispatches OnExportClick, which launches an export coroutine and builds CSV on Dispatchers.Default."},
+    "2": {"pass": false, "why": "Export runs in the list ViewModel job, so leaving the screen can cancel it; no file is produced."},
+    "3": {"pass": false, "why": "The CSV is only an ExportReady string, and App.kt discards that effect without saving a file."},
+    "4": {"pass": false, "why": "The export uses launchGuarded in the ViewModel, with no DI app-lifetime scope or platform background work."},
+    "5": {"pass": false, "why": "The diff routes failures to emitError but does not show a user-visible error path for export."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The export button dispatches OnExportClick, which launches an export coroutine and builds CSV on Dispatchers.Default."},
+    "2": {"pass": false, "why": "The final message explicitly says navigation cancels the ViewModel export, and no file is created."},
+    "3": {"pass": false, "why": "The result is stored and displayed as a CSV string; the diff contains no file creation or save action."},
+    "4": {"pass": false, "why": "The export uses the ViewModel's launchGuarded job, not an app-lifetime DI scope or platform background work."},
+    "5": {"pass": true, "why": "Export failures set exportError, and the screen renders an Export failed message with Dismiss."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The export button dispatches OnExportClick, which launches an export coroutine and builds CSV on Dispatchers.Default."},
+    "2": {"pass": false, "why": "The final message says leaving the screen cancels the ViewModel job; no persistent file is produced."},
+    "3": {"pass": false, "why": "The CSV is held in exportedCsv and shown as text, with no file creation in the diff."},
+    "4": {"pass": false, "why": "The export runs through the ViewModel's launchGuarded job rather than app-lifetime DI or platform background work."},
+    "5": {"pass": false, "why": "The diff and test show error emission, but do not show the claimed popup or other user-visible export error."}
+  }
+}

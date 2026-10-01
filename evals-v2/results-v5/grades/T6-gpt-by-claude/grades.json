@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Flags that the permission result is ignored and the callback fires even when denied."},
+    "2": {"pass": false, "why": "Touch target size is never mentioned."},
+    "3": {"pass": true, "why": "GlobalScope gets only a passing note and is not labelled blocking."},
+    "4": {"pass": true, "why": "The hardcoded time format is not called blocking; the fixed noon value is only context for the unwired-feature finding."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Two P1 findings only; no later-improvements section and no statement of what is fine."},
+    "7": {"pass": false, "why": "Proposes no denial behaviour (alerts-off usability, no re-prompt loop)."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Flags that requestPermission() result is ignored so onTimeSelected runs on denial."},
+    "2": {"pass": true, "why": "Explicitly flags the 24 dp touch target."},
+    "3": {"pass": true, "why": "Custom coroutine scope is not mentioned or called blocking."},
+    "4": {"pass": true, "why": "The hardcoded time is noted only within the unwired-feature finding; the format is not called blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "P1/P2 labels only; nothing is separated as later work and nothing is called fine."},
+    "7": {"pass": false, "why": "Says only 'handle the result'; no alerts-off usability and nothing about re-prompt loops."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Major finding: permission denial is ignored and the callback runs anyway."},
+    "2": {"pass": true, "why": "Notes the clickable target is constrained to 24 dp."},
+    "3": {"pass": true, "why": "GlobalScope is rated Minor, not blocking."},
+    "4": {"pass": true, "why": "Major finding is about the time always being noon with no picker (behaviour), not the time format; the unused timeFormat is incidental."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Has severity levels but never says what is fine as it is."},
+    "7": {"pass": false, "why": "Says only 'handle denial before saving'; no alerts-off usability and no re-prompt loop point."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Blocking item: click handler ignores the permission result."},
+    "2": {"pass": true, "why": "Later item asks for a normal-sized touch target on the reminder entry point, implying the current one is too small."},
+    "3": {"pass": false, "why": "The blocking bullet explicitly includes launching the callback in GlobalScope."},
+    "4": {"pass": true, "why": "Blocking on hardcoded noon is about missing time selection, not the time format."},
+    "5": {"pass": true, "why": "Diff is empty; the code appears only in the message."},
+    "6": {"pass": true, "why": "Has Blocking, 'Worth doing later' and 'Fine as is' sections (though its 'checks pass' claim is unsupported by checks=none)."},
+    "7": {"pass": false, "why": "Only says 'handle permission'; no alerts-off usability and no re-prompt loop."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Blocking item: dialog ignores the permission result and needs to handle denial."},
+    "2": {"pass": true, "why": "Flags the 24 dp clickable text."},
+    "3": {"pass": true, "why": "GlobalScope is placed under 'Worth doing later'."},
+    "4": {"pass": true, "why": "Blocking on hardcoded '12:00:00' is about missing time selection, not the format."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Separate Blocking, 'Worth doing later' and 'Fine as is' sections."},
+    "7": {"pass": false, "why": "Says only 'needs to handle denial'; no alerts-off usability and no re-prompt loop."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Must-fix: the callback sends a time even when requestPermission() returns false."},
+    "2": {"pass": true, "why": "Flags the 24 dp touch target under 'Can wait'."},
+    "3": {"pass": false, "why": "GlobalScope is listed as Must fix item 4."},
+    "4": {"pass": true, "why": "The hardcoded time is flagged for ignoring the user's choice, not for its format; the hardcoded label is under 'Can wait'."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Has Must fix / Can wait, but never says what is fine as it is."},
+    "7": {"pass": false, "why": "Mentions a 'recoverable denied-permission state' but not alerts-off usability or avoiding re-prompt loops."}
+  }
+}

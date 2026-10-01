@@ -1,0 +1,38 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The active addJob guard prevents a second insert during rapid overlapping taps."},
+    "2": {"pass": true, "why": "addWorkout returns when an add job is already active."},
+    "3": {"pass": false, "why": "The diff adds no double-add regression test."},
+    "4": {"pass": true, "why": "The diff changes only the add guard and adjacent formatting."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The active-job guard prevents a second insert, and the gated test verifies one workout."},
+    "2": {"pass": true, "why": "addWorkout drops a second request while addJob is active."},
+    "3": {"pass": true, "why": "A new test holds the first insert open, double taps, and checks one workout and effect."},
+    "4": {"pass": true, "why": "Changes are confined to the add guard and its test support."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The active addJob guard prevents a second insert during rapid overlapping taps."},
+    "2": {"pass": true, "why": "addWorkout returns when an add job is already active."},
+    "3": {"pass": false, "why": "The diff adds no double-add regression test."},
+    "4": {"pass": true, "why": "The diff changes only the add guard."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The active-job guard blocks a duplicate insert, and the test checks one workout."},
+    "2": {"pass": true, "why": "addWorkout drops a second request while addJob is active."},
+    "3": {"pass": true, "why": "A new test sends two add clicks and checks one workout and one effect."},
+    "4": {"pass": true, "why": "Changes are confined to the add guard and its regression test."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The active-job guard blocks a duplicate insert, and the test checks one workout."},
+    "2": {"pass": true, "why": "addWorkout drops a second request while addJob is active."},
+    "3": {"pass": true, "why": "A new test sends two add clicks and checks one workout and one effect."},
+    "4": {"pass": true, "why": "Changes are confined to the add guard and its regression test."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The active-job guard blocks a duplicate insert, and the test checks one workout."},
+    "2": {"pass": true, "why": "addWorkout drops a second request while addJob is active."},
+    "3": {"pass": true, "why": "A new test sends two add clicks and checks one workout and one navigation effect."},
+    "4": {"pass": true, "why": "Changes are confined to the add guard and its regression test."}
+  }
+}

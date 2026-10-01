@@ -1,0 +1,17 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The diff saves each title change in SavedStateHandle; the existing process-death test and allTests pass."},
+    "2": {"pass": true, "why": "The added test checks that typed text enters SavedStateHandle and survives OnScreenStarted reconciliation."},
+    "3": {"pass": true, "why": "The diff only adds the draft persistence write and its focused test."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The diff saves each title change in SavedStateHandle; the existing process-death test and allTests pass."},
+    "2": {"pass": true, "why": "The added test checks SavedStateHandle and retention of the typed draft after a screen restart."},
+    "3": {"pass": true, "why": "The diff only adds the draft persistence write and its focused test."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The diff saves each title change in SavedStateHandle; the existing process-death test and allTests pass."},
+    "2": {"pass": true, "why": "The added tests check SavedStateHandle and retention of typed text after OnScreenStarted."},
+    "3": {"pass": true, "why": "The diff only adds the draft persistence write and two focused tests."}
+  }
+}

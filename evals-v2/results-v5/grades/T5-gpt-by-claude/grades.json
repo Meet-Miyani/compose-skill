@@ -1,0 +1,38 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "addWorkout returns early while addJob is active or navigation is pending, so a second tap cannot insert again; the test checks addCalls == 1"},
+    "2": {"pass": true, "why": "The ViewModel drops overlapping OnAddClick through the addJob?.isActive / awaitingNavigation guard"},
+    "3": {"pass": true, "why": "Added a gated double-tap test asserting addCalls == 1 and one effect; it would see 2 calls without the guard"},
+    "4": {"pass": true, "why": "Changes are limited to the add guard, its reset on OnScreenStarted and test-fake hooks"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The isAdding flag is set synchronously before launch and checked first, so later taps are ignored until the list restarts; the test asserts one item and one effect"},
+    "2": {"pass": true, "why": "The button is disabled by !state.isAdding and the ViewModel returns early when isAdding"},
+    "3": {"pass": true, "why": "The gated double-tap test asserts a single OpenWorkout effect and one item; it would fail with two inserts"},
+    "4": {"pass": true, "why": "The state flag, button enabled, error reset, and the failure-retry test all serve the fix; no unrelated refactor"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "isAdding is set before launch and stays set until the screen restarts, so repeated taps insert once; the test asserts items == [1]"},
+    "2": {"pass": true, "why": "Button enabled = !state.isAdding, plus a ViewModel early return on isAdding"},
+    "3": {"pass": true, "why": "The test sends double and late taps and asserts one item and one effect; it would fail without the guard"},
+    "4": {"pass": true, "why": "Only the contract flag, button enabled, ViewModel guard and one test changed"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "An addJob?.isActive guard drops taps while the insert is in flight, which is the overlap that caused the duplicate"},
+    "2": {"pass": true, "why": "The ViewModel guard drops overlapping requests and the button is disabled while isAdding"},
+    "3": {"pass": false, "why": "The diff adds no test, and the message says tests were not run"},
+    "4": {"pass": true, "why": "Changes are limited to the isAdding flag, the button enabled state and the add guard"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "An addJob?.isActive guard ignores a second add while the first is running"},
+    "2": {"pass": true, "why": "The ViewModel drops overlapping add requests through the in-flight guard"},
+    "3": {"pass": false, "why": "No test was added with the fix"},
+    "4": {"pass": true, "why": "A minimal one-line guard in addWorkout"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "isAddingWorkout is set synchronously and cleared in finally, so a second tap during creation is ignored; the test asserts addCalls == 1"},
+    "2": {"pass": true, "why": "The ViewModel drops overlapping add requests through the isAddingWorkout flag"},
+    "3": {"pass": true, "why": "Added a double-tap test asserting one addCalls, one item and one effect; it fails without the guard"},
+    "4": {"pass": true, "why": "Replacing addJob with a boolean flag is part of the fix; the other changes are test-fake hooks only"}
+  }
+}

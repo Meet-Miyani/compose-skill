@@ -1,0 +1,134 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export triggers a coroutine job."
+    },
+    "2": {
+      "pass": false,
+      "why": "Export is tied to viewModelScope and produces no file if the screen is left."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV escaping logic handles commas and quotes correctly."
+    },
+    "4": {
+      "pass": false,
+      "why": "Export runs in viewModelScope via launchGuarded."
+    },
+    "5": {
+      "pass": true,
+      "why": "Errors in launchGuarded are emitted to the UI state."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export triggers a coroutine job."
+    },
+    "2": {
+      "pass": false,
+      "why": "Export is tied to viewModelScope and cancels if the screen is left."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV escaping logic is correct."
+    },
+    "4": {
+      "pass": false,
+      "why": "Export runs in viewModelScope."
+    },
+    "5": {
+      "pass": true,
+      "why": "Errors in launchGuarded are emitted to the UI state."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export calls WorkoutExportManager to launch a background job."
+    },
+    "2": {
+      "pass": true,
+      "why": "Job runs in an app-level scope, surviving screen navigation and producing a file."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV formatting properly quotes and escapes fields."
+    },
+    "4": {
+      "pass": true,
+      "why": "Uses an appScope CoroutineScope provided via Koin DI."
+    },
+    "5": {
+      "pass": true,
+      "why": "StorageExceptions are caught and update the UI status to Failed."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export triggers a coroutine job."
+    },
+    "2": {
+      "pass": false,
+      "why": "Export runs in viewModelScope and does not produce a file."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV generation logic correctly escapes fields."
+    },
+    "4": {
+      "pass": false,
+      "why": "Export runs in viewModelScope."
+    },
+    "5": {
+      "pass": true,
+      "why": "Errors in launchGuarded are handled and sent to the UI."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export enqueues a background operation."
+    },
+    "2": {
+      "pass": true,
+      "why": "Uses WorkManager or a persistent object scope, surviving screen navigation."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV logic correctly quotes and escapes fields."
+    },
+    "4": {
+      "pass": false,
+      "why": "Desktop/iOS CoroutineScope is instantiated as a default parameter, not provided through DI."
+    },
+    "5": {
+      "pass": true,
+      "why": "Exceptions update the export status to Failed, which the UI displays."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Tapping export enqueues a background operation."
+    },
+    "2": {
+      "pass": true,
+      "why": "Uses WorkManager or a top-level scope, surviving screen navigation."
+    },
+    "3": {
+      "pass": true,
+      "why": "CSV logic correctly quotes and escapes fields."
+    },
+    "4": {
+      "pass": false,
+      "why": "Desktop/iOS uses a top-level CoroutineScope equivalent to GlobalScope."
+    },
+    "5": {
+      "pass": false,
+      "why": "Background errors in WorkManager or the global scope are not sent to the UI."
+    }
+  }
+}

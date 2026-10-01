@@ -1,0 +1,20 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Guard `if (addJob?.isActive == true) return` drops the second add while the first runs; test asserts one item and checks pass."},
+    "2": {"pass": true, "why": "The ViewModel drops overlapping add requests through the active-job guard in addWorkout()."},
+    "3": {"pass": true, "why": "Added a test that sends OnAddClick twice and asserts one item and one OpenWorkout effect."},
+    "4": {"pass": true, "why": "The diff touches only the one-line guard and the new regression test."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same active-job guard stops the duplicate insert; test asserts a single item and checks pass."},
+    "2": {"pass": true, "why": "The ViewModel ignores the add request while addJob is active."},
+    "3": {"pass": true, "why": "Added a double-OnAddClick test asserting one item and one OpenWorkout effect."},
+    "4": {"pass": true, "why": "Only the guard line and the test changed; the extra blank line is trivial, not a refactor."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The active-job guard stops the second add; test asserts one item and checks pass."},
+    "2": {"pass": true, "why": "The ViewModel drops overlapping add requests with `addJob?.isActive` check."},
+    "3": {"pass": true, "why": "Added a double-tap test asserting one item and exactly one OpenWorkout effect."},
+    "4": {"pass": true, "why": "The diff is limited to the one-line guard and the regression test."}
+  }
+}

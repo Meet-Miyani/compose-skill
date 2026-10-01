@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the new 'Choose workout type' button in the editor opens the WorkoutTypeRoute."
+    },
+    "2": {
+      "pass": false,
+      "why": "The selected type is saved directly to the database rather than updating an editor draft."
+    },
+    "3": {
+      "pass": true,
+      "why": "Pressing back on the picker navigates back without modifying the saved type."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is saved immediately in the picker, not when the workout is saved in the editor."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate navigation destination and uses the database to pass the result."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new screen has its own WorkoutTypeContract and WorkoutTypeViewModel."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "The picker is opened from the list screen's add button, not from the workout editor."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selecting a type creates a new workout and navigates forward, rather than returning and updating a draft."
+    },
+    "3": {
+      "pass": false,
+      "why": "The picker appears before the editor, so there is no draft state to preserve."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is never saved to the database as WorkoutEntity is not modified."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate destination and passes its result via navigation arguments."
+    },
+    "6": {
+      "pass": false,
+      "why": "The new screen reuses WorkoutsListViewModel instead of having its own."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "The picker is opened from the list screen, not by tapping a workout type in the editor."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selecting a type creates a new workout and navigates forward instead of returning to update a draft."
+    },
+    "3": {
+      "pass": false,
+      "why": "The picker is shown before the editor, so there is no existing draft to preserve."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is saved as the workout's initial title rather than a distinct type field."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate destination and passes its result via navigation arguments."
+    },
+    "6": {
+      "pass": false,
+      "why": "The new screen reuses WorkoutsListViewModel instead of having its own."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": false,
+      "why": "The picker is opened from the list screen, not from the workout editor."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selecting a type creates a new workout and navigates forward instead of returning to update a draft."
+    },
+    "3": {
+      "pass": false,
+      "why": "The picker is shown before the editor, so there is no existing draft to preserve."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is saved as the workout's title rather than a distinct type field."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate destination and passes the created workout ID."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new screen has its own WorkoutTypePickerContract and WorkoutTypePickerViewModel."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the new button in the editor opens the WorkoutTypePickerRoute."
+    },
+    "2": {
+      "pass": false,
+      "why": "The selected type is saved directly to the database rather than updating an editor draft."
+    },
+    "3": {
+      "pass": true,
+      "why": "Pressing back on the picker navigates back without modifying the database."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is saved immediately in the picker, not when the workout is saved in the editor."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate destination and uses the database to pass the result."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new screen has its own WorkoutTypePickerContract and WorkoutTypePickerViewModel."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the new button in the editor opens the WorkoutTypeRoute."
+    },
+    "2": {
+      "pass": false,
+      "why": "The selected type is saved directly to the database rather than updating an editor draft."
+    },
+    "3": {
+      "pass": true,
+      "why": "Pressing back navigates back without modifying the database."
+    },
+    "4": {
+      "pass": false,
+      "why": "The type is saved immediately in the picker, not when the workout is saved in the editor."
+    },
+    "5": {
+      "pass": true,
+      "why": "The picker is a separate destination and uses the database to pass the result."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new screen has its own WorkoutTypeContract and WorkoutTypeViewModel."
+    }
+  }
+}

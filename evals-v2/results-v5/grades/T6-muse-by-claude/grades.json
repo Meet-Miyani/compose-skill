@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Blocking #2: requestPermission() result never checked; denial still pretends success."},
+    "2": {"pass": true, "why": "Blocking #2 flags size(24.dp) tap area as too small to tap reliably."},
+    "3": {"pass": false, "why": "Blocking #1 opens with 'launches with GlobalScope' and treats the scope as part of the blocking defect."},
+    "4": {"pass": true, "why": "Unused timeFormat and hardcoded strings are placed under 'Worth doing later', not blocking."},
+    "5": {"pass": true, "why": "Diff is empty; corrected code appears only in the message."},
+    "6": {"pass": true, "why": "Has Blocking, 'Worth doing later' and 'Fine as is' sections."},
+    "7": {"pass": true, "why": "On denial shows 'Alerts are off. You can keep using workouts' with Open settings; no automatic re-prompt."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Must fix #2: permission ignored, denial path does same as grant (silent success)."},
+    "2": {"pass": true, "why": "Must fix #3: 24dp touch target fails 48dp minimum."},
+    "3": {"pass": false, "why": "GlobalScope.launch is the 'leading' must-fix issue."},
+    "4": {"pass": false, "why": "Must fix #5 lists hardcoded '12:00:00' and unused timeFormat as must-fix."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Separates must-fix from can-wait but never says what is fine as it is."},
+    "7": {"pass": false, "why": "Asks for a recoverable error state only; does not say feature stays usable with alerts off or avoid re-prompt loops."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking: denial ignored, hasPermission unused, always proceeds."},
+    "2": {"pass": true, "why": "Blocking: size(24.dp) touch target far below 48dp."},
+    "3": {"pass": false, "why": "GlobalScope.launch listed under blocking defects."},
+    "4": {"pass": false, "why": "Hardcoded '12:00:00' and timeFormat listed under blocking defects."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "No later-improvements section and nothing stated as fine as it is."},
+    "7": {"pass": false, "why": "Only says 'show rationale / disabled state'; no statement that the feature stays usable with alerts off or no re-prompt loop."}
+  }
+}

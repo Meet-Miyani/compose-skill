@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": false,
+      "why": "The picker has its own destination and uses repository storage, but the editor has no evidenced return refresh or result handoff."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": true,
+      "why": "A dedicated destination writes through the repository and the editor refreshes on resume without global mutable state."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": false,
+      "why": "The picker has its own destination and uses repository storage, but the editor has no evidenced return refresh or result handoff."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": false,
+      "why": "The picker has its own destination and uses repository storage, but the editor has no evidenced return refresh or result handoff."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": false,
+      "why": "The picker has its own destination and uses repository storage, but the editor has no evidenced return refresh or result handoff."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The editor type control pushes a dedicated picker navigation key."
+    },
+    "2": {
+      "pass": false,
+      "why": "Selection writes through the repository immediately; the editor has no draft type updated by the picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The picker back action only navigates back and makes no type write."
+    },
+    "4": {
+      "pass": false,
+      "why": "The picker persists the type on selection, while the workout Save path only saves the title."
+    },
+    "5": {
+      "pass": false,
+      "why": "The picker has its own destination and uses repository storage, but the editor has no evidenced return refresh or result handoff."
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker adds its own UiState/UiAction contract and ViewModel."
+    }
+  }
+}

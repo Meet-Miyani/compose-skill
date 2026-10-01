@@ -1,0 +1,20 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Guard `if (addJob?.isActive == true) return` drops a second add while the first insert is in flight, so one entry is created"},
+    "2": {"pass": true, "why": "The viewmodel drops overlapping add requests through the isActive guard on addJob"},
+    "3": {"pass": false, "why": "The diff adds no test; only the viewmodel changes"},
+    "4": {"pass": true, "why": "One-line change in addWorkout only; no unrelated edits"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "isActive guard plus a new test that asserts 1 item and 1 effect after two OnAddClick; jvmTest passes"},
+    "2": {"pass": true, "why": "The viewmodel drops overlapping add requests through the isActive guard on addJob"},
+    "3": {"pass": true, "why": "Adds the `double add creates single workout` test, which sends OnAddClick twice"},
+    "4": {"pass": true, "why": "Only the guard line and one new test; no refactor"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Guard `if (addJob?.isActive == true) return` drops a second add while the first insert is in flight, so one entry is created"},
+    "2": {"pass": true, "why": "The viewmodel drops overlapping add requests through the isActive guard on addJob"},
+    "3": {"pass": false, "why": "No test is added; the message relies only on existing tests"},
+    "4": {"pass": true, "why": "One-line change in addWorkout only; no unrelated edits"}
+  }
+}

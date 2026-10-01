@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Adds behaviour the MVP code never had: SavedStateHandle draft persistence across process death, async launchGuarded with emitError error path, and an overlapping-click guard."},
+    "2": {"pass": true, "why": "checks_exit=0 and the Gradle build/allTests report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Diff touches only Quick Add files (contract, ViewModel, widget, new test); no unrelated code is rewritten."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel<QuickAddUiAction, QuickAddUiState, QuickAddUiEffect> with onAction/updateState, and the contract file declares UiState/UiAction/UiEffect (with redundant duplicate actions)."},
+    "5": {"pass": false, "why": "It only splits stateful and stateless overloads, all named QuickAddWidget, with no Route/Screen naming, and it adds no string resources."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "addWorkout sets loading true then false and clears text synchronously, matching the presenter, and the no-arg QuickAddWidget() call still works."},
+    "2": {"pass": true, "why": "checks_exit=0 and allTests report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Only Quick Add files are changed or added."},
+    "4": {"pass": true, "why": "The ViewModel extends BaseViewModel with the QuickAdd UiAction/UiState/UiEffect contract and a single onAction entry point."},
+    "5": {"pass": false, "why": "The stateful and stateless overloads share the name QuickAddWidget, with no Route/Screen split, and no string resources are used."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Loading true then false and clearing the text happen synchronously as in the presenter, and the no-arg widget call is preserved."},
+    "2": {"pass": true, "why": "checks_exit=0 with BUILD SUCCESSFUL, and jvmTest/allTests are up to date."},
+    "3": {"pass": true, "why": "Only Quick Add files are changed or added."},
+    "4": {"pass": true, "why": "The ViewModel extends BaseViewModel<QuickAddUiAction, QuickAddUiState, QuickAddUiEffect>, and the contract has the three declarations."},
+    "5": {"pass": false, "why": "There is a single stateful QuickAddWidget with no stateless Screen counterpart (no Route/Screen split), and no string resources."}
+  }
+}

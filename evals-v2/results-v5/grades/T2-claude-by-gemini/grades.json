@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Tapping the workout type button opens a new picker screen"
+    },
+    "2": {
+      "pass": false,
+      "why": "Saves directly to the database instead of updating a draft"
+    },
+    "3": {
+      "pass": true,
+      "why": "Cancelling or pressing back does not overwrite the type"
+    },
+    "4": {
+      "pass": false,
+      "why": "The chosen type is saved immediately, not when the workout is saved"
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses the database as global mutable state to pass the result back"
+    },
+    "6": {
+      "pass": true,
+      "why": "The picker screen has its own UiState/UiAction contract and ViewModel"
+    }
+  }
+}

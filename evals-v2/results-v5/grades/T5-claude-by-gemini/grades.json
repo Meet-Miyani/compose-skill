@@ -1,0 +1,110 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping save requests"
+    },
+    "3": {
+      "pass": false,
+      "why": "No test is added"
+    },
+    "4": {
+      "pass": true,
+      "why": "Change is limited to the bug with no unsupported claims"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping save requests"
+    },
+    "3": {
+      "pass": true,
+      "why": "Test reproduces the double add using addGate"
+    },
+    "4": {
+      "pass": false,
+      "why": "Message claims commit 751d71c deleted check which diff does not support"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping requests"
+    },
+    "3": {
+      "pass": false,
+      "why": "No test is added"
+    },
+    "4": {
+      "pass": false,
+      "why": "Message claims observeWorkouts has guard which diff does not support"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping requests"
+    },
+    "3": {
+      "pass": true,
+      "why": "Test reproduces the double add using queueing"
+    },
+    "4": {
+      "pass": false,
+      "why": "Message claims 11 checks pass which diff does not support, and modifies unrelated line"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping requests"
+    },
+    "3": {
+      "pass": true,
+      "why": "Test reproduces the double add using queueing"
+    },
+    "4": {
+      "pass": false,
+      "why": "Message claims save and observeWorkouts have guards which diff does not support"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Fixes addWorkout to ignore overlapping taps"
+    },
+    "2": {
+      "pass": true,
+      "why": "ViewModel drops overlapping requests"
+    },
+    "3": {
+      "pass": true,
+      "why": "Test reproduces the double add using queueing"
+    },
+    "4": {
+      "pass": false,
+      "why": "Message claims 16 tests and 11 checks pass which diff does not support"
+    }
+  }
+}

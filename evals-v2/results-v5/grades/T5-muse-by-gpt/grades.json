@@ -1,0 +1,20 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The added active-job guard prevents a second insert while the first add is in progress."},
+    "2": {"pass": true, "why": "addWorkout returns when addJob is active, dropping overlapping requests."},
+    "3": {"pass": false, "why": "The diff contains no new test for double add."},
+    "4": {"pass": true, "why": "The only change is the guard in addWorkout."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The active-job guard prevents overlapping inserts, and the added double-add test asserts one item."},
+    "2": {"pass": true, "why": "addWorkout returns when addJob is active, dropping overlapping requests."},
+    "3": {"pass": true, "why": "The diff adds a double-add test that checks for one workout and one effect."},
+    "4": {"pass": true, "why": "The diff changes only the add guard and its focused regression test."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The added active-job guard prevents a second insert while the first add is in progress."},
+    "2": {"pass": true, "why": "addWorkout returns when addJob is active, dropping overlapping requests."},
+    "3": {"pass": false, "why": "The diff contains no new test for double add."},
+    "4": {"pass": true, "why": "The only change is the guard in addWorkout."}
+  }
+}

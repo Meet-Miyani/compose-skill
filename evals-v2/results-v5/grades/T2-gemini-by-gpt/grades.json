@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "The diff is empty; the proposed picker screen was not implemented."},
+    "2": {"pass": false, "why": "The diff is empty and shows no selection returning to or updating the editor draft."},
+    "3": {"pass": false, "why": "The diff is empty and shows no picker cancellation or back handling."},
+    "4": {"pass": false, "why": "The diff is empty and shows no type persistence on workout save."},
+    "5": {"pass": false, "why": "The diff is empty and shows no picker destination or result delivery."},
+    "6": {"pass": false, "why": "The diff is empty and adds no picker contract or ViewModel."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "The diff is empty; the proposed picker screen was not implemented."},
+    "2": {"pass": false, "why": "The diff is empty and shows no selection returning to or updating the editor draft."},
+    "3": {"pass": false, "why": "The diff is empty and shows no picker cancellation or back handling."},
+    "4": {"pass": false, "why": "The diff is empty and shows no type persistence on workout save."},
+    "5": {"pass": false, "why": "The diff is empty and shows no picker destination or result delivery."},
+    "6": {"pass": false, "why": "The diff is empty and adds no picker contract or ViewModel."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The editor's type button emits a navigation effect that opens WorkoutTypeNavKey."},
+    "2": {"pass": false, "why": "Selecting a type only changes picker state; returning requires a separate Save action and no editor draft update is shown."},
+    "3": {"pass": true, "why": "Back pops the picker without calling saveWorkoutType, so an unsaved selection does not overwrite the type."},
+    "4": {"pass": false, "why": "The picker saves type immediately through saveWorkoutType; the editor's workout save is not wired to save the chosen type."},
+    "5": {"pass": false, "why": "A separate navigation destination exists, but its Saved effect carries no type and no result is delivered to the editor."},
+    "6": {"pass": true, "why": "The diff adds WorkoutTypeUiState, WorkoutTypeUiAction, and a dedicated WorkoutTypeViewModel."}
+  }
+}

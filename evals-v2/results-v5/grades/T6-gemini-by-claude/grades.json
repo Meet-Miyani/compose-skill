@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Blocking #1 flags that hasPermission is ignored and the callback fires on denial."},
+    "2": {"pass": true, "why": "Blocking #2 flags Modifier.size(24.dp) on a clickable as below the 48dp minimum."},
+    "3": {"pass": false, "why": "GlobalScope launch is folded into Blocking #1 as a blocking defect."},
+    "4": {"pass": true, "why": "Unused timeFormat and the hardcoded time are listed under 'Worth doing later', not blocking."},
+    "5": {"pass": true, "why": "Diff is empty; the corrected file appears only in the message."},
+    "6": {"pass": false, "why": "Has Blocking/Later/Fine sections, but its only 'fine' point is a claim that compile and tests pass, which checks=none does not support."},
+    "7": {"pass": false, "why": "Fix only gates the callback on grant; says nothing about keeping the feature usable with alerts off or not re-prompting."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocker #2 flags the ignored permission result, so the reminder is scheduled on denial."},
+    "2": {"pass": true, "why": "Blocker #3 flags size(24.dp) as below the 48x48dp touch target."},
+    "3": {"pass": false, "why": "GlobalScope usage is Blocker #1."},
+    "4": {"pass": false, "why": "Blocker #4 lists the unused timeFormat 'HH:mm:ss' and the hardcoded time as must-fix before merge."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Separates blockers from 'What Can Wait' but never says what is fine as it is."},
+    "7": {"pass": false, "why": "Suggests only scheduling if granted or showing a snackbar; does not say the feature stays usable with alerts off or avoids a re-prompt loop."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Critical #3 flags that permission denial is ignored and onTimeSelected still fires."},
+    "2": {"pass": true, "why": "Important #2 flags .size(24.dp) as violating the 48x48dp touch target."},
+    "3": {"pass": true, "why": "GlobalScope is under Important (Should Fix), not Critical (Must Fix)."},
+    "4": {"pass": true, "why": "Unused timeFormat is listed under Minor (Nice to Have)."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Critical/Important/Minor tiers separate must-fix from later, and Strengths names what is fine (package placement)."},
+    "7": {"pass": false, "why": "Only says to check hasPermission and 'handle denied gracefully'; nothing about usable with alerts off or no re-prompt loop."}
+  }
+}

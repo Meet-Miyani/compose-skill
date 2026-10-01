@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Point 3: saveWorkout throws StorageException, catches it, prints, never reports failure to the UI."},
+    "2": {"pass": true, "why": "Point 4: independent jobs let an earlier query publish results after the query changed."},
+    "3": {"pass": true, "why": "Flags the swallowed failure, not the logging call itself, as the problem."},
+    "4": {"pass": true, "why": "Init block not mentioned."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Uses Major/Minor severity only; no blocking vs later split and no 'fine as is' statement."},
+    "7": {"pass": true, "why": "Fix plan requires a storage failure to produce an AppError (error snackbar) rather than being hidden."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocking 1: storage error caught and printed, caller gets no failure; route through the guarded VM error path."},
+    "2": {"pass": true, "why": "Blocking 2: older request can overwrite newer results; cancel previous or reject stale."},
+    "3": {"pass": true, "why": "Blocking item is the swallowed failure, not the print/logging call."},
+    "4": {"pass": true, "why": "Init block not mentioned."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Proposes routing the save through the ViewModel's guarded error path that reports StorageException to the UI."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Save failures swallowed: only printed, caller has no recoverable error state."},
+    "2": {"pass": true, "why": "Slow older response can overwrite a newer result; cancel or reject stale."},
+    "3": {"pass": true, "why": "Does not treat the logging call itself as blocking."},
+    "4": {"pass": true, "why": "Init block not mentioned."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "High/Medium severities only; no blocking vs later split or explicit 'fine as is' section."},
+    "7": {"pass": true, "why": "Route through the guarded VM error handling or expose an explicit error result."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "saveWorkout catches and prints, so the failure never reaches the UI."},
+    "2": {"pass": true, "why": "Overlapping calls can let an older query replace newer results."},
+    "3": {"pass": true, "why": "Blocking item is the failure not reaching the UI, not the print itself."},
+    "4": {"pass": true, "why": "Empty initializer listed under 'Worth doing later', not blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Route the save through the guarded action that sends failures to the popup error host."}
+  },
+  "E": {
+    "1": {"pass": false, "why": "SearchFeature.saveWorkout is described only as an unused placeholder to remove later, not as a swallowed error that leaves UI error state unset."},
+    "2": {"pass": false, "why": "Only suggests testing rapid query changes; never states that older responses can overwrite newer ones."},
+    "3": {"pass": true, "why": "Logging/print is not called blocking."},
+    "4": {"pass": true, "why": "Init block not mentioned."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Must fix / Can wait split, but nothing says what is fine as it is."},
+    "7": {"pass": true, "why": "Wants storage failures wrapped and shown as a visible, retryable error in the editor."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "saveWorkout catches StorageException and prints; the UI can't show an error."},
+    "2": {"pass": true, "why": "Earlier slower search can overwrite later query results; cancel or ignore stale."},
+    "3": {"pass": true, "why": "Does not treat the print/logging call as the blocking defect."},
+    "4": {"pass": true, "why": "Init block not mentioned."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Flat findings list; no blocking vs later split and no 'fine as is' statement."},
+    "7": {"pass": true, "why": "Route the failure through the app's error handling so the UI can show an error or retry."}
+  }
+}

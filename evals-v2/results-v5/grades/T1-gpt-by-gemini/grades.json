@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches an image picker via ActivityResultContracts and JFileChooser."
+    },
+    "3": {
+      "pass": true,
+      "why": "The selected image is saved to app-private storage as a file."
+    },
+    "4": {
+      "pass": true,
+      "why": "The workout entity adds a photoPath field to save the path."
+    },
+    "5": {
+      "pass": true,
+      "why": "The photo file is written by the repository off the main thread."
+    },
+    "6": {
+      "pass": false,
+      "why": "Uses string literals like 'Choose workout photo' in the JVM picker."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches the image picker via imagepickerkmp."
+    },
+    "3": {
+      "pass": true,
+      "why": "The selected image is copied to app-specific local storage."
+    },
+    "4": {
+      "pass": true,
+      "why": "The workout entity adds a photoPath field to save the path."
+    },
+    "5": {
+      "pass": true,
+      "why": "The photo file is written by the data layer (WorkoutsDatabase) off the main thread."
+    },
+    "6": {
+      "pass": true,
+      "why": "All new user-facing text uses string resources."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches the system photo picker on Android."
+    },
+    "3": {
+      "pass": true,
+      "why": "The selected image is saved to app-private storage."
+    },
+    "4": {
+      "pass": true,
+      "why": "The workout entity adds a photoPath field."
+    },
+    "5": {
+      "pass": false,
+      "why": "The photo file is written from the UI layer (composable callback) on the main thread."
+    },
+    "6": {
+      "pass": true,
+      "why": "All new user-facing text uses string resources."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches the platform photo picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The image is saved to local app storage (the database)."
+    },
+    "4": {
+      "pass": false,
+      "why": "The workout entity saves a BLOB instead of the file path."
+    },
+    "5": {
+      "pass": false,
+      "why": "No photo file is written; the photo is stored as a BLOB in the database."
+    },
+    "6": {
+      "pass": false,
+      "why": "Uses a string literal 'Choose a workout photo' in the JVM picker."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches the platform image picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The selected photo is saved to app-owned local storage."
+    },
+    "4": {
+      "pass": false,
+      "why": "The workout entity is not modified to save the path."
+    },
+    "5": {
+      "pass": true,
+      "why": "The photo file is written by the data layer off the main thread."
+    },
+    "6": {
+      "pass": true,
+      "why": "All new user-facing text uses string resources."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The 'Attach photo' button is added to the WorkoutsScreen."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tapping the button launches the platform photo picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "The image is copied into app-owned local storage."
+    },
+    "4": {
+      "pass": true,
+      "why": "The workout entity adds a photoPath field."
+    },
+    "5": {
+      "pass": true,
+      "why": "The photo file is written by the data layer off the main thread."
+    },
+    "6": {
+      "pass": false,
+      "why": "Uses a string literal 'Images' in the JVM file picker filter."
+    }
+  }
+}

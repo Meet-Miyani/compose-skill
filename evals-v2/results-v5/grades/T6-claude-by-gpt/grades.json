@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "It says the ignored permission result leaves denial unhandled."},
+    "2": {"pass": true, "why": "It identifies the 24dp touch target as too small."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed reminder time, while describing timeFormat as unused."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It separates priorities but does not clearly state what is fine as it is."},
+    "7": {"pass": false, "why": "It asks for a denied state but does not specify usable alerts-off behavior or avoiding repeated prompts."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "It says denial is ignored and the callback still fires."},
+    "2": {"pass": true, "why": "It identifies the 24dp target as below the 48dp minimum."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed reminder time and calls timeFormat unused."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It lists findings without separating blockers from later improvements or saying what is fine."},
+    "7": {"pass": false, "why": "It identifies denial but gives no alerts-off or repeat-prompt behavior."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "It says denial is ignored and needs a visible state."},
+    "2": {"pass": true, "why": "It identifies the 24dp clickable area as too small."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed selected time, not a hardcoded display format."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It separates must-fix and later items but does not say what is fine as it is."},
+    "7": {"pass": false, "why": "It suggests an alerts-off state but does not say the feature remains usable or prevent repeated prompts."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "It says denial is unchecked and execution continues."},
+    "2": {"pass": true, "why": "It flags the 24dp target as below the 48dp minimum."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed reminder time and calls timeFormat unused."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It separates Blocking and Should fix and explicitly says a rename leftover is fine for now."},
+    "7": {"pass": false, "why": "It proposes a permission callback but no usable alerts-off state or repeat-prompt policy."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "It says the denied permission result is discarded and gives no feedback."},
+    "2": {"pass": true, "why": "It identifies the 24dp box as too small for touch."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed reminder time and calls timeFormat unused."},
+    "5": {"pass": true, "why": "The project diff is empty; the code sample is only in the message."},
+    "6": {"pass": true, "why": "It has Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "It says to save the chosen time, show alerts off with settings access, and not ask again."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "It says denial is ignored and the app gives no response."},
+    "2": {"pass": true, "why": "It identifies the 24dp tap target and asks for at least 48dp."},
+    "3": {"pass": true, "why": "It critiques GlobalScope, not a custom coroutine scope."},
+    "4": {"pass": true, "why": "It objects to the fixed reminder time and calls timeFormat unused."},
+    "5": {"pass": true, "why": "The project diff is empty; the code sample is only in the message."},
+    "6": {"pass": true, "why": "It has Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "It explicitly calls for a usable denied state with settings access and no nagging."}
+  }
+}

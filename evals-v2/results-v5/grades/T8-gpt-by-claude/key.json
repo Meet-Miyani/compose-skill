@@ -1,0 +1,26 @@
+{
+ "A": {
+  "model": "gpt-6-luna",
+  "arm": "nokit"
+ },
+ "B": {
+  "model": "gpt-6-luna",
+  "arm": "kit"
+ },
+ "C": {
+  "model": "gpt-6-sol",
+  "arm": "kit"
+ },
+ "D": {
+  "model": "gpt-6-luna",
+  "arm": "generic"
+ },
+ "E": {
+  "model": "gpt-6-sol",
+  "arm": "nokit"
+ },
+ "F": {
+  "model": "gpt-6-sol",
+  "arm": "generic"
+ }
+}

@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies the caught StorageException as hidden from the user with no error state surfaced."},
+    "2": {"pass": true, "why": "Explains that uncancelled searches let an older result replace a newer one."},
+    "3": {"pass": true, "why": "Places the println observation among later improvements, not as a blocker."},
+    "4": {"pass": true, "why": "Places the empty init block among later improvements."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Uses Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "Proposes the existing guarded save path and mapping storage failures to a popup error."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Says the StorageException is caught and printed without an error visible to the user."},
+    "2": {"pass": true, "why": "Identifies independent uncancelled coroutines and stale search results."},
+    "3": {"pass": true, "why": "Discusses println only under smaller points and as part of the swallowed-error defect."},
+    "4": {"pass": true, "why": "Lists the empty init block under smaller points."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates Must fix from Smaller points and states that the real save path handles errors correctly."},
+    "7": {"pass": true, "why": "Proposes routing failures through launchGuarded and testing state.error or an emitted error."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Explicitly says the caught StorageException leaves no error state or message."},
+    "2": {"pass": true, "why": "Explains that prior search coroutines are not cancelled and can finish last."},
+    "3": {"pass": true, "why": "Treats println as supporting detail of the swallowed save error, not an independent blocker."},
+    "4": {"pass": true, "why": "Puts the empty init block in Can wait."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates Must fix from Can wait and says the existing guarded save is handled correctly."},
+    "7": {"pass": true, "why": "Explicitly proposes updateState with an error value and a visible Retry option."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Says the caught StorageException reaches neither AppError state nor an effect."},
+    "2": {"pass": true, "why": "Identifies the uncancelled search jobs and possible stale overwrite."},
+    "3": {"pass": true, "why": "Mentions println within the swallowed-error finding rather than making logging a separate blocker."},
+    "4": {"pass": true, "why": "Mentions the empty init block as cleanup without calling it blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "The review groups blockers and minor cleanup under Problems without a clear later-improvements section."},
+    "7": {"pass": true, "why": "Proposes routing save through guarded ViewModel handling that shows an AppError to the user."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Says saveWorkout catches and only prints the StorageException, leaving the user with no message."},
+    "2": {"pass": true, "why": "Says uncancelled earlier searches can overwrite newer results."},
+    "3": {"pass": true, "why": "Does not call catch-block logging a blocking issue on its own."},
+    "4": {"pass": true, "why": "Does not call the empty init block blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Uses Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "Proposes deleting the logging-only save path and using the existing user-visible save popup."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Says saveWorkout catches the StorageException and only prints it, so the user sees no error."},
+    "2": {"pass": true, "why": "Identifies uncancelled searches that permit an old result to overwrite a new one."},
+    "3": {"pass": true, "why": "Puts the println observation in Minor rather than making it blocking."},
+    "4": {"pass": true, "why": "Puts the empty init block in Minor."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates Blocking, Should fix, and Minor and says the real save structure is fine."},
+    "7": {"pass": true, "why": "Proposes using guarded save handling and wrapping storage errors so a user-visible error is emitted."}
+  }
+}

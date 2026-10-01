@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnExportClick starts a guarded coroutine job that builds the CSV in withContext(Dispatchers.Default), off the main thread"},
+    "2": {"pass": false, "why": "The job runs in the ViewModel scope through launchGuarded, so leaving the screen cancels it; no file is ever written"},
+    "3": {"pass": false, "why": "The CSV builder is valid, but App.kt handles ExportReady as Unit, so the CSV is thrown away and no file or output reaches the user"},
+    "4": {"pass": false, "why": "The export runs in the ViewModel's own scope (launchGuarded), not in an app-lifetime scope from DI or in platform background work"},
+    "5": {"pass": true, "why": "onError = ::emitError sends failures to the popup errors channel shown to the user"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "OnExportClick starts a guarded coroutine job that reads the snapshot and builds the CSV on ioDispatcher"},
+    "2": {"pass": false, "why": "The export is ViewModel-scoped, and the message admits it is cancelled when the user leaves the screen"},
+    "3": {"pass": true, "why": "workoutsToCsv gives an RFC 4180 escaped header and rows of all workouts, with tests; delivered as CSV text in state and on screen"},
+    "4": {"pass": false, "why": "The export uses the ViewModel scope through launchGuarded; WorkManager and app scope were left out on purpose"},
+    "5": {"pass": true, "why": "onError sets exportError, and the screen shows the 'Export failed.' text with a Dismiss button; a test covers it"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "OnExportClick starts a guarded coroutine job that reads the snapshot and builds the CSV on backgroundDispatcher"},
+    "2": {"pass": false, "why": "The export is in the ViewModel scope, and the message admits leaving the screen cancels it"},
+    "3": {"pass": true, "why": "toCsv gives an RFC 4180 escaped header and rows from a full DAO snapshot, with tests; delivered as CSV text in state and on screen"},
+    "4": {"pass": false, "why": "The export runs in the ViewModel scope through launchGuarded, not in an app-lifetime scope from DI or in platform background work"},
+    "5": {"pass": true, "why": "onError = ::emitError sends the failure to the popup errors channel; a test checks that a Storage error is emitted"}
+  }
+}

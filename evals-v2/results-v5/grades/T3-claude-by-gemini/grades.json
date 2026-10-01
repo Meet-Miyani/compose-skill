@@ -1,0 +1,134 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "triggers a coroutine in a singleton component"
+    },
+    "2": {
+      "pass": true,
+      "why": "the singleton scope outlives the screen"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting with proper escaping"
+    },
+    "4": {
+      "pass": true,
+      "why": "runs in an app-lifetime scope within a singleton, not viewModelScope"
+    },
+    "5": {
+      "pass": true,
+      "why": "failed export updates state and shows error text on screen"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "triggers WorkManager on Android and Coroutine on other platforms"
+    },
+    "2": {
+      "pass": true,
+      "why": "WorkManager and singleton scope outlive the screen"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting with formula injection mitigation"
+    },
+    "4": {
+      "pass": true,
+      "why": "uses platform background work on Android and app-lifetime scope on others"
+    },
+    "5": {
+      "pass": true,
+      "why": "error state is displayed via ExportStatusText on screen"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "message claims '3 new view-model tests' but the diff actually adds 4"
+    },
+    "2": {
+      "pass": true,
+      "why": "export scope is an app-lifetime singleton that outlives the screen"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting and escaping"
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutsExportScope is provided via DI as a singleton"
+    },
+    "5": {
+      "pass": false,
+      "why": "if the user leaves the screen, the error is swallowed by a fresh ViewModel and never reaches them"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "triggers WorkManager on Android and Coroutine on other platforms"
+    },
+    "2": {
+      "pass": true,
+      "why": "WorkManager and app-lifetime scope outlive the screen"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting with formula mitigation"
+    },
+    "4": {
+      "pass": true,
+      "why": "uses platform background work on Android and DI app-lifetime scope on others"
+    },
+    "5": {
+      "pass": true,
+      "why": "error state maps to AppError and displays on screen"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": false,
+      "why": "message claims the Android build failed offline, but the check results show BUILD SUCCESSFUL"
+    },
+    "2": {
+      "pass": true,
+      "why": "WorkManager and InProcessWorkoutsExporter outlive the screen"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting with formula mitigation"
+    },
+    "4": {
+      "pass": true,
+      "why": "uses WorkManager on Android and app-lifetime scope on others"
+    },
+    "5": {
+      "pass": true,
+      "why": "export failure message is displayed via UI state"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "triggers an export coroutine in viewModelScope"
+    },
+    "2": {
+      "pass": false,
+      "why": "message claims navigating between screens is fine, but viewModelScope cancels the export"
+    },
+    "3": {
+      "pass": true,
+      "why": "valid CSV formatting and escaping"
+    },
+    "4": {
+      "pass": false,
+      "why": "the export runs in viewModelScope, violating the rubric constraint"
+    },
+    "5": {
+      "pass": true,
+      "why": "emitError shows a popup to the user on failure"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Picker opens from a new button on the list screen; the workout screen has no workout-type field to tap."},
+    "2": {"pass": false, "why": "Selection only pops the back stack; the result is never delivered to the workout screen or any draft."},
+    "3": {"pass": false, "why": "The editor has no draft type at all, so the diff shows no draft type being protected."},
+    "4": {"pass": false, "why": "No persistence: Workout, entity and repository are unchanged, and the message admits the type is not saved."},
+    "5": {"pass": false, "why": "Picker is its own nav key, but its result never reaches the editor by any path."},
+    "6": {"pass": true, "why": "WorkoutTypePickerContract has UiState/UiAction/UiEffect and a BaseViewModel subclass, matching the existing screens."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The detail screen's 'Pick workout type' button sends OpenWorkoutTypePicker, which pushes WorkoutsTypePickerKey."},
+    "2": {"pass": true, "why": "Confirm saves the type and pops on TypeSaved; the detail reloads on return and shows items[0].workoutType."},
+    "3": {"pass": true, "why": "Back sends NavigateBack and pops without saving; only Confirm writes the type."},
+    "4": {"pass": true, "why": "Type is persisted through the new entity column, DAO updateWorkoutType, repository saveWorkoutType and a 1→2 AutoMigration; the title save does not touch it."},
+    "5": {"pass": true, "why": "Own WorkoutsTypePickerKey entry; the result travels through the repository, with no global or file-level mutable variable."},
+    "6": {"pass": true, "why": "Own Contract (UiState/UiAction/UiEffect), a Koin ViewModel with params and SavedStateHandle, plus Route and Screen."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The detail screen's 'Pick workout type' button sends OpenWorkoutTypePicker, which pushes WorkoutTypePickerKey."},
+    "2": {"pass": true, "why": "Tapping a type saves it and navigates back; the detail load sets workoutType = item?.type, which the screen shows."},
+    "3": {"pass": true, "why": "Back sends NavigateBack with no save; only a type tap writes."},
+    "4": {"pass": true, "why": "Type is persisted through the entity column, DAO updateType, repository saveWorkoutType and a 1→2 AutoMigration."},
+    "5": {"pass": true, "why": "Own WorkoutTypePickerKey entry; the result travels through the repository, with no global or file-level mutable variable."},
+    "6": {"pass": true, "why": "Own Contract (UiState/UiAction/UiEffect), a Koin ViewModel with params, plus Route and Screen."}
+  }
+}

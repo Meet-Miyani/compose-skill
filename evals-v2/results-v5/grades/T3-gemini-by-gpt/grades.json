@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "The diff is empty; no export button or background job was implemented."},
+    "2": {"pass": false, "why": "The diff is empty; there is no export that can continue after leaving the screen."},
+    "3": {"pass": false, "why": "The diff is empty; no workout CSV is generated."},
+    "4": {"pass": false, "why": "The diff is empty; no DI-provided app scope or platform background work was added."},
+    "5": {"pass": false, "why": "The diff is empty; no export failure is surfaced to the user."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The Export CSV button dispatches OnExportClick, which invokes a service that launches the export job."},
+    "2": {"pass": true, "why": "The service launches in a DI-provided app scope, so leaving the list ViewModel does not cancel the file write."},
+    "3": {"pass": true, "why": "The service serializes repository workouts with a header and escapes commas, quotes, and line breaks before writing a CSV file."},
+    "4": {"pass": true, "why": "Koin provides a singleton CoroutineScope with SupervisorJob, and the export service launches in that scope."},
+    "5": {"pass": false, "why": "The service stores ExportStatus.Error, but the ViewModel observes only Running and never shows the error to the user."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "The diff is empty; no export button or background job was implemented."},
+    "2": {"pass": false, "why": "The diff is empty; there is no export that can continue after leaving the screen."},
+    "3": {"pass": false, "why": "The diff is empty; no workout CSV is generated."},
+    "4": {"pass": false, "why": "The diff is empty; no DI-provided app scope or platform background work was added."},
+    "5": {"pass": false, "why": "The diff is empty; no export failure is surfaced to the user."}
+  }
+}

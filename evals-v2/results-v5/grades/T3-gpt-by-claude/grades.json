@@ -1,0 +1,44 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnExportClick launches an export coroutine that builds the CSV on a background dispatcher (withContext(ioDispatcher))"},
+    "2": {"pass": false, "why": "Export runs via launchGuarded in the ViewModel, so clearing the screen's ViewModel cancels it, and no file is ever written"},
+    "3": {"pass": false, "why": "No file is produced; the CSV text is only shown in a dialog for manual copying (the escaped string itself is well formed)"},
+    "4": {"pass": false, "why": "Work runs in the ViewModel's scope (launchGuarded), not an app-lifetime DI scope or platform background work"},
+    "5": {"pass": true, "why": "launchGuarded onError = ::emitError sends the failure into the screen's error state, not just a log"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "OnExportClick launches a coroutine that reads workouts and builds the CSV on backgroundDispatcher"},
+    "2": {"pass": false, "why": "Export is tied to the ViewModel scope, and the share effect is only consumed while the screen collects effects; leaving can cancel or lose it"},
+    "3": {"pass": false, "why": "No CSV file is created: Android shares the text via EXTRA_TEXT, iOS shares a string, desktop copies to the clipboard"},
+    "4": {"pass": false, "why": "Uses the ViewModel's launchGuarded scope, not an app-lifetime DI scope or WorkManager"},
+    "5": {"pass": true, "why": "onError = ::emitError surfaces the failure in UI state"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Tap calls WorkoutExportManager.export(), which launches a job in the app scope"},
+    "2": {"pass": true, "why": "Job runs in a singleton CoroutineScope from Koin; the ViewModel only observes the status flow, so leaving the screen does not cancel it"},
+    "3": {"pass": true, "why": "Writes a .csv file with a header, CRLF rows and RFC 4180 quoting of text fields; the test checks the exact output"},
+    "4": {"pass": true, "why": "CoroutineScope(SupervisorJob()+Default) is registered as a Koin single and injected into the manager"},
+    "5": {"pass": true, "why": "A StorageException sets the status to Failed, and the screen shows 'Export failed. Tap Export CSV to retry.' (other exception types are not caught)"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Tap launches a coroutine that builds the CSV on Dispatchers.Default"},
+    "2": {"pass": false, "why": "Runs in the ViewModel scope with no file output; leaving the screen cancels it or discards the result"},
+    "3": {"pass": false, "why": "No file is produced (dialog text only), and it uses only currentState.items, so it is not guaranteed to cover all workouts"},
+    "4": {"pass": false, "why": "Uses the ViewModel's launchGuarded scope"},
+    "5": {"pass": true, "why": "onError resets isExporting and calls emitError so the user sees the error"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Tap enqueues a WorkManager OneTimeWorkRequest on Android, or starts a LocalWorkoutExport job on other platforms"},
+    "2": {"pass": true, "why": "WorkManager worker writes exports/workouts.csv independent of the screen; desktop and iOS use a singleton-owned scope with a pending marker to resume"},
+    "3": {"pass": true, "why": "Writes workouts.csv with a header and fully quoted, escaped fields; tested (formula-prefix guard alters values but stays valid CSV)"},
+    "4": {"pass": true, "why": "Android uses WorkManager (platform background work); desktop and iOS use a constructor-injectable scope owned by a Koin @Single, not GlobalScope or viewModelScope"},
+    "5": {"pass": true, "why": "Worker failure maps to ExportStatus.Failed, and the screen shows 'Export failed. Tap Export workouts to retry.'"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Tap calls exportService.enqueue(), which schedules a WorkManager job on Android and a coroutine job elsewhere"},
+    "2": {"pass": true, "why": "WorkManager or a process-level scope does the read and file write, independent of the screen"},
+    "3": {"pass": true, "why": "Writes a .csv file to Downloads or Documents with a header and every cell RFC 4180 quoted; tested"},
+    "4": {"pass": false, "why": "Android uses WorkManager, but iOS and JVM run in a top-level file-private CoroutineScope (an ad-hoc global), not a DI-provided app scope"},
+    "5": {"pass": false, "why": "Only a synchronous enqueue failure is shown; worker failure (Result.failure) and iOS/JVM job exceptions never reach the UI"}
+  }
+}
