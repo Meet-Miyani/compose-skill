@@ -50,6 +50,7 @@ Build from the context you have. When a file or fact is missing, state the assum
 > **Iron law: never mix two patterns in one feature.** New work follows this contract. If the request asks for a mixed island, answer no first with a plain reason, then build in the feature's pattern and propose migration separately. Precedent is evidence, not permission.
 
 Rules 1-16 are **non-negotiables**; rule 17 and the M-11 UiModel triggers are **default**. Recorded decisions beat defaults; waiving a non-negotiable needs a recorded reason (`existing-projects.md` 5).
+These rules govern code you write. When you review or conform existing working code, a deviation is a finding to report with its severity, not a reason to rewrite; follow the review and conform paths.
 
 1. **Dependencies point one way: `:feature:*` → `:data:*`, `:core:*`, design system. No feature depends on another feature. `:core:*` and `:data:*` never depend on a feature. Nothing depends on the composition root.** Sibling imports rot into cycles. *Prevents:* cycles and cross-feature coupling.
 2. **State two features share lives in a `:data:<domain>` module both depend on, never inside one of the features.** Feature repositories are private by construction. *Prevents:* sibling imports smuggled in as shared state.

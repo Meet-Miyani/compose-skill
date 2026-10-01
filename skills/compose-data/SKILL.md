@@ -112,8 +112,8 @@ A paged list over a changing network source uses `RemoteMediator` plus Room; the
 
 Load only the references this task needs. One level deep.
 
-- Also read [coroutines-flow.md](../compose-architecture/references/coroutines-flow.md) for file or database writes and streams.
-- Also read [error-handling.md](../compose-architecture/references/error-handling.md) for failed writes or network calls.
+- Also read [coroutines-flow.md](../compose-architecture/references/coroutines-flow.md) only when changing file or database writes and streams.
+- Also read [error-handling.md](../compose-architecture/references/error-handling.md) only when changing failed writes or network calls.
 
 - [boundaries-and-mapping.md](references/boundaries-and-mapping.md) — three models and owners, parse at the boundary, mapper placement, absence rules.
 - [networking-ktor.md](references/networking-ktor.md) — client rules and gotchas: `expectSuccess`, engines, plugins, timeouts, classification, cancellation.

@@ -28,6 +28,7 @@ Answer the verdict on line one, then findings in plain words with file-path evid
 
 - **Blocking** covers only: a user-visible bug, a crash or ANR risk, data loss, a security or privacy issue, or anything that fails the build, tests, or guards.
 - A kit-convention deviation in working code (naming, file layout, two first-load owners with no bug, DI style) is **worth doing later**, unless the task is kit adoption or the user asked for a convention review.
+- In working code, hardcoded strings, date/time formats or units, naming, file layout, and convention differences are worth doing later, not blocking, unless the task is localisation or a convention review.
 - `Not shippable` or `request changes` is used only when a blocking item exists.
 - Every review ends with a short **fine as is** line naming what needs no change.
 - Lambda allocation inside composables is fine as is on Kotlin 2.0.20 or later: a fresh closure per recomposition and per-item callbacks passed without a hand `remember` are memoized automatically by capture, so they are never a finding, never blocking, and never worth doing later. Evidence: https://developer.android.com/develop/ui/compose/performance/stability/strongskipping. If `gradle/libs.versions.toml` shows Kotlin below 2.0.20, the old hand-hoisting note may apply instead.
