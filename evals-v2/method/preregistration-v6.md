@@ -51,3 +51,12 @@ GPT. An item passes only when both graders pass it. Grades are frozen before sco
 
 If rules 1-3 hold, release v6.1.0-preview.2. Otherwise v6.0 stays current and the results are published as found.
 `kit` vs `nokit` lifts are reported as in v5.
+
+**Add-on list (owner, 2026-10-01, before any v6 result exists):** after the OpenCode Go plan resets (around Oct 5),
+the following run the same 6 tasks × 3 arms through the same harness and grading (Claude + GPT graders),
+reported separately from the 5-model panel:
+- DeepSeek V4.1 Flash
+- DeepSeek V4 Pro
+- MiniMax M3
+
+Kimi K3, GLM 5.3 and Qwen 3.8 Max are added only if plan quota remains after these three.
