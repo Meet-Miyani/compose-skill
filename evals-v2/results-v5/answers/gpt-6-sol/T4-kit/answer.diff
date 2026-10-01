@@ -1,0 +1,37 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..e9e9baf 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,7 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
+@@ -65,7 +65,7 @@ class WorkoutsViewModel(
+                     isRefreshing = false,
+                     isMissing = item == null,
+                     items = listOfNotNull(item),
+-                    draftTitle = if (savedStateHandle.contains("draftTitle")) draftTitle else item?.title.orEmpty(),
++                    draftTitle = savedStateHandle["draftTitle"] ?: item?.title.orEmpty(),
+                 )
+             }
+             hasStarted = true
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..0b545f3 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -254,7 +254,9 @@ class WorkoutsViewModelTest {
+     fun `process death restores draft and refetches`() = runTest(testScheduler) {
+         val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
+         val handle = SavedStateHandle()
+-        handle["draftTitle"] = "half-typed"
++        val original = viewModel(fake, handle = handle)
++        original.onAction(WorkoutsUiAction.OnTitleChanged("half-typed"))
++
+         val viewModel = viewModel(fake, handle = handle)
+ 
+         assertEquals("half-typed", viewModel.state.value.draftTitle)

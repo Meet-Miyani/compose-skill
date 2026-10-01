@@ -1,0 +1,1 @@
+Each title edit is now saved to `SavedStateHandle`, which lets the app restore the draft if Android recreates the screen while you’re in another app. I didn’t run tests.

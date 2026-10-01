@@ -1,0 +1,60 @@
+> Task :core:designsystem:bundleAndroidMainClassesToCompileJar
+> Task :core:designsystem:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:processDebugResources FROM-CACHE
+> Task :feature:workouts:compileTestKotlinJvm
+> Task :feature:workouts:compileJvmTestJava NO-SOURCE
+> Task :feature:workouts:jvmTestClasses
+> Task :core:error:compileKotlinIosSimulatorArm64 FROM-CACHE
+> Task :core:designsystem:compileKotlinIosSimulatorArm64
+> Task :core:mvi:compileKotlinIosSimulatorArm64
+> Task :feature:workouts:jvmTest
+> Task :feature:workouts:kspAndroidMain
+
+> Task :feature:workouts:compileAndroidMain
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: <project>/feature/workouts/build/generated/ksp/android/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: <project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt:16:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:workouts:processAndroidMainJavaRes
+> Task :feature:workouts:bundleAndroidMainClassesToCompileJar
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:compileAndroidMain FROM-CACHE
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:processAndroidMainJavaRes
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:compileDebugKotlin FROM-CACHE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :feature:workouts:kspKotlinIosSimulatorArm64
+> Task :androidApp:mergeDebugJavaResource
+
+> Task :feature:workouts:compileKotlinIosSimulatorArm64
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: <project>/feature/workouts/build/generated/ksp/iosSimulatorArm64/iosSimulatorArm64Main/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: <project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt:16:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:workouts:iosSimulatorArm64MainKlibrary
+> Task :feature:workouts:kspTestKotlinIosSimulatorArm64
+> Task :feature:workouts:copyRoomSchemas NO-SOURCE
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+> Task :feature:workouts:compileTestKotlinIosSimulatorArm64
+> Task :feature:workouts:linkDebugTestIosSimulatorArm64
+> Task :feature:workouts:iosSimulatorArm64Test
+> Task :feature:workouts:allTests
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 14s
+214 actionable tasks: 134 executed, 50 from cache, 30 up-to-date
+Configuration cache entry stored.

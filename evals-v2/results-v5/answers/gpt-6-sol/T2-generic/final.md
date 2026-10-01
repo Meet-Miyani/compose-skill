@@ -1,0 +1,3 @@
+Added a separate workout type screen with Cardio, Strength, and Flexibility. Open it from the workout editor; choosing a type saves it and returns to the editor. The choice persists across app restarts, and an interrupted save can resume after process restoration.
+
+The JVM tests and Android debug build pass. I could not verify the iOS app build: Koin reports missing definitions for the existing ViewModels as well as the new one. The check script named in the README is absent.

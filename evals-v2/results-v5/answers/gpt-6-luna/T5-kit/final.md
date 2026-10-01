@@ -1,0 +1,3 @@
+Fixed the duplicate creation in [WorkoutsListViewModel.kt](<project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt): the first tap now marks creation in flight immediately, and further taps are ignored until it finishes. Added a regression test that sends two add actions and checks that only one workout is created and opened.
+
+The workouts JVM tests pass, and `git diff --check` is clean.

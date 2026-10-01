@@ -1,0 +1,3 @@
+Added an **Attach photo** button to the workout detail screen. It opens the platform photo picker, copies the selected image into app-owned local storage, and saves its path with the workout in Room. The screen shows “Photo attached” after saving, including after a reload.
+
+Verified with JVM tests, Android assembly, iOS simulator compilation, and all 11 Compose project checks. The iOS host app must provide `NSPhotoLibraryUsageDescription` for the UIKit picker; this repository has no iOS host configuration to add it to.

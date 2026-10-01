@@ -1,0 +1,247 @@
+diff --git a/androidApp/src/main/kotlin/com/example/app/MainActivity.kt b/androidApp/src/main/kotlin/com/example/app/MainActivity.kt
+index 138e448..1b1017e 100644
+--- a/androidApp/src/main/kotlin/com/example/app/MainActivity.kt
++++ b/androidApp/src/main/kotlin/com/example/app/MainActivity.kt
+@@ -1,5 +1,6 @@
+ package com.example.app
+ 
++import android.content.Intent
+ import android.os.Bundle
+ import androidx.activity.ComponentActivity
+ import androidx.activity.compose.setContent
+@@ -12,7 +13,13 @@ class MainActivity : ComponentActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         setContent {
+-            App()
++            App(onShareCsv = { csv ->
++                val shareIntent = Intent(Intent.ACTION_SEND).apply {
++                    type = "text/csv"
++                    putExtra(Intent.EXTRA_TEXT, csv)
++                }
++                startActivity(Intent.createChooser(shareIntent, "Export workouts"))
++            })
+         }
+     }
+ }
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 878e8d8..433ad02 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -27,7 +27,7 @@ import org.koin.core.parameter.parametersOf
+  * renders this and nothing else.
+  */
+ @Composable
+-fun App() {
++fun App(onShareCsv: (String) -> Unit) {
+     MaterialTheme {
+         Surface {
+             // The SavedStateConfiguration form is the only
+@@ -52,6 +52,7 @@ fun App() {
+                             onEffect = { effect ->
+                                 when (effect) {
+                                     is WorkoutsListUiEffect.OpenWorkout -> backStack.add(WorkoutsDetailKey(effect.id))
++                                    is WorkoutsListUiEffect.ShareWorkoutCsv -> onShareCsv(effect.csv)
+                                 }
+                             },
+                         )
+diff --git a/composeApp/src/iosMain/kotlin/com/example/app/MainViewController.kt b/composeApp/src/iosMain/kotlin/com/example/app/MainViewController.kt
+index c366b27..f1d7f90 100644
+--- a/composeApp/src/iosMain/kotlin/com/example/app/MainViewController.kt
++++ b/composeApp/src/iosMain/kotlin/com/example/app/MainViewController.kt
+@@ -1,11 +1,19 @@
+ package com.example.app
+ 
+ import androidx.compose.ui.window.ComposeUIViewController
++import platform.UIKit.UIActivityViewController
++import platform.UIKit.UIViewController
+ 
+ /**
+  * Thin iOS entry point. Starts DI and renders the shared App. The iosApp
+  * Xcode project calls this factory and nothing else.
+  */
+-fun MainViewController() = ComposeUIViewController(
+-    configure = { initKoin() },
+-) { App() }
++fun MainViewController() = run {
++    lateinit var host: UIViewController
++    ComposeUIViewController(configure = { initKoin() }) {
++        App(onShareCsv = { csv ->
++            val activity = UIActivityViewController(listOf(csv), null)
++            host.presentViewController(activity, animated = true, completion = null)
++        })
++    }.also { host = it }
++}
+diff --git a/composeApp/src/jvmMain/kotlin/com/example/app/Main.kt b/composeApp/src/jvmMain/kotlin/com/example/app/Main.kt
+index 540aba1..940220c 100644
+--- a/composeApp/src/jvmMain/kotlin/com/example/app/Main.kt
++++ b/composeApp/src/jvmMain/kotlin/com/example/app/Main.kt
+@@ -3,6 +3,8 @@ package com.example.app
+ import androidx.compose.ui.window.Window
+ import androidx.compose.ui.window.application
+ import org.jetbrains.compose.resources.stringResource
++import java.awt.Toolkit
++import java.awt.datatransfer.StringSelection
+ import workouts.composeapp.generated.resources.Res
+ import workouts.composeapp.generated.resources.app_title
+ 
+@@ -11,7 +13,9 @@ fun main() {
+     initKoin()
+     application {
+         Window(onCloseRequest = ::exitApplication, title = stringResource(Res.string.app_title)) {
+-            App()
++            App(onShareCsv = { csv ->
++                Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(csv), null)
++            })
+         }
+     }
+ }
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..789e466 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -1,6 +1,8 @@
+ <resources>
+     <string name="workouts_title">Workouts</string>
+     <string name="add_workout">Add workout</string>
++    <string name="export_workouts">Export workouts</string>
++    <string name="exporting_workouts">Preparing CSV…</string>
+     <string name="empty_workouts">No workouts yet</string>
+     <string name="untitled_workout">Untitled workout</string>
+     <string name="error_message">Something went wrong.</string>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+index 3f7f10f..3ba27cd 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+@@ -9,16 +9,19 @@ import com.example.feature.workouts.domain.model.Workout
+ data class WorkoutsListUiState(
+     val items: List<Workout> = emptyList(),
+     val isLoading: Boolean = true,
++    val isExporting: Boolean = false,
+     val error: AppError? = null,
+ ) : UiState
+ 
+ sealed interface WorkoutsListUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsListUiAction
+     data object OnAddClick : WorkoutsListUiAction
++    data object OnExportClick : WorkoutsListUiAction
+     data class OnWorkoutClick(val id: Long) : WorkoutsListUiAction
+     data object OnRetryClick : WorkoutsListUiAction
+ }
+ 
+ sealed interface WorkoutsListUiEffect : UiEffect {
+     data class OpenWorkout(val id: Long) : WorkoutsListUiEffect
++    data class ShareWorkoutCsv(val csv: String) : WorkoutsListUiEffect
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+index 8e3edd8..3f3633e 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+@@ -19,6 +19,7 @@ fun WorkoutsListRoute(viewModel: WorkoutsListViewModel, onEffect: suspend (Worko
+     WorkoutsListScreen(
+         state = state,
+         onAdd = { viewModel.onAction(WorkoutsListUiAction.OnAddClick) },
++        onExport = { viewModel.onAction(WorkoutsListUiAction.OnExportClick) },
+         onWorkout = { viewModel.onAction(WorkoutsListUiAction.OnWorkoutClick(it)) },
+         onRetry = { viewModel.onAction(WorkoutsListUiAction.OnRetryClick) },
+     )
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+index 1cef939..0ada3e2 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
+ import org.jetbrains.compose.resources.stringResource
+ import workouts.feature.workouts.generated.resources.Res
+ import workouts.feature.workouts.generated.resources.add_workout
++import workouts.feature.workouts.generated.resources.export_workouts
++import workouts.feature.workouts.generated.resources.exporting_workouts
+ import workouts.feature.workouts.generated.resources.empty_workouts
+ import workouts.feature.workouts.generated.resources.error_message
+ import workouts.feature.workouts.generated.resources.workouts_title
+@@ -26,12 +28,16 @@ import workouts.feature.workouts.generated.resources.untitled_workout
+ fun WorkoutsListScreen(
+     state: WorkoutsListUiState,
+     onAdd: () -> Unit,
++    onExport: () -> Unit,
+     onWorkout: (Long) -> Unit,
+     onRetry: () -> Unit,
+ ) {
+     Column(Modifier.fillMaxSize().padding(16.dp)) {
+         Text(stringResource(Res.string.workouts_title))
+         Button(onClick = onAdd) { Text(stringResource(Res.string.add_workout)) }
++        Button(onClick = onExport, enabled = !state.isExporting) {
++            Text(stringResource(if (state.isExporting) Res.string.exporting_workouts else Res.string.export_workouts))
++        }
+         when {
+             state.isLoading -> CircularProgressIndicator()
+             state.error != null -> {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index b31b7d4..f5534ee 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -2,20 +2,30 @@ package com.example.feature.workouts.presentation.list
+ 
+ import com.example.core.mvi.BaseViewModel
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
++import com.example.feature.workouts.domain.model.Workout
+ import kotlinx.coroutines.Job
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.flow.first
+ import kotlinx.coroutines.flow.collect
++import kotlinx.coroutines.withContext
+ import org.koin.core.annotation.KoinViewModel
+ 
+ @KoinViewModel
+-class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
++class WorkoutsListViewModel(
++    private val repository: WorkoutsRepository,
++    private val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default,
++) :
+     BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(WorkoutsListUiState()) {
+     private var streamJob: Job? = null
+     private var addJob: Job? = null
++    private var exportJob: Job? = null
+ 
+     override fun onAction(action: WorkoutsListUiAction) {
+         when (action) {
+             WorkoutsListUiAction.OnScreenStarted, WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
+             WorkoutsListUiAction.OnAddClick -> addWorkout()
++            WorkoutsListUiAction.OnExportClick -> exportWorkouts()
+             is WorkoutsListUiAction.OnWorkoutClick -> sendEffect(WorkoutsListUiEffect.OpenWorkout(action.id))
+         }
+     }
+@@ -36,4 +46,33 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+             sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
+         }
+     }
++
++    private fun exportWorkouts() {
++        if (exportJob?.isActive == true) return
++        exportJob = launchGuarded(
++            onError = ::emitError,
++            onStart = { updateState { copy(isExporting = true) } },
++            onComplete = { updateState { copy(isExporting = false) } },
++        ) {
++            val csv = withContext(backgroundDispatcher) {
++                repository.getWorkoutsStream().first().toWorkoutCsv()
++            }
++            sendEffect(WorkoutsListUiEffect.ShareWorkoutCsv(csv))
++        }
++    }
++
++    private fun List<Workout>.toWorkoutCsv(): String {
++        fun String.csvCell(): String = "\"${replace("\"", "\"\"")}\""
++        return buildString {
++            appendLine("id,title,body,updatedAt,isArchived")
++            this@toWorkoutCsv.forEach { workout ->
++                append(workout.id)
++                append(','); append(workout.title.orEmpty().csvCell())
++                append(','); append(workout.body.orEmpty().csvCell())
++                append(','); append(workout.updatedAt?.toString().orEmpty().csvCell())
++                append(','); append(workout.isArchived)
++                appendLine()
++            }
++        }
++    }
+ }

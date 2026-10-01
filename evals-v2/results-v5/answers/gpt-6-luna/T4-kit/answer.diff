@@ -1,0 +1,13 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..6e98170 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,7 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()

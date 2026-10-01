@@ -1,0 +1,553 @@
+diff --git a/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+new file mode 100644
+index 0000000..67292db
+--- /dev/null
++++ b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+@@ -0,0 +1,48 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 2,
++    "identityHash": "16c4e78ef96a53aef31d178db03ecede",
++    "entities": [
++      {
++        "tableName": "workouts",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL, `photoPath` TEXT)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "photoPath",
++            "columnName": "photoPath",
++            "affinity": "TEXT"
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '16c4e78ef96a53aef31d178db03ecede')"
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.android.kt
+new file mode 100644
+index 0000000..ae51d60
+--- /dev/null
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.android.kt
+@@ -0,0 +1,20 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import java.io.File
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.withContext
++
++internal actual class WorkoutPhotoStorage {
++    actual suspend fun savePhoto(workoutId: Long, bytes: ByteArray): String =
++        withContext(Dispatchers.IO) {
++            try {
++                val dir = File(applicationContext.filesDir, "workout_photos").apply { mkdirs() }
++                val file = File(dir, "photo_$workoutId.jpg")
++                file.writeBytes(bytes)
++                file.absolutePath
++            } catch (e: Exception) {
++                throw StorageException(e)
++            }
++        }
++}
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+index 838eb7e..fcce595 100644
+--- a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+@@ -4,7 +4,7 @@ import android.content.Context
+ import androidx.room.Room
+ import androidx.room.RoomDatabase
+ 
+-private lateinit var applicationContext: Context
++internal lateinit var applicationContext: Context
+ 
+ fun setWorkoutsDatabaseContext(context: Context) {
+     applicationContext = context.applicationContext
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..c7462a2 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,7 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="workout_title">Workout title</string>
++    <string name="attach_photo">Attach photo</string>
++    <string name="attaching_photo">Attaching photo…</string>
++    <string name="photo_attached">Photo attached</string>
+ </resources>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+index 97b6ff2..af4a3fa 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+@@ -9,6 +9,8 @@ internal data class WorkoutEntity(
+     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+     val title: String = "",
+     val body: String = "",
++    val photoPath: String? = null,
+ )
+ 
+-internal fun WorkoutEntity.toDomain(): Workout = Workout(id = id, title = title, body = body, updatedAt = null)
++internal fun WorkoutEntity.toDomain(): Workout =
++    Workout(id = id, title = title, body = body, updatedAt = null, photoPath = photoPath)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.kt
+new file mode 100644
+index 0000000..31b9051
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.kt
+@@ -0,0 +1,12 @@
++package com.example.feature.workouts.data.local
++
++/**
++ * File-backed local storage for workout photos.
++ *
++ * Writes raw image bytes into the platform app-files directory and returns
++ * the absolute path, which the repository persists on the workout row.
++ * No third-party dependencies; platform actuals use only stdlib file APIs.
++ */
++internal expect class WorkoutPhotoStorage() {
++    suspend fun savePhoto(workoutId: Long, bytes: ByteArray): String
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+index 1dbb93f..4928239 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+@@ -21,4 +21,7 @@ internal interface WorkoutsDao {
+ 
+     @Query("UPDATE workouts SET title = :title WHERE id = :id")
+     suspend fun updateTitle(id: Long, title: String)
++
++    @Query("UPDATE workouts SET photoPath = :photoPath WHERE id = :id")
++    suspend fun updatePhotoPath(id: Long, photoPath: String)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+index 7783acb..cca80cf 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+@@ -1,12 +1,18 @@
+ package com.example.feature.workouts.data.local
+ 
++import androidx.room.AutoMigration
+ import androidx.room.ConstructedBy
+ import androidx.room.Database
+ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+ 
+-@Database(entities = [WorkoutEntity::class], version = 1, exportSchema = true)
++@Database(
++    entities = [WorkoutEntity::class],
++    version = 2,
++    autoMigrations = [AutoMigration(from = 1, to = 2)],
++    exportSchema = true,
++)
+ @ConstructedBy(WorkoutsDatabaseConstructor::class)
+ internal abstract class WorkoutsDatabase : RoomDatabase() {
+     abstract fun workoutsDao(): WorkoutsDao
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+index 547204b..d1f47a9 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+@@ -5,8 +5,10 @@
+  */
+ package com.example.feature.workouts.data.repository
+ 
++import com.example.core.error.StorageException
+ import com.example.feature.workouts.data.local.WorkoutsDao
+ import com.example.feature.workouts.data.local.WorkoutEntity
++import com.example.feature.workouts.data.local.WorkoutPhotoStorage
+ import com.example.feature.workouts.data.local.toDomain
+ import com.example.feature.workouts.domain.model.Workout
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.map
+ @Factory
+ internal class DefaultWorkoutsRepository(
+     private val dao: WorkoutsDao,
++    private val photoStorage: WorkoutPhotoStorage,
+ ) : WorkoutsRepository {
+     override fun getWorkoutsStream(): Flow<List<Workout>> = dao.getWorkoutsStream().map { workouts -> workouts.map(WorkoutEntity::toDomain) }
+     override suspend fun addWorkout(): Long = dao.insert(WorkoutEntity())
+@@ -43,4 +46,19 @@ internal class DefaultWorkoutsRepository(
+     override suspend fun saveWorkoutDraft(id: Long, title: String) {
+         dao.updateTitle(id, title)
+     }
++
++    /**
++     * Writes photo bytes to local app files and records the path on the workout row.
++     */
++    override suspend fun attachPhoto(id: Long, bytes: ByteArray): String {
++        try {
++            val path = photoStorage.savePhoto(id, bytes)
++            dao.updatePhotoPath(id, path)
++            return path
++        } catch (e: StorageException) {
++            throw e
++        } catch (e: Exception) {
++            throw StorageException(e)
++        }
++    }
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/di/WorkoutsFeatureModule.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/di/WorkoutsFeatureModule.kt
+index 5f2c0bb..9e504c8 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/di/WorkoutsFeatureModule.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/di/WorkoutsFeatureModule.kt
+@@ -8,6 +8,7 @@ package com.example.feature.workouts.di
+ import com.example.feature.workouts.data.repository.DefaultWorkoutsRepository
+ import com.example.feature.workouts.data.local.WorkoutsDatabase
+ import com.example.feature.workouts.data.local.WorkoutsDao
++import com.example.feature.workouts.data.local.WorkoutPhotoStorage
+ import com.example.feature.workouts.data.local.createWorkoutsDatabase
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import org.koin.core.annotation.ComponentScan
+@@ -25,6 +26,9 @@ class WorkoutsFeatureModule {
+ 
+     @Single
+     internal fun provideDao(database: WorkoutsDatabase): WorkoutsDao = database.workoutsDao()
++
++    @Single
++    internal fun providePhotoStorage(): WorkoutPhotoStorage = WorkoutPhotoStorage()
+     /**
+      * Binds the Workouts repository contract to its default.
+      */
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+index 67351d3..c728e6e 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+@@ -8,4 +8,6 @@ public data class Workout(
+     val body: String?,
+     val updatedAt: kotlin.time.Instant?,
+     val isArchived: Boolean = false,
++    /** Local file path of the attached photo, or null when none. */
++    val photoPath: String? = null,
+ )
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+index b449760..0fd3e23 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+@@ -28,4 +28,11 @@ public interface WorkoutsRepository {
+      * Persists the editor draft title for the workout with the given identity.
+      */
+     public suspend fun saveWorkoutDraft(id: Long, title: String)
++
++    /**
++     * Saves photo bytes to local storage and records the file path on the workout.
++     *
++     * @return the absolute path of the stored photo.
++     */
++    public suspend fun attachPhoto(id: Long, bytes: ByteArray): String
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/SamplePhoto.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/SamplePhoto.kt
+new file mode 100644
+index 0000000..c03b690
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/SamplePhoto.kt
+@@ -0,0 +1,21 @@
++package com.example.feature.workouts.presentation.workouts
++
++/**
++ * Placeholder photo bytes used by the attach-photo button until a platform
++ * image picker is wired in. A real picker will call
++ * [WorkoutsUiAction.OnAttachPhoto] with the picked JPEG/PNG bytes; this
++ * helper keeps the common button functional on every target without any
++ * third-party dependency.
++ */
++fun samplePhotoBytes(): ByteArray = byteArrayOf(
++    // Minimal 1x1 transparent PNG.
++    0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
++    0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
++    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
++    0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4.toByte(),
++    0x89.toByte(), 0x00, 0x00, 0x00, 0x0D, 0x49, 0x44, 0x41,
++    0x54, 0x78, 0x9C.toByte(), 0x63, 0x00, 0x01, 0x00, 0x00,
++    0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4.toByte(), 0x00,
++    0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE.toByte(),
++    0x42, 0x60, 0x82.toByte(),
++)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+index 71bdcd1..033a06f 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+@@ -17,6 +17,8 @@ import com.example.core.mvi.UiState
+ data class WorkoutsUiState(
+     val items: List<Workout> = emptyList(),
+     val draftTitle: String = "",
++    val photoPath: String? = null,
++    val isAttachingPhoto: Boolean = false,
+     val isLoading: Boolean = false,
+     val isRefreshing: Boolean = false,
+     val error: AppError? = null,
+@@ -29,6 +31,8 @@ sealed interface WorkoutsUiAction : UiAction {
+     data object OnSaveClick : WorkoutsUiAction
+     data class OnRetryClick(val error: AppError) : WorkoutsUiAction
+     data object OnBackClick : WorkoutsUiAction
++    /** Attaches photo bytes to this workout; bytes come from the platform picker (or the sample button). */
++    data class OnAttachPhoto(val bytes: ByteArray) : WorkoutsUiAction
+ }
+ 
+ sealed interface WorkoutsUiEffect : UiEffect {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+index 3b89a00..10bf885 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+@@ -31,6 +31,7 @@ fun WorkoutsRoute(
+         state = state,
+         onTitleChange = { viewModel.onAction(WorkoutsUiAction.OnTitleChanged(it)) },
+         onSave = { viewModel.onAction(WorkoutsUiAction.OnSaveClick) },
++        onAttachPhoto = { viewModel.onAction(WorkoutsUiAction.OnAttachPhoto(it)) },
+         onRetry = {
+             // Retry holds the error it retries; no-op when no error is showing.
+             viewModel.onAction(WorkoutsUiAction.OnRetryClick(state.error ?: return@WorkoutsScreen))
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+index 653e46d..a129bb8 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+@@ -15,9 +15,12 @@ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.Modifier
+ import org.jetbrains.compose.resources.stringResource
+ import workouts.feature.workouts.generated.resources.Res
++import workouts.feature.workouts.generated.resources.attach_photo
++import workouts.feature.workouts.generated.resources.attaching_photo
+ import workouts.feature.workouts.generated.resources.back
+ import workouts.feature.workouts.generated.resources.error_message
+ import workouts.feature.workouts.generated.resources.missing_workout
++import workouts.feature.workouts.generated.resources.photo_attached
+ import workouts.feature.workouts.generated.resources.workout_title
+ import workouts.feature.workouts.generated.resources.refreshing
+ import workouts.feature.workouts.generated.resources.retry
+@@ -28,6 +31,7 @@ fun WorkoutsScreen(
+     state: WorkoutsUiState,
+     onTitleChange: (String) -> Unit,
+     onSave: () -> Unit,
++    onAttachPhoto: (ByteArray) -> Unit,
+     onRetry: () -> Unit,
+     onBack: () -> Unit,
+     modifier: Modifier = Modifier,
+@@ -53,6 +57,16 @@ fun WorkoutsScreen(
+                 label = { Text(stringResource(Res.string.workout_title)) },
+             )
+             Button(onClick = onSave) { Text(stringResource(Res.string.save)) }
++            Button(
++                onClick = { onAttachPhoto(samplePhotoBytes()) },
++                enabled = !state.isAttachingPhoto,
++            ) { Text(stringResource(Res.string.attach_photo)) }
++            if (state.isAttachingPhoto) {
++                Text(stringResource(Res.string.attaching_photo))
++            }
++            if (state.photoPath != null) {
++                Text(stringResource(Res.string.photo_attached))
++            }
+             Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
+         }
+     }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index 6e98170..77d2863 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -33,6 +33,7 @@ class WorkoutsViewModel(
+ 
+     private var loadJob: Job? = null
+     private var saveJob: Job? = null
++    private var attachJob: Job? = null
+     private var hasStarted: Boolean = false
+ 
+     override fun onAction(action: WorkoutsUiAction) {
+@@ -45,6 +46,7 @@ class WorkoutsViewModel(
+             WorkoutsUiAction.OnSaveClick -> save()
+             is WorkoutsUiAction.OnRetryClick -> retry()
+             WorkoutsUiAction.OnBackClick -> sendEffect(WorkoutsUiEffect.NavigateBack)
++            is WorkoutsUiAction.OnAttachPhoto -> attachPhoto(action.bytes)
+         }
+     }
+ 
+@@ -65,6 +67,7 @@ class WorkoutsViewModel(
+                     isRefreshing = false,
+                     isMissing = item == null,
+                     items = listOfNotNull(item),
++                    photoPath = item?.photoPath,
+                     draftTitle = if (savedStateHandle.contains("draftTitle")) draftTitle else item?.title.orEmpty(),
+                 )
+             }
+@@ -87,4 +90,23 @@ class WorkoutsViewModel(
+         updateState { copy(error = null) }
+         load()
+     }
++
++    private fun attachPhoto(bytes: ByteArray) {
++        if (attachJob?.isActive == true) return
++        attachJob = launchGuarded(
++            onError = ::emitError,
++            onStart = { updateState { copy(isAttachingPhoto = true) } },
++            onComplete = { updateState { copy(isAttachingPhoto = false) } },
++        ) {
++            val path = withContext(ioDispatcher) {
++                repository.attachPhoto(params.workoutId, bytes)
++            }
++            updateState {
++                copy(
++                    photoPath = path,
++                    items = items.map { if (it.id == params.workoutId) it.copy(photoPath = path) else it },
++                )
++            }
++        }
++    }
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+index 70715fa..d7b6222 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+@@ -32,6 +32,10 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+     var lastSavedDraft: Pair<Long, String>? = null
+     var saveCalls: Int = 0
+ 
++    /** Last photo bytes the fake was asked to store; the attach test asserts this. */
++    var lastAttachedPhoto: Pair<Long, ByteArray>? = null
++    var attachCalls: Int = 0
++
+     /** Test-only helper that replaces the stored list. */
+     fun seed(items: List<Workout>) {
+         backing.value = items
+@@ -61,4 +65,12 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+         lastSavedDraft = id to title
+         backing.update { list -> list.map { if (it.id == id) it.copy(title = title) else it } }
+     }
++
++    override suspend fun attachPhoto(id: Long, bytes: ByteArray): String {
++        attachCalls += 1
++        lastAttachedPhoto = id to bytes
++        val path = "local/photo_$id.jpg"
++        backing.update { list -> list.map { if (it.id == id) it.copy(photoPath = path) else it } }
++        return path
++    }
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..e5dbc37 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -250,6 +250,25 @@ class WorkoutsViewModelTest {
+         assertEquals("Title", viewModel.state.value.items.first().title)
+     }
+ 
++    @Test
++    fun `attach photo persists bytes and updates state`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        val bytes = byteArrayOf(1, 2, 3)
++        viewModel.onAction(WorkoutsUiAction.OnAttachPhoto(bytes))
++        advanceUntilIdle()
++
++        assertEquals(1, fake.attachCalls)
++        assertEquals(1L, fake.lastAttachedPhoto?.first)
++        assertEquals("local/photo_1.jpg", viewModel.state.value.photoPath)
++        assertEquals("local/photo_1.jpg", viewModel.state.value.items.single().photoPath)
++        assertFalse(viewModel.state.value.isAttachingPhoto)
++    }
++
+     @Test
+     fun `process death restores draft and refetches`() = runTest(testScheduler) {
+         val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
+diff --git a/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.ios.kt b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.ios.kt
+new file mode 100644
+index 0000000..b4feab2
+--- /dev/null
++++ b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.ios.kt
+@@ -0,0 +1,42 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import kotlinx.cinterop.BetaInteropApi
++import kotlinx.cinterop.ExperimentalForeignApi
++import kotlinx.cinterop.addressOf
++import kotlinx.cinterop.usePinned
++import platform.Foundation.NSData
++import platform.Foundation.NSDocumentDirectory
++import platform.Foundation.NSFileManager
++import platform.Foundation.NSUserDomainMask
++import platform.Foundation.create
++import platform.Foundation.writeToFile
++
++@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
++internal actual class WorkoutPhotoStorage {
++    actual suspend fun savePhoto(workoutId: Long, bytes: ByteArray): String {
++        try {
++            val directory = NSFileManager.defaultManager.URLForDirectory(
++                NSDocumentDirectory, NSUserDomainMask, null, true, null,
++            )?.path ?: throw IllegalStateException("Documents directory unavailable")
++            val dir = "$directory/workout_photos"
++            NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)
++            val path = "$dir/photo_$workoutId.jpg"
++            val data = bytes.usePinned { pinned ->
++                if (bytes.isEmpty()) {
++                    NSData()
++                } else {
++                    NSData.create(bytes = pinned.addressOf(0), length = bytes.size.toULong())
++                }
++            }
++            if (!data.writeToFile(path, true)) {
++                throw IllegalStateException("Failed to write photo to $path")
++            }
++            return path
++        } catch (e: StorageException) {
++            throw e
++        } catch (e: Exception) {
++            throw StorageException(e)
++        }
++    }
++}
+diff --git a/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.jvm.kt b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.jvm.kt
+new file mode 100644
+index 0000000..8c095af
+--- /dev/null
++++ b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoStorage.jvm.kt
+@@ -0,0 +1,20 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import java.io.File
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.withContext
++
++internal actual class WorkoutPhotoStorage {
++    actual suspend fun savePhoto(workoutId: Long, bytes: ByteArray): String =
++        withContext(Dispatchers.IO) {
++            try {
++                val dir = File(File(System.getProperty("user.home"), ".workouts-app"), "photos").apply { mkdirs() }
++                val file = File(dir, "photo_$workoutId.jpg")
++                file.writeBytes(bytes)
++                file.absolutePath
++            } catch (e: Exception) {
++                throw StorageException(e)
++            }
++        }
++}

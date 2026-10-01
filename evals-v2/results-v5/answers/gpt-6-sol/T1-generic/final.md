@@ -1,0 +1,3 @@
+Added an **Attach photo** button to the workout editor. It opens the platform image picker, saves the selected photo in app-owned local storage, and shows “Photo attached” when the workout is reopened. Selecting another photo replaces the attachment; deleting the workout removes its photo.
+
+Verified with JVM tests, an Android debug build, and an iOS simulator compile. The editor shows attachment status, but does not display a photo preview.

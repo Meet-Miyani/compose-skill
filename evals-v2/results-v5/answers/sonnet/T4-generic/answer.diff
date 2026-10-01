@@ -1,0 +1,43 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..72c3d61 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,8 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                // Persist to SavedStateHandle so the draft survives process death.
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..3bb216f 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -265,4 +265,24 @@ class WorkoutsViewModelTest {
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+         assertEquals(1, viewModel.state.value.items.size)
+     }
++
++    @Test
++    fun `typed title is written to saved state and survives recreation`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val handle = SavedStateHandle()
++        val first = viewModel(fake, handle = handle)
++        first.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        first.onAction(WorkoutsUiAction.OnTitleChanged("half-typed"))
++
++        assertEquals("half-typed", handle["draftTitle"])
++
++        // New ViewModel on the same handle, as after process death.
++        val second = viewModel(fake, handle = handle)
++        second.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals("half-typed", second.state.value.draftTitle)
++    }
+ }

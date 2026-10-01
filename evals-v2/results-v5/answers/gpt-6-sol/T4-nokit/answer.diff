@@ -1,0 +1,53 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..6e98170 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,7 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..5718d8c 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -254,7 +254,12 @@ class WorkoutsViewModelTest {
+     fun `process death restores draft and refetches`() = runTest(testScheduler) {
+         val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
+         val handle = SavedStateHandle()
+-        handle["draftTitle"] = "half-typed"
++        val original = viewModel(fake, handle = handle)
++        original.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        original.onAction(WorkoutsUiAction.OnTitleChanged("half-typed"))
++
++        assertEquals("half-typed", handle["draftTitle"])
+         val viewModel = viewModel(fake, handle = handle)
+ 
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+@@ -265,4 +270,21 @@ class WorkoutsViewModelTest {
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+         assertEquals(1, viewModel.state.value.items.size)
+     }
++
++    @Test
++    fun `cleared draft stays empty after recreation and reload`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val handle = SavedStateHandle()
++        val original = viewModel(fake, handle = handle)
++        original.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        original.onAction(WorkoutsUiAction.OnTitleChanged(""))
++
++        val restored = viewModel(fake, handle = handle)
++        restored.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertTrue(handle.contains("draftTitle"))
++        assertEquals("", restored.state.value.draftTitle)
++    }
+ }

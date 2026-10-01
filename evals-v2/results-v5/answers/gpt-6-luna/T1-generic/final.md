@@ -1,0 +1,3 @@
+Added an **Attach photo** button to the workout editor. Android uses the system photo picker; desktop uses a file chooser. Selected photos are saved in app-private storage, and Room stores the path with the workout. Existing databases migrate to the new schema, and a ViewModel test covers photo attachment.
+
+Android, desktop, and iOS compilation succeeded; the ViewModel test source also compiled. **Photo picking is not implemented for iOS yet**, though its local storage support is in place.

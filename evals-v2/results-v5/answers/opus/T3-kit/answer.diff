@@ -1,0 +1,927 @@
+diff --git a/androidApp/src/main/kotlin/com/example/app/MainApplication.kt b/androidApp/src/main/kotlin/com/example/app/MainApplication.kt
+index ec31ff0..6f10e16 100644
+--- a/androidApp/src/main/kotlin/com/example/app/MainApplication.kt
++++ b/androidApp/src/main/kotlin/com/example/app/MainApplication.kt
+@@ -7,6 +7,7 @@ class MainApplication : Application() {
+     override fun onCreate() {
+         super.onCreate()
+         configureWorkoutsDatabase(this)
++        configureWorkoutsExport(this)
+         initKoin()
+     }
+ }
+diff --git a/composeApp/build.gradle.kts b/composeApp/build.gradle.kts
+index 2d3c3ab..10e4fe8 100644
+--- a/composeApp/build.gradle.kts
++++ b/composeApp/build.gradle.kts
+@@ -44,6 +44,10 @@ kotlin {
+             implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+             implementation(libs.androidx.lifecycle.runtimeCompose)
+         }
++        androidMain.dependencies {
++            // Durable background work for the workouts CSV export.
++            implementation(libs.androidx.work.runtime)
++        }
+         jvmMain.dependencies {
+             implementation(compose.desktop.currentOs)
+             implementation(libs.compose.components.resources)
+diff --git a/composeApp/src/androidMain/kotlin/com/example/app/NotesDatabaseContext.kt b/composeApp/src/androidMain/kotlin/com/example/app/NotesDatabaseContext.kt
+index ff86b56..efb6983 100644
+--- a/composeApp/src/androidMain/kotlin/com/example/app/NotesDatabaseContext.kt
++++ b/composeApp/src/androidMain/kotlin/com/example/app/NotesDatabaseContext.kt
+@@ -1,6 +1,9 @@
+ package com.example.app
+ 
+ import android.content.Context
++import com.example.app.adapter.setWorkoutsExportContext
+ import com.example.feature.workouts.data.local.setWorkoutsDatabaseContext
+ 
+ fun configureWorkoutsDatabase(context: Context) = setWorkoutsDatabaseContext(context)
++
++fun configureWorkoutsExport(context: Context) = setWorkoutsExportContext(context)
+diff --git a/composeApp/src/androidMain/kotlin/com/example/app/adapter/ExportAdapterModule.android.kt b/composeApp/src/androidMain/kotlin/com/example/app/adapter/ExportAdapterModule.android.kt
+new file mode 100644
+index 0000000..928ce05
+--- /dev/null
++++ b/composeApp/src/androidMain/kotlin/com/example/app/adapter/ExportAdapterModule.android.kt
+@@ -0,0 +1,23 @@
++package com.example.app.adapter
++
++import android.content.Context
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import org.koin.core.annotation.Module
++import org.koin.core.annotation.Single
++
++// Same shell hand-off as configureWorkoutsDatabase: set once in Application.onCreate.
++private lateinit var applicationContext: Context
++
++fun setWorkoutsExportContext(context: Context) {
++    applicationContext = context.applicationContext
++}
++
++@Module
++actual class ExportAdapterModule {
++    @Single
++    fun exportFileSink(): WorkoutsExportFileSink = MediaStoreWorkoutsExportFileSink(applicationContext)
++
++    @Single
++    fun exportScheduler(): WorkoutsExportScheduler = WorkManagerWorkoutsExportScheduler(applicationContext)
++}
+diff --git a/composeApp/src/androidMain/kotlin/com/example/app/adapter/MediaStoreWorkoutsExportFileSink.kt b/composeApp/src/androidMain/kotlin/com/example/app/adapter/MediaStoreWorkoutsExportFileSink.kt
+new file mode 100644
+index 0000000..01a00e9
+--- /dev/null
++++ b/composeApp/src/androidMain/kotlin/com/example/app/adapter/MediaStoreWorkoutsExportFileSink.kt
+@@ -0,0 +1,51 @@
++package com.example.app.adapter
++
++import android.content.ContentValues
++import android.content.Context
++import android.os.Build
++import android.os.Environment
++import android.provider.MediaStore
++import com.example.core.error.StorageException
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import java.io.File
++import java.io.IOException
++
++/**
++ * Android sink. API 29+: public Downloads through MediaStore, no permission
++ * needed. API 24-28: the app's own Documents folder, which needs no
++ * storage permission either.
++ */
++class MediaStoreWorkoutsExportFileSink(private val context: Context) : WorkoutsExportFileSink {
++    override suspend fun writeCsv(fileName: String, content: String): String = try {
++        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) writeToDownloads(fileName, content) else writeToAppFiles(fileName, content)
++    } catch (e: IOException) {
++        throw StorageException(e)
++    }
++
++    private fun writeToDownloads(fileName: String, content: String): String {
++        val resolver = context.contentResolver
++        val values = ContentValues().apply {
++            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
++            put(MediaStore.Downloads.MIME_TYPE, "text/csv")
++            put(MediaStore.Downloads.IS_PENDING, 1)
++        }
++        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
++            ?: throw IOException("MediaStore refused $fileName")
++        try {
++            val stream = resolver.openOutputStream(uri) ?: throw IOException("No output stream for $uri")
++            stream.use { it.write(content.toByteArray()) }
++            resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
++        } catch (e: IOException) {
++            resolver.delete(uri, null, null)
++            throw e
++        }
++        return "Downloads/$fileName"
++    }
++
++    private fun writeToAppFiles(fileName: String, content: String): String {
++        val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) ?: context.filesDir
++        val file = File(directory, fileName)
++        file.writeText(content)
++        return file.absolutePath
++    }
++}
+diff --git a/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkManagerWorkoutsExportScheduler.kt b/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkManagerWorkoutsExportScheduler.kt
+new file mode 100644
+index 0000000..81b594d
+--- /dev/null
++++ b/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkManagerWorkoutsExportScheduler.kt
+@@ -0,0 +1,41 @@
++package com.example.app.adapter
++
++import android.content.Context
++import androidx.work.ExistingWorkPolicy
++import androidx.work.OneTimeWorkRequestBuilder
++import androidx.work.WorkInfo
++import androidx.work.WorkManager
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import com.example.feature.workouts.domain.export.WorkoutsExportStatus
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.map
++
++/**
++ * Android scheduler: enqueues [WorkoutsExportWorker] as unique WorkManager
++ * work, so the export survives leaving the screen and process death.
++ */
++class WorkManagerWorkoutsExportScheduler(context: Context) : WorkoutsExportScheduler {
++    private val workManager = WorkManager.getInstance(context)
++
++    override val status: Flow<WorkoutsExportStatus> =
++        workManager.getWorkInfosForUniqueWorkFlow(WorkoutsExportWorker.UNIQUE_NAME).map { infos ->
++            val info = infos.firstOrNull() ?: return@map WorkoutsExportStatus.Idle
++            when (info.state) {
++                WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING, WorkInfo.State.BLOCKED -> WorkoutsExportStatus.Running
++                WorkInfo.State.SUCCEEDED ->
++                    info.outputData.getString(WorkoutsExportWorker.KEY_LOCATION)
++                        ?.let(WorkoutsExportStatus::Saved) ?: WorkoutsExportStatus.Idle
++                WorkInfo.State.FAILED -> WorkoutsExportStatus.Failed
++                WorkInfo.State.CANCELLED -> WorkoutsExportStatus.Idle
++            }
++        }
++
++    override fun startExport() {
++        // KEEP: a tap while an export is pending or running does not start a second one.
++        workManager.enqueueUniqueWork(
++            WorkoutsExportWorker.UNIQUE_NAME,
++            ExistingWorkPolicy.KEEP,
++            OneTimeWorkRequestBuilder<WorkoutsExportWorker>().build(),
++        )
++    }
++}
+diff --git a/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkoutsExportWorker.kt b/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkoutsExportWorker.kt
+new file mode 100644
+index 0000000..cdee42b
+--- /dev/null
++++ b/composeApp/src/androidMain/kotlin/com/example/app/adapter/WorkoutsExportWorker.kt
+@@ -0,0 +1,30 @@
++package com.example.app.adapter
++
++import android.content.Context
++import androidx.work.CoroutineWorker
++import androidx.work.WorkerParameters
++import androidx.work.workDataOf
++import com.example.core.error.StorageException
++import com.example.feature.workouts.data.export.WorkoutsCsvExport
++import org.koin.core.component.KoinComponent
++import org.koin.core.component.get
++
++/** Runs the shared workouts CSV export as WorkManager work. */
++class WorkoutsExportWorker(
++    context: Context,
++    params: WorkerParameters,
++) : CoroutineWorker(context, params), KoinComponent {
++    override suspend fun doWork(): Result {
++        val location = try {
++            get<WorkoutsCsvExport>().run()
++        } catch (e: StorageException) {
++            return Result.failure()
++        }
++        return Result.success(workDataOf(KEY_LOCATION to location))
++    }
++
++    companion object {
++        const val UNIQUE_NAME = "workouts-csv-export"
++        const val KEY_LOCATION = "location"
++    }
++}
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/AppModule.kt b/composeApp/src/commonMain/kotlin/com/example/app/AppModule.kt
+index 9ace1c8..59a0ced 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/AppModule.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/AppModule.kt
+@@ -1,5 +1,6 @@
+ package com.example.app
+ 
++import com.example.app.adapter.ExportAdapterModule
+ import com.example.feature.workouts.di.WorkoutsFeatureModule
+ import org.koin.core.annotation.KoinApplication
+ import org.koin.plugin.module.dsl.startKoin
+@@ -8,7 +9,7 @@ import org.koin.plugin.module.dsl.startKoin
+  * Composition-root Koin wiring. Aggregates every feature and data module.
+  * No business logic lives here.
+  */
+-@KoinApplication(modules = [WorkoutsFeatureModule::class])
++@KoinApplication(modules = [WorkoutsFeatureModule::class, ExportAdapterModule::class])
+ object AppKoinApp
+ 
+ /**
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/adapter/CoroutineWorkoutsExportScheduler.kt b/composeApp/src/commonMain/kotlin/com/example/app/adapter/CoroutineWorkoutsExportScheduler.kt
+new file mode 100644
+index 0000000..9834558
+--- /dev/null
++++ b/composeApp/src/commonMain/kotlin/com/example/app/adapter/CoroutineWorkoutsExportScheduler.kt
+@@ -0,0 +1,43 @@
++package com.example.app.adapter
++
++import com.example.core.error.StorageException
++import com.example.feature.workouts.data.export.WorkoutsCsvExport
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import com.example.feature.workouts.domain.export.WorkoutsExportStatus
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.StateFlow
++import kotlinx.coroutines.flow.asStateFlow
++import kotlinx.coroutines.launch
++
++/**
++ * In-process export scheduler for iOS and desktop: runs the export on an
++ * app-lifetime [scope], so it continues after the screen is left.
++ * [keepAlive] lets a platform hold the process awake around the export.
++ */
++class CoroutineWorkoutsExportScheduler(
++    private val export: WorkoutsCsvExport,
++    private val scope: CoroutineScope,
++    private val keepAlive: suspend (block: suspend () -> Unit) -> Unit = { it() },
++) : WorkoutsExportScheduler {
++    private val _status = MutableStateFlow<WorkoutsExportStatus>(WorkoutsExportStatus.Idle)
++    override val status: StateFlow<WorkoutsExportStatus> = _status.asStateFlow()
++
++    override fun startExport() {
++        // Atomic claim: a second tap while running is ignored.
++        while (true) {
++            val current = _status.value
++            if (current == WorkoutsExportStatus.Running) return
++            if (_status.compareAndSet(current, WorkoutsExportStatus.Running)) break
++        }
++        scope.launch {
++            keepAlive {
++                _status.value = try {
++                    WorkoutsExportStatus.Saved(export.run())
++                } catch (e: StorageException) {
++                    WorkoutsExportStatus.Failed
++                }
++            }
++        }
++    }
++}
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/adapter/ExportAdapterModule.kt b/composeApp/src/commonMain/kotlin/com/example/app/adapter/ExportAdapterModule.kt
+new file mode 100644
+index 0000000..f2d5e31
+--- /dev/null
++++ b/composeApp/src/commonMain/kotlin/com/example/app/adapter/ExportAdapterModule.kt
+@@ -0,0 +1,11 @@
++package com.example.app.adapter
++
++import org.koin.core.annotation.Module
++
++/**
++ * Platform bindings for the workouts CSV export ports
++ * (`WorkoutsExportScheduler`, `WorkoutsExportFileSink`). Each target's
++ * actual declares its own adapters.
++ */
++@Module
++expect class ExportAdapterModule()
+diff --git a/composeApp/src/iosMain/kotlin/com/example/app/adapter/DocumentsWorkoutsExportFileSink.kt b/composeApp/src/iosMain/kotlin/com/example/app/adapter/DocumentsWorkoutsExportFileSink.kt
+new file mode 100644
+index 0000000..61f340d
+--- /dev/null
++++ b/composeApp/src/iosMain/kotlin/com/example/app/adapter/DocumentsWorkoutsExportFileSink.kt
+@@ -0,0 +1,31 @@
++package com.example.app.adapter
++
++import com.example.core.error.StorageException
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import kotlinx.cinterop.ExperimentalForeignApi
++import platform.Foundation.NSDocumentDirectory
++import platform.Foundation.NSFileManager
++import platform.Foundation.NSString
++import platform.Foundation.NSUTF8StringEncoding
++import platform.Foundation.NSUserDomainMask
++import platform.Foundation.create
++import platform.Foundation.writeToFile
++
++/**
++ * iOS sink: writes into the app's Documents folder. It shows in the Files
++ * app once the iosApp Info.plist sets UIFileSharingEnabled and
++ * LSSupportsOpeningDocumentsInPlace.
++ */
++@OptIn(ExperimentalForeignApi::class)
++class DocumentsWorkoutsExportFileSink : WorkoutsExportFileSink {
++    override suspend fun writeCsv(fileName: String, content: String): String {
++        val directory = NSFileManager.defaultManager.URLForDirectory(
++            NSDocumentDirectory, NSUserDomainMask, null, true, null,
++        )?.path ?: throw StorageException(IllegalStateException("Documents directory unavailable"))
++        val path = "$directory/$fileName"
++        val written = NSString.create(string = content)
++            .writeToFile(path, atomically = true, encoding = NSUTF8StringEncoding, error = null)
++        if (!written) throw StorageException(IllegalStateException("Could not write $path"))
++        return "Files › $fileName"
++    }
++}
+diff --git a/composeApp/src/iosMain/kotlin/com/example/app/adapter/ExportAdapterModule.ios.kt b/composeApp/src/iosMain/kotlin/com/example/app/adapter/ExportAdapterModule.ios.kt
+new file mode 100644
+index 0000000..3593768
+--- /dev/null
++++ b/composeApp/src/iosMain/kotlin/com/example/app/adapter/ExportAdapterModule.ios.kt
+@@ -0,0 +1,44 @@
++package com.example.app.adapter
++
++import com.example.feature.workouts.data.export.WorkoutsCsvExport
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
++import org.koin.core.annotation.Module
++import org.koin.core.annotation.Single
++import platform.UIKit.UIApplication
++import platform.UIKit.UIBackgroundTaskInvalid
++
++@Module
++actual class ExportAdapterModule {
++    @Single
++    fun exportFileSink(): WorkoutsExportFileSink = DocumentsWorkoutsExportFileSink()
++
++    @Single
++    fun exportScheduler(export: WorkoutsCsvExport): WorkoutsExportScheduler =
++        CoroutineWorkoutsExportScheduler(
++            export = export,
++            scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
++            keepAlive = ::withBackgroundTask,
++        )
++}
++
++/**
++ * Asks iOS for extra run time so an export started just before the app is
++ * backgrounded can finish. iOS may still end it at expiry.
++ */
++private suspend fun withBackgroundTask(block: suspend () -> Unit) {
++    val application = UIApplication.sharedApplication
++    var taskId = UIBackgroundTaskInvalid
++    taskId = application.beginBackgroundTaskWithName("workouts-csv-export") {
++        application.endBackgroundTask(taskId)
++        taskId = UIBackgroundTaskInvalid
++    }
++    try {
++        block()
++    } finally {
++        if (taskId != UIBackgroundTaskInvalid) application.endBackgroundTask(taskId)
++    }
++}
+diff --git a/composeApp/src/jvmMain/kotlin/com/example/app/adapter/DownloadsWorkoutsExportFileSink.kt b/composeApp/src/jvmMain/kotlin/com/example/app/adapter/DownloadsWorkoutsExportFileSink.kt
+new file mode 100644
+index 0000000..241e826
+--- /dev/null
++++ b/composeApp/src/jvmMain/kotlin/com/example/app/adapter/DownloadsWorkoutsExportFileSink.kt
+@@ -0,0 +1,21 @@
++package com.example.app.adapter
++
++import com.example.core.error.StorageException
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import java.io.File
++import java.io.IOException
++
++/** Desktop sink: writes into ~/Downloads, or the home folder when it is missing. */
++class DownloadsWorkoutsExportFileSink : WorkoutsExportFileSink {
++    override suspend fun writeCsv(fileName: String, content: String): String {
++        val home = File(System.getProperty("user.home"))
++        val directory = File(home, "Downloads").takeIf(File::isDirectory) ?: home
++        val file = File(directory, fileName)
++        try {
++            file.writeText(content)
++        } catch (e: IOException) {
++            throw StorageException(e)
++        }
++        return file.absolutePath
++    }
++}
+diff --git a/composeApp/src/jvmMain/kotlin/com/example/app/adapter/ExportAdapterModule.jvm.kt b/composeApp/src/jvmMain/kotlin/com/example/app/adapter/ExportAdapterModule.jvm.kt
+new file mode 100644
+index 0000000..0138229
+--- /dev/null
++++ b/composeApp/src/jvmMain/kotlin/com/example/app/adapter/ExportAdapterModule.jvm.kt
+@@ -0,0 +1,20 @@
++package com.example.app.adapter
++
++import com.example.feature.workouts.data.export.WorkoutsCsvExport
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
++import org.koin.core.annotation.Module
++import org.koin.core.annotation.Single
++
++@Module
++actual class ExportAdapterModule {
++    @Single
++    fun exportFileSink(): WorkoutsExportFileSink = DownloadsWorkoutsExportFileSink()
++
++    @Single
++    fun exportScheduler(export: WorkoutsCsvExport): WorkoutsExportScheduler =
++        CoroutineWorkoutsExportScheduler(export, CoroutineScope(SupervisorJob() + Dispatchers.Default))
++}
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..00a90a1 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,8 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="workout_title">Workout title</string>
++    <string name="export_csv">Export CSV</string>
++    <string name="export_running">Exporting in the background. You can leave this screen.</string>
++    <string name="export_saved">Export saved to %1$s</string>
++    <string name="export_failed">Export failed. Tap Export CSV to try again.</string>
+ </resources>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsv.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsv.kt
+new file mode 100644
+index 0000000..8ce8664
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsv.kt
+@@ -0,0 +1,37 @@
++/** CSV encoding for the workouts export (RFC 4180). */
++package com.example.feature.workouts.data.export
++
++import com.example.feature.workouts.domain.model.Workout
++
++private val HEADER = listOf("id", "title", "body", "updated_at", "archived")
++
++/** Characters a spreadsheet treats as the start of a formula. */
++private val FORMULA_PREFIXES = charArrayOf('=', '+', '-', '@', '\t', '\r')
++
++/** Encodes [workouts] as CSV with a header row and CRLF line endings. */
++internal fun buildWorkoutsCsv(workouts: List<Workout>): String = buildString {
++    appendRow(HEADER)
++    workouts.forEach { workout ->
++        appendRow(
++            listOf(
++                workout.id.toString(),
++                workout.title.orEmpty(),
++                workout.body.orEmpty(),
++                workout.updatedAt?.toString().orEmpty(),
++                workout.isArchived.toString(),
++            ),
++        )
++    }
++}
++
++private fun StringBuilder.appendRow(fields: List<String>) {
++    fields.joinTo(this, separator = ",", transform = ::escapeField)
++    append("\r\n")
++}
++
++private fun escapeField(raw: String): String {
++    // Neutralise spreadsheet formulas in user text (OWASP CSV injection).
++    val value = if (raw.isNotEmpty() && raw[0] in FORMULA_PREFIXES) "'$raw" else raw
++    val needsQuotes = value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }
++    return if (needsQuotes) "\"" + value.replace("\"", "\"\"") + "\"" else value
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExport.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExport.kt
+new file mode 100644
+index 0000000..9d8cad4
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExport.kt
+@@ -0,0 +1,34 @@
++/** The workouts CSV export job, shared by every platform scheduler. */
++package com.example.feature.workouts.data.export
++
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import com.example.feature.workouts.domain.repository.WorkoutsRepository
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.flow.first
++import kotlinx.coroutines.withContext
++import org.koin.core.annotation.Factory
++import org.koin.core.annotation.Provided
++import kotlin.time.Clock
++
++/**
++ * Reads every workout, encodes it as CSV and hands it to the platform sink.
++ *
++ * Platform schedulers call [run] from their background mechanism; it never
++ * touches UI state.
++ */
++@Factory
++public class WorkoutsCsvExport(
++    private val repository: WorkoutsRepository,
++    @Provided private val sink: WorkoutsExportFileSink,
++    // Injected seams with commonMain defaults, as in WorkoutsViewModel.
++    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
++    private val clock: Clock = Clock.System,
++) {
++    /** Runs the export and returns the user-facing location of the file. */
++    public suspend fun run(): String = withContext(dispatcher) {
++        val workouts = repository.getWorkoutsStream().first()
++        val fileName = "workouts-${clock.now().epochSeconds}.csv"
++        sink.writeCsv(fileName, buildWorkoutsCsv(workouts))
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportFileSink.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportFileSink.kt
+new file mode 100644
+index 0000000..59e4935
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportFileSink.kt
+@@ -0,0 +1,12 @@
++/** File-writing port for the workouts CSV export. */
++package com.example.feature.workouts.domain.export
++
++/**
++ * Writes an exported file to a user-reachable place on the current platform.
++ *
++ * Implementations wrap expected IO failures as `StorageException`.
++ */
++public interface WorkoutsExportFileSink {
++    /** Writes [content] as [fileName] and returns the user-facing location. */
++    public suspend fun writeCsv(fileName: String, content: String): String
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportScheduler.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportScheduler.kt
+new file mode 100644
+index 0000000..b79b5a7
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/export/WorkoutsExportScheduler.kt
+@@ -0,0 +1,29 @@
++/** Background CSV export port owned by the Workouts domain. */
++package com.example.feature.workouts.domain.export
++
++import kotlinx.coroutines.flow.Flow
++
++/**
++ * Starts the workouts CSV export off the screen and reports its progress.
++ *
++ * Platform implementations are bound in the composition root: Android runs
++ * the export as WorkManager work, iOS and desktop on an app-lifetime scope.
++ * The export outlives the screen that started it.
++ */
++public interface WorkoutsExportScheduler {
++    /** Latest export status; replays the current value to new collectors. */
++    public val status: Flow<WorkoutsExportStatus>
++
++    /** Starts an export; a no-op while one is already running. */
++    public fun startExport()
++}
++
++/** Progress of the most recent workouts CSV export. */
++public sealed interface WorkoutsExportStatus {
++    public data object Idle : WorkoutsExportStatus
++    public data object Running : WorkoutsExportStatus
++
++    /** [location] is the user-facing place the file was saved to. */
++    public data class Saved(val location: String) : WorkoutsExportStatus
++    public data object Failed : WorkoutsExportStatus
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+index 3f7f10f..1e55cee 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+@@ -10,6 +10,9 @@ data class WorkoutsListUiState(
+     val items: List<Workout> = emptyList(),
+     val isLoading: Boolean = true,
+     val error: AppError? = null,
++    val isExporting: Boolean = false,
++    val exportedTo: String? = null,
++    val exportError: AppError? = null,
+ ) : UiState
+ 
+ sealed interface WorkoutsListUiAction : UiAction {
+@@ -17,6 +20,7 @@ sealed interface WorkoutsListUiAction : UiAction {
+     data object OnAddClick : WorkoutsListUiAction
+     data class OnWorkoutClick(val id: Long) : WorkoutsListUiAction
+     data object OnRetryClick : WorkoutsListUiAction
++    data object OnExportClick : WorkoutsListUiAction
+ }
+ 
+ sealed interface WorkoutsListUiEffect : UiEffect {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+index 8e3edd8..87b49ba 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+@@ -21,5 +21,6 @@ fun WorkoutsListRoute(viewModel: WorkoutsListViewModel, onEffect: suspend (Worko
+         onAdd = { viewModel.onAction(WorkoutsListUiAction.OnAddClick) },
+         onWorkout = { viewModel.onAction(WorkoutsListUiAction.OnWorkoutClick(it)) },
+         onRetry = { viewModel.onAction(WorkoutsListUiAction.OnRetryClick) },
++        onExport = { viewModel.onAction(WorkoutsListUiAction.OnExportClick) },
+     )
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+index 1cef939..0735d65 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+@@ -18,6 +18,10 @@ import workouts.feature.workouts.generated.resources.Res
+ import workouts.feature.workouts.generated.resources.add_workout
+ import workouts.feature.workouts.generated.resources.empty_workouts
+ import workouts.feature.workouts.generated.resources.error_message
++import workouts.feature.workouts.generated.resources.export_csv
++import workouts.feature.workouts.generated.resources.export_failed
++import workouts.feature.workouts.generated.resources.export_running
++import workouts.feature.workouts.generated.resources.export_saved
+ import workouts.feature.workouts.generated.resources.workouts_title
+ import workouts.feature.workouts.generated.resources.retry
+ import workouts.feature.workouts.generated.resources.untitled_workout
+@@ -28,10 +32,18 @@ fun WorkoutsListScreen(
+     onAdd: () -> Unit,
+     onWorkout: (Long) -> Unit,
+     onRetry: () -> Unit,
++    onExport: () -> Unit,
+ ) {
+     Column(Modifier.fillMaxSize().padding(16.dp)) {
+         Text(stringResource(Res.string.workouts_title))
+         Button(onClick = onAdd) { Text(stringResource(Res.string.add_workout)) }
++        // Disabled only while an export runs; the status line below says why.
++        Button(onClick = onExport, enabled = !state.isExporting) { Text(stringResource(Res.string.export_csv)) }
++        when {
++            state.isExporting -> Text(stringResource(Res.string.export_running))
++            state.exportError != null -> Text(stringResource(Res.string.export_failed))
++            state.exportedTo != null -> Text(stringResource(Res.string.export_saved, state.exportedTo))
++        }
+         when {
+             state.isLoading -> CircularProgressIndicator()
+             state.error != null -> {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index b31b7d4..7032fb0 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -1,20 +1,33 @@
+ package com.example.feature.workouts.presentation.list
+ 
++import com.example.core.error.AppError
++import com.example.core.error.AppErrorType
+ import com.example.core.mvi.BaseViewModel
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import com.example.feature.workouts.domain.export.WorkoutsExportStatus
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.collect
+ import org.koin.core.annotation.KoinViewModel
++import org.koin.core.annotation.Provided
+ 
+ @KoinViewModel
+-class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+-    BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(WorkoutsListUiState()) {
++class WorkoutsListViewModel(
++    private val repository: WorkoutsRepository,
++    @Provided private val exportScheduler: WorkoutsExportScheduler,
++) : BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(WorkoutsListUiState()) {
+     private var streamJob: Job? = null
+     private var addJob: Job? = null
++    private var exportStatusJob: Job? = null
+ 
+     override fun onAction(action: WorkoutsListUiAction) {
+         when (action) {
+-            WorkoutsListUiAction.OnScreenStarted, WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
++            WorkoutsListUiAction.OnScreenStarted -> {
++                observeWorkouts()
++                observeExportStatus()
++            }
++            WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
++            WorkoutsListUiAction.OnExportClick -> exportScheduler.startExport()
+             WorkoutsListUiAction.OnAddClick -> addWorkout()
+             is WorkoutsListUiAction.OnWorkoutClick -> sendEffect(WorkoutsListUiEffect.OpenWorkout(action.id))
+         }
+@@ -30,6 +43,22 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+         }
+     }
+ 
++    // The export runs outside this ViewModel; it only mirrors the scheduler's status.
++    private fun observeExportStatus() {
++        if (exportStatusJob?.isActive == true) return
++        exportStatusJob = launchGuarded(onError = ::emitError) {
++            exportScheduler.status.collect { status ->
++                updateState {
++                    copy(
++                        isExporting = status == WorkoutsExportStatus.Running,
++                        exportedTo = (status as? WorkoutsExportStatus.Saved)?.location,
++                        exportError = if (status == WorkoutsExportStatus.Failed) AppError(AppErrorType.Storage) else null,
++                    )
++                }
++            }
++        }
++    }
++
+     private fun addWorkout() {
+         if (addJob?.isActive == true) return
+         addJob = launchGuarded(onError = ::emitError) {
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExportTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExportTest.kt
+new file mode 100644
+index 0000000..17881eb
+--- /dev/null
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/data/export/WorkoutsCsvExportTest.kt
+@@ -0,0 +1,69 @@
++package com.example.feature.workouts.data.export
++
++import com.example.feature.workouts.domain.export.WorkoutsExportFileSink
++import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.presentation.workouts.FakeWorkoutsRepository
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.runTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.time.Clock
++import kotlin.time.Instant
++
++class WorkoutsCsvExportTest {
++    private class RecordingSink : WorkoutsExportFileSink {
++        val written = mutableListOf<Pair<String, String>>()
++        override suspend fun writeCsv(fileName: String, content: String): String {
++            written += fileName to content
++            return "Downloads/$fileName"
++        }
++    }
++
++    private val fixedClock = object : Clock {
++        override fun now(): Instant = Instant.fromEpochSeconds(1_700_000_000)
++    }
++
++    @Test fun `csv has a header and one row per workout`() {
++        val csv = buildWorkoutsCsv(
++            listOf(
++                Workout(1, "Leg day", "Squats", Instant.fromEpochSeconds(0)),
++                Workout(2, null, null, null, isArchived = true),
++            ),
++        )
++        assertEquals(
++            "id,title,body,updated_at,archived\r\n" +
++                "1,Leg day,Squats,1970-01-01T00:00:00Z,false\r\n" +
++                "2,,,,true\r\n",
++            csv,
++        )
++    }
++
++    @Test fun `fields with commas quotes or newlines are quoted`() {
++        val csv = buildWorkoutsCsv(listOf(Workout(1, "Run, then \"swim\"", "line1\nline2", null)))
++        assertEquals(
++            "id,title,body,updated_at,archived\r\n" +
++                "1,\"Run, then \"\"swim\"\"\",\"line1\nline2\",,false\r\n",
++            csv,
++        )
++    }
++
++    @Test fun `formula-like text is neutralised`() {
++        val csv = buildWorkoutsCsv(listOf(Workout(1, "=SUM(A1)", "-5 reps", null)))
++        assertEquals("1,'=SUM(A1),'-5 reps,,false", csv.lines()[1])
++    }
++
++    @Test fun `run writes every workout through the sink`() = runTest {
++        val repository = FakeWorkoutsRepository().apply {
++            seed(listOf(Workout(1, "A", "", null), Workout(2, "B", "", null)))
++        }
++        val sink = RecordingSink()
++        val export = WorkoutsCsvExport(repository, sink, StandardTestDispatcher(testScheduler), fixedClock)
++
++        val location = export.run()
++
++        val (fileName, content) = sink.written.single()
++        assertEquals("workouts-1700000000.csv", fileName)
++        assertEquals("Downloads/workouts-1700000000.csv", location)
++        assertEquals(3, content.trimEnd().lines().size)
++    }
++}
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsExportScheduler.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsExportScheduler.kt
+new file mode 100644
+index 0000000..4b59d81
+--- /dev/null
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsExportScheduler.kt
+@@ -0,0 +1,15 @@
++package com.example.feature.workouts.presentation.workouts
++
++import com.example.feature.workouts.domain.export.WorkoutsExportScheduler
++import com.example.feature.workouts.domain.export.WorkoutsExportStatus
++import kotlinx.coroutines.flow.MutableStateFlow
++
++/** Test-only fake: tests push statuses into [status] and read [startCalls]. */
++class FakeWorkoutsExportScheduler : WorkoutsExportScheduler {
++    override val status = MutableStateFlow<WorkoutsExportStatus>(WorkoutsExportStatus.Idle)
++    var startCalls: Int = 0
++
++    override fun startExport() {
++        startCalls += 1
++    }
++}
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+index 836f07c..57cd8fd 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+@@ -1,5 +1,7 @@
+ package com.example.feature.workouts.presentation.workouts
+ 
++import com.example.core.error.AppErrorType
++import com.example.feature.workouts.domain.export.WorkoutsExportStatus
+ import com.example.feature.workouts.domain.model.Workout
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiAction
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiEffect
+@@ -20,6 +22,8 @@ import kotlin.test.BeforeTest
+ import kotlin.test.Test
+ import kotlin.test.assertEquals
+ import kotlin.test.assertFalse
++import kotlin.test.assertNull
++import kotlin.test.assertTrue
+ 
+ @OptIn(ExperimentalCoroutinesApi::class)
+ class WorkoutsListViewModelTest {
+@@ -30,7 +34,7 @@ class WorkoutsListViewModelTest {
+ 
+     @Test fun `observes workouts and later changes`() = runTest(scheduler) {
+         val fake = FakeWorkoutsRepository()
+-        val viewModel = WorkoutsListViewModel(fake)
++        val viewModel = WorkoutsListViewModel(fake, FakeWorkoutsExportScheduler())
+         viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
+         advanceUntilIdle()
+         assertFalse(viewModel.state.value.isLoading)
+@@ -41,7 +45,7 @@ class WorkoutsListViewModelTest {
+ 
+     @Test fun `add creates workout and opens detail`() = runTest(scheduler) {
+         val fake = FakeWorkoutsRepository()
+-        val viewModel = WorkoutsListViewModel(fake)
++        val viewModel = WorkoutsListViewModel(fake, FakeWorkoutsExportScheduler())
+         val effects = mutableListOf<WorkoutsListUiEffect>()
+         backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { viewModel.effect.toList(effects) }
+         viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
+@@ -52,11 +56,52 @@ class WorkoutsListViewModelTest {
+     }
+ 
+     @Test fun `workout click opens chosen workout`() = runTest(scheduler) {
+-        val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository())
++        val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository(), FakeWorkoutsExportScheduler())
+         val effects = mutableListOf<WorkoutsListUiEffect>()
+         backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { viewModel.effect.toList(effects) }
+         viewModel.onAction(WorkoutsListUiAction.OnWorkoutClick(42L))
+         advanceUntilIdle()
+         assertEquals(WorkoutsListUiEffect.OpenWorkout(42L), effects.single())
+     }
++
++    @Test fun `export click hands the export to the scheduler`() = runTest(scheduler) {
++        val exportScheduler = FakeWorkoutsExportScheduler()
++        val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository(), exportScheduler)
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        viewModel.onAction(WorkoutsListUiAction.OnExportClick)
++        advanceUntilIdle()
++        assertEquals(1, exportScheduler.startCalls)
++    }
++
++    @Test fun `export status drives running saved and failed state`() = runTest(scheduler) {
++        val exportScheduler = FakeWorkoutsExportScheduler()
++        val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository(), exportScheduler)
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertFalse(viewModel.state.value.isExporting)
++
++        exportScheduler.status.value = WorkoutsExportStatus.Running
++        advanceUntilIdle()
++        assertTrue(viewModel.state.value.isExporting)
++
++        exportScheduler.status.value = WorkoutsExportStatus.Saved("Downloads/workouts-1.csv")
++        advanceUntilIdle()
++        assertFalse(viewModel.state.value.isExporting)
++        assertEquals("Downloads/workouts-1.csv", viewModel.state.value.exportedTo)
++        assertNull(viewModel.state.value.exportError)
++
++        exportScheduler.status.value = WorkoutsExportStatus.Failed
++        advanceUntilIdle()
++        assertEquals(AppErrorType.Storage, viewModel.state.value.exportError?.type)
++        assertNull(viewModel.state.value.exportedTo)
++    }
++
++    @Test fun `export started elsewhere shows as running when the screen starts`() = runTest(scheduler) {
++        val exportScheduler = FakeWorkoutsExportScheduler()
++        exportScheduler.status.value = WorkoutsExportStatus.Running
++        val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository(), exportScheduler)
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertTrue(viewModel.state.value.isExporting)
++    }
+ }
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+index d656ab0..141489d 100644
+--- a/gradle/libs.versions.toml
++++ b/gradle/libs.versions.toml
+@@ -38,6 +38,9 @@ androidx-lifecycle = "2.11.0"
+ 
+ room = "2.8.5"
+ sqlite = "2.7.1"
++# Latest stable per https://developer.android.com/jetpack/androidx/releases/work
++# (maven metadata checked 2026-10-01).
++androidx-work = "2.12.0"
+ ksp = "2.3.12"
+ 
+ # ---- Coroutines ----
+@@ -95,6 +98,7 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
++androidx-work-runtime = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
+ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+ # compileOnly for build-logic: extension classes the convention plugins
+ # configure (coordinates per Now in Android's build-logic).

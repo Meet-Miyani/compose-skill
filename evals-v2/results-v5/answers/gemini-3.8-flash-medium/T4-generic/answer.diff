@@ -1,0 +1,54 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..6e98170 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,7 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..9f09dea 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -265,4 +265,36 @@ class WorkoutsViewModelTest {
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+         assertEquals(1, viewModel.state.value.items.size)
+     }
++
++    @Test
++    fun `typing title updates savedStateHandle`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val handle = SavedStateHandle()
++        val viewModel = viewModel(fake, handle = handle)
++
++        viewModel.onAction(WorkoutsUiAction.OnTitleChanged("user typed text"))
++
++        assertEquals("user typed text", handle["draftTitle"])
++    }
++
++    @Test
++    fun `typed text survives app switch and reload`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout().copy(title = "Original Title"))) }
++        val handle = SavedStateHandle()
++        val viewModel = viewModel(fake, handle = handle)
++
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertEquals("Original Title", viewModel.state.value.draftTitle)
++
++        viewModel.onAction(WorkoutsUiAction.OnTitleChanged("Modified Title"))
++        assertEquals("Modified Title", viewModel.state.value.draftTitle)
++
++        // Simulating app switch and return: LifecycleStartEffect triggers OnScreenStarted
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals("Modified Title", viewModel.state.value.draftTitle)
++        assertEquals("Modified Title", handle["draftTitle"])
++    }
+ }

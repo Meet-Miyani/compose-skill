@@ -1,0 +1,60 @@
+> Task :core:designsystem:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:checkDebugDuplicateClasses
+> Task :core:designsystem:copyAndroidMainJniLibsProjectOnly
+> Task :core:error:mergeAndroidMainJniLibFolders
+> Task :core:error:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:processDebugNavigationResources
+> Task :androidApp:parseDebugLocalResources FROM-CACHE
+> Task :core:error:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:generateDebugRFile
+> Task :feature:workouts:mergeAndroidMainJniLibFolders
+> Task :feature:workouts:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:checkDebugAarMetadata
+> Task :androidApp:validateSigningDebug
+> Task :androidApp:writeDebugAppMetadata
+> Task :androidApp:writeDebugSigningConfigVersions
+> Task :core:mvi:mergeAndroidMainJniLibFolders
+> Task :androidApp:mergeDebugAssets
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :feature:workouts:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:processDebugMainManifest
+> Task :androidApp:processDebugManifest
+> Task :androidApp:processDebugManifestForPackage
+> Task :androidApp:compressDebugAssets
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:mergeDebugNativeLibs
+> Task :androidApp:compileDebugNavigationResources
+> Task :composeApp:compileAndroidMain
+> Task :composeApp:compileKotlinJvm
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses
+> Task :composeApp:jvmJar
+> Task :composeApp:processAndroidMainJavaRes
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :androidApp:stripDebugDebugSymbols
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:mergeDebugResources
+> Task :androidApp:compileDebugKotlin
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:processDebugResources
+> Task :androidApp:dexBuilderDebug
+> Task :androidApp:mergeProjectDexDebug
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:mergeExtDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 47s
+165 actionable tasks: 105 executed, 6 from cache, 54 up-to-date
+Configuration cache entry stored.

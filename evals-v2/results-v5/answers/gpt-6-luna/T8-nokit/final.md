@@ -1,0 +1,3 @@
+Refactored Quick Add to use the project’s MVI structure: [QuickAddContract.kt](<<project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt>) defines its state and actions, [QuickAddViewModel.kt](<<project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt>) handles them, and [QuickAddWidget.kt](<<project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt>) collects state and dispatches actions.
+
+The Add action still sets loading, clears it, and resets the input; the existing save placeholder remains unchanged. `git diff --check` passed. I did not run tests or a build.

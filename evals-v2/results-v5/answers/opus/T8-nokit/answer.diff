@@ -1,0 +1,163 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt
+new file mode 100644
+index 0000000..8e90efc
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt
+@@ -0,0 +1,17 @@
++package com.example.feature.workouts.presentation.list
++
++import com.example.core.mvi.UiAction
++import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
++
++data class QuickAddUiState(
++    val text: String = "",
++    val isLoading: Boolean = false,
++) : UiState
++
++sealed interface QuickAddUiAction : UiAction {
++    data class OnTextChanged(val text: String) : QuickAddUiAction
++    data object OnAddClick : QuickAddUiAction
++}
++
++sealed interface QuickAddUiEffect : UiEffect
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddRoute.kt
+new file mode 100644
+index 0000000..b66465d
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddRoute.kt
+@@ -0,0 +1,17 @@
++package com.example.feature.workouts.presentation.list
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.ui.Modifier
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++
++@Composable
++fun QuickAddRoute(viewModel: QuickAddViewModel, modifier: Modifier = Modifier) {
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    QuickAddWidget(
++        state = state,
++        onTextChange = { viewModel.onAction(QuickAddUiAction.OnTextChanged(it)) },
++        onAdd = { viewModel.onAction(QuickAddUiAction.OnAddClick) },
++        modifier = modifier,
++    )
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt
+new file mode 100644
+index 0000000..fe8e799
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt
+@@ -0,0 +1,22 @@
++package com.example.feature.workouts.presentation.list
++
++import com.example.core.mvi.BaseViewModel
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class QuickAddViewModel :
++    BaseViewModel<QuickAddUiAction, QuickAddUiState, QuickAddUiEffect>(QuickAddUiState()) {
++
++    override fun onAction(action: QuickAddUiAction) {
++        when (action) {
++            is QuickAddUiAction.OnTextChanged -> updateState { copy(text = action.text) }
++            QuickAddUiAction.OnAddClick -> add()
++        }
++    }
++
++    private fun add() {
++        updateState { copy(isLoading = true) }
++        // save logic...
++        updateState { copy(isLoading = false, text = "") }
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+index 23001af..478f32e 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+@@ -1,36 +1,14 @@
+ package com.example.feature.workouts.presentation.list
+ 
+-import androidx.compose.runtime.*
+-
+-// MVI violation: uses MVP instead of BaseViewModel and UiState/UiAction/UiEffect
+-
+-interface QuickAddView {
+-    fun showLoading()
+-    fun hideLoading()
+-    fun clearInput()
+-}
+-
+-class QuickAddPresenter(private val view: QuickAddView) {
+-    fun onAddClicked(workoutName: String) {
+-        view.showLoading()
+-        // save logic...
+-        view.hideLoading()
+-        view.clearInput()
+-    }
+-}
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
+ 
+ @Composable
+-fun QuickAddWidget() {
+-    var isLoading by remember { mutableStateOf(false) }
+-    var text by remember { mutableStateOf("") }
+-    
+-    val presenter = remember { 
+-        QuickAddPresenter(object : QuickAddView {
+-            override fun showLoading() { isLoading = true }
+-            override fun hideLoading() { isLoading = false }
+-            override fun clearInput() { text = "" }
+-        }) 
+-    }
+-    
++fun QuickAddWidget(
++    state: QuickAddUiState,
++    onTextChange: (String) -> Unit,
++    onAdd: () -> Unit,
++    modifier: Modifier = Modifier,
++) {
+     // UI elements...
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/QuickAddViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/QuickAddViewModelTest.kt
+new file mode 100644
+index 0000000..0578ab1
+--- /dev/null
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/QuickAddViewModelTest.kt
+@@ -0,0 +1,34 @@
++package com.example.feature.workouts.presentation.workouts
++
++import com.example.feature.workouts.presentation.list.QuickAddUiAction
++import com.example.feature.workouts.presentation.list.QuickAddViewModel
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class QuickAddViewModelTest {
++    @BeforeTest fun setUp() { Dispatchers.setMain(StandardTestDispatcher()) }
++    @AfterTest fun tearDown() { Dispatchers.resetMain() }
++
++    @Test fun `text change updates text`() {
++        val viewModel = QuickAddViewModel()
++        viewModel.onAction(QuickAddUiAction.OnTextChanged("Run"))
++        assertEquals("Run", viewModel.state.value.text)
++    }
++
++    @Test fun `add clears input and ends not loading`() {
++        val viewModel = QuickAddViewModel()
++        viewModel.onAction(QuickAddUiAction.OnTextChanged("Run"))
++        viewModel.onAction(QuickAddUiAction.OnAddClick)
++        assertEquals("", viewModel.state.value.text)
++        assertFalse(viewModel.state.value.isLoading)
++    }
++}

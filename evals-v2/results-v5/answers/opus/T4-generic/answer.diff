@@ -1,0 +1,54 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index ee4c87e..c7b59eb 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -39,7 +39,8 @@ class WorkoutsViewModel(
+         when (action) {
+             WorkoutsUiAction.OnScreenStarted -> load()
+             is WorkoutsUiAction.OnTitleChanged -> {
+-                
++                // Persist first: load() keeps the draft only when the handle holds it.
++                savedStateHandle["draftTitle"] = action.title
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..9ce047e 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -250,6 +250,35 @@ class WorkoutsViewModelTest {
+         assertEquals("Title", viewModel.state.value.items.first().title)
+     }
+ 
++    @Test
++    fun `returning to screen keeps typed draft`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        viewModel.onAction(WorkoutsUiAction.OnTitleChanged("typed"))
++        // App switch: onStart fires again and reconciles.
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals("typed", viewModel.state.value.draftTitle)
++    }
++
++    @Test
++    fun `typed draft survives process death`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val handle = SavedStateHandle()
++        viewModel(fake, handle = handle).onAction(WorkoutsUiAction.OnTitleChanged("typed"))
++
++        // New ViewModel on the same handle simulates restore after process death.
++        val restored = viewModel(fake, handle = handle)
++        restored.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals("typed", restored.state.value.draftTitle)
++    }
++
+     @Test
+     fun `process death restores draft and refetches`() = runTest(testScheduler) {
+         val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }

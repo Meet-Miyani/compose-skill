@@ -1,0 +1,3 @@
+Replaced Quick Add’s presenter and local Compose state with an immutable MVI state, actions, and a `BaseViewModel`. The stateless widget now receives state and dispatches actions. It preserves the existing add behavior: loading starts, then completes immediately and clears the input. The workout name is saved through `SavedStateHandle`.
+
+Added a test for restoring the name and clearing it on add. I didn’t run the test. Quick Add still has no repository save wired in, matching the original stub’s behavior.

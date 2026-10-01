@@ -1,0 +1,411 @@
+diff --git a/feature/workouts/build.gradle.kts b/feature/workouts/build.gradle.kts
+index 004d2c9..6c3e28f 100644
+--- a/feature/workouts/build.gradle.kts
++++ b/feature/workouts/build.gradle.kts
+@@ -28,9 +28,11 @@ kotlin {
+             // @KoinViewModel needs this at compile time.
+             implementation(libs.koin.core.viewmodel)
+             implementation(libs.kotlinx.coroutines.core)
++            implementation(libs.kotlinx.io.core)
+             implementation(libs.kotlinx.serialization.core)
+             implementation(libs.androidx.room.runtime)
+             implementation(libs.androidx.sqlite.bundled)
++            implementation(libs.androidx.sqlite)
+             implementation(libs.androidx.navigation3.runtime)
+             implementation(libs.androidx.lifecycle.viewmodel)
+             implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+@@ -39,6 +41,7 @@ kotlin {
+             implementation(libs.compose.foundation)
+             implementation(libs.compose.material3)
+             implementation(libs.compose.components.resources)
++            implementation(libs.imagepickerkmp.photo)
+         }
+         commonTest.dependencies {
+             implementation(libs.kotlinx.coroutines.core)
+diff --git a/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+new file mode 100644
+index 0000000..67292db
+--- /dev/null
++++ b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+@@ -0,0 +1,48 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 2,
++    "identityHash": "16c4e78ef96a53aef31d178db03ecede",
++    "entities": [
++      {
++        "tableName": "workouts",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL, `photoPath` TEXT)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "photoPath",
++            "columnName": "photoPath",
++            "affinity": "TEXT"
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '16c4e78ef96a53aef31d178db03ecede')"
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+index 838eb7e..063cd82 100644
+--- a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+@@ -3,6 +3,7 @@ package com.example.feature.workouts.data.local
+ import android.content.Context
+ import androidx.room.Room
+ import androidx.room.RoomDatabase
++import java.io.File
+ 
+ private lateinit var applicationContext: Context
+ 
+@@ -15,3 +16,6 @@ internal actual fun workoutsDatabaseBuilder(): RoomDatabase.Builder<WorkoutsData
+         context = applicationContext,
+         name = applicationContext.getDatabasePath("workouts.db").absolutePath,
+     )
++
++internal actual fun workoutsPhotoDirectory(): String =
++    File(applicationContext.filesDir, "workout-photos").apply { mkdirs() }.absolutePath
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..1e0847d 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,6 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="workout_title">Workout title</string>
++    <string name="attach_photo">Attach photo</string>
++    <string name="photo_attached">Photo attached</string>
+ </resources>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+index 97b6ff2..6d04adc 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+@@ -9,6 +9,7 @@ internal data class WorkoutEntity(
+     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+     val title: String = "",
+     val body: String = "",
++    val photoPath: String? = null,
+ )
+ 
+-internal fun WorkoutEntity.toDomain(): Workout = Workout(id = id, title = title, body = body, updatedAt = null)
++internal fun WorkoutEntity.toDomain(): Workout = Workout(id = id, title = title, body = body, updatedAt = null, photoPath = photoPath)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+index 1dbb93f..d658aa0 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+@@ -21,4 +21,7 @@ internal interface WorkoutsDao {
+ 
+     @Query("UPDATE workouts SET title = :title WHERE id = :id")
+     suspend fun updateTitle(id: Long, title: String)
++
++    @Query("UPDATE workouts SET photoPath = :path WHERE id = :id")
++    suspend fun updatePhotoPath(id: Long, path: String)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+index 7783acb..c63d9d4 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+@@ -4,9 +4,15 @@ import androidx.room.ConstructedBy
+ import androidx.room.Database
+ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
++import androidx.room.migration.Migration
++import androidx.sqlite.SQLiteConnection
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
++import androidx.sqlite.execSQL
++import kotlinx.io.buffered
++import kotlinx.io.files.Path
++import kotlinx.io.files.SystemFileSystem
+ 
+-@Database(entities = [WorkoutEntity::class], version = 1, exportSchema = true)
++@Database(entities = [WorkoutEntity::class], version = 2, exportSchema = true)
+ @ConstructedBy(WorkoutsDatabaseConstructor::class)
+ internal abstract class WorkoutsDatabase : RoomDatabase() {
+     abstract fun workoutsDao(): WorkoutsDao
+@@ -19,4 +25,21 @@ internal expect object WorkoutsDatabaseConstructor : RoomDatabaseConstructor<Wor
+ 
+ internal expect fun workoutsDatabaseBuilder(): RoomDatabase.Builder<WorkoutsDatabase>
+ 
+-internal fun createWorkoutsDatabase(): WorkoutsDatabase = workoutsDatabaseBuilder().setDriver(BundledSQLiteDriver()).build()
++private val migration1To2 = object : Migration(1, 2) {
++    override fun migrate(connection: SQLiteConnection) {
++        connection.execSQL("ALTER TABLE workouts ADD COLUMN photoPath TEXT")
++    }
++}
++
++internal fun createWorkoutsDatabase(): WorkoutsDatabase = workoutsDatabaseBuilder()
++    .addMigrations(migration1To2)
++    .setDriver(BundledSQLiteDriver())
++    .build()
++
++internal expect fun workoutsPhotoDirectory(): String
++
++internal suspend fun saveWorkoutPhotoFile(workoutId: Long, bytes: ByteArray): String {
++    val path = Path("${workoutsPhotoDirectory()}/workout-$workoutId.photo")
++    SystemFileSystem.sink(path).buffered().use { sink -> sink.write(bytes) }
++    return path.toString()
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+index 547204b..55d5efb 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+@@ -7,6 +7,7 @@ package com.example.feature.workouts.data.repository
+ 
+ import com.example.feature.workouts.data.local.WorkoutsDao
+ import com.example.feature.workouts.data.local.WorkoutEntity
++import com.example.feature.workouts.data.local.saveWorkoutPhotoFile
+ import com.example.feature.workouts.data.local.toDomain
+ import com.example.feature.workouts.domain.model.Workout
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+@@ -43,4 +44,9 @@ internal class DefaultWorkoutsRepository(
+     override suspend fun saveWorkoutDraft(id: Long, title: String) {
+         dao.updateTitle(id, title)
+     }
++
++    override suspend fun saveWorkoutPhoto(id: Long, bytes: ByteArray) {
++        val path = saveWorkoutPhotoFile(id, bytes)
++        dao.updatePhotoPath(id, path)
++    }
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+index 67351d3..0035282 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+@@ -8,4 +8,5 @@ public data class Workout(
+     val body: String?,
+     val updatedAt: kotlin.time.Instant?,
+     val isArchived: Boolean = false,
++    val photoPath: String? = null,
+ )
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+index b449760..cbb5639 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+@@ -28,4 +28,5 @@ public interface WorkoutsRepository {
+      * Persists the editor draft title for the workout with the given identity.
+      */
+     public suspend fun saveWorkoutDraft(id: Long, title: String)
++    public suspend fun saveWorkoutPhoto(id: Long, bytes: ByteArray)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+index 71bdcd1..64adf06 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+@@ -27,6 +27,7 @@ sealed interface WorkoutsUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsUiAction
+     data class OnTitleChanged(val title: String) : WorkoutsUiAction
+     data object OnSaveClick : WorkoutsUiAction
++    data class OnPhotoSelected(val bytes: ByteArray) : WorkoutsUiAction
+     data class OnRetryClick(val error: AppError) : WorkoutsUiAction
+     data object OnBackClick : WorkoutsUiAction
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+index 3b89a00..1de3e4c 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+@@ -31,6 +31,7 @@ fun WorkoutsRoute(
+         state = state,
+         onTitleChange = { viewModel.onAction(WorkoutsUiAction.OnTitleChanged(it)) },
+         onSave = { viewModel.onAction(WorkoutsUiAction.OnSaveClick) },
++        onPhotoSelected = { viewModel.onAction(WorkoutsUiAction.OnPhotoSelected(it)) },
+         onRetry = {
+             // Retry holds the error it retries; no-op when no error is showing.
+             viewModel.onAction(WorkoutsUiAction.OnRetryClick(state.error ?: return@WorkoutsScreen))
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+index 653e46d..94cfb54 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+@@ -12,7 +12,13 @@ import androidx.compose.material3.CircularProgressIndicator
+ import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.LaunchedEffect
+ import androidx.compose.ui.Modifier
++import io.github.ismoy.imagepickerkmp.extensions.loadBytes
++import io.github.ismoy.imagepickerkmp.config.GalleryConfig
++import io.github.ismoy.imagepickerkmp.picker.ImagePickerKMPConfig
++import io.github.ismoy.imagepickerkmp.picker.ImagePickerResult
++import io.github.ismoy.imagepickerkmp.picker.rememberImagePickerKMP
+ import org.jetbrains.compose.resources.stringResource
+ import workouts.feature.workouts.generated.resources.Res
+ import workouts.feature.workouts.generated.resources.back
+@@ -22,16 +28,29 @@ import workouts.feature.workouts.generated.resources.workout_title
+ import workouts.feature.workouts.generated.resources.refreshing
+ import workouts.feature.workouts.generated.resources.retry
+ import workouts.feature.workouts.generated.resources.save
++import workouts.feature.workouts.generated.resources.attach_photo
++import workouts.feature.workouts.generated.resources.photo_attached
+ 
+ @Composable
+ fun WorkoutsScreen(
+     state: WorkoutsUiState,
+     onTitleChange: (String) -> Unit,
+     onSave: () -> Unit,
++    onPhotoSelected: (ByteArray) -> Unit,
+     onRetry: () -> Unit,
+     onBack: () -> Unit,
+     modifier: Modifier = Modifier,
+ ) {
++    val photoPicker = rememberImagePickerKMP(
++        config = ImagePickerKMPConfig(galleryConfig = GalleryConfig(allowMultiple = false, selectionLimit = 1)),
++    )
++    val photoResult = photoPicker.result
++    LaunchedEffect(photoResult) {
++        if (photoResult is ImagePickerResult.Success) {
++            photoResult.photos.firstOrNull()?.let { onPhotoSelected(it.loadBytes()) }
++            photoPicker.reset()
++        }
++    }
+     when {
+         state.isLoading -> CircularProgressIndicator(modifier = modifier)
+         state.error != null && state.items.isEmpty() -> Column(modifier = modifier) {
+@@ -53,6 +72,8 @@ fun WorkoutsScreen(
+                 label = { Text(stringResource(Res.string.workout_title)) },
+             )
+             Button(onClick = onSave) { Text(stringResource(Res.string.save)) }
++            Button(onClick = { photoPicker.launchGallery() }) { Text(stringResource(Res.string.attach_photo)) }
++            if (state.items.firstOrNull()?.photoPath != null) Text(stringResource(Res.string.photo_attached))
+             Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
+         }
+     }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index 6e98170..b4dd5bb 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -43,6 +43,7 @@ class WorkoutsViewModel(
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
++            is WorkoutsUiAction.OnPhotoSelected -> savePhoto(action.bytes)
+             is WorkoutsUiAction.OnRetryClick -> retry()
+             WorkoutsUiAction.OnBackClick -> sendEffect(WorkoutsUiEffect.NavigateBack)
+         }
+@@ -87,4 +88,12 @@ class WorkoutsViewModel(
+         updateState { copy(error = null) }
+         load()
+     }
++
++    private fun savePhoto(bytes: ByteArray) {
++        if (saveJob?.isActive == true) return
++        saveJob = launchGuarded(onError = ::emitError) {
++            withContext(ioDispatcher) { repository.saveWorkoutPhoto(params.workoutId, bytes) }
++            load()
++        }
++    }
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+index 70715fa..09f6d8c 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+@@ -61,4 +61,8 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+         lastSavedDraft = id to title
+         backing.update { list -> list.map { if (it.id == id) it.copy(title = title) else it } }
+     }
++
++    override suspend fun saveWorkoutPhoto(id: Long, bytes: ByteArray) {
++        backing.update { list -> list.map { if (it.id == id) it.copy(photoPath = "test-photo") else it } }
++    }
+ }
+diff --git a/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.ios.kt b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.ios.kt
+index 678fa39..5b09564 100644
+--- a/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.ios.kt
++++ b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.ios.kt
+@@ -2,10 +2,10 @@ package com.example.feature.workouts.data.local
+ 
+ import androidx.room.Room
+ import androidx.room.RoomDatabase
+-import platform.Foundation.NSDocumentDirectory
++import kotlinx.cinterop.ExperimentalForeignApi
+ import platform.Foundation.NSFileManager
++import platform.Foundation.NSDocumentDirectory
+ import platform.Foundation.NSUserDomainMask
+-import kotlinx.cinterop.ExperimentalForeignApi
+ 
+ @OptIn(ExperimentalForeignApi::class)
+ internal actual fun workoutsDatabaseBuilder(): RoomDatabase.Builder<WorkoutsDatabase> {
+@@ -14,3 +14,13 @@ internal actual fun workoutsDatabaseBuilder(): RoomDatabase.Builder<WorkoutsData
+     )?.path ?: error("Documents directory unavailable")
+     return Room.databaseBuilder<WorkoutsDatabase>(name = "$directory/workouts.db")
+ }
++
++@OptIn(ExperimentalForeignApi::class)
++internal actual fun workoutsPhotoDirectory(): String {
++    val directory = NSFileManager.defaultManager.URLForDirectory(
++        NSDocumentDirectory, NSUserDomainMask, null, true, null,
++    )?.path ?: error("Documents directory unavailable")
++    val photoDirectory = "$directory/workout-photos"
++    NSFileManager.defaultManager.createDirectoryAtPath(photoDirectory, true, null, null)
++    return photoDirectory
++}
+diff --git a/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.jvm.kt b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.jvm.kt
+index adde80f..c593541 100644
+--- a/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.jvm.kt
++++ b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.jvm.kt
+@@ -8,3 +8,6 @@ internal actual fun workoutsDatabaseBuilder(): RoomDatabase.Builder<WorkoutsData
+     val directory = File(System.getProperty("user.home"), ".workouts-app").apply { mkdirs() }
+     return Room.databaseBuilder<WorkoutsDatabase>(name = File(directory, "workouts.db").absolutePath)
+ }
++
++internal actual fun workoutsPhotoDirectory(): String =
++    File(System.getProperty("user.home"), ".workouts-app/photos").apply { mkdirs() }.absolutePath
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+index d656ab0..175a830 100644
+--- a/gradle/libs.versions.toml
++++ b/gradle/libs.versions.toml
+@@ -48,6 +48,8 @@ kotlinx-coroutines = "1.11.0"
+ # kotlinx.serialization 1.10.0 or newer. Verify at
+ # https://github.com/Kotlin/kotlinx.serialization/blob/master/CHANGELOG.md
+ kotlinx-serialization = "1.11.0"
++imagepickerkmp = "1.1.0"
++kotlinx-io = "0.9.0"
+ 
+ # ---- Navigation ----
+ # CMP 1.12.1 pairs JetBrains navigation3 1.1.2 (stable; its 1.2.0 is only
+@@ -79,6 +81,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
+ androidx-navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "navigation3-ui", version.ref = "androidx-navigation3-ui" }
+ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
++kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
+ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+ kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+ compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+@@ -96,6 +99,8 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
+ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
++androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
++imagepickerkmp-photo = { module = "io.github.ismoy:imagepickerkmp", version.ref = "imagepickerkmp" }
+ # compileOnly for build-logic: extension classes the convention plugins
+ # configure (coordinates per Now in Android's build-logic).
+ kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }

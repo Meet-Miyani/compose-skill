@@ -1,0 +1,737 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 878e8d8..71775f7 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -63,6 +63,8 @@ fun App() {
+                             onEffect = { effect ->
+                                 when (effect) {
+                                     is WorkoutsUiEffect.OpenWorkoutsDetail -> backStack.add(WorkoutsDetailKey(effect.id))
++                                    // The Route runs the platform picker itself; it never reaches here.
++                                    WorkoutsUiEffect.PickPhoto -> Unit
+                                     WorkoutsUiEffect.Saved, WorkoutsUiEffect.NavigateBack ->
+                                         if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                                 }
+diff --git a/feature/workouts/build.gradle.kts b/feature/workouts/build.gradle.kts
+index 004d2c9..6bcb492 100644
+--- a/feature/workouts/build.gradle.kts
++++ b/feature/workouts/build.gradle.kts
+@@ -40,6 +40,9 @@ kotlin {
+             implementation(libs.compose.material3)
+             implementation(libs.compose.components.resources)
+         }
++        androidMain.dependencies {
++            implementation(libs.androidx.activity.compose)
++        }
+         commonTest.dependencies {
+             implementation(libs.kotlinx.coroutines.core)
+             implementation(kotlin("test"))
+diff --git a/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+new file mode 100644
+index 0000000..e44987b
+--- /dev/null
++++ b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+@@ -0,0 +1,48 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 2,
++    "identityHash": "16c4e78ef96a53aef31d178db03ecede",
++    "entities": [
++      {
++        "tableName": "workouts",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL, `photoPath` TEXT)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "photoPath",
++            "columnName": "photoPath",
++            "affinity": "TEXT"
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '16c4e78ef96a53aef31d178db03ecede')"
++    ]
++  }
++}
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.android.kt
+new file mode 100644
+index 0000000..221a331
+--- /dev/null
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.android.kt
+@@ -0,0 +1,23 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import java.io.File
++import java.io.IOException
++
++private fun photosDirectory(): File = File(applicationContext.filesDir, "workout-photos").apply { mkdirs() }
++
++internal actual fun writeWorkoutPhotoFile(workoutId: Long, bytes: ByteArray): String = try {
++    File(photosDirectory(), "workout-$workoutId.photo").apply { writeBytes(bytes) }.absolutePath
++} catch (e: IOException) {
++    throw StorageException(e)
++}
++
++internal actual fun readWorkoutPhotoFile(path: String): ByteArray? = try {
++    File(path).takeIf(File::exists)?.readBytes()
++} catch (e: IOException) {
++    throw StorageException(e)
++}
++
++internal actual fun deleteWorkoutPhotoFile(path: String) {
++    File(path).delete()
++}
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+index 838eb7e..fcce595 100644
+--- a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.android.kt
+@@ -4,7 +4,7 @@ import android.content.Context
+ import androidx.room.Room
+ import androidx.room.RoomDatabase
+ 
+-private lateinit var applicationContext: Context
++internal lateinit var applicationContext: Context
+ 
+ fun setWorkoutsDatabaseContext(context: Context) {
+     applicationContext = context.applicationContext
+diff --git a/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.android.kt b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.android.kt
+new file mode 100644
+index 0000000..3759ee7
+--- /dev/null
++++ b/feature/workouts/src/androidMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.android.kt
+@@ -0,0 +1,29 @@
++package com.example.feature.workouts.presentation.workouts
++
++import android.net.Uri
++import androidx.activity.compose.rememberLauncherForActivityResult
++import androidx.activity.result.PickVisualMediaRequest
++import androidx.activity.result.contract.ActivityResultContracts
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.rememberCoroutineScope
++import androidx.compose.runtime.rememberUpdatedState
++import androidx.compose.ui.platform.LocalContext
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.withContext
++
++@Composable
++internal actual fun rememberPhotoPicker(onPicked: (ByteArray) -> Unit): () -> Unit {
++    val currentOnPicked by rememberUpdatedState(onPicked)
++    val resolver = LocalContext.current.contentResolver
++    val scope = rememberCoroutineScope()
++    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
++        if (uri == null) return@rememberLauncherForActivityResult
++        scope.launch {
++            val bytes = withContext(Dispatchers.IO) { resolver.openInputStream(uri)?.use { it.readBytes() } }
++            bytes?.let(currentOnPicked)
++        }
++    }
++    return { launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
++}
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..a608470 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,7 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="workout_title">Workout title</string>
++    <string name="attach_photo">Attach photo</string>
++    <string name="change_photo">Change photo</string>
++    <string name="workout_photo">Workout photo</string>
+ </resources>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+index 97b6ff2..7641d7b 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+@@ -9,6 +9,7 @@ internal data class WorkoutEntity(
+     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+     val title: String = "",
+     val body: String = "",
++    val photoPath: String? = null,
+ )
+ 
+ internal fun WorkoutEntity.toDomain(): Workout = Workout(id = id, title = title, body = body, updatedAt = null)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.kt
+new file mode 100644
+index 0000000..0d59bc5
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.kt
+@@ -0,0 +1,10 @@
++package com.example.feature.workouts.data.local
++
++/** Writes the workout's photo into app-private storage and returns its path; failures surface as `StorageException`. */
++internal expect fun writeWorkoutPhotoFile(workoutId: Long, bytes: ByteArray): String
++
++/** Reads a stored photo, or null when the file no longer exists; other failures surface as `StorageException`. */
++internal expect fun readWorkoutPhotoFile(path: String): ByteArray?
++
++/** Removes a stored photo; a missing file is not an error. */
++internal expect fun deleteWorkoutPhotoFile(path: String)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+index 1dbb93f..078ddd4 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+@@ -19,6 +19,9 @@ internal interface WorkoutsDao {
+     @Query("DELETE FROM workouts WHERE id = :id")
+     suspend fun delete(id: Long)
+ 
++    @Query("UPDATE workouts SET photoPath = :photoPath WHERE id = :id")
++    suspend fun updatePhotoPath(id: Long, photoPath: String?)
++
+     @Query("UPDATE workouts SET title = :title WHERE id = :id")
+     suspend fun updateTitle(id: Long, title: String)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+index 7783acb..627e4ff 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+@@ -1,12 +1,18 @@
+ package com.example.feature.workouts.data.local
+ 
++import androidx.room.AutoMigration
+ import androidx.room.ConstructedBy
+ import androidx.room.Database
+ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+ 
+-@Database(entities = [WorkoutEntity::class], version = 1, exportSchema = true)
++@Database(
++    entities = [WorkoutEntity::class],
++    version = 2,
++    exportSchema = true,
++    autoMigrations = [AutoMigration(from = 1, to = 2)],
++)
+ @ConstructedBy(WorkoutsDatabaseConstructor::class)
+ internal abstract class WorkoutsDatabase : RoomDatabase() {
+     abstract fun workoutsDao(): WorkoutsDao
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+index 547204b..1a5cc59 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+@@ -7,7 +7,10 @@ package com.example.feature.workouts.data.repository
+ 
+ import com.example.feature.workouts.data.local.WorkoutsDao
+ import com.example.feature.workouts.data.local.WorkoutEntity
++import com.example.feature.workouts.data.local.deleteWorkoutPhotoFile
++import com.example.feature.workouts.data.local.readWorkoutPhotoFile
+ import com.example.feature.workouts.data.local.toDomain
++import com.example.feature.workouts.data.local.writeWorkoutPhotoFile
+ import com.example.feature.workouts.domain.model.Workout
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import org.koin.core.annotation.Factory
+@@ -34,9 +37,24 @@ internal class DefaultWorkoutsRepository(
+      * Deletes the workout with the given identity.
+      */
+     override suspend fun deleteWorkout(id: Long) {
++        val photoPath = dao.getWorkout(id)?.photoPath
+         dao.delete(id)
++        photoPath?.let(::deleteWorkoutPhotoFile)
+     }
+ 
++    /**
++     * Writes the photo file first, then records its path, so a failed write never leaves a dangling path.
++     */
++    override suspend fun attachWorkoutPhoto(id: Long, bytes: ByteArray) {
++        dao.updatePhotoPath(id, writeWorkoutPhotoFile(id, bytes))
++    }
++
++    /**
++     * Reads the photo file behind the stored path; null when none is attached or the file is gone.
++     */
++    override suspend fun getWorkoutPhoto(id: Long): ByteArray? =
++        dao.getWorkout(id)?.photoPath?.let(::readWorkoutPhotoFile)
++
+     /**
+      * Persists the editor draft title.
+      */
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+index b449760..b6c3dc5 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+@@ -24,6 +24,16 @@ public interface WorkoutsRepository {
+      */
+     public suspend fun deleteWorkout(id: Long)
+ 
++    /**
++     * Stores the photo bytes for the workout, replacing any earlier photo.
++     */
++    public suspend fun attachWorkoutPhoto(id: Long, bytes: ByteArray)
++
++    /**
++     * Returns the attached photo bytes, or null when the workout has no photo.
++     */
++    public suspend fun getWorkoutPhoto(id: Long): ByteArray?
++
+     /**
+      * Persists the editor draft title for the workout with the given identity.
+      */
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.kt
+new file mode 100644
+index 0000000..fa71f76
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.kt
+@@ -0,0 +1,7 @@
++package com.example.feature.workouts.presentation.workouts
++
++import androidx.compose.runtime.Composable
++
++/** Returns a launcher that presents the platform photo picker and passes chosen photo bytes to [onPicked]. */
++@Composable
++internal expect fun rememberPhotoPicker(onPicked: (ByteArray) -> Unit): () -> Unit
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+index 71bdcd1..057117f 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+@@ -19,6 +19,7 @@ data class WorkoutsUiState(
+     val draftTitle: String = "",
+     val isLoading: Boolean = false,
+     val isRefreshing: Boolean = false,
++    val photo: ByteArray? = null,
+     val error: AppError? = null,
+     val isMissing: Boolean = false,
+ ) : UiState
+@@ -27,6 +28,8 @@ sealed interface WorkoutsUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsUiAction
+     data class OnTitleChanged(val title: String) : WorkoutsUiAction
+     data object OnSaveClick : WorkoutsUiAction
++    data object OnAttachPhotoClick : WorkoutsUiAction
++    class OnPhotoPicked(val bytes: ByteArray) : WorkoutsUiAction
+     data class OnRetryClick(val error: AppError) : WorkoutsUiAction
+     data object OnBackClick : WorkoutsUiAction
+ }
+@@ -34,5 +37,6 @@ sealed interface WorkoutsUiAction : UiAction {
+ sealed interface WorkoutsUiEffect : UiEffect {
+     data class OpenWorkoutsDetail(val id: Long) : WorkoutsUiEffect
+     data object Saved : WorkoutsUiEffect
++    data object PickPhoto : WorkoutsUiEffect
+     data object NavigateBack : WorkoutsUiEffect
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+index 3b89a00..7725d43 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+@@ -25,11 +25,16 @@ fun WorkoutsRoute(
+         onStopOrDispose {}
+     }
+     val state by viewModel.state.collectAsStateWithLifecycle()
+-    CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
++    val pickPhoto = rememberPhotoPicker { bytes -> viewModel.onAction(WorkoutsUiAction.OnPhotoPicked(bytes)) }
++    CollectEffect(viewModel.effect) { effect ->
++        // The platform picker is a UI-side capability: the Route runs it, the shell never sees it.
++        if (effect == WorkoutsUiEffect.PickPhoto) pickPhoto() else onEffect(effect)
++    }
+     HandleAppErrors(viewModel.errors)
+     WorkoutsScreen(
+         state = state,
+         onTitleChange = { viewModel.onAction(WorkoutsUiAction.OnTitleChanged(it)) },
++        onAttachPhoto = { viewModel.onAction(WorkoutsUiAction.OnAttachPhotoClick) },
+         onSave = { viewModel.onAction(WorkoutsUiAction.OnSaveClick) },
+         onRetry = {
+             // Retry holds the error it retries; no-op when no error is showing.
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+index 653e46d..f0a1d02 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+@@ -6,18 +6,27 @@
+  */
+ package com.example.feature.workouts.presentation.workouts
+ 
++import androidx.compose.foundation.Image
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.heightIn
+ import androidx.compose.material3.Button
+ import androidx.compose.material3.CircularProgressIndicator
+ import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.remember
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++import org.jetbrains.compose.resources.decodeToImageBitmap
+ import org.jetbrains.compose.resources.stringResource
+ import workouts.feature.workouts.generated.resources.Res
++import workouts.feature.workouts.generated.resources.attach_photo
+ import workouts.feature.workouts.generated.resources.back
++import workouts.feature.workouts.generated.resources.change_photo
+ import workouts.feature.workouts.generated.resources.error_message
+ import workouts.feature.workouts.generated.resources.missing_workout
++import workouts.feature.workouts.generated.resources.workout_photo
+ import workouts.feature.workouts.generated.resources.workout_title
+ import workouts.feature.workouts.generated.resources.refreshing
+ import workouts.feature.workouts.generated.resources.retry
+@@ -27,6 +36,7 @@ import workouts.feature.workouts.generated.resources.save
+ fun WorkoutsScreen(
+     state: WorkoutsUiState,
+     onTitleChange: (String) -> Unit,
++    onAttachPhoto: () -> Unit,
+     onSave: () -> Unit,
+     onRetry: () -> Unit,
+     onBack: () -> Unit,
+@@ -52,6 +62,18 @@ fun WorkoutsScreen(
+                 onValueChange = onTitleChange,
+                 label = { Text(stringResource(Res.string.workout_title)) },
+             )
++            state.photo?.let { bytes ->
++                // Decode once per photo, not on every recomposition.
++                val bitmap = remember(bytes) { bytes.decodeToImageBitmap() }
++                Image(
++                    bitmap = bitmap,
++                    contentDescription = stringResource(Res.string.workout_photo),
++                    modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
++                )
++            }
++            Button(onClick = onAttachPhoto) {
++                Text(stringResource(if (state.photo == null) Res.string.attach_photo else Res.string.change_photo))
++            }
+             Button(onClick = onSave) { Text(stringResource(Res.string.save)) }
+             Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
+         }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index 6e98170..5ae7bd9 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -33,6 +33,7 @@ class WorkoutsViewModel(
+ 
+     private var loadJob: Job? = null
+     private var saveJob: Job? = null
++    private var photoJob: Job? = null
+     private var hasStarted: Boolean = false
+ 
+     override fun onAction(action: WorkoutsUiAction) {
+@@ -43,6 +44,8 @@ class WorkoutsViewModel(
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
++            WorkoutsUiAction.OnAttachPhotoClick -> sendEffect(WorkoutsUiEffect.PickPhoto)
++            is WorkoutsUiAction.OnPhotoPicked -> attachPhoto(action.bytes)
+             is WorkoutsUiAction.OnRetryClick -> retry()
+             WorkoutsUiAction.OnBackClick -> sendEffect(WorkoutsUiEffect.NavigateBack)
+         }
+@@ -59,12 +62,14 @@ class WorkoutsViewModel(
+             onComplete = { updateState { copy(isLoading = false, isRefreshing = false) } },
+         ) {
+             val item = withContext(ioDispatcher) { repository.getWorkout(params.workoutId) }
++            val photo = if (item == null) null else withContext(ioDispatcher) { repository.getWorkoutPhoto(params.workoutId) }
+             updateState {
+                 copy(
+                     isLoading = false,
+                     isRefreshing = false,
+                     isMissing = item == null,
+                     items = listOfNotNull(item),
++                    photo = photo,
+                     draftTitle = if (savedStateHandle.contains("draftTitle")) draftTitle else item?.title.orEmpty(),
+                 )
+             }
+@@ -83,6 +88,15 @@ class WorkoutsViewModel(
+         }
+     }
+ 
++    private fun attachPhoto(bytes: ByteArray) {
++        // A newer pick supersedes an in-flight one; the file write is idempotent per workout.
++        photoJob?.cancel()
++        photoJob = launchGuarded(onError = ::emitError) {
++            withContext(ioDispatcher) { repository.attachWorkoutPhoto(params.workoutId, bytes) }
++            updateState { copy(photo = bytes) }
++        }
++    }
++
+     private fun retry() {
+         updateState { copy(error = null) }
+         load()
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+index 70715fa..29bc509 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+@@ -56,6 +56,19 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+         backing.update { list -> list.filterNot { it.id == id } }
+     }
+ 
++    /** Photos by workout id; tests read this to assert what was stored. */
++    val photos = mutableMapOf<Long, ByteArray>()
++
++    override suspend fun attachWorkoutPhoto(id: Long, bytes: ByteArray) {
++        shouldThrowOnPhoto?.let { throw it }
++        photos[id] = bytes
++    }
++
++    override suspend fun getWorkoutPhoto(id: Long): ByteArray? = photos[id]
++
++    /** When set, attaching a photo fails with this storage error. */
++    var shouldThrowOnPhoto: com.example.core.error.StorageException? = null
++
+     override suspend fun saveWorkoutDraft(id: Long, title: String) {
+         saveCalls += 1
+         lastSavedDraft = id to title
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..cd0f28f 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -265,4 +265,63 @@ class WorkoutsViewModelTest {
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+         assertEquals(1, viewModel.state.value.items.size)
+     }
++
++    @Test
++    fun `attach click asks the UI to open the picker`() = runTest(testScheduler) {
++        val viewModel = viewModel(FakeWorkoutsRepository())
++        val effects = mutableListOf<UiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(WorkoutsUiAction.OnAttachPhotoClick)
++        advanceUntilIdle()
++
++        assertEquals(listOf<UiEffect>(WorkoutsUiEffect.PickPhoto), effects)
++    }
++
++    @Test
++    fun `picked photo is stored and shown`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++        val bytes = byteArrayOf(1, 2, 3)
++
++        viewModel.onAction(WorkoutsUiAction.OnPhotoPicked(bytes))
++        advanceUntilIdle()
++
++        assertTrue(bytes.contentEquals(fake.photos[1L]))
++        assertTrue(bytes.contentEquals(viewModel.state.value.photo))
++    }
++
++    @Test
++    fun `stored photo loads with the workout`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply {
++            seed(listOf(workout()))
++            photos[1L] = byteArrayOf(9)
++        }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertTrue(byteArrayOf(9).contentEquals(viewModel.state.value.photo))
++    }
++
++    @Test
++    fun `photo store failure reports an error and keeps the old photo`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply {
++            seed(listOf(workout()))
++            photos[1L] = byteArrayOf(9)
++            shouldThrowOnPhoto = com.example.core.error.StorageException(java.io.IOException("disk full"))
++        }
++        val viewModel = viewModel(fake)
++        val errors = mutableListOf<com.example.core.error.AppError>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.errors.toList(errors) }
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        viewModel.onAction(WorkoutsUiAction.OnPhotoPicked(byteArrayOf(1)))
++        advanceUntilIdle()
++
++        assertEquals(1, errors.size)
++        assertTrue(byteArrayOf(9).contentEquals(viewModel.state.value.photo))
++    }
+ }
+diff --git a/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.ios.kt b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.ios.kt
+new file mode 100644
+index 0000000..7f37934
+--- /dev/null
++++ b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.ios.kt
+@@ -0,0 +1,48 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import kotlinx.cinterop.BetaInteropApi
++import kotlinx.cinterop.ExperimentalForeignApi
++import kotlinx.cinterop.addressOf
++import kotlinx.cinterop.usePinned
++import platform.Foundation.NSData
++import platform.Foundation.NSDocumentDirectory
++import platform.Foundation.NSFileManager
++import platform.Foundation.NSUserDomainMask
++import platform.Foundation.create
++import platform.Foundation.dataWithContentsOfFile
++import platform.Foundation.writeToFile
++import platform.posix.memcpy
++
++@OptIn(ExperimentalForeignApi::class)
++private fun photosDirectory(): String {
++    val documents = NSFileManager.defaultManager.URLForDirectory(
++        NSDocumentDirectory, NSUserDomainMask, null, true, null,
++    )?.path ?: throw StorageException(IllegalStateException("Documents directory unavailable"))
++    val directory = "$documents/workout-photos"
++    NSFileManager.defaultManager.createDirectoryAtPath(directory, true, null, null)
++    return directory
++}
++
++@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
++internal actual fun writeWorkoutPhotoFile(workoutId: Long, bytes: ByteArray): String {
++    val path = "${photosDirectory()}/workout-$workoutId.photo"
++    val data = bytes.usePinned { NSData.create(bytes = it.addressOf(0), length = bytes.size.toULong()) }
++    if (!data.writeToFile(path, atomically = true)) {
++        throw StorageException(IllegalStateException("Could not write $path"))
++    }
++    return path
++}
++
++@OptIn(ExperimentalForeignApi::class)
++internal actual fun readWorkoutPhotoFile(path: String): ByteArray? {
++    val data = NSData.dataWithContentsOfFile(path) ?: return null
++    return ByteArray(data.length.toInt()).also { out ->
++        if (out.isNotEmpty()) out.usePinned { memcpy(it.addressOf(0), data.bytes, data.length) }
++    }
++}
++
++@OptIn(ExperimentalForeignApi::class)
++internal actual fun deleteWorkoutPhotoFile(path: String) {
++    NSFileManager.defaultManager.removeItemAtPath(path, null)
++}
+diff --git a/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.ios.kt b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.ios.kt
+new file mode 100644
+index 0000000..af39865
+--- /dev/null
++++ b/feature/workouts/src/iosMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.ios.kt
+@@ -0,0 +1,55 @@
++package com.example.feature.workouts.presentation.workouts
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.rememberUpdatedState
++import kotlinx.cinterop.ExperimentalForeignApi
++import kotlinx.cinterop.addressOf
++import kotlinx.cinterop.usePinned
++import platform.Foundation.NSDictionary
++import platform.UIKit.UIApplication
++import platform.UIKit.UIImage
++import platform.UIKit.UIImageJPEGRepresentation
++import platform.UIKit.UIImagePickerController
++import platform.UIKit.UIImagePickerControllerDelegateProtocol
++import platform.UIKit.UIImagePickerControllerOriginalImage
++import platform.UIKit.UIImagePickerControllerSourceType
++import platform.UIKit.UINavigationControllerDelegateProtocol
++import platform.darwin.NSObject
++import platform.posix.memcpy
++
++private class PhotoPickerDelegate(
++    private val onPicked: (ByteArray) -> Unit,
++) : NSObject(), UIImagePickerControllerDelegateProtocol, UINavigationControllerDelegateProtocol {
++    @OptIn(ExperimentalForeignApi::class)
++    override fun imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo: Map<Any?, *>) {
++        val image = didFinishPickingMediaWithInfo[UIImagePickerControllerOriginalImage] as? UIImage
++        val data = image?.let { UIImageJPEGRepresentation(it, 0.9) }
++        picker.dismissViewControllerAnimated(true, completion = null)
++        if (data != null) {
++            val bytes = ByteArray(data.length.toInt())
++            if (bytes.isNotEmpty()) bytes.usePinned { memcpy(it.addressOf(0), data.bytes, data.length) }
++            onPicked(bytes)
++        }
++    }
++
++    override fun imagePickerControllerDidCancel(picker: UIImagePickerController) {
++        picker.dismissViewControllerAnimated(true, completion = null)
++    }
++}
++
++@Composable
++internal actual fun rememberPhotoPicker(onPicked: (ByteArray) -> Unit): () -> Unit {
++    val currentOnPicked by rememberUpdatedState(onPicked)
++    // UIKit holds the delegate weakly; remember keeps it alive for the composition.
++    val delegate = remember { PhotoPickerDelegate { bytes -> currentOnPicked(bytes) } }
++    return {
++        val picker = UIImagePickerController().apply {
++            sourceType = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary
++            this.delegate = delegate
++        }
++        UIApplication.sharedApplication.keyWindow?.rootViewController
++            ?.presentViewController(picker, animated = true, completion = null)
++    }
++}
+diff --git a/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.jvm.kt b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.jvm.kt
+new file mode 100644
+index 0000000..ccf56cb
+--- /dev/null
++++ b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/data/local/WorkoutPhotoFiles.jvm.kt
+@@ -0,0 +1,24 @@
++package com.example.feature.workouts.data.local
++
++import com.example.core.error.StorageException
++import java.io.File
++import java.io.IOException
++
++private fun photosDirectory(): File =
++    File(System.getProperty("user.home"), ".workouts-app/photos").apply { mkdirs() }
++
++internal actual fun writeWorkoutPhotoFile(workoutId: Long, bytes: ByteArray): String = try {
++    File(photosDirectory(), "workout-$workoutId.photo").apply { writeBytes(bytes) }.absolutePath
++} catch (e: IOException) {
++    throw StorageException(e)
++}
++
++internal actual fun readWorkoutPhotoFile(path: String): ByteArray? = try {
++    File(path).takeIf(File::exists)?.readBytes()
++} catch (e: IOException) {
++    throw StorageException(e)
++}
++
++internal actual fun deleteWorkoutPhotoFile(path: String) {
++    File(path).delete()
++}
+diff --git a/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.jvm.kt b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.jvm.kt
+new file mode 100644
+index 0000000..943d636
+--- /dev/null
++++ b/feature/workouts/src/jvmMain/kotlin/com/example/feature/workouts/presentation/workouts/PhotoPicker.jvm.kt
+@@ -0,0 +1,23 @@
++package com.example.feature.workouts.presentation.workouts
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.rememberUpdatedState
++import java.awt.FileDialog
++import java.awt.Frame
++import java.io.File
++
++private val imageExtensions = setOf("jpg", "jpeg", "png", "webp", "bmp", "gif")
++
++@Composable
++internal actual fun rememberPhotoPicker(onPicked: (ByteArray) -> Unit): () -> Unit {
++    val currentOnPicked by rememberUpdatedState(onPicked)
++    return {
++        val dialog = FileDialog(null as Frame?, "Select photo", FileDialog.LOAD).apply {
++            setFilenameFilter { _, name -> name.substringAfterLast('.', "").lowercase() in imageExtensions }
++            isVisible = true
++        }
++        val file = dialog.file?.let { File(dialog.directory, it) }
++        if (file != null) currentOnPicked(file.readBytes())
++    }
++}

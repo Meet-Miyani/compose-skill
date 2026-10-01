@@ -1,0 +1,60 @@
+> Task :feature:workouts:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :feature:workouts:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :feature:workouts:processAndroidMainJavaRes UP-TO-DATE
+> Task :composeApp:mergeAndroidMainJniLibFolders
+> Task :composeApp:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:designsystem:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:copyAndroidMainJniLibsProjectOnly
+> Task :core:mvi:mergeAndroidMainJniLibFolders
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :feature:workouts:mergeAndroidMainJniLibFolders
+> Task :feature:workouts:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:validateSigningDebug
+> Task :androidApp:checkDebugDuplicateClasses
+> Task :androidApp:writeDebugAppMetadata
+> Task :core:error:mergeAndroidMainJniLibFolders
+> Task :core:error:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:writeDebugSigningConfigVersions
+> Task :core:error:copyAndroidMainJniLibsProjectOnly
+> Task :feature:workouts:copyAndroidMainJniLibsProjectOnly
+> Task :core:designsystem:mergeAndroidMainJniLibFolders
+> Task :core:designsystem:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:processDebugMainManifest UP-TO-DATE
+> Task :androidApp:processDebugManifest UP-TO-DATE
+> Task :androidApp:processDebugManifestForPackage UP-TO-DATE
+> Task :androidApp:mergeDebugAssets
+> Task :androidApp:compressDebugAssets FROM-CACHE
+> Task :composeApp:compileAndroidMain UP-TO-DATE
+> Task :composeApp:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:processAndroidMainJavaRes UP-TO-DATE
+> Task :core:designsystem:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:processDebugResources UP-TO-DATE
+> Task :androidApp:mergeDebugJniLibFolders
+> Task :androidApp:compileDebugKotlin UP-TO-DATE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:processDebugJavaRes UP-TO-DATE
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :androidApp:mergeLibDexDebug FROM-CACHE
+> Task :androidApp:mergeDebugNativeLibs
+> Task :androidApp:stripDebugDebugSymbols
+> Task :androidApp:mergeExtDexDebug FROM-CACHE
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2s
+165 actionable tasks: 44 executed, 7 from cache, 114 up-to-date
+Configuration cache entry stored.

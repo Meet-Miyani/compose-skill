@@ -1,0 +1,3 @@
+Added an **Attach photo** button to the workout detail screen. It opens the platform photo picker and saves the selected image in the local Room database with that workout. Existing workouts are preserved by a database migration, and the screen shows when a photo is attached.
+
+Verified with JVM tests, an Android debug build, and iOS simulator compilation. The iOS host app must add `NSPhotoLibraryUsageDescription` to its `Info.plist` before using the picker, as [Apple requires for photo library access](https://developer.apple.com/documentation/bundleresources/information-property-list/nsphotolibraryusagedescription).

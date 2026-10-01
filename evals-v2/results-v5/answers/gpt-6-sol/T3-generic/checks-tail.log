@@ -1,0 +1,60 @@
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:mergeDebugResources UP-TO-DATE
+> Task :feature:workouts:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:validateSigningDebug UP-TO-DATE
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :core:error:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:writeDebugAppMetadata UP-TO-DATE
+> Task :androidApp:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :feature:workouts:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :core:error:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :composeApp:jvmProcessResources
+> Task :composeApp:processJvmMainResources SKIPPED
+> Task :androidApp:mergeDebugNativeLibs UP-TO-DATE
+> Task :androidApp:processDebugMainManifest UP-TO-DATE
+> Task :androidApp:stripDebugDebugSymbols UP-TO-DATE
+> Task :androidApp:processDebugManifest UP-TO-DATE
+> Task :androidApp:processDebugManifestForPackage UP-TO-DATE
+> Task :androidApp:processDebugResources UP-TO-DATE
+> Task :composeApp:generateActualResourceCollectorsForJvmMain
+> Task :feature:workouts:kspAndroidMain
+> Task :feature:workouts:copyRoomSchemas NO-SOURCE
+> Task :composeApp:compileKotlinJvm
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses
+> Task :composeApp:jvmJar
+
+> Task :feature:workouts:compileAndroidMain
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: <project>/feature/workouts/build/generated/ksp/android/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: <project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt:16:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:workouts:processAndroidMainJavaRes UP-TO-DATE
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+> Task :feature:workouts:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:compileAndroidMain UP-TO-DATE
+> Task :composeApp:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain UP-TO-DATE
+> Task :composeApp:processAndroidMainJavaRes UP-TO-DATE
+> Task :androidApp:compileDebugKotlin UP-TO-DATE
+> Task :androidApp:processDebugJavaRes UP-TO-DATE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:dexBuilderDebug UP-TO-DATE
+> Task :androidApp:mergeProjectDexDebug UP-TO-DATE
+> Task :androidApp:mergeDebugJavaResource UP-TO-DATE
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect UP-TO-DATE
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 2s
+165 actionable tasks: 20 executed, 145 up-to-date
+Configuration cache entry stored.

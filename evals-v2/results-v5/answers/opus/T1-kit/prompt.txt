@@ -1,0 +1,1 @@
+Add a button to attach a photo to a workout. It should save the photo to local storage.

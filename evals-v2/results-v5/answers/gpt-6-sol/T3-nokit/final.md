@@ -1,0 +1,3 @@
+Added an **Export CSV** button to the workout list. It exports all workouts without keeping the user on that screen. Android uses WorkManager to run the export after navigation and saves the file in Downloads; desktop and iOS use jobs independent of the screen.
+
+Verified with the JVM tests, an Android debug build, and an iOS simulator compile. On desktop and iOS, the app must remain running until the export finishes.

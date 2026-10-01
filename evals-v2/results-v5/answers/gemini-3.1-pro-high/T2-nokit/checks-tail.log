@@ -1,0 +1,60 @@
+> Task :core:error:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:mvi:mergeAndroidMainJniLibFolders
+> Task :androidApp:checkDebugDuplicateClasses
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:error:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:mergeDebugJniLibFolders
+> Task :feature:workouts:mergeAndroidMainJniLibFolders
+> Task :feature:workouts:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:mergeDebugAssets
+> Task :androidApp:compressDebugAssets FROM-CACHE
+> Task :androidApp:writeDebugAppMetadata
+> Task :core:designsystem:mergeAndroidMainJniLibFolders
+> Task :feature:workouts:compileAndroidMain UP-TO-DATE
+> Task :core:designsystem:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :androidApp:validateSigningDebug
+> Task :feature:workouts:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :composeApp:compileKotlinJvm FROM-CACHE
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses UP-TO-DATE
+> Task :composeApp:jvmJar UP-TO-DATE
+> Task :androidApp:writeDebugSigningConfigVersions
+> Task :feature:workouts:processAndroidMainJavaRes
+> Task :core:designsystem:copyAndroidMainJniLibsProjectOnly
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:mergeDebugResources FROM-CACHE
+> Task :feature:workouts:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:processDebugMainManifest FROM-CACHE
+> Task :androidApp:processDebugManifest FROM-CACHE
+> Task :androidApp:processDebugManifestForPackage FROM-CACHE
+> Task :composeApp:compileAndroidMain FROM-CACHE
+> Task :composeApp:processAndroidMainJavaRes UP-TO-DATE
+> Task :androidApp:mergeDebugNativeLibs
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :androidApp:processDebugResources FROM-CACHE
+> Task :androidApp:stripDebugDebugSymbols
+> Task :androidApp:mergeExtDexDebug FROM-CACHE
+> Task :androidApp:compileDebugKotlin FROM-CACHE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 7s
+165 actionable tasks: 52 executed, 30 from cache, 83 up-to-date
+Configuration cache entry stored.

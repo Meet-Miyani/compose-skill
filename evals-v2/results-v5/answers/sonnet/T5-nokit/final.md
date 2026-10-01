@@ -1,0 +1,3 @@
+Fixed in `WorkoutsListViewModel.kt`: `addWorkout()` now returns early if an add is already running. A double tap used to start two inserts, so you got two workouts, and the second tap is now ignored.
+
+I haven't built or run it. The guard also covers the second tap only while the first insert is still in flight. A tap after it finishes would add a new workout, but by then you've already been taken to the opened workout.

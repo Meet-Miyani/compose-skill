@@ -1,0 +1,38 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index 6fdd8f6..0e9b495 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -31,7 +31,8 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     }
+ 
+     private fun addWorkout() {
+-        
++        // Overlap guard: a double tap must not insert a second workout while the first is in flight.
++        if (addJob?.isActive == true) return
+         addJob = launchGuarded(onError = ::emitError) {
+             sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
+         }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+index 836f07c..38c59c2 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+@@ -51,6 +51,19 @@ class WorkoutsListViewModelTest {
+         assertEquals(WorkoutsListUiEffect.OpenWorkout(1L), effects.single())
+     }
+ 
++    @Test fun `double tap on add creates a single workout`() = runTest(scheduler) {
++        val fake = FakeWorkoutsRepository()
++        val viewModel = WorkoutsListViewModel(fake)
++        val effects = mutableListOf<WorkoutsListUiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { viewModel.effect.toList(effects) }
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        advanceUntilIdle()
++        assertEquals(1, viewModel.state.value.items.size)
++        assertEquals(1, effects.size)
++    }
++
+     @Test fun `workout click opens chosen workout`() = runTest(scheduler) {
+         val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository())
+         val effects = mutableListOf<WorkoutsListUiEffect>()

@@ -1,0 +1,3 @@
+agent_exit=0 seconds=unknown
+note=runner wrap-up crashed (script edited mid-run, 2026-09-30); finalized 2026-10-01 by v5-finalize.sh
+checks_exit=0

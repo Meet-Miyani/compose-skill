@@ -1,0 +1,47 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+index 3f7f10f..9d6a0d9 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+@@ -9,6 +9,7 @@ import com.example.feature.workouts.domain.model.Workout
+ data class WorkoutsListUiState(
+     val items: List<Workout> = emptyList(),
+     val isLoading: Boolean = true,
++    val isAdding: Boolean = false,
+     val error: AppError? = null,
+ ) : UiState
+ 
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+index 1cef939..321bfe6 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+@@ -31,7 +31,7 @@ fun WorkoutsListScreen(
+ ) {
+     Column(Modifier.fillMaxSize().padding(16.dp)) {
+         Text(stringResource(Res.string.workouts_title))
+-        Button(onClick = onAdd) { Text(stringResource(Res.string.add_workout)) }
++        Button(onClick = onAdd, enabled = !state.isAdding) { Text(stringResource(Res.string.add_workout)) }
+         when {
+             state.isLoading -> CircularProgressIndicator()
+             state.error != null -> {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index 6fdd8f6..47a1bfa 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -31,9 +31,15 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     }
+ 
+     private fun addWorkout() {
+-        
++        if (addJob?.isActive == true) return
++
++        updateState { copy(isAdding = true) }
+         addJob = launchGuarded(onError = ::emitError) {
+-            sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
++            try {
++                sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
++            } finally {
++                updateState { copy(isAdding = false) }
++            }
+         }
+     }
+ }

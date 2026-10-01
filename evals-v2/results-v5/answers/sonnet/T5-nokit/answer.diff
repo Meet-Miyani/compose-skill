@@ -1,0 +1,15 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index 6fdd8f6..39f01fa 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -31,8 +31,8 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     }
+ 
+     private fun addWorkout() {
+-        
+-        addJob = launchGuarded(onError = ::emitError) {
++        if (addJob?.isActive == true) return
++        addJob =launchGuarded(onError = ::emitError) {
+             sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
+         }
+     }

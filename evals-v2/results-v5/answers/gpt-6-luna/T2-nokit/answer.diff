@@ -1,0 +1,176 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 878e8d8..8b999d3 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -10,11 +10,15 @@ import androidx.navigation3.runtime.rememberNavBackStack
+ import androidx.navigation3.scene.SinglePaneSceneStrategy
+ import androidx.navigation3.ui.NavDisplay
+ import androidx.savedstate.serialization.SavedStateConfiguration
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
+ import com.example.feature.workouts.navigation.WorkoutsDetailKey
+ import com.example.feature.workouts.navigation.WorkoutsListKey
++import com.example.feature.workouts.navigation.WorkoutTypeSelectionKey
+ import com.example.feature.workouts.navigation.workoutsNavSerializers
+ import com.example.feature.workouts.presentation.list.WorkoutsListRoute
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiEffect
++import com.example.feature.workouts.presentation.selection.WorkoutTypeSelectionScreen
+ import com.example.feature.workouts.presentation.workouts.WorkoutsParams
+ import com.example.feature.workouts.presentation.workouts.WorkoutsRoute
+ import com.example.feature.workouts.presentation.workouts.WorkoutsUiEffect
+@@ -51,14 +55,32 @@ fun App() {
+                             viewModel = koinViewModel(),
+                             onEffect = { effect ->
+                                 when (effect) {
+-                                    is WorkoutsListUiEffect.OpenWorkout -> backStack.add(WorkoutsDetailKey(effect.id))
++                                    is WorkoutsListUiEffect.OpenWorkout -> backStack.add(WorkoutsDetailKey(effect.id, effect.type))
++                                    WorkoutsListUiEffect.OpenWorkoutTypeSelection -> backStack.add(WorkoutTypeSelectionKey)
+                                 }
+                             },
+                         )
+                     }
++                    entry<WorkoutTypeSelectionKey> {
++                        val viewModel: com.example.feature.workouts.presentation.list.WorkoutsListViewModel = koinViewModel()
++                        CollectEffect(viewModel.effect) { effect ->
++                            when (effect) {
++                                is WorkoutsListUiEffect.OpenWorkout -> {
++                                    if (backStack.lastOrNull() == WorkoutTypeSelectionKey) backStack.removeAt(backStack.lastIndex)
++                                    backStack.add(WorkoutsDetailKey(effect.id, effect.type))
++                                }
++                                WorkoutsListUiEffect.OpenWorkoutTypeSelection -> Unit
++                            }
++                        }
++                        HandleAppErrors(viewModel.errors)
++                        WorkoutTypeSelectionScreen(
++                            onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
++                            onTypeSelected = { type -> viewModel.onAction(com.example.feature.workouts.presentation.list.WorkoutsListUiAction.OnWorkoutTypeSelected(type)) },
++                        )
++                    }
+                     entry<WorkoutsDetailKey> { key ->
+                         WorkoutsRoute(
+-                            viewModel = koinViewModel(parameters = { parametersOf(WorkoutsParams(workoutId = key.workoutId)) }),
++                            viewModel = koinViewModel(parameters = { parametersOf(WorkoutsParams(workoutId = key.workoutId, workoutType = key.workoutType)) }),
+                             workoutId = key.workoutId,
+                             onEffect = { effect ->
+                                 when (effect) {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
+index 8e40396..cff4439 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
+@@ -21,11 +21,14 @@ sealed interface WorkoutsNavKey : NavKey
+ @Serializable
+ data object WorkoutsListKey : WorkoutsNavKey
+ 
++@Serializable
++data object WorkoutTypeSelectionKey : WorkoutsNavKey
++
+ /**
+  * Detail destination key carrying the workout identity.
+  */
+ @Serializable
+-data class WorkoutsDetailKey(val workoutId: Long) : WorkoutsNavKey
++data class WorkoutsDetailKey(val workoutId: Long, val workoutType: String? = null) : WorkoutsNavKey
+ 
+ /**
+  * Polymorphic serializers for the Workouts key hierarchy.
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+index 3f7f10f..4fd778c 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+@@ -15,10 +15,12 @@ data class WorkoutsListUiState(
+ sealed interface WorkoutsListUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsListUiAction
+     data object OnAddClick : WorkoutsListUiAction
++    data class OnWorkoutTypeSelected(val type: String) : WorkoutsListUiAction
+     data class OnWorkoutClick(val id: Long) : WorkoutsListUiAction
+     data object OnRetryClick : WorkoutsListUiAction
+ }
+ 
+ sealed interface WorkoutsListUiEffect : UiEffect {
+-    data class OpenWorkout(val id: Long) : WorkoutsListUiEffect
++    data class OpenWorkout(val id: Long, val type: String? = null) : WorkoutsListUiEffect
++    data object OpenWorkoutTypeSelection : WorkoutsListUiEffect
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index b31b7d4..4483a68 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -15,7 +15,8 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     override fun onAction(action: WorkoutsListUiAction) {
+         when (action) {
+             WorkoutsListUiAction.OnScreenStarted, WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
+-            WorkoutsListUiAction.OnAddClick -> addWorkout()
++            WorkoutsListUiAction.OnAddClick -> sendEffect(WorkoutsListUiEffect.OpenWorkoutTypeSelection)
++            is WorkoutsListUiAction.OnWorkoutTypeSelected -> addWorkout(action.type)
+             is WorkoutsListUiAction.OnWorkoutClick -> sendEffect(WorkoutsListUiEffect.OpenWorkout(action.id))
+         }
+     }
+@@ -30,10 +31,10 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+         }
+     }
+ 
+-    private fun addWorkout() {
++    private fun addWorkout(type: String? = null) {
+         if (addJob?.isActive == true) return
+         addJob = launchGuarded(onError = ::emitError) {
+-            sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
++            sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout(), type))
+         }
+     }
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/selection/WorkoutTypeSelectionScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/selection/WorkoutTypeSelectionScreen.kt
+new file mode 100644
+index 0000000..cdef446
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/selection/WorkoutTypeSelectionScreen.kt
+@@ -0,0 +1,28 @@
++package com.example.feature.workouts.presentation.selection
++
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Button
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++
++@Composable
++fun WorkoutTypeSelectionScreen(
++    onBack: () -> Unit,
++    onTypeSelected: (String) -> Unit,
++) {
++    Column(
++        modifier = Modifier.fillMaxSize().padding(24.dp),
++        verticalArrangement = Arrangement.spacedBy(16.dp),
++    ) {
++        Text("Choose a workout type")
++        Button(onClick = { onTypeSelected("Cardio") }) { Text("Cardio") }
++        Button(onClick = { onTypeSelected("Strength") }) { Text("Strength") }
++        Button(onClick = { onTypeSelected("Flexibility") }) { Text("Flexibility") }
++        Button(onClick = onBack) { Text("Back") }
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index 6e98170..bcec117 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -17,7 +17,7 @@ import org.koin.core.annotation.KoinViewModel
+ import org.koin.core.annotation.InjectedParam
+ 
+ /** Construction bag for the destination's nav arguments. Top-level so entries and tests share it. */
+-data class WorkoutsParams(val workoutId: Long)
++data class WorkoutsParams(val workoutId: Long, val workoutType: String? = null)
+ 
+ /** ViewModel behind the Workouts destination; owns its UiState, draft title, and cold-load/reconcile split. */
+ @KoinViewModel
+@@ -65,7 +65,7 @@ class WorkoutsViewModel(
+                     isRefreshing = false,
+                     isMissing = item == null,
+                     items = listOfNotNull(item),
+-                    draftTitle = if (savedStateHandle.contains("draftTitle")) draftTitle else item?.title.orEmpty(),
++                    draftTitle = if (savedStateHandle.contains("draftTitle")) draftTitle else item?.title ?: params.workoutType.orEmpty(),
+                 )
+             }
+             hasStarted = true

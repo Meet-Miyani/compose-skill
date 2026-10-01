@@ -1,0 +1,180 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+index 23001af..3debe73 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+@@ -1,36 +1,31 @@
+ package com.example.feature.workouts.presentation.list
+ 
+-import androidx.compose.runtime.*
+-
+-// MVI violation: uses MVP instead of BaseViewModel and UiState/UiAction/UiEffect
+-
+-interface QuickAddView {
+-    fun showLoading()
+-    fun hideLoading()
+-    fun clearInput()
+-}
+-
+-class QuickAddPresenter(private val view: QuickAddView) {
+-    fun onAddClicked(workoutName: String) {
+-        view.showLoading()
+-        // save logic...
+-        view.hideLoading()
+-        view.clearInput()
+-    }
+-}
++import androidx.compose.runtime.Composable
++import androidx.compose.foundation.layout.Row
++import androidx.compose.material3.Button
++import androidx.compose.material3.CircularProgressIndicator
++import androidx.compose.material3.Text
++import androidx.compose.material3.TextField
++import org.jetbrains.compose.resources.stringResource
++import workouts.feature.workouts.generated.resources.Res
++import workouts.feature.workouts.generated.resources.add_workout
++import androidx.compose.ui.Modifier
+ 
+ @Composable
+-fun QuickAddWidget() {
+-    var isLoading by remember { mutableStateOf(false) }
+-    var text by remember { mutableStateOf("") }
+-    
+-    val presenter = remember { 
+-        QuickAddPresenter(object : QuickAddView {
+-            override fun showLoading() { isLoading = true }
+-            override fun hideLoading() { isLoading = false }
+-            override fun clearInput() { text = "" }
+-        }) 
++fun QuickAddWidget(
++    text: String,
++    isLoading: Boolean,
++    onTextChanged: (String) -> Unit,
++    onAddClick: () -> Unit,
++) {
++    Row {
++        TextField(value = text, onValueChange = onTextChanged, modifier = Modifier.weight(1f))
++        Button(onClick = onAddClick, enabled = !isLoading) {
++            if (isLoading) {
++                CircularProgressIndicator()
++            } else {
++                Text(stringResource(Res.string.add_workout))
++            }
++        }
+     }
+-    
+-    // UI elements...
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+index 3f7f10f..24ee3a8 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListContract.kt
+@@ -9,12 +9,16 @@ import com.example.feature.workouts.domain.model.Workout
+ data class WorkoutsListUiState(
+     val items: List<Workout> = emptyList(),
+     val isLoading: Boolean = true,
++    val quickAddText: String = "",
++    val isQuickAddLoading: Boolean = false,
+     val error: AppError? = null,
+ ) : UiState
+ 
+ sealed interface WorkoutsListUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsListUiAction
+     data object OnAddClick : WorkoutsListUiAction
++    data class OnQuickAddTextChanged(val text: String) : WorkoutsListUiAction
++    data object OnQuickAddClick : WorkoutsListUiAction
+     data class OnWorkoutClick(val id: Long) : WorkoutsListUiAction
+     data object OnRetryClick : WorkoutsListUiAction
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+index 8e3edd8..c8cc84b 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListRoute.kt
+@@ -19,6 +19,8 @@ fun WorkoutsListRoute(viewModel: WorkoutsListViewModel, onEffect: suspend (Worko
+     WorkoutsListScreen(
+         state = state,
+         onAdd = { viewModel.onAction(WorkoutsListUiAction.OnAddClick) },
++        onQuickAddTextChanged = { viewModel.onAction(WorkoutsListUiAction.OnQuickAddTextChanged(it)) },
++        onQuickAdd = { viewModel.onAction(WorkoutsListUiAction.OnQuickAddClick) },
+         onWorkout = { viewModel.onAction(WorkoutsListUiAction.OnWorkoutClick(it)) },
+         onRetry = { viewModel.onAction(WorkoutsListUiAction.OnRetryClick) },
+     )
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+index 1cef939..41c9177 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListScreen.kt
+@@ -26,12 +26,20 @@ import workouts.feature.workouts.generated.resources.untitled_workout
+ fun WorkoutsListScreen(
+     state: WorkoutsListUiState,
+     onAdd: () -> Unit,
++    onQuickAddTextChanged: (String) -> Unit,
++    onQuickAdd: () -> Unit,
+     onWorkout: (Long) -> Unit,
+     onRetry: () -> Unit,
+ ) {
+     Column(Modifier.fillMaxSize().padding(16.dp)) {
+         Text(stringResource(Res.string.workouts_title))
+         Button(onClick = onAdd) { Text(stringResource(Res.string.add_workout)) }
++        QuickAddWidget(
++            text = state.quickAddText,
++            isLoading = state.isQuickAddLoading,
++            onTextChanged = onQuickAddTextChanged,
++            onAddClick = onQuickAdd,
++        )
+         when {
+             state.isLoading -> CircularProgressIndicator()
+             state.error != null -> {
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index b31b7d4..9c869c4 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -1,5 +1,6 @@
+ package com.example.feature.workouts.presentation.list
+ 
++import androidx.lifecycle.SavedStateHandle
+ import com.example.core.mvi.BaseViewModel
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import kotlinx.coroutines.Job
+@@ -7,8 +8,12 @@ import kotlinx.coroutines.flow.collect
+ import org.koin.core.annotation.KoinViewModel
+ 
+ @KoinViewModel
+-class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+-    BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(WorkoutsListUiState()) {
++class WorkoutsListViewModel(
++    private val repository: WorkoutsRepository,
++    private val savedStateHandle: SavedStateHandle,
++) : BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(
++    WorkoutsListUiState(quickAddText = savedStateHandle[QUICK_ADD_TEXT_KEY] ?: ""),
++) {
+     private var streamJob: Job? = null
+     private var addJob: Job? = null
+ 
+@@ -16,6 +21,11 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+         when (action) {
+             WorkoutsListUiAction.OnScreenStarted, WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
+             WorkoutsListUiAction.OnAddClick -> addWorkout()
++            is WorkoutsListUiAction.OnQuickAddTextChanged -> {
++                savedStateHandle[QUICK_ADD_TEXT_KEY] = action.text
++                updateState { copy(quickAddText = action.text) }
++            }
++            WorkoutsListUiAction.OnQuickAddClick -> quickAddWorkout()
+             is WorkoutsListUiAction.OnWorkoutClick -> sendEffect(WorkoutsListUiEffect.OpenWorkout(action.id))
+         }
+     }
+@@ -36,4 +46,16 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+             sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
+         }
+     }
++
++    private fun quickAddWorkout() {
++        if (currentState.isQuickAddLoading) return
++        updateState { copy(isQuickAddLoading = true) }
++        // The existing quick-add flow has no persistence call; preserve its loading and clear-input sequence.
++        updateState { copy(isQuickAddLoading = false, quickAddText = "") }
++        savedStateHandle[QUICK_ADD_TEXT_KEY] = ""
++    }
++
++    private companion object {
++        const val QUICK_ADD_TEXT_KEY = "quickAddText"
++    }
+ }

@@ -1,0 +1,1 @@
+Make the Quick Add feature match the project's MVI conventions without changing behaviour.

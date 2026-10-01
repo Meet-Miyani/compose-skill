@@ -1,0 +1,164 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt
+new file mode 100644
+index 0000000..63c16bb
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddContract.kt
+@@ -0,0 +1,18 @@
++package com.example.feature.workouts.presentation.list
++
++import com.example.core.mvi.UiAction
++import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
++
++data class QuickAddUiState(
++    val workoutName: String = "",
++    val isLoading: Boolean = false,
++) : UiState
++
++sealed interface QuickAddUiAction : UiAction {
++    data class OnWorkoutNameChanged(val name: String) : QuickAddUiAction
++    data object OnAddClick : QuickAddUiAction
++}
++
++/** Quick Add currently has no one-shot UI commands. */
++data object QuickAddUiEffect : UiEffect
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt
+new file mode 100644
+index 0000000..79e63be
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModel.kt
+@@ -0,0 +1,34 @@
++package com.example.feature.workouts.presentation.list
++
++import androidx.lifecycle.SavedStateHandle
++import com.example.core.mvi.BaseViewModel
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class QuickAddViewModel(
++    private val savedStateHandle: SavedStateHandle,
++) : BaseViewModel<QuickAddUiAction, QuickAddUiState, QuickAddUiEffect>(
++    QuickAddUiState(workoutName = savedStateHandle[WORKOUT_NAME_KEY] ?: ""),
++) {
++    override fun onAction(action: QuickAddUiAction) {
++        when (action) {
++            is QuickAddUiAction.OnWorkoutNameChanged -> {
++                savedStateHandle[WORKOUT_NAME_KEY] = action.name
++                updateState { copy(workoutName = action.name) }
++            }
++            QuickAddUiAction.OnAddClick -> add()
++        }
++    }
++
++    private fun add() {
++        updateState { copy(isLoading = true) }
++        // Preserve the existing Quick Add stub behavior: the add operation
++        // completes immediately and clears the input.
++        updateState { copy(isLoading = false, workoutName = "") }
++        savedStateHandle[WORKOUT_NAME_KEY] = ""
++    }
++
++    private companion object {
++        const val WORKOUT_NAME_KEY = "quickAddWorkoutName"
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+index 23001af..07503bb 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/QuickAddWidget.kt
+@@ -1,36 +1,35 @@
+ package com.example.feature.workouts.presentation.list
+ 
+-import androidx.compose.runtime.*
+-
+-// MVI violation: uses MVP instead of BaseViewModel and UiState/UiAction/UiEffect
+-
+-interface QuickAddView {
+-    fun showLoading()
+-    fun hideLoading()
+-    fun clearInput()
+-}
+-
+-class QuickAddPresenter(private val view: QuickAddView) {
+-    fun onAddClicked(workoutName: String) {
+-        view.showLoading()
+-        // save logic...
+-        view.hideLoading()
+-        view.clearInput()
+-    }
+-}
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.material3.Button
++import androidx.compose.material3.CircularProgressIndicator
++import androidx.compose.material3.OutlinedTextField
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import org.jetbrains.compose.resources.stringResource
++import workouts.feature.workouts.generated.resources.Res
++import workouts.feature.workouts.generated.resources.add_workout
+ 
++/** Stateless Quick Add content; state and intents are owned by its MVI host. */
+ @Composable
+-fun QuickAddWidget() {
+-    var isLoading by remember { mutableStateOf(false) }
+-    var text by remember { mutableStateOf("") }
+-    
+-    val presenter = remember { 
+-        QuickAddPresenter(object : QuickAddView {
+-            override fun showLoading() { isLoading = true }
+-            override fun hideLoading() { isLoading = false }
+-            override fun clearInput() { text = "" }
+-        }) 
++fun QuickAddWidget(
++    state: QuickAddUiState,
++    onAction: (QuickAddUiAction) -> Unit,
++) {
++    Row(Modifier.fillMaxWidth()) {
++        OutlinedTextField(
++            value = state.workoutName,
++            onValueChange = { onAction(QuickAddUiAction.OnWorkoutNameChanged(it)) },
++            modifier = Modifier.weight(1f),
++            singleLine = true,
++        )
++        Button(
++            onClick = { onAction(QuickAddUiAction.OnAddClick) },
++            enabled = !state.isLoading,
++        ) {
++            if (state.isLoading) CircularProgressIndicator() else Text(stringResource(Res.string.add_workout))
++        }
+     }
+-    
+-    // UI elements...
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModelTest.kt
+new file mode 100644
+index 0000000..5791635
+--- /dev/null
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/list/QuickAddViewModelTest.kt
+@@ -0,0 +1,24 @@
++package com.example.feature.workouts.presentation.list
++
++import androidx.lifecycle.SavedStateHandle
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++
++class QuickAddViewModelTest {
++    @Test
++    fun `name is restored and add clears it`() {
++        val handle = SavedStateHandle()
++        val viewModel = QuickAddViewModel(handle)
++
++        viewModel.onAction(QuickAddUiAction.OnWorkoutNameChanged("Intervals"))
++        assertEquals("Intervals", viewModel.state.value.workoutName)
++
++        val recreatedViewModel = QuickAddViewModel(handle)
++        assertEquals("Intervals", recreatedViewModel.state.value.workoutName)
++
++        recreatedViewModel.onAction(QuickAddUiAction.OnAddClick)
++        assertEquals("", recreatedViewModel.state.value.workoutName)
++        assertFalse(recreatedViewModel.state.value.isLoading)
++    }
++}

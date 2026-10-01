@@ -1,0 +1,3 @@
+Quick Add now follows the workouts list MVI flow: the ViewModel owns its text and loading state, and the widget sends changes and clicks through actions. The add action preserves the existing loading and clear-input sequence; the save logic remains a placeholder.
+
+The ComposeKit guards passed. `compileKotlinMetadata` reported success but was skipped by Gradle. An Android compile check could not run because this module has no `compileDebugKotlinAndroid` task.

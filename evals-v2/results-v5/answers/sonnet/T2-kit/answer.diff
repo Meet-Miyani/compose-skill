@@ -1,0 +1,860 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 878e8d8..deadf2a 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -11,10 +11,14 @@ import androidx.navigation3.scene.SinglePaneSceneStrategy
+ import androidx.navigation3.ui.NavDisplay
+ import androidx.savedstate.serialization.SavedStateConfiguration
+ import com.example.feature.workouts.navigation.WorkoutsDetailKey
++import com.example.feature.workouts.navigation.WorkoutTypePickerKey
+ import com.example.feature.workouts.navigation.WorkoutsListKey
+ import com.example.feature.workouts.navigation.workoutsNavSerializers
+ import com.example.feature.workouts.presentation.list.WorkoutsListRoute
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiEffect
++import com.example.feature.workouts.presentation.picker.WorkoutTypePickerParams
++import com.example.feature.workouts.presentation.picker.WorkoutTypePickerRoute
++import com.example.feature.workouts.presentation.picker.WorkoutTypePickerUiEffect
+ import com.example.feature.workouts.presentation.workouts.WorkoutsParams
+ import com.example.feature.workouts.presentation.workouts.WorkoutsRoute
+ import com.example.feature.workouts.presentation.workouts.WorkoutsUiEffect
+@@ -63,12 +67,25 @@ fun App() {
+                             onEffect = { effect ->
+                                 when (effect) {
+                                     is WorkoutsUiEffect.OpenWorkoutsDetail -> backStack.add(WorkoutsDetailKey(effect.id))
++                                    is WorkoutsUiEffect.OpenTypePicker -> backStack.add(WorkoutTypePickerKey(effect.id))
+                                     WorkoutsUiEffect.Saved, WorkoutsUiEffect.NavigateBack ->
+                                         if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                                 }
+                             },
+                         )
+                     }
++                    entry<WorkoutTypePickerKey> { key ->
++                        WorkoutTypePickerRoute(
++                            viewModel = koinViewModel(parameters = { parametersOf(WorkoutTypePickerParams(workoutId = key.workoutId)) }),
++                            workoutId = key.workoutId,
++                            onEffect = { effect ->
++                                when (effect) {
++                                    WorkoutTypePickerUiEffect.Selected, WorkoutTypePickerUiEffect.NavigateBack ->
++                                        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
++                                }
++                            },
++                        )
++                    }
+                 },
+             )
+         }
+diff --git a/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+new file mode 100644
+index 0000000..a1f576d
+--- /dev/null
++++ b/feature/workouts/schemas/com.example.feature.workouts.data.local.WorkoutsDatabase/2.json
+@@ -0,0 +1,48 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 2,
++    "identityHash": "aecfd3327a04e2ff4b98fde179efd6fb",
++    "entities": [
++      {
++        "tableName": "workouts",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL, `type` TEXT)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "type",
++            "columnName": "type",
++            "affinity": "TEXT"
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aecfd3327a04e2ff4b98fde179efd6fb')"
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/feature/workouts/src/commonMain/composeResources/values/strings.xml b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+index b1982be..3cf4159 100644
+--- a/feature/workouts/src/commonMain/composeResources/values/strings.xml
++++ b/feature/workouts/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,10 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="workout_title">Workout title</string>
++    <string name="choose_type">Choose workout type</string>
++    <string name="workout_type_current">Type: %1$s</string>
++    <string name="workout_type_none">Not set</string>
++    <string name="type_cardio">Cardio</string>
++    <string name="type_strength">Strength</string>
++    <string name="type_flexibility">Flexibility</string>
+ </resources>
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+index 97b6ff2..ebfbcd8 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutEntity.kt
+@@ -3,12 +3,21 @@ package com.example.feature.workouts.data.local
+ import androidx.room.Entity
+ import androidx.room.PrimaryKey
+ import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.domain.model.WorkoutType
+ 
+ @Entity(tableName = "workouts")
+ internal data class WorkoutEntity(
+     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+     val title: String = "",
+     val body: String = "",
++    val type: String? = null,
+ )
+ 
+-internal fun WorkoutEntity.toDomain(): Workout = Workout(id = id, title = title, body = body, updatedAt = null)
++internal fun WorkoutEntity.toDomain(): Workout = Workout(
++    id = id,
++    title = title,
++    body = body,
++    updatedAt = null,
++    // An unknown stored value degrades to "no type"; the row stays.
++    type = WorkoutType.entries.firstOrNull { it.name == type },
++)
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+index 1dbb93f..0e155a2 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDao.kt
+@@ -21,4 +21,7 @@ internal interface WorkoutsDao {
+ 
+     @Query("UPDATE workouts SET title = :title WHERE id = :id")
+     suspend fun updateTitle(id: Long, title: String)
++
++    @Query("UPDATE workouts SET type = :type WHERE id = :id")
++    suspend fun updateType(id: Long, type: String)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+index 7783acb..627e4ff 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt
+@@ -1,12 +1,18 @@
+ package com.example.feature.workouts.data.local
+ 
++import androidx.room.AutoMigration
+ import androidx.room.ConstructedBy
+ import androidx.room.Database
+ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+ 
+-@Database(entities = [WorkoutEntity::class], version = 1, exportSchema = true)
++@Database(
++    entities = [WorkoutEntity::class],
++    version = 2,
++    exportSchema = true,
++    autoMigrations = [AutoMigration(from = 1, to = 2)],
++)
+ @ConstructedBy(WorkoutsDatabaseConstructor::class)
+ internal abstract class WorkoutsDatabase : RoomDatabase() {
+     abstract fun workoutsDao(): WorkoutsDao
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+index 547204b..4408a82 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/repository/DefaultWorkoutsRepository.kt
+@@ -9,6 +9,7 @@ import com.example.feature.workouts.data.local.WorkoutsDao
+ import com.example.feature.workouts.data.local.WorkoutEntity
+ import com.example.feature.workouts.data.local.toDomain
+ import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.domain.model.WorkoutType
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import org.koin.core.annotation.Factory
+ import kotlinx.coroutines.flow.Flow
+@@ -43,4 +44,11 @@ internal class DefaultWorkoutsRepository(
+     override suspend fun saveWorkoutDraft(id: Long, title: String) {
+         dao.updateTitle(id, title)
+     }
++
++    /**
++     * Persists the chosen workout type.
++     */
++    override suspend fun setWorkoutType(id: Long, type: WorkoutType) {
++        dao.updateType(id, type.name)
++    }
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+index 67351d3..31a812d 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/Workout.kt
+@@ -8,4 +8,5 @@ public data class Workout(
+     val body: String?,
+     val updatedAt: kotlin.time.Instant?,
+     val isArchived: Boolean = false,
++    val type: WorkoutType? = null,
+ )
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/WorkoutType.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/WorkoutType.kt
+new file mode 100644
+index 0000000..49903b4
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/model/WorkoutType.kt
+@@ -0,0 +1,5 @@
++/** Domain workout category, chosen on its own screen. */
++package com.example.feature.workouts.domain.model
++
++/** The categories a workout can belong to. Absence is `null` on [Workout], never a member. */
++public enum class WorkoutType { Cardio, Strength, Flexibility }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+index b449760..722b0f0 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/domain/repository/WorkoutsRepository.kt
+@@ -6,6 +6,7 @@
+ package com.example.feature.workouts.domain.repository
+ 
+ import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.domain.model.WorkoutType
+ import kotlinx.coroutines.flow.Flow
+ 
+ /**
+@@ -28,4 +29,9 @@ public interface WorkoutsRepository {
+      * Persists the editor draft title for the workout with the given identity.
+      */
+     public suspend fun saveWorkoutDraft(id: Long, title: String)
++
++    /**
++     * Persists the type for the workout with the given identity.
++     */
++    public suspend fun setWorkoutType(id: Long, type: WorkoutType)
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
+index 8e40396..3411acb 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/navigation/WorkoutsNavKey.kt
+@@ -27,6 +27,12 @@ data object WorkoutsListKey : WorkoutsNavKey
+ @Serializable
+ data class WorkoutsDetailKey(val workoutId: Long) : WorkoutsNavKey
+ 
++/**
++ * Type picker destination key carrying the workout identity.
++ */
++@Serializable
++data class WorkoutTypePickerKey(val workoutId: Long) : WorkoutsNavKey
++
+ /**
+  * Polymorphic serializers for the Workouts key hierarchy.
+  */
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerContract.kt
+new file mode 100644
+index 0000000..bc16162
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerContract.kt
+@@ -0,0 +1,31 @@
++/**
++ * MVI contract for the workout type picker destination.
++ *
++ * UiState holds the domain WorkoutType directly; no M-11 trigger fires here.
++ */
++package com.example.feature.workouts.presentation.picker
++
++import com.example.core.error.AppError
++import com.example.core.mvi.UiAction
++import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
++import com.example.feature.workouts.domain.model.WorkoutType
++
++data class WorkoutTypePickerUiState(
++    val selected: WorkoutType? = null,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++    val isMissing: Boolean = false,
++) : UiState
++
++sealed interface WorkoutTypePickerUiAction : UiAction {
++    data object OnScreenStarted : WorkoutTypePickerUiAction
++    data class OnTypeClick(val type: WorkoutType) : WorkoutTypePickerUiAction
++    data class OnRetryClick(val error: AppError) : WorkoutTypePickerUiAction
++    data object OnBackClick : WorkoutTypePickerUiAction
++}
++
++sealed interface WorkoutTypePickerUiEffect : UiEffect {
++    data object Selected : WorkoutTypePickerUiEffect
++    data object NavigateBack : WorkoutTypePickerUiEffect
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerRoute.kt
+new file mode 100644
+index 0000000..3f5ba1e
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerRoute.kt
+@@ -0,0 +1,38 @@
++/**
++ * Lifecycle-aware wrapper for the workout type picker destination.
++ *
++ * Koin-free: the composition root resolves the ViewModel and passes it in.
++ */
++package com.example.feature.workouts.presentation.picker
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
++
++/** Entry for the type picker destination; owns lifecycle, effect collection, and error forwarding. */
++@Composable
++fun WorkoutTypePickerRoute(
++    viewModel: WorkoutTypePickerViewModel,
++    workoutId: Long,
++    onEffect: suspend (WorkoutTypePickerUiEffect) -> Unit,
++) {
++    LifecycleStartEffect(workoutId) {
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
++    HandleAppErrors(viewModel.errors)
++    WorkoutTypePickerScreen(
++        state = state,
++        onType = { viewModel.onAction(WorkoutTypePickerUiAction.OnTypeClick(it)) },
++        onRetry = {
++            // Retry holds the error it retries; no-op when no error is showing.
++            viewModel.onAction(WorkoutTypePickerUiAction.OnRetryClick(state.error ?: return@WorkoutTypePickerScreen))
++        },
++        onBack = { viewModel.onAction(WorkoutTypePickerUiAction.OnBackClick) },
++    )
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerScreen.kt
+new file mode 100644
+index 0000000..d3b58ec
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerScreen.kt
+@@ -0,0 +1,77 @@
++/**
++ * Stateless content for the workout type picker destination.
++ *
++ * Renders state only. No ViewModel, no Koin, no state reads beyond params.
++ */
++package com.example.feature.workouts.presentation.picker
++
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Button
++import androidx.compose.material3.CircularProgressIndicator
++import androidx.compose.material3.RadioButton
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.selection.selectable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.semantics.Role
++import androidx.compose.ui.unit.dp
++import com.example.feature.workouts.domain.model.WorkoutType
++import org.jetbrains.compose.resources.StringResource
++import org.jetbrains.compose.resources.stringResource
++import workouts.feature.workouts.generated.resources.Res
++import workouts.feature.workouts.generated.resources.back
++import workouts.feature.workouts.generated.resources.choose_type
++import workouts.feature.workouts.generated.resources.error_message
++import workouts.feature.workouts.generated.resources.missing_workout
++import workouts.feature.workouts.generated.resources.retry
++import workouts.feature.workouts.generated.resources.type_cardio
++import workouts.feature.workouts.generated.resources.type_flexibility
++import workouts.feature.workouts.generated.resources.type_strength
++
++/** String resource for a workout type; shared by the picker and the detail screen. */
++fun WorkoutType.label(): StringResource = when (this) {
++    WorkoutType.Cardio -> Res.string.type_cardio
++    WorkoutType.Strength -> Res.string.type_strength
++    WorkoutType.Flexibility -> Res.string.type_flexibility
++}
++
++@Composable
++fun WorkoutTypePickerScreen(
++    state: WorkoutTypePickerUiState,
++    onType: (WorkoutType) -> Unit,
++    onRetry: () -> Unit,
++    onBack: () -> Unit,
++    modifier: Modifier = Modifier,
++) {
++    when {
++        state.isLoading -> CircularProgressIndicator(modifier = modifier)
++        state.error != null -> Column(modifier = modifier) {
++            Text(stringResource(Res.string.error_message))
++            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
++            Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
++        }
++        state.isMissing -> Column(modifier = modifier) {
++            Text(stringResource(Res.string.missing_workout))
++            Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
++        }
++        else -> Column(modifier = modifier.padding(16.dp)) {
++            Text(stringResource(Res.string.choose_type))
++            WorkoutType.entries.forEach { type ->
++                Row(
++                    modifier = Modifier.selectable(
++                        selected = type == state.selected,
++                        onClick = { onType(type) },
++                        role = Role.RadioButton,
++                    ),
++                ) {
++                    // The row owns the click and semantics; the button only draws.
++                    RadioButton(selected = type == state.selected, onClick = null)
++                    Text(stringResource(type.label()))
++                }
++            }
++            Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
++        }
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModel.kt
+new file mode 100644
+index 0000000..ef216d6
+--- /dev/null
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModel.kt
+@@ -0,0 +1,75 @@
++/**
++ * ViewModel for the workout type picker destination.
++ *
++ * Reads the current type by identity and writes the choice through the
++ * repository, so the detail destination sees it when it reconciles.
++ */
++package com.example.feature.workouts.presentation.picker
++
++import com.example.core.mvi.BaseViewModel
++import com.example.feature.workouts.domain.model.WorkoutType
++import com.example.feature.workouts.domain.repository.WorkoutsRepository
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.Job
++import kotlinx.coroutines.withContext
++import org.koin.core.annotation.InjectedParam
++import org.koin.core.annotation.KoinViewModel
++
++/** Construction bag for the picker's nav arguments. Top-level so entries and tests share it. */
++data class WorkoutTypePickerParams(val workoutId: Long)
++
++/** ViewModel behind the type picker; owns its UiState and the choice write. */
++@KoinViewModel
++class WorkoutTypePickerViewModel(
++    private val repository: WorkoutsRepository,
++    @InjectedParam private val params: WorkoutTypePickerParams,
++    // Inject the dispatcher; Default is the commonMain default across targets.
++    private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
++) : BaseViewModel<WorkoutTypePickerUiAction, WorkoutTypePickerUiState, WorkoutTypePickerUiEffect>(
++    WorkoutTypePickerUiState(),
++) {
++
++    private var loadJob: Job? = null
++    private var saveJob: Job? = null
++    private var hasStarted: Boolean = false
++
++    override fun onAction(action: WorkoutTypePickerUiAction) {
++        when (action) {
++            WorkoutTypePickerUiAction.OnScreenStarted -> load()
++            is WorkoutTypePickerUiAction.OnTypeClick -> select(action.type)
++            is WorkoutTypePickerUiAction.OnRetryClick -> retry()
++            WorkoutTypePickerUiAction.OnBackClick -> sendEffect(WorkoutTypePickerUiEffect.NavigateBack)
++        }
++    }
++
++    private fun load() {
++        // Overlap guard: the first load owns the response; later overlapping loads return early.
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { error ->
++                if (hasStarted) emitError(error) else updateState { copy(error = error) }
++            },
++            onStart = { updateState { copy(isLoading = !hasStarted) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val item = withContext(ioDispatcher) { repository.getWorkout(params.workoutId) }
++            updateState { copy(isLoading = false, isMissing = item == null, selected = item?.type) }
++            hasStarted = true
++        }
++    }
++
++    private fun select(type: WorkoutType) {
++        if (saveJob?.isActive == true) return
++        saveJob = launchGuarded(onError = ::emitError) {
++            withContext(ioDispatcher) { repository.setWorkoutType(params.workoutId, type) }
++            updateState { copy(selected = type) }
++            sendEffect(WorkoutTypePickerUiEffect.Selected)
++        }
++    }
++
++    private fun retry() {
++        updateState { copy(error = null) }
++        load()
++    }
++}
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+index 71bdcd1..b77c2c3 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsContract.kt
+@@ -27,12 +27,14 @@ sealed interface WorkoutsUiAction : UiAction {
+     data object OnScreenStarted : WorkoutsUiAction
+     data class OnTitleChanged(val title: String) : WorkoutsUiAction
+     data object OnSaveClick : WorkoutsUiAction
++    data object OnChooseTypeClick : WorkoutsUiAction
+     data class OnRetryClick(val error: AppError) : WorkoutsUiAction
+     data object OnBackClick : WorkoutsUiAction
+ }
+ 
+ sealed interface WorkoutsUiEffect : UiEffect {
+     data class OpenWorkoutsDetail(val id: Long) : WorkoutsUiEffect
++    data class OpenTypePicker(val id: Long) : WorkoutsUiEffect
+     data object Saved : WorkoutsUiEffect
+     data object NavigateBack : WorkoutsUiEffect
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+index 3b89a00..91962df 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsRoute.kt
+@@ -8,6 +8,7 @@ package com.example.feature.workouts.presentation.workouts
+ 
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleResumeEffect
+ import androidx.lifecycle.compose.LifecycleStartEffect
+ import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import com.example.core.mvi.CollectEffect
+@@ -24,6 +25,13 @@ fun WorkoutsRoute(
+         viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
+         onStopOrDispose {}
+     }
++    // A covered entry rests at STARTED, so returning from the type picker fires
++    // ON_RESUME, not ON_START. Reconcile there; the load's overlap guard skips it
++    // while the cold load from ON_START is still running.
++    LifecycleResumeEffect(workoutId) {
++        viewModel.onAction(WorkoutsUiAction.OnScreenStarted)
++        onPauseOrDispose {}
++    }
+     val state by viewModel.state.collectAsStateWithLifecycle()
+     CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
+     HandleAppErrors(viewModel.errors)
+@@ -35,6 +43,7 @@ fun WorkoutsRoute(
+             // Retry holds the error it retries; no-op when no error is showing.
+             viewModel.onAction(WorkoutsUiAction.OnRetryClick(state.error ?: return@WorkoutsScreen))
+         },
++        onChooseType = { viewModel.onAction(WorkoutsUiAction.OnChooseTypeClick) },
+         onBack = { viewModel.onAction(WorkoutsUiAction.OnBackClick) },
+     )
+ }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+index 653e46d..35dcb18 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsScreen.kt
+@@ -15,7 +15,11 @@ import androidx.compose.runtime.Composable
+ import androidx.compose.ui.Modifier
+ import org.jetbrains.compose.resources.stringResource
+ import workouts.feature.workouts.generated.resources.Res
++import com.example.feature.workouts.presentation.picker.label
+ import workouts.feature.workouts.generated.resources.back
++import workouts.feature.workouts.generated.resources.choose_type
++import workouts.feature.workouts.generated.resources.workout_type_current
++import workouts.feature.workouts.generated.resources.workout_type_none
+ import workouts.feature.workouts.generated.resources.error_message
+ import workouts.feature.workouts.generated.resources.missing_workout
+ import workouts.feature.workouts.generated.resources.workout_title
+@@ -28,6 +32,7 @@ fun WorkoutsScreen(
+     state: WorkoutsUiState,
+     onTitleChange: (String) -> Unit,
+     onSave: () -> Unit,
++    onChooseType: () -> Unit,
+     onRetry: () -> Unit,
+     onBack: () -> Unit,
+     modifier: Modifier = Modifier,
+@@ -52,6 +57,14 @@ fun WorkoutsScreen(
+                 onValueChange = onTitleChange,
+                 label = { Text(stringResource(Res.string.workout_title)) },
+             )
++            Text(
++                stringResource(
++                    Res.string.workout_type_current,
++                    state.items.firstOrNull()?.type?.let { stringResource(it.label()) }
++                        ?: stringResource(Res.string.workout_type_none),
++                ),
++            )
++            Button(onClick = onChooseType) { Text(stringResource(Res.string.choose_type)) }
+             Button(onClick = onSave) { Text(stringResource(Res.string.save)) }
+             Button(onClick = onBack) { Text(stringResource(Res.string.back)) }
+         }
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+index 6e98170..6ee8040 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModel.kt
+@@ -43,6 +43,7 @@ class WorkoutsViewModel(
+                 updateState { copy(draftTitle = action.title) }
+             }
+             WorkoutsUiAction.OnSaveClick -> save()
++            WorkoutsUiAction.OnChooseTypeClick -> sendEffect(WorkoutsUiEffect.OpenTypePicker(params.workoutId))
+             is WorkoutsUiAction.OnRetryClick -> retry()
+             WorkoutsUiAction.OnBackClick -> sendEffect(WorkoutsUiEffect.NavigateBack)
+         }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModelTest.kt
+new file mode 100644
+index 0000000..193d0af
+--- /dev/null
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/picker/WorkoutTypePickerViewModelTest.kt
+@@ -0,0 +1,189 @@
++/**
++ * State-matrix tests for the workout type picker ViewModel.
++ *
++ * Each test drives the public event API and asserts the public state API.
++ * Effects are collected with `backgroundScope` into a list; no Turbine.
++ */
++package com.example.feature.workouts.presentation.picker
++
++import com.example.core.error.NetworkException
++import com.example.core.mvi.UiEffect
++import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.domain.model.WorkoutType
++import com.example.feature.workouts.presentation.workouts.FakeWorkoutsRepository
++import kotlinx.coroutines.CompletableDeferred
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.toList
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.UnconfinedTestDispatcher
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++import kotlin.test.assertNotNull
++import kotlin.test.assertNull
++import kotlin.test.assertTrue
++
++/** ViewModel tests covering every observable picker state. */
++@OptIn(ExperimentalCoroutinesApi::class)
++class WorkoutTypePickerViewModelTest {
++    private val testScheduler = TestCoroutineScheduler()
++
++    @BeforeTest
++    fun setUp() {
++        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
++    }
++
++    @AfterTest
++    fun tearDown() {
++        Dispatchers.resetMain()
++    }
++
++    private fun workout(id: Long = 1L, type: WorkoutType? = null) =
++        Workout(id = id, title = "Title", body = "Body", updatedAt = null, type = type)
++
++    private fun viewModel(fake: FakeWorkoutsRepository, id: Long = 1L) = WorkoutTypePickerViewModel(
++        repository = fake,
++        params = WorkoutTypePickerParams(workoutId = id),
++        // Separate instance on the shared scheduler, so withContext(ioDispatcher) suspends.
++        ioDispatcher = StandardTestDispatcher(testScheduler),
++    )
++
++    @Test
++    fun `cold load shows loading then current type`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout(type = WorkoutType.Strength))) }
++        val viewModel = viewModel(fake)
++        val gate = CompletableDeferred<Unit>().also { fake.gate = it }
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertTrue(viewModel.state.value.isLoading)
++
++        gate.complete(Unit)
++        advanceUntilIdle()
++
++        assertFalse(viewModel.state.value.isLoading)
++        assertEquals(WorkoutType.Strength, viewModel.state.value.selected)
++    }
++
++    @Test
++    fun `workout without a type loads with nothing selected`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertNull(viewModel.state.value.selected)
++        assertFalse(viewModel.state.value.isMissing)
++    }
++
++    @Test
++    fun `selecting a type writes through repository and emits selected`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++        val effects = mutableListOf<UiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnTypeClick(WorkoutType.Cardio))
++        advanceUntilIdle()
++
++        assertEquals(WorkoutType.Cardio, fake.getWorkout(1L)?.type)
++        assertEquals(WorkoutType.Cardio, viewModel.state.value.selected)
++        assertEquals(listOf<UiEffect>(WorkoutTypePickerUiEffect.Selected), effects)
++    }
++
++    @Test
++    fun `double tap makes one repository write`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnTypeClick(WorkoutType.Cardio))
++        viewModel.onAction(WorkoutTypePickerUiAction.OnTypeClick(WorkoutType.Strength))
++        advanceUntilIdle()
++
++        assertEquals(1, fake.typeCalls)
++    }
++
++    @Test
++    fun `write failure surfaces as popup error and does not navigate`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply {
++            seed(listOf(workout()))
++            shouldThrow = NetworkException.Connection()
++        }
++        val viewModel = viewModel(fake)
++        val errors = mutableListOf<com.example.core.error.AppError>()
++        val effects = mutableListOf<UiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.errors.toList(errors) }
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnTypeClick(WorkoutType.Cardio))
++        advanceUntilIdle()
++
++        assertEquals(1, errors.size)
++        assertTrue(effects.isEmpty())
++        assertNull(viewModel.state.value.selected)
++    }
++
++    @Test
++    fun `load failure shows inline error then retry succeeds`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { shouldThrow = NetworkException.Connection() }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertNotNull(viewModel.state.value.error)
++
++        fake.shouldThrow = null
++        fake.seed(listOf(workout(type = WorkoutType.Flexibility)))
++        viewModel.onAction(WorkoutTypePickerUiAction.OnRetryClick(viewModel.state.value.error!!))
++        advanceUntilIdle()
++
++        assertNull(viewModel.state.value.error)
++        assertEquals(WorkoutType.Flexibility, viewModel.state.value.selected)
++    }
++
++    @Test
++    fun `unknown workout sets isMissing with no AppError`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout(id = 2L))) }
++        val viewModel = viewModel(fake, id = 1L)
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertTrue(viewModel.state.value.isMissing)
++        assertNull(viewModel.state.value.error)
++    }
++
++    @Test
++    fun `overlapping loads make one read`() = runTest(testScheduler) {
++        val fake = FakeWorkoutsRepository().apply { seed(listOf(workout())) }
++        val viewModel = viewModel(fake)
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        viewModel.onAction(WorkoutTypePickerUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals(1, fake.getCalls)
++    }
++
++    @Test
++    fun `back emits navigate back`() = runTest(testScheduler) {
++        val viewModel = viewModel(FakeWorkoutsRepository())
++        val effects = mutableListOf<UiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(WorkoutTypePickerUiAction.OnBackClick)
++        advanceUntilIdle()
++
++        assertEquals(listOf<UiEffect>(WorkoutTypePickerUiEffect.NavigateBack), effects)
++    }
++}
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+index 70715fa..18b1a86 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+@@ -7,6 +7,7 @@
+ package com.example.feature.workouts.presentation.workouts
+ 
+ import com.example.feature.workouts.domain.model.Workout
++import com.example.feature.workouts.domain.model.WorkoutType
+ import com.example.feature.workouts.domain.repository.WorkoutsRepository
+ import com.example.core.error.NetworkException
+ import kotlinx.coroutines.CompletableDeferred
+@@ -32,6 +33,9 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+     var lastSavedDraft: Pair<Long, String>? = null
+     var saveCalls: Int = 0
+ 
++    /** Counts type writes; the double-tap test asserts the guard keeps this at one. */
++    var typeCalls: Int = 0
++
+     /** Test-only helper that replaces the stored list. */
+     fun seed(items: List<Workout>) {
+         backing.value = items
+@@ -61,4 +65,10 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+         lastSavedDraft = id to title
+         backing.update { list -> list.map { if (it.id == id) it.copy(title = title) else it } }
+     }
++
++    override suspend fun setWorkoutType(id: Long, type: WorkoutType) {
++        typeCalls += 1
++        shouldThrow?.let { throw it }
++        backing.update { list -> list.map { if (it.id == id) it.copy(type = type) else it } }
++    }
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+index ad430e4..3ac8528 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsViewModelTest.kt
+@@ -265,4 +265,16 @@ class WorkoutsViewModelTest {
+         assertEquals("half-typed", viewModel.state.value.draftTitle)
+         assertEquals(1, viewModel.state.value.items.size)
+     }
++
++    @Test
++    fun `choose type emits open picker for this workout`() = runTest(testScheduler) {
++        val viewModel = viewModel(FakeWorkoutsRepository(), id = 7L)
++        val effects = mutableListOf<UiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(WorkoutsUiAction.OnChooseTypeClick)
++        advanceUntilIdle()
++
++        assertEquals(listOf<UiEffect>(WorkoutsUiEffect.OpenTypePicker(7L)), effects)
++    }
+ }

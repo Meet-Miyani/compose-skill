@@ -1,0 +1,1 @@
+Draft text is now written to `SavedStateHandle` on every edit, so a recreated screen can restore it. `git diff --check` passed. I didn’t run tests.

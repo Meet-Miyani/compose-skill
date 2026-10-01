@@ -1,0 +1,103 @@
+diff --git a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+index 6fdd8f6..92d7fb6 100644
+--- a/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
++++ b/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/list/WorkoutsListViewModel.kt
+@@ -11,10 +11,15 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     BaseViewModel<WorkoutsListUiAction, WorkoutsListUiState, WorkoutsListUiEffect>(WorkoutsListUiState()) {
+     private var streamJob: Job? = null
+     private var addJob: Job? = null
++    private var awaitingNavigation = false
+ 
+     override fun onAction(action: WorkoutsListUiAction) {
+         when (action) {
+-            WorkoutsListUiAction.OnScreenStarted, WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
++            WorkoutsListUiAction.OnScreenStarted -> {
++                awaitingNavigation = false
++                observeWorkouts()
++            }
++            WorkoutsListUiAction.OnRetryClick -> observeWorkouts()
+             WorkoutsListUiAction.OnAddClick -> addWorkout()
+             is WorkoutsListUiAction.OnWorkoutClick -> sendEffect(WorkoutsListUiEffect.OpenWorkout(action.id))
+         }
+@@ -31,9 +36,9 @@ class WorkoutsListViewModel(private val repository: WorkoutsRepository) :
+     }
+ 
+     private fun addWorkout() {
+-        
++        if (addJob?.isActive == true || awaitingNavigation) return
+         addJob = launchGuarded(onError = ::emitError) {
+-            sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
++            awaitingNavigation = sendEffect(WorkoutsListUiEffect.OpenWorkout(repository.addWorkout()))
+         }
+     }
+ }
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+index 70715fa..5a28484 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/FakeWorkoutsRepository.kt
+@@ -23,6 +23,8 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+ 
+     /** When set, one-shot reads suspend until the test completes it, so in-flight states stay observable. */
+     var gate: CompletableDeferred<Unit>? = null
++    var addGate: CompletableDeferred<Unit>? = null
++    var addCalls: Int = 0
+     private val backing = MutableStateFlow<List<Workout>>(emptyList())
+ 
+     /** Counts one-shot reads; the overlap test asserts the guard keeps this at one. */
+@@ -40,6 +42,8 @@ class FakeWorkoutsRepository : WorkoutsRepository {
+     override fun getWorkoutsStream(): Flow<List<Workout>> = backing
+ 
+     override suspend fun addWorkout(): Long {
++        addCalls += 1
++        addGate?.await()
+         val id = (backing.value.maxOfOrNull { it.id } ?: 0L) + 1L
+         backing.update { it + Workout(id, "", "", null) }
+         return id
+diff --git a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+index 836f07c..4b37e4c 100644
+--- a/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
++++ b/feature/workouts/src/commonTest/kotlin/com/example/feature/workouts/presentation/workouts/WorkoutsListViewModelTest.kt
+@@ -4,6 +4,7 @@ import com.example.feature.workouts.domain.model.Workout
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiAction
+ import com.example.feature.workouts.presentation.list.WorkoutsListUiEffect
+ import com.example.feature.workouts.presentation.list.WorkoutsListViewModel
++import kotlinx.coroutines.CompletableDeferred
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.ExperimentalCoroutinesApi
+ import kotlinx.coroutines.flow.toList
+@@ -51,6 +52,35 @@ class WorkoutsListViewModelTest {
+         assertEquals(WorkoutsListUiEffect.OpenWorkout(1L), effects.single())
+     }
+ 
++    @Test fun `double tap add creates only one workout`() = runTest(scheduler) {
++        val fake = FakeWorkoutsRepository()
++        val gate = CompletableDeferred<Unit>()
++        fake.addGate = gate
++        val viewModel = WorkoutsListViewModel(fake)
++        val effects = mutableListOf<WorkoutsListUiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { viewModel.effect.toList(effects) }
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        advanceUntilIdle()
++        assertEquals(1, fake.addCalls)
++
++        gate.complete(Unit)
++        advanceUntilIdle()
++        assertEquals(1, viewModel.state.value.items.size)
++        assertEquals(1, effects.size)
++        assertEquals(WorkoutsListUiEffect.OpenWorkout(1L), effects.single())
++
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        advanceUntilIdle()
++        assertEquals(1, fake.addCalls)
++
++        viewModel.onAction(WorkoutsListUiAction.OnScreenStarted)
++        viewModel.onAction(WorkoutsListUiAction.OnAddClick)
++        advanceUntilIdle()
++        assertEquals(2, fake.addCalls)
++    }
++
+     @Test fun `workout click opens chosen workout`() = runTest(scheduler) {
+         val viewModel = WorkoutsListViewModel(FakeWorkoutsRepository())
+         val effects = mutableListOf<WorkoutsListUiEffect>()

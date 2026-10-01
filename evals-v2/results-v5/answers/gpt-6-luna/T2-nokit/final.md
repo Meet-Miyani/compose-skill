@@ -1,0 +1,3 @@
+Added a separate workout type screen with **Cardio**, **Strength**, and **Flexibility** options. Choosing one creates a workout and opens the editor with that type as its initial title.
+
+The navigation and selection UI are in [App.kt](<project>/composeApp/src/commonMain/kotlin/com/example/app/App.kt) and [WorkoutTypeSelectionScreen.kt](<project>/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/presentation/selection/WorkoutTypeSelectionScreen.kt). I didn’t run tests.

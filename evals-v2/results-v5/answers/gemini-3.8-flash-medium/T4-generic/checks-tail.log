@@ -1,0 +1,60 @@
+> Task :composeApp:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:designsystem:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :core:error:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :core:mvi:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :feature:workouts:serializeSwiftPMDependenciesMetadataForLockFiles UP-TO-DATE
+> Task :composeApp:generateUmbrellaPackageIdentifierBasedResolutionForDefault SKIPPED
+> Task :composeApp:fetchUmbrellaPackageIdentifierForDefault SKIPPED
+> Task :feature:workouts:syncPersistedPackageResolvedToSynthetic SKIPPED
+> Task :feature:workouts:fetchSyntheticImportProjectPackages SKIPPED
+> Task :feature:workouts:convertSyntheticImportProjectIntoDefFileIphonesimulator UP-TO-DATE
+> Task :feature:workouts:assembleIosSimulatorArm64TestResources UP-TO-DATE
+> Task :androidApp:mergeDebugAssets
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :feature:workouts:checkJvmTestComposeLibrariesCompatibility
+> Task :feature:workouts:copyTestComposeResourcesForIosSimulatorArm64 UP-TO-DATE
+> Task :feature:workouts:assembleJvmTestResources UP-TO-DATE
+> Task :androidApp:compressDebugAssets FROM-CACHE
+> Task :feature:workouts:jvmTestProcessResources UP-TO-DATE
+> Task :feature:workouts:processJvmTestResources SKIPPED
+> Task :androidApp:writeDebugSigningConfigVersions
+> Task :androidApp:validateSigningDebug
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+> Task :core:error:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly
+> Task :core:mvi:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :core:designsystem:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :feature:workouts:kspKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :feature:workouts:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :feature:workouts:iosSimulatorArm64MainKlibrary UP-TO-DATE
+> Task :androidApp:mergeDebugNativeLibs
+> Task :androidApp:stripDebugDebugSymbols
+> Task :androidApp:mergeExtDexDebug FROM-CACHE
+> Task :feature:workouts:kspTestKotlinIosSimulatorArm64
+> Task :feature:workouts:copyRoomSchemas NO-SOURCE
+> Task :androidApp:mergeLibDexDebug FROM-CACHE
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+> Task :feature:workouts:compileTestKotlinIosSimulatorArm64
+> Task :feature:workouts:compileTestKotlinJvm
+> Task :feature:workouts:compileJvmTestJava NO-SOURCE
+> Task :feature:workouts:jvmTestClasses
+> Task :feature:workouts:jvmTest
+> Task :feature:workouts:linkDebugTestIosSimulatorArm64
+> Task :feature:workouts:iosSimulatorArm64Test
+> Task :feature:workouts:allTests
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 7s
+214 actionable tasks: 57 executed, 7 from cache, 150 up-to-date
+Configuration cache entry stored.
