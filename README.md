@@ -9,12 +9,15 @@ One consistent house style, measured on five models in real agent CLIs.
 [![Release](https://img.shields.io/github/v/release/Meet-Miyani/compose-skill?include_prereleases&label=release&color=2a78d6)](https://github.com/Meet-Miyani/compose-skill/releases)
 [![CI](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/Meet-Miyani/compose-skill?color=52514e)](LICENSE)
+[![Website](https://img.shields.io/badge/website-compose.avinya.dev-ee3a20)](https://compose.avinya.dev)
 [![Skills](https://img.shields.io/badge/skills-7-2a78d6)](#whats-inside)
 [![Held-out test](https://img.shields.io/badge/held--out%20test-120%20agentic%20runs-2a78d6)](#results-held-out-v5)
 [![Guard tests](https://img.shields.io/badge/guard%20tests-90%20passing-0ca30c)](tests/skills)
 [![v6.1 A/B](https://img.shields.io/badge/v6.1%20A%2FB-in%20progress-eda100)](#roadmap)
 
 **Works with** Claude Code · Codex · Cursor · OpenCode · Copilot · Gemini CLI · Antigravity
+
+**Website:** [compose.avinya.dev](https://compose.avinya.dev) · [Install guides per agent](https://compose.avinya.dev/install/) · [Results](https://compose.avinya.dev/results/)
 
 </div>
 
@@ -75,7 +78,12 @@ flowchart TD
 
 ## Install
 
-Install all seven skills. `compose` is the entry point, and it hands each task to the other six.
+Install all seven skills. `compose` is the entry point, and it hands each task to the other six. Step-by-step pages
+for each agent are on the website: [Claude Code](https://compose.avinya.dev/install/claude-code/),
+[Codex](https://compose.avinya.dev/install/codex/), [Cursor](https://compose.avinya.dev/install/cursor/),
+[GitHub Copilot](https://compose.avinya.dev/install/github-copilot/),
+[Gemini CLI and Antigravity](https://compose.avinya.dev/install/gemini-cli-and-antigravity/),
+[OpenCode](https://compose.avinya.dev/install/opencode/).
 
 Every option below can install for **one project** (lives in the repo, so your team gets it too) or **globally** (for
 you, in every project on your machine).
@@ -247,7 +255,7 @@ Checks on the kit itself:
 - [ ] **Cheap-model benchmark:** the same tasks on DeepSeek V4.1 Flash, DeepSeek V4 Pro and MiniMax M3, then Kimi K3,
   GLM and Qwen if plan quota allows
 - [ ] **Promote v6 to "Latest"** on GitHub once v6.1 is confirmed (until then `gh skill` needs `--pin`)
-- [ ] **A project site** with the full test history
+- [x] **Project site:** [compose.avinya.dev](https://compose.avinya.dev) *(live 2026-10-02)*; the full test history comes next
 - [ ] *Maybe:* a kit CLI for project tooling (new project, add feature, run guards), if users ask for it
 
 After v6 and the cheap-model benchmark, new benchmark rounds start only for a concrete reason: a reported problem, a
