@@ -77,3 +77,9 @@ Kimi K3, GLM 5.3 and Qwen 3.8 Max are added only if plan quota remains after the
   moderator may change only those references, in a copy of the test. Inputs, fake data and expected values never
   change. Every such edit is published as a per-run diff. A test that compiles and fails, or that cannot be adapted
   because the behaviour is gone, fails rubric item 1.
+
+**Amendment 2 (2026-10-01 19:24, before any Sonnet run; one Luna cell exists):** the panel's Claude model is
+pinned to **`claude-sonnet-5-5` (Sonnet 5.5)**. The `sonnet` alias resolves to it today, and the run logs show that
+all 24 v5 "Sonnet 5" cells also ran `claude-sonnet-5-5`. So "Sonnet 5" above was a mislabel, and pinning keeps the
+same model as v5 while stopping the alias from changing during the runs. The v5 results carry the same mislabel and
+will be corrected there.
