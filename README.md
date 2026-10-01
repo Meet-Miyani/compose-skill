@@ -16,10 +16,14 @@ With Node ≥ 22.20, install through `npx skills` for Claude Code, Codex, Cursor
 npx skills add Meet-Miyani/compose-skill --skill '*'
 ```
 
-With GitHub CLI ≥ 2.90, install through `gh skill` (also supports Gemini CLI and Antigravity). Pin the release tag:
+With GitHub CLI ≥ 2.90, install through `gh skill` (also supports Gemini CLI and Antigravity). Run it interactively
+to pick all 7, or install them in one line. Always pin the release: without `--pin`, `gh skill` uses the repository's latest
+release, and on GitHub a pre-release never counts as "latest", so that is still the old v5 skill.
 
 ```sh
-gh skill install Meet-Miyani/compose-skill --all --pin v6.0.0-preview.1
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1
+done
 ```
 
 In Claude Code, add the marketplace and install its plugin:
