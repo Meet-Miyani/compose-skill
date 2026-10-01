@@ -41,8 +41,10 @@ def answer_text(run):
     meta = read("meta.txt")
     checks = read("checks.log")
     tail = "\n".join(checks.splitlines()[-40:]) if checks != "(none)" else checks
-    return (f"### Final message\n{read('final.md', 20_000)}\n\n### Diff (project changes)\n```diff\n"
+    text = (f"### Final message\n{read('final.md', 20_000)}\n\n### Diff (project changes)\n```diff\n"
             f"{read('answer.diff', CAP)}\n```\n\n### Checks\n{meta}\n```\n{tail}\n```\n")
+    # blinding: names that reveal an instruction file or the kit's install folders become neutral text
+    return re.sub(r"\b(CLAUDE|AGENTS|GEMINI)\.md\b|\.(claude|agents)/skills\S*", "[project instructions]", text)
 
 def packets():
     ts = tasks(); os.makedirs(G, exist_ok=True); rng = random.Random(20260930)
@@ -50,7 +52,7 @@ def packets():
         for vendor in ("claude", "gpt", "gemini"):
             runs = [(m, a) for m in VENDOR if VENDOR[m] == vendor for a in ARMS
                     if os.path.isfile(os.path.join(W, "runs", m, f"{tid}-{a}", "meta.txt"))]
-            if not runs: continue
+            if len(runs) < 6: continue  # build a packet only when all 2 models x 3 arms are done
             rng.shuffle(runs)
             key = {chr(65 + i): {"model": m, "arm": a} for i, (m, a) in enumerate(runs)}
             items = "\n".join(f"{n}. {txt}" for n, txt in t["items"])
@@ -58,7 +60,9 @@ def packets():
             for L, (m, a) in zip(key, runs):
                 body.append(f"\n## Answer {L}\n" + answer_text(os.path.join(W, "runs", m, f"{tid}-{a}")))
             for grader in {"claude", "gpt", "gemini"} - {vendor}:
-                d = os.path.join(G, f"{tid}-{vendor}-by-{grader}"); os.makedirs(d, exist_ok=True)
+                d = os.path.join(G, f"{tid}-{vendor}-by-{grader}")
+                if os.path.isfile(os.path.join(d, "grades.json")): continue  # never rebuild a graded packet
+                os.makedirs(d, exist_ok=True)
                 open(os.path.join(d, "packet.md"), "w").write("".join(body))
                 json.dump(key, open(os.path.join(d, "key.json"), "w"), indent=1)
     print("packets:", len(glob.glob(os.path.join(G, "*", "packet.md"))))
