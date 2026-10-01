@@ -1,9 +1,10 @@
 <div align="center">
 
-# Compose Kit
+# Compose Skill (Compose Kit)
 
-**Agent skills that make AI coding models write better Jetpack Compose and Compose Multiplatform code.**<br>
-Seven skills, one consistent house style, measured on five models in real agent CLIs.
+**A Compose skill for AI coding agents: seven agent skills that make Claude Code, Codex, Cursor, Copilot and Gemini
+write better Jetpack Compose and Compose Multiplatform code.**<br>
+One consistent house style, measured on five models in real agent CLIs.
 
 [![Release](https://img.shields.io/github/v/release/Meet-Miyani/compose-skill?include_prereleases&label=release&color=2a78d6)](https://github.com/Meet-Miyani/compose-skill/releases)
 [![CI](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml)
@@ -64,17 +65,11 @@ Also included: project and feature templates, and the guard scripts (`compose-ar
 ## How it works
 
 ```mermaid
-flowchart LR
-    P["Your prompt"] --> E["compose<br/>entry tree<br/>~1.3k tokens"]
-    E --> K{"Task kind"}
-    K -->|"new feature · change · bug fix<br/>review · conform · setup · question"| A{"Affected area"}
-    A --> R1["architecture"]
-    A --> R2["feature"]
-    A --> R3["ui"]
-    A --> R4["data"]
-    A --> R5["project"]
-    A --> R6["platform"]
-    R1 & R2 & R3 & R4 & R5 & R6 --> F["One reference file<br/>per affected area"]
+flowchart TD
+    P["Your prompt"] --> E["compose entry tree · ~1.3k tokens"]
+    E --> K{"What kind of task?<br/>new feature · change · bug fix · review<br/>conform · setup · question"}
+    K --> A{"Which areas does it touch?<br/>architecture · feature · ui<br/>data · project · platform"}
+    A --> F["Load one reference file per affected area"]
     F --> C["Code in the house style"]
 ```
 
