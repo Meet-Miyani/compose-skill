@@ -61,3 +61,19 @@ Claims allowed by rules 4-5:
 - Gemini is tested at the cheaper tier only (3.1 Pro dropped before scoring).
 - Blinding is imperfect (house syntax can reveal the kit arm); early leaky grades were voided and re-done.
 - The `[kit]` items were written by the moderator (a Claude model).
+
+## Kit context per task (pre-registered rule 6: reported, not scored): `kit-tokens.txt`
+
+Upper bound: the full size of every kit file opened.
+
+| Model | Max per task | Tasks over 20k | Loaded `compose` first |
+|---|---|---|---|
+| Opus | 9.9k | 0/8 | 8/8 |
+| Sonnet 5 | 14.0k | 0/8 | 8/8 |
+| GPT-6-Luna | 18.3k | 0/8 | 8/8 |
+| GPT-6-Sol | 26.4k | 3/8 (T1-T3, new features) | 8/8 |
+| Gemini 3.8 Flash | 26.5k | 2/8 (T1-T2, new features) | 8/8 |
+| *Muse (add-on)* | ~50k | 6/8 | via OpenCode's skill tool (see the note in `kit-tokens.txt`) |
+
+Every panel model entered through the `compose` tree on every task. Reviews and bug fixes stayed at 1-13k. New
+features exceed 20k for the models that read beyond the tree (Sol, Flash); Claude models stay well under.
