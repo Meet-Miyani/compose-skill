@@ -2,7 +2,7 @@
 
 Domain: Workout log app (workouts, exercises, sets/reps, personal records, rest timer).
 8 scenarios, all six skills covered, 2 pressure, 2 review-leaning. Written from
-`handoff/SKILL_SPECS.md` and `handoff/reviews/DECISIONS.md` only, without reading the kit's
+`(internal record, not published)` and `(internal record, not published)` only, without reading the kit's
 own text or scenarios.
 
 ---

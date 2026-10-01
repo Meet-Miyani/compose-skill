@@ -1,0 +1,6 @@
+{
+  "name": "compose-kit",
+  "version": "6.0.0-preview.1",
+  "description": "Seven skills for Jetpack Compose and Compose Multiplatform",
+  "author": { "name": "Meet Miyani" }
+}

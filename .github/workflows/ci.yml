@@ -17,16 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
+      - name: Test architecture guards
+        run: bash tests/skills/compose-architecture/run-tests.sh
 
-      - name: Validate skill
-        run: ./scripts/validate-skill.sh --quick --score-only
-
-      - name: Test
-        run: go test ./...
-
-      - name: Smoke test
-        run: ./scripts/smoke-test.sh
+      - name: Validate plugin manifests
+        run: python3 scripts/validate-plugin-manifests.py

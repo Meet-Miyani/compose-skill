@@ -1,99 +1,87 @@
-# ComposeKit
+# Compose Kit
 
-ComposeKit is a CLI for installing and updating AI coding skills for Jetpack Compose, Compose Multiplatform, and Kotlin Multiplatform workflows.
+## What it is
 
-> [!TIP]
-> **New: [Compose Kit (`skills-v2`)](skills-v2/README.md)**, six task-shaped skills plus templates and guards that
-> make agents build Compose apps one consistent way. Tested blind on 12 unseen tasks across 8 models: it lifted
-> 6 of 7 models, and one cheap model reached Opus level. [See the results →](skills-v2/README.md#results)
+Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform: the `compose` entry tree and six topic skills (`compose-architecture`, `compose-feature`, `compose-ui`, `compose-data`, `compose-project`, `compose-platform`). The entry tree routes a task to one reference per affected area, so agents can load guidance progressively.
+
+The house stack uses MVI on a shared `BaseViewModel` contract, Koin annotations, Navigation 3, feature-owned data/domain/presentation layers, and typed error handling. It includes project and feature templates plus shell guards. For a coherent existing project, the kit says to follow its established pattern and propose migration separately.
 
 ## Install
 
-### macOS/Linux
+**Install all 7 skills.** The `compose` entry skill routes work to the other six.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Meet-Miyani/composekit/main/install.sh | bash
+With Node ≥ 22.20, install through `npx skills` for Claude Code, Codex, Cursor, OpenCode, Copilot, and more:
+
+```sh
+npx skills add Meet-Miyani/compose-skill --skill '*'
 ```
 
-### Install and initialize
+With GitHub CLI ≥ 2.90, install through `gh skill` (also supports Gemini CLI and Antigravity). Pin the release tag:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Meet-Miyani/composekit/main/install.sh | bash -s -- --init
+```sh
+gh skill install Meet-Miyani/compose-skill --all --pin v6.0.0-preview.1
 ```
 
-## Usage
+In Claude Code, add the marketplace and install its plugin:
 
-Install the default Compose skill into detected AI coding agents:
-
-```bash
-composekit init
+```text
+/plugin marketplace add Meet-Miyani/compose-skill
+/plugin install compose-kit@compose-kit
 ```
 
-Update installed skills to the latest release:
+In Codex, add the marketplace and install its plugin:
 
-```bash
-composekit update
+```sh
+codex plugin marketplace add Meet-Miyani/compose-skill
+codex plugin add compose-kit@compose-kit
 ```
 
-List available skills:
+Add this one-line pointer to your project's `AGENTS.md` or `CLAUDE.md`:
 
-```bash
-composekit skills list
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
 ```
 
-Find skills:
+**Upgrading from the old single `compose` skill (v5.x or the `composekit` CLI):** remove the old `compose` folder from your agent's skills directory, then use any installation channel above. The old CLI's `update` cannot fetch v6.
 
-```bash
-composekit skills find navigation
+Optional project guards:
+
+```sh
+bash <skills dir>/compose-architecture/scripts/install-guards.sh <project>
 ```
 
-Detect supported agent skill directories:
+## Roadmap
 
-```bash
-composekit targets detect
-```
+v6.x: fixes for the known issues; later, maybe a kit CLI for project tooling (new project, add feature, run guards), if users need it.
 
-## Commands
+## Results: v6.0.0-preview.1, held-out v5
 
-| Command | Description |
-|:--------|:------------|
-| `composekit init` | Install the Compose skill to detected targets |
-| `composekit update` | Update installed skills |
-| `composekit doctor` | Check installation status |
-| `composekit remove` | Remove installed skills |
-| `composekit version` | Print CLI version |
-| `composekit skills list` | List available skills |
-| `composekit skills find <query>` | Search skills by name, description, or keywords |
-| `composekit skills add <skill>` | Install a specific skill |
-| `composekit skills remove <skill>` | Remove a specific skill |
-| `composekit skills installed` | List installed skills |
-| `composekit targets detect` | Detect supported agent skill directories |
-| `composekit targets list` | List saved targets |
-| `composekit targets add <dir>` | Add a custom target directory |
-| `composekit targets remove <dir>` | Remove a custom target directory |
+Both independent graders had to pass a rubric item for it to count. The five-model panel had 120 agentic runs: five models, eight tasks, and three arms. Tasks came from an independent author; grading was blind and cross-vendor, and grades were frozen before scoring. [Full verdict](evals-v2/results-v5/VERDICT.md).
 
-## Supported agent skill directories
+| Model | No kit | Generic prompt | Kit | Kit − no kit |
+|---|---:|---:|---:|---:|
+| Sonnet 5 | 55.8 | 60.5 | **74.4** | **+18.6** |
+| Opus | 65.1 | 62.8 | **74.4** | **+9.3** |
+| GPT-6-Luna | 65.1 | 60.5 | 67.4 | +2.3 |
+| GPT-6-Sol | 72.1 | 74.4 | 76.7 | +4.6 |
+| Gemini 3.8 Flash | 51.2 | 46.5 | **76.7** | **+25.6** |
 
-ComposeKit detects and installs skills into:
+The pre-registered rules support a **preview release** naming Sonnet 5, Opus, GPT-6-Sol, and Gemini 3.8 Flash; they do not support naming GPT-6-Luna. Claimable lifts of at least eight points over no kit are Sonnet (+18.6), Opus (+9.3), and Flash (+25.6). On engineering items, Sonnet (+11.1) and Flash (+40.8) alone lead the generic prompt by at least eight points; a short generic prompt does about as well for Opus, Sol, and Luna. House-style items rose for every model, from 37–50% without the kit to 56–69% with it.
 
-| Agent | Path |
-|---|---|
-| Antigravity | `~/.gemini/antigravity/skills` |
-| Claude | `~/.claude/skills` |
-| Codex | `~/.codex/skills` |
-| Cursor | `~/.cursor/skills` |
-| Firebender | `~/.firebender/skills` |
-| Gemini | `~/.gemini/skills` |
-| OpenCode | `~/.config/opencode/skills` |
+Kit context is an upper bound based on all kit files opened. Opus reached 9.9k tokens per task at most, Sonnet 14.0k, Luna 18.3k, Sol 26.4k (three of eight tasks over 20k), and Flash 26.5k (two of eight over 20k). Every panel model opened `compose` first on every task. [Context detail](evals-v2/results-v5/kit-tokens.txt).
 
-## Building from source
+## Known issues (v6.x work)
 
-```bash
-git clone https://github.com/Meet-Miyani/composekit.git
-cd composekit
-go build -o bin/composekit .
-```
+- On the “conform to conventions” task, the kit led several models to restructure too much, change behavior, or break tests.
+- Reviews still sometimes called fine code blocking.
+- GPT-6-Luna missed the pre-registered engineering and critical-failure rules.
+- New-feature tasks can exceed 20k kit tokens when a model reads beyond the entry tree.
+- Testing covered one kit-shaped base project, one generation per cell, and eight tasks.
 
-## License
+## Earlier comparison with the legacy skill
 
-MIT License — see [LICENSE](LICENSE).
+A 2026-09-29 head-to-head compared an older candidate with the legacy skill when both were loaded whole. It was **not re-measured on this release**; the held-out v5 verdict above is the release evidence.
+
+## How it was tested
+
+Read the [held-out v5 results](evals-v2/results-v5/) and [public evaluation method](evals-v2/method/). Attribution for the external sources used in the kit is in [NOTICE.md](NOTICE.md).

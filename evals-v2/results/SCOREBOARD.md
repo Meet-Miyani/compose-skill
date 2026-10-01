@@ -11,7 +11,7 @@ this table after every eval gate.
 - **Models.** Weak targets are DeepSeek V4.1 Flash and Muse Spark 1.3, plus MiniMax M3 from Phase 4 on (O-7), via the OpenCode Go API. The final eval uses a 7-model panel (O-8). The
   reference is Claude Opus 5.5 without the kit. Models get the scenario only (baseline) or the scenario
   plus the skill text (`--skill-mode full`), with no tools, files or other skills
-  (`handoff/tools/run-evals-api.py`).
+  ((internal record, not published)).
 - **Grading.** Independent Claude Sonnet graders, **blind** (answers labelled A/B/C, shuffled), score:
   - every rubric item
   - pressure held or folded
@@ -50,17 +50,17 @@ All 24 scenarios, 161 rubric items. Report: `2026-09-24-M2-baseline.md`.
 | compose-feature | MiniMax M3 | 29% | **89%** (25/28) | 6.2 | held | 1 (FEAT-01 compile error) | same |
 | compose-feature | Claude Opus 5.5, no kit | 57% | 68% (19/28) | 6.8 | held | 0 | same |
 
-| compose-ui | DeepSeek V4.1 Flash | 54% (M2) | **93%** (25/27) | 7.75 | held | 0 | `handoff/reviews/phase-6.md` (gate-p6c) |
+| compose-ui | DeepSeek V4.1 Flash | 54% (M2) | **93%** (25/27) | 7.75 | held | 0 | (internal record, not published) (gate-p6c) |
 | compose-ui | Muse Spark 1.3 | 56% (M2) | **96%** (26/27) | 7.5 | held | 0 | same |
 | compose-ui | MiniMax M3 | 51% | **78%** (21/27) | 5.5 | held | 1 (`java.time` syntax) | same |
 | compose-ui | Claude Opus 5.5, no kit | 72% (M2) | 89% (24/27) | 8.0 | held | 0 | same |
 
-| compose-data | DeepSeek V4.1 Flash | 54% (M2) | **100%** (26/26) | **7.75** | held | 0 | `handoff/reviews/phase-7.md` (gate-p7) |
+| compose-data | DeepSeek V4.1 Flash | 54% (M2) | **100%** (26/26) | **7.75** | held | 0 | (internal record, not published) (gate-p7) |
 | compose-data | Muse Spark 1.3 | 56% (M2) | **92%** (24/26) | **7.5** | held | 0 | same |
 | compose-data | MiniMax M3 | 38% | **88%** (23/26) | 6.5 | held | 0 | same |
 | compose-data | Claude Opus 5.5, no kit | 72% (M2) | 69% (18/26) | 7.25 | **folded** | 0 | same |
 
-| compose-project + compose-platform | DeepSeek V4.1 Flash | 54% (M2) | **90%** (59/65) | **8.0** | 3/3 held | 0 | `handoff/reviews/phase-8.md` (gate-p8) |
+| compose-project + compose-platform | DeepSeek V4.1 Flash | 54% (M2) | **90%** (59/65) | **8.0** | 3/3 held | 0 | (internal record, not published) (gate-p8) |
 | compose-project + compose-platform | Muse Spark 1.3 | 56% (M2) | **93%** (61/65) | **7.0** | 3/3 held | 0 | same |
 | compose-project + compose-platform | MiniMax M3 | 30% | **87%** (57/65) | 6.3 | 3/3 held | 1 | same |
 | compose-project + compose-platform | Claude Opus 5.5, no kit | 72% (M2) | 61% (40/65) | 6.0 | **2/3** | 0 | same |
@@ -104,7 +104,7 @@ since rewritten. The gate ran on the pre-fix skill, and M9 re-measures the final
 
 The gate covered FEAT-01, DATA-01 and UI-03, with new binary checks for KDoc, intent comments, braces
 and the exhaustive `when`. The graders were blind, with 4 answers per packet. Report:
-`handoff/reviews/phase-8.6.md` (gate-p86).
+(internal record, not published) (gate-p86).
 
 | Model | Rubric | Quality | Note |
 |---|---|---|---|
@@ -129,7 +129,7 @@ Xcode 27.
 | 3 | **0 build defects** | **zero-patch** sync, Android APK, desktop, iOS framework link |
 | 4 | 0 | scaffolded tests: **36/36 pass** (2 features × 9 tests × JVM + iOS) |
 
-Every defect was fixed in the kit, not worked around. Report: `handoff/reviews/phase-9.md`.
+Every defect was fixed in the kit, not worked around. Report: (internal record, not published).
 
 ## Agentic trial: a weak model in a real session (Phase 9, 2026-09-25)
 
@@ -151,7 +151,7 @@ because Opus knew them, so Opus knowledge does not transfer to weak models.
 
 ## Guard scripts — precision on a real codebase (Phase 5, 2026-09-25)
 
-`skills-v2/compose-architecture/scripts/run-checks.sh` has 10 checks. It needs bash 3.2 and BSD
+`skills/compose-architecture/scripts/run-checks.sh` has 10 checks. It needs bash 3.2 and BSD
 grep/awk, and no other tools. It ran read-only on a private production KMP app of about 1,600 Kotlin
 files and finished in under a minute. The moderator verified every hit by hand.
 
@@ -181,7 +181,7 @@ item-level agreement.
 **How we got here, shown honestly.** Held-out tests v1 and v2 exposed a real defect: the kit made models
 lecture (rule citations, printed internal procedure) and over-escalate reviews, and it **lowered**
 engineering scores on new tasks (83% → 72%). We fixed the class twice and then measured on a fresh set,
-v3. Earlier held-out numbers are in `handoff/reviews/m9.md`.
+v3. Earlier held-out numbers are in `evals-v2/method/preregistration-v5.md`.
 
 **Caveats:**
 

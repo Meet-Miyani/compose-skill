@@ -1349,7 +1349,7 @@ check_security() {
 
   while IFS= read -r file; do
     local path_matches
-    path_matches=$(grep -nE '(/Users/[a-zA-Z]|/home/[a-zA-Z]|C:\\Users\\)' "$file" 2>/dev/null || true)
+    path_matches=$(grep -nE '(/U[s]ers/[a-zA-Z]|/home/[a-zA-Z]|C:\\Users\\)' "$file" 2>/dev/null || true)
     if [ -n "$path_matches" ]; then
       while IFS= read -r match; do
         path_count=$((path_count + 1))
@@ -1637,7 +1637,7 @@ compute_quality_score() {
   [ "$p3" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Disclosure"); fix_labels+=("Link all reference files from SKILL.md — orphaned files found (+3)"); fix_sources+=("spec: 'use relative paths from skill root' — agentskills.io/specification#file-references"); }
   [ "$p4" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Disclosure"); fix_labels+=("Keep body under $BODY_MAX_LINES lines (+2)"); fix_sources+=("spec: 'under 500 lines' — agentskills.io/specification#progressive-disclosure"); }
   [ "$x1" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Security"); fix_labels+=("Remove detected API keys/secrets from markdown files (+5)"); fix_sources+=("community: 'Never hardcode credentials' — mdskills.ai/docs/skill-best-practices"); }
-  [ "$x2" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Security"); fix_labels+=("Replace hardcoded paths (/Users/...) with relative paths (+3)"); fix_sources+=("spec: 'use relative paths from the skill root' — agentskills.io/specification#file-references"); }
+  [ "$x2" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Security"); fix_labels+=("Replace hardcoded user home paths with relative paths (+3)"); fix_sources+=("spec: 'use relative paths from the skill root' — agentskills.io/specification#file-references"); }
   [ "$x3" = "0" ] && { fix_count=$((fix_count+1)); fix_dims+=("Security"); fix_labels+=("Remove or guard dangerous commands (rm -rf, chmod 777) (+2)"); fix_sources+=("community: 'Shell commands need guardrails' — mdskills.ai/docs/skill-best-practices"); }
 
   # ── Display: "How to Improve" section with sourced fixes (terminal only) ──

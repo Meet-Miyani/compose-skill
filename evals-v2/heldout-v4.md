@@ -2,7 +2,7 @@
 
 Domain: Plant care app (plants, watering schedules, reminders, photos, care log, species search).
 12 scenarios, all six skills covered, 2 pressure, 1 review, 1 bug fix, 1 project-decisions case. Written
-from `handoff/SKILL_SPECS.md` and `handoff/reviews/DECISIONS.md` only, without reading the kit's own text
+from `(internal record, not published)` and `(internal record, not published)` only, without reading the kit's own text
 or scenarios. Never shown to the worker.
 
 ---

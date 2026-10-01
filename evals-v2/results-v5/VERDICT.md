@@ -2,7 +2,7 @@
 
 Candidate `skills-v2/` at `5cf2763`. 5 models × 8 tasks × 3 arms = 120 agentic runs in the real CLIs. Each answer was
 graded blind by the two vendors other than its own; an item passes only when both graders pass it. Rules are in
-`handoff/reviews/m9.md` ("Plan step 9"). Full table: `score-output.txt`.
+`evals-v2/method/preregistration-v5.md` ("Plan step 9"). Full table: `score-output.txt`.
 
 ## Scores (both graders agree; % of rubric items)
 

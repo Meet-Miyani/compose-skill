@@ -1,21 +1,7 @@
-APP := composekit
-
-.PHONY: build test smoke validate-skill clean snapshot
-
-build:
-	go build -o bin/$(APP) .
+.PHONY: test validate-skill
 
 test:
-	go test ./...
-
-smoke:
-	./scripts/smoke-test.sh
+	bash tests/skills/compose-architecture/run-tests.sh
 
 validate-skill:
 	./scripts/validate-skill.sh
-
-clean:
-	rm -rf bin dist tmp-smoke tmp-skills
-
-snapshot:
-	goreleaser release --snapshot --clean

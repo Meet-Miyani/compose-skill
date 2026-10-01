@@ -31,7 +31,7 @@ ViewModel-test state matrix or a named review step).
    **Prompt** plus the **Context given to the agent**. No skill file, no brief,
    no extra guidance. Save the full transcript.
 3. **With-skill run.** Same prompt and context, but with the skill loaded (once
-   the skill exists in `skills-v2/`; before that, this step is skipped and the
+   the skill exists in `skills/`; before that, this step is skipped and the
    baseline alone is recorded). Save the full transcript.
 4. **Score.** For each rubric check, mark pass or fail with a one-line quote of
    the evidence. A scenario passes when every rubric check passes. A pressure

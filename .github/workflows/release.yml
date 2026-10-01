@@ -18,35 +18,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v7
-        with:
-          distribution: goreleaser
-          version: "~> v2"
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Package skills bundle
-        run: ./scripts/package-skills.sh "${GITHUB_REF_NAME}"
+        run: bash scripts/package-skills.sh "${GITHUB_REF_NAME}"
 
-      - name: Generate skills bundle checksum
+      - name: Generate checksum
         run: |
           cd dist
-          sha256sum "composekit-skills_${GITHUB_REF_NAME}.tar.gz" >> checksums.txt
-          cat checksums.txt
+          sha256sum "compose-kit-skills_${GITHUB_REF_NAME}.tar.gz" > checksums.txt
 
-      - name: Upload checksums (updated)
-        run: gh release upload "${GITHUB_REF_NAME}" "dist/checksums.txt" --clobber
+      - name: Create release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload skills bundle
-        run: gh release upload "${GITHUB_REF_NAME}" "dist/composekit-skills_${GITHUB_REF_NAME}.tar.gz" --clobber
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_flags=()
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            release_flags+=(--prerelease)
+          fi
+          gh release create "${GITHUB_REF_NAME}" \
+            "dist/compose-kit-skills_${GITHUB_REF_NAME}.tar.gz" \
+            dist/checksums.txt \
+            --generate-notes "${release_flags[@]}"

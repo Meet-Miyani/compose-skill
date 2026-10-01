@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds the SEALED held-out set v4 (heldout-v4.json + heldout-v4.md).
 
-Moderator-written 2026-09-28 from handoff/SKILL_SPECS.md and handoff/reviews/DECISIONS.md only,
+Moderator-written 2026-09-28 from (internal record, not published) and (internal record, not published) only,
 without reading the kit's skill text or earlier scenarios' wording. Never shown to the worker.
 """
 import json, os
@@ -188,7 +188,7 @@ json.dump(evals, open(os.path.join(HERE, "heldout-v4.json"), "w"), indent=1)
 md = ["# Held-out eval set v4 (SEALED)", "",
       "Domain: Plant care app (plants, watering schedules, reminders, photos, care log, species search).",
       "12 scenarios, all six skills covered, 2 pressure, 1 review, 1 bug fix, 1 project-decisions case. Written",
-      "from `handoff/SKILL_SPECS.md` and `handoff/reviews/DECISIONS.md` only, without reading the kit's own text",
+      "from `(internal record, not published)` and `(internal record, not published)` only, without reading the kit's own text",
       "or scenarios. Never shown to the worker.", "", "---"]
 for s in S:
     md += ["", title_line(s), "", "**Prompt:**", s["prompt"], "", "**Context given to the agent:**", s["context"], "",
