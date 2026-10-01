@@ -1,7 +1,7 @@
-package com.example.feature.readinglog.presentation.stats
+package com.example.feature.notes.readinglog.presentation.stats
 
-import com.example.feature.readinglog.domain.model.Book
-import com.example.feature.readinglog.domain.repository.BookRepository
+import com.example.feature.notes.readinglog.domain.model.Book
+import com.example.feature.notes.readinglog.domain.repository.BookRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay

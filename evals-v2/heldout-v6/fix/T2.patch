@@ -1,8 +1,8 @@
-diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailScreen.kt
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
 index a4feaa4..f87bec2 100644
---- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailScreen.kt
-+++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailScreen.kt
-@@ -2,7 +2,7 @@ package com.example.feature.readinglog.presentation.detail
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -2,7 +2,7 @@ package com.example.feature.notes.readinglog.presentation.detail
  import androidx.compose.foundation.layout.Column
  import androidx.compose.material3.Text
  import androidx.compose.runtime.Composable
@@ -20,16 +20,16 @@ index a4feaa4..f87bec2 100644
      Column {
          if (state.isLoading) { Text("Loading...") }
          state.book?.let {
-diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailViewModel.kt
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
 index fe644f9..ed4435c 100644
---- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailViewModel.kt
-+++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/detail/BookDetailViewModel.kt
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
 @@ -1,26 +1,26 @@
- package com.example.feature.readinglog.presentation.detail
+ package com.example.feature.notes.readinglog.presentation.detail
 -import androidx.lifecycle.ViewModel
 -import androidx.lifecycle.viewModelScope
 +import com.example.core.mvi.BaseViewModel
- import com.example.feature.readinglog.domain.repository.BookRepository
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
 -import kotlinx.coroutines.flow.MutableStateFlow
 -import kotlinx.coroutines.launch
 -import org.koin.core.annotation.Factory

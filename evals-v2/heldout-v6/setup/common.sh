@@ -1,22 +1,22 @@
 #!/bin/bash
 set -e
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/data
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/domain/model
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/domain/repository
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/list
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/navigation
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/model
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/domain/model/Book.kt
-package com.example.feature.readinglog.domain.model
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/model/Book.kt
+package com.example.feature.notes.readinglog.domain.model
 data class Book(val id: Long, val title: String, val author: String, val pages: Int, val isFinished: Boolean)
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/data/BookEntity.kt
-package com.example.feature.readinglog.data
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookEntity.kt
+package com.example.feature.notes.readinglog.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 @Entity(tableName = "books")
-data class BookEntity(
+internal data class BookEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
     val author: String,
@@ -25,14 +25,14 @@ data class BookEntity(
 )
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/data/BookDao.kt
-package com.example.feature.readinglog.data
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
+package com.example.feature.notes.readinglog.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 @Dao
-interface BookDao {
+internal interface BookDao {
     @Query("SELECT * FROM books")
     fun getBooksStream(): Flow<List<BookEntity>>
     @Insert
@@ -46,20 +46,16 @@ python3 -c '
 import sys
 f="feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt"
 with open(f, "r") as file: content = file.read()
-content = content.replace("entities = [NoteEntity::class], version = 1,", "entities = [NoteEntity::class, com.example.feature.readinglog.data.BookEntity::class], version = 2, autoMigrations = [androidx.room.AutoMigration(from = 1, to = 2)],")
+content = content.replace("entities = [NoteEntity::class], version = 1,", "entities = [NoteEntity::class, com.example.feature.notes.readinglog.data.BookEntity::class], version = 2, autoMigrations = [androidx.room.AutoMigration(from = 1, to = 2)],")
 assert "version = 2" in content
-content = content.replace("abstract fun notesDao(): NotesDao", "abstract fun notesDao(): NotesDao\n    abstract fun bookDao(): com.example.feature.readinglog.data.BookDao")
+content = content.replace("abstract fun notesDao(): NotesDao", "abstract fun notesDao(): NotesDao\n    abstract fun bookDao(): com.example.feature.notes.readinglog.data.BookDao")
 with open(f, "w") as file: file.write(content)
 
-f="feature/notes/src/commonMain/kotlin/com/example/feature/notes/di/NotesFeatureModule.kt"
-with open(f, "r") as file: content = file.read()
-content = content.replace("@ComponentScan(\"com.example.feature.notes\")", "@ComponentScan(\"com.example.feature\")")
-with open(f, "w") as file: file.write(content)
 '
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/domain/repository/BookRepository.kt
-package com.example.feature.readinglog.domain.repository
-import com.example.feature.readinglog.domain.model.Book
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+package com.example.feature.notes.readinglog.domain.repository
+import com.example.feature.notes.readinglog.domain.model.Book
 import kotlinx.coroutines.flow.Flow
 interface BookRepository {
     fun getBooksStream(): Flow<List<Book>>
@@ -68,10 +64,10 @@ interface BookRepository {
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/data/DefaultBookRepository.kt
-package com.example.feature.readinglog.data
-import com.example.feature.readinglog.domain.model.Book
-import com.example.feature.readinglog.domain.repository.BookRepository
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+package com.example.feature.notes.readinglog.data
+import com.example.feature.notes.readinglog.domain.model.Book
+import com.example.feature.notes.readinglog.domain.repository.BookRepository
 import com.example.feature.notes.data.local.NotesDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -90,12 +86,12 @@ internal class DefaultBookRepository(private val db: NotesDatabase) : BookReposi
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/list/BookListContract.kt
-package com.example.feature.readinglog.presentation.list
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+package com.example.feature.notes.readinglog.presentation.list
 import com.example.core.mvi.UiAction
 import com.example.core.mvi.UiState
 import com.example.core.mvi.UiEffect
-import com.example.feature.readinglog.domain.model.Book
+import com.example.feature.notes.readinglog.domain.model.Book
 data class BookListUiState(val items: List<Book> = emptyList(), val isLoading: Boolean = false) : UiState
 sealed interface BookListUiAction : UiAction {
     data object OnScreenStarted : BookListUiAction
@@ -107,10 +103,10 @@ sealed interface BookListUiEffect : UiEffect {
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/list/BookListViewModel.kt
-package com.example.feature.readinglog.presentation.list
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+package com.example.feature.notes.readinglog.presentation.list
 import com.example.core.mvi.BaseViewModel
-import com.example.feature.readinglog.domain.repository.BookRepository
+import com.example.feature.notes.readinglog.domain.repository.BookRepository
 import kotlinx.coroutines.Job
 import org.koin.core.annotation.KoinViewModel
 @KoinViewModel
@@ -138,8 +134,8 @@ class BookListViewModel(private val repository: BookRepository) :
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/list/BookListScreen.kt
-package com.example.feature.readinglog.presentation.list
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+package com.example.feature.notes.readinglog.presentation.list
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -160,8 +156,8 @@ fun BookListScreen(state: BookListUiState, onAdd: () -> Unit, onMarkFinished: (L
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/list/BookListRoute.kt
-package com.example.feature.readinglog.presentation.list
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+package com.example.feature.notes.readinglog.presentation.list
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -190,8 +186,8 @@ fun BookListRoute(viewModel: BookListViewModel, onEffect: suspend (BookListUiEff
 }
 INNER_EOF
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/navigation/BookListKey.kt
-package com.example.feature.readinglog.navigation
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/BookListKey.kt
+package com.example.feature.notes.readinglog.navigation
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
@@ -239,7 +235,7 @@ with open(f, "w") as file: file.write(content)
 # Update App.kt
 f="composeApp/src/commonMain/kotlin/com/example/app/App.kt"
 with open(f, "r") as file: content = file.read()
-content = content.replace("import com.example.feature.notes.navigation.NotesListKey", "import com.example.feature.notes.navigation.NotesListKey\nimport com.example.feature.readinglog.navigation.BookListKey\nimport com.example.feature.readinglog.navigation.readingLogNavSerializers\nimport kotlinx.serialization.modules.plus\nimport com.example.feature.readinglog.presentation.list.BookListRoute")
+content = content.replace("import com.example.feature.notes.navigation.NotesListKey", "import com.example.feature.notes.navigation.NotesListKey\nimport com.example.feature.notes.readinglog.navigation.BookListKey\nimport com.example.feature.notes.readinglog.navigation.readingLogNavSerializers\nimport kotlinx.serialization.modules.plus\nimport com.example.feature.notes.readinglog.presentation.list.BookListRoute")
 content = content.replace("serializersModule = notesNavSerializers }", "serializersModule = notesNavSerializers + readingLogNavSerializers }")
 assert "readingLogNavSerializers }" in content
 content = content.replace("entry<NotesListKey> {", "entry<BookListKey> {\n                        BookListRoute(viewModel = koinViewModel(), onEffect = { })\n                    }\n\n                    entry<NotesListKey> {")

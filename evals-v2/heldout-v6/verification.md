@@ -1,6 +1,7 @@
 # v6 held-out tasks: verification
 
-Gate: `v6-verify-tasks-v3.sh` (build gate plus content lint), run by the moderator on 2026-10-01 at 18:52-18:54.
+Gate: `v6-verify-tasks-v3.sh` (build gate plus content lint), run by the moderator on 2026-10-01 at 19:14-19:16 on
+the final set.
 
 ## Gate on the base app without the kit guards
 
@@ -110,7 +111,11 @@ PASS  T6 setup state builds and existing tests pass
 ALL 6 TASKS VERIFIED
 ```
 
-Extra checks: after a full build, every setup state has a clean `git status` (T1/T2 show only the reference patch the gate applied), and the T3/T4 "PR" commits each contain one file, the ViewModel under review.
+Extra checks:
+- After a full build, every setup state has a clean `git status`. T1/T2 show only the reference patch the gate
+  applied.
+- The T3/T4 "PR" commits each contain one file: the ViewModel under review.
+- All 11 kit guard scripts pass on every setup state.
 
 ## Moderator repairs (pre-registration Amendment 1)
 
@@ -176,3 +181,15 @@ set before any run.
   Opus said to keep it.
 - The T1 test cases with 0 pages and the T2 not-found case pass on the initial state alone. The positive cases
   carry the behaviour check.
+
+**Found by the first harness test run, after sealing and before any counted run**
+12. The kit's guard scripts, which only kit arms receive, failed on the shared base itself. Layering failed because
+    the reading-log code sat in the `feature/notes` module under a separate `com.example.feature.readinglog`
+    package. The data-boundary check failed because `BookEntity` was public. Kit agents would therefore see errors
+    in code they were not asked to touch, and no-kit agents would not.
+    - The reading-log code moved under the module's own package (`com.example.feature.notes.readinglog`).
+    - `BookEntity` and `BookDao` are now `internal`, as the house keeps entities.
+    - The base no longer widens the Notes DI component scan, which the move made unnecessary.
+
+    Every setup state now passes all 11 kit guards. The test run (GPT-6-Luna, T1, kit61) was discarded and will be
+    re-run on the corrected set.

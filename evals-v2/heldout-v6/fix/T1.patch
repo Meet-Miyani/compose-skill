@@ -1,8 +1,8 @@
-diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
 index a94099c..85a33ae 100644
---- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
-+++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
-@@ -2,7 +2,7 @@ package com.example.feature.readinglog.presentation.stats
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+@@ -2,7 +2,7 @@ package com.example.feature.notes.readinglog.presentation.stats
  import androidx.compose.foundation.layout.Column
  import androidx.compose.material3.Text
  import androidx.compose.runtime.Composable
@@ -20,16 +20,16 @@ index a94099c..85a33ae 100644
      Column {
          if (state.isLoading) { Text("Loading...") }
          Text("Total pages read: ${state.totalPages}")
-diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
 index 901f0ec..1179f4c 100644
---- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
-+++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
 @@ -1,26 +1,28 @@
- package com.example.feature.readinglog.presentation.stats
+ package com.example.feature.notes.readinglog.presentation.stats
 -import androidx.lifecycle.ViewModel
 -import androidx.lifecycle.viewModelScope
 +import com.example.core.mvi.BaseViewModel
- import com.example.feature.readinglog.domain.repository.BookRepository
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
 -import kotlinx.coroutines.flow.MutableStateFlow
 -import kotlinx.coroutines.launch
 -import org.koin.core.annotation.Factory

@@ -2,18 +2,18 @@
 set -e
 bash "$(dirname "$0")/common.sh"
 git add -A && git -c user.name=dev -c user.email=dev@example.com commit -qm "Add reading log"
-mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats
+mkdir -p feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats
 
-cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
-package com.example.feature.readinglog.presentation.stats
+cat << 'INNER_EOF' > feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+package com.example.feature.notes.readinglog.presentation.stats
 
 import com.example.core.mvi.BaseViewModel
 import com.example.core.mvi.UiAction
 import com.example.core.mvi.UiEffect
 import com.example.core.mvi.UiState
-import com.example.feature.readinglog.domain.repository.BookRepository
+import com.example.feature.notes.readinglog.domain.repository.BookRepository
 import org.koin.core.annotation.Factory
-import com.example.feature.readinglog.domain.model.Book
+import com.example.feature.notes.readinglog.domain.model.Book
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
