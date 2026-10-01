@@ -64,15 +64,15 @@ Both independent graders had to pass a rubric item for it to count. The five-mod
 
 | Model | No kit | Generic prompt | Kit | Kit − no kit |
 |---|---:|---:|---:|---:|
-| Sonnet 5 | 55.8 | 60.5 | **74.4** | **+18.6** |
+| Sonnet 5.5 | 55.8 | 60.5 | **74.4** | **+18.6** |
 | Opus | 65.1 | 62.8 | **74.4** | **+9.3** |
 | GPT-6-Luna | 65.1 | 60.5 | 67.4 | +2.3 |
 | GPT-6-Sol | 72.1 | 74.4 | 76.7 | +4.6 |
 | Gemini 3.8 Flash | 51.2 | 46.5 | **76.7** | **+25.6** |
 
-The pre-registered rules support a **preview release** naming Sonnet 5, Opus, GPT-6-Sol, and Gemini 3.8 Flash; they do not support naming GPT-6-Luna. Claimable lifts of at least eight points over no kit are Sonnet (+18.6), Opus (+9.3), and Flash (+25.6). On engineering items, Sonnet (+11.1) and Flash (+40.8) alone lead the generic prompt by at least eight points; a short generic prompt does about as well for Opus, Sol, and Luna. House-style items rose for every model, from 37–50% without the kit to 56–69% with it.
+The pre-registered rules support a **preview release** naming Sonnet 5.5, Opus, GPT-6-Sol, and Gemini 3.8 Flash; they do not support naming GPT-6-Luna. Claimable lifts of at least eight points over no kit are Sonnet (+18.6), Opus (+9.3), and Flash (+25.6). On engineering items, Sonnet (+11.1) and Flash (+40.8) alone lead the generic prompt by at least eight points; a short generic prompt does about as well for Opus, Sol, and Luna. House-style items rose for every model, from 37–50% without the kit to 56–69% with it.
 
-**Erratum (2026-10-01):** the two review tasks had flawed setups (one wrong rubric item; planted items labelled in code comments). No pre-registered outcome changes, but Opus’s +9.3 depends on those two tasks (+3.4 without them), and the review over-flagging finding came mostly from the wrong item. [Erratum](evals-v2/results-v5/VERDICT.md#erratum-2026-10-01).
+**Erratum (2026-10-01):** the two review tasks had flawed setups (one wrong rubric item; planted items labelled in code comments). No pre-registered outcome changes, but Opus’s +9.3 depends on those two tasks (+3.4 without them), and the review over-flagging finding came mostly from the wrong item. [Erratum](evals-v2/results-v5/VERDICT.md#erratum-2026-10-01). The Claude model was Sonnet 5.5 (`claude-sonnet-5-5`), first published as "Sonnet 5".
 
 Kit context is an upper bound based on all kit files opened. Opus reached 9.9k tokens per task at most, Sonnet 14.0k, Luna 18.3k, Sol 26.4k (three of eight tasks over 20k), and Flash 26.5k (two of eight over 20k). Every panel model opened `compose` first on every task. [Context detail](evals-v2/results-v5/kit-tokens.txt).
 

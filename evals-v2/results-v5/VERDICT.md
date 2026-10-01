@@ -13,7 +13,7 @@ graded blind by the two vendors other than its own; an item passes only when bot
 
 | Model | No kit | Generic prompt | Kit | Kit − no kit | `[eng]` no kit → kit | `[kit]` no kit → kit |
 |---|---|---|---|---|---|---|
-| Sonnet 5 | 55.8 | 60.5 | **74.4** | **+18.6** | 66.7 → 77.8 | 37.5 → 68.8 |
+| Sonnet 5.5 | 55.8 | 60.5 | **74.4** | **+18.6** | 66.7 → 77.8 | 37.5 → 68.8 |
 | Opus | 65.1 | 62.8 | **74.4** | **+9.3** | 77.8 → 77.8 | 43.8 → 68.8 |
 | GPT-6-Luna | 65.1 | 60.5 | 67.4 | +2.3 | **77.8 → 66.7** | 43.8 → 68.8 |
 | GPT-6-Sol | 72.1 | 74.4 | 76.7 | +4.6 | 85.2 → 81.5 | 50.0 → 68.8 |
@@ -37,7 +37,7 @@ waiting to lock`). Re-run cleanly with `--no-daemon` on 2026-10-01, all three bu
 Graders saw those failed checks, so Sol's frozen kit score is, if anything, slightly understated (T8 #2 "existing
 tests pass"). No grade was changed, and no verdict depends on these three.
 
-**Outcome (pre-registered):** rules 1-3 hold for 4 of 5 models. **Release as a preview, naming Sonnet 5, Opus,
+**Outcome (pre-registered):** rules 1-3 hold for 4 of 5 models. **Release as a preview, naming Sonnet 5.5, Opus,
 GPT-6-Sol and Gemini 3.8 Flash; not GPT-6-Luna.**
 
 Claims allowed by rules 4-5:
@@ -75,7 +75,7 @@ Upper bound: the full size of every kit file opened.
 | Model | Max per task | Tasks over 20k | Loaded `compose` first |
 |---|---|---|---|
 | Opus | 9.9k | 0/8 | 8/8 |
-| Sonnet 5 | 14.0k | 0/8 | 8/8 |
+| Sonnet 5.5 | 14.0k | 0/8 | 8/8 |
 | GPT-6-Luna | 18.3k | 0/8 | 8/8 |
 | GPT-6-Sol | 26.4k | 3/8 (T1-T3, new features) | 8/8 |
 | Gemini 3.8 Flash | 26.5k | 2/8 (T1-T2, new features) | 8/8 |
@@ -109,7 +109,7 @@ tasks.
 
 | Model | Lift as published | Without T6 item 3 | Without T6 and T7 | `[eng]` change without T6 item 3 |
 |---|---|---|---|---|
-| Sonnet 5 | +18.6 | +21.4 | +17.2 | +15.4 |
+| Sonnet 5.5 | +18.6 | +21.4 | +17.2 | +15.4 |
 | Opus | +9.3 | +9.5 | **+3.4** | 0.0 |
 | GPT-6-Luna | +2.3 | +2.4 | **−3.4** | **−11.5** |
 | GPT-6-Sol | +4.7 | +7.1 | +3.4 | 0.0 |
@@ -121,6 +121,11 @@ tasks.
   review tasks. Sonnet and Flash keep claimable lifts. **Opus's lift drops below 8 points**, so the +9.3 depends on
   the review tasks. Luna, already excluded, would also fail rule 1. With 8 tasks, differences under ~8 points
   were already called noise (Limits).
+
+**Model label (corrected 2026-10-01):** the v5 Claude model was published as "Sonnet 5". The run logs show that
+all 24 of its cells ran `claude-sonnet-5-5` (Sonnet 5.5), and all 24 Opus cells ran `claude-opus-5-5`. The `sonnet`
+alias already resolved to Sonnet 5.5 when v5 ran; the pre-registration's note that it meant Sonnet 5 was out of date.
+Only the label changes; every number stands.
 
 **Changes for v6:** the task gate now also lints for labelling comments, and the moderator checks every rubric item
 against the planted code before sealing. Both are pre-registered with the v6 test.
