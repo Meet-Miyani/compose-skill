@@ -1,0 +1,74 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
+index a94099c..85a33ae 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsScreen.kt
+@@ -2,7 +2,7 @@ package com.example.feature.readinglog.presentation.stats
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import androidx.compose.runtime.getValue
+ import androidx.lifecycle.compose.LifecycleStartEffect
+ @Composable
+@@ -11,7 +11,7 @@ fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
+         viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
+         onStopOrDispose {}
+     }
+-    val state by viewModel.state.collectAsState()
++    val state by viewModel.state.collectAsStateWithLifecycle()
+     Column {
+         if (state.isLoading) { Text("Loading...") }
+         Text("Total pages read: ${state.totalPages}")
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
+index 901f0ec..1179f4c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/readinglog/presentation/stats/ReadingStatsViewModel.kt
+@@ -1,26 +1,28 @@
+ package com.example.feature.readinglog.presentation.stats
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class ReadingStatsViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(ReadingStatsUiState())
+-    fun onAction(action: ReadingStatsUiAction) {
+-        if (action is ReadingStatsUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val pages = books.filter { it.isFinished }.sumOf { it.pages }
+-                    state.value = state.value.copy(totalPages = pages, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
++import kotlinx.coroutines.withContext
++import org.koin.core.annotation.KoinViewModel
++@KoinViewModel
++class ReadingStatsViewModel(
++    private val repository: BookRepository,
++    private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
++) : BaseViewModel<ReadingStatsUiAction, ReadingStatsUiState, ReadingStatsUiEffect>(ReadingStatsUiState()) {
++    override fun onAction(action: ReadingStatsUiAction) {
++        when (action) {
++            ReadingStatsUiAction.OnScreenStarted -> load()
++        }
++    }
++    private fun load() {
++        updateState { copy(isLoading = true) }
++        launchGuarded(onError = { updateState { copy(isLoading = false, error = it.type.name) } }) {
++            val pages = withContext(ioDispatcher) {
++                repository.getBooksStream().first().filter { it.isFinished }.sumOf { it.pages }
+             }
++            updateState { copy(totalPages = pages, isLoading = false) }
+         }
+     }
+ }
