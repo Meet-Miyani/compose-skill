@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Says onError = { } makes a failed load look like a valid total of zero; keeps error in state."},
+    "2": {"pass": true, "why": "Every Load starts another collector; duplicates run for the ViewModel's lifetime."},
+    "3": {"pass": true, "why": "Treats off-main calculation as fine; only injects dispatcher in the fix."},
+    "4": {"pass": true, "why": "Return type not raised as blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Keeps streamJob and returns early while it is active."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "onError = { } leaves totalPages at 0, so a failed load looks like a valid total."},
+    "2": {"pass": true, "why": "Load starts another long-lived collector each time it is dispatched."},
+    "3": {"pass": true, "why": "Dispatcher calculation not called blocking."},
+    "4": {"pass": true, "why": "Return type not raised as blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Job guard (streamJob?.isActive return) keeps a single collection."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Discarded failure leaves totalPages at 0 as though no pages were read."},
+    "2": {"pass": true, "why": "Repeated Load leaves multiple active subscriptions until the view model is cleared."},
+    "3": {"pass": true, "why": "Dispatcher calculation not mentioned as an issue."},
+    "4": {"pass": true, "why": "Return type not raised."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Major/Minor severity only; no blocking-vs-later split and no statement of what is fine."},
+    "7": {"pass": true, "why": "Keep the Job and skip Load while active, as BookListViewModel does."}
+  },
+  "D": {
+    "1": {"pass": false, "why": "Says errors are silently discarded but not that totalPages stays at 0 and looks like zero pages read."},
+    "2": {"pass": true, "why": "Each Load adds a collector that stays active for the ViewModel's lifetime; they accumulate."},
+    "3": {"pass": true, "why": "Dispatcher calculation not mentioned."},
+    "4": {"pass": true, "why": "Return type not raised."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "P1/P2 list only; no statement of what is fine as it is."},
+    "7": {"pass": true, "why": "Keep the job and skip loading while active, as BookListViewModel does."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Hidden failure leaves total at 0, which looks like a valid result."},
+    "2": {"pass": true, "why": "Each Load starts a new unguarded collector; repeated dispatches leave multiple collectors active."},
+    "3": {"pass": true, "why": "Dispatcher calculation not called blocking."},
+    "4": {"pass": true, "why": "Return type not raised."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Suggests retaining or guarding the job against overlapping loads."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Failure gives no error and can leave the total at the default zero."},
+    "2": {"pass": true, "why": "Each Load starts another collector; duplicates run until the ViewModel is cleared."},
+    "3": {"pass": true, "why": "Dispatcher calculation not called blocking."},
+    "4": {"pass": true, "why": "Return type not raised."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Keep and reuse an active collection job."}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "checks_exit=0 with feature:notes jvmTest run; total-pages computation unchanged"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "diff touches only the stats contract/VM/Route/Screen plus new test files"},
+    "4": {"pass": false, "why": "Screen adds a new inline 'Something went wrong.' error Text the original never displayed, a new visible UI element/behaviour"},
+    "5": {"pass": true, "why": "extends BaseViewModel with Ui contract, updateState only, launchGuarded(onError) replaces try/catch"},
+    "6": {"pass": true, "why": "ReadingStatsRoute in own file with collectAsStateWithLifecycle, stateless ReadingStatsScreen(state, modifier)"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "checks_exit=0 with feature:notes jvmTest run; total-pages computation unchanged"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "diff limited to stats feature files and new tests"},
+    "4": {"pass": true, "why": "no new controls/screens/navigation/persistence; screen renders the same texts"},
+    "5": {"pass": true, "why": "extends BaseViewModel, updateState, launchGuarded(onError=::emitError, onComplete) with no try/catch"},
+    "6": {"pass": true, "why": "Route extracted to own file using collectAsStateWithLifecycle; Screen takes state only"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "checks_exit=0 with feature:notes jvmTest run; computation and displayed texts unchanged"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "only stats files plus two related string resources added"},
+    "4": {"pass": true, "why": "no new controls/screens/navigation/persistence; same Loading/total texts via resources"},
+    "5": {"pass": true, "why": "extends BaseViewModel, updateState, launchGuarded with onError/onStart/onComplete, no try/catch"},
+    "6": {"pass": true, "why": "Route in own file with collectAsStateWithLifecycle; stateless Screen(state, modifier)"}
+  }
+}

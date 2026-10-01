@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Blocking #1: GlobalScope work outlives the screen, never cancelled, can write to a dead screen."},
+    "2": {"pass": true, "why": "Blocking #2: empty catch drops failures; failed search looks like 'no books found' with no message in state."},
+    "3": {"pass": true, "why": "Later list notes two fast keystrokes start unguarded searches; fix cancels prior so only the latest query writes."},
+    "4": {"pass": true, "why": "Initial empty query is not flagged as blocking."},
+    "5": {"pass": true, "why": "ignoreCase title match is kept unchanged and not called blocking."},
+    "6": {"pass": true, "why": "Diff is empty."},
+    "7": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "8": {"pass": true, "why": "Corrected code uses launchGuarded (ViewModel scope) with searchJob?.cancel() on each query change."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocker #1: GlobalScope leaks beyond onCleared."},
+    "2": {"pass": true, "why": "Blocker #2: empty catch swallows exceptions; silent failure with no feedback, no error field in state."},
+    "3": {"pass": true, "why": "Blocker #3: no job cancellation; 'a' search can finish after 'ab' and overwrite results with stale query."},
+    "4": {"pass": true, "why": "Initial empty query is not raised."},
+    "5": {"pass": true, "why": "Case-insensitive match not called blocking; only a nit about also matching author."},
+    "6": {"pass": true, "why": "Diff is empty."},
+    "7": {"pass": false, "why": "Separates blockers from nits but never says what is fine as it is."},
+    "8": {"pass": true, "why": "Proposes searchJob?.cancel(); searchJob = launchGuarded(...) in the ViewModel scope."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking #1: GlobalScope job not tied to screen; late updateState writes to a cleared screen."},
+    "2": {"pass": true, "why": "Blocking #2: empty catch; user sees stale or empty list with no message."},
+    "3": {"pass": true, "why": "Blocking #3: parallel searches, older query can finish last and overwrite newer results."},
+    "4": {"pass": true, "why": "Initial empty query is not flagged as blocking."},
+    "5": {"pass": true, "why": "Case-insensitive title match listed under Fine as is."},
+    "6": {"pass": true, "why": "Diff is empty."},
+    "7": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "8": {"pass": true, "why": "Corrected code cancels searchJob and relaunches with launchGuarded in the ViewModel scope."}
+  }
+}

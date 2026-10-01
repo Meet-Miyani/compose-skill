@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Goal stored in Room reading_goal table (v3 auto-migration) and read back via a Flow"},
+    "2": {"pass": true, "why": "Stepper bounded 1..365 and the ViewModel rejects goals outside 1..365; free text is not possible"},
+    "3": {"pass": true, "why": "Counts books with isFinished=1 and finishedYear equal to the current year; markFinished records the year"},
+    "4": {"pass": true, "why": "checks_exit=0 and the build log shows test tasks completing"},
+    "5": {"pass": true, "why": "Goal goes through BookRepository/DAO into BookListUiState via the ViewModel; the composable only renders it and sends actions"},
+    "6": {"pass": false, "why": "The ViewModel silently drops invalid goals, so no validation message reaches state (new strings are resources)"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Goal stored per year in the Room yearly_reading_goals table with a v3 auto-migration"},
+    "2": {"pass": true, "why": "Input is filtered to digits, the composable rejects <=0, and the ViewModel also returns early on <=0"},
+    "3": {"pass": true, "why": "Counts finished books whose completedYear is the current year; markFinished records the year"},
+    "4": {"pass": true, "why": "Re-run checks_exit=0 with :feature:notes:jvmTest executed"},
+    "5": {"pass": true, "why": "Goal flows through repository/DAO into BookListUiState; the composable only holds a text draft and sends an action"},
+    "6": {"pass": false, "why": "Validation is also done in the composable, and no error message reaches the screen through state"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Goal stored in the Room reading_goal table (v3 auto-migration) and observed via a repository Flow"},
+    "2": {"pass": true, "why": "Digits-only input, ViewModel ignores target<=0, and the repository coerces to at least 1"},
+    "3": {"pass": true, "why": "Counts finished books with finishedYear equal to the current year (SQLite strftime); markFinished sets it"},
+    "4": {"pass": true, "why": "checks_exit=0 with :feature:notes:jvmTest executed"},
+    "5": {"pass": true, "why": "Goal flows through repository into UiState via the ViewModel; the composable only forwards input"},
+    "6": {"pass": false, "why": "No validation message, and the new UI text is hardcoded ('This year: ...', 'Yearly reading goal')"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Goal stored per year in Room reading_goals (v3 auto-migration); a JVM test reopens the DB and reads it back"},
+    "2": {"pass": true, "why": "ViewModel parses the draft with toIntOrNull and rejects null or <=0 by setting goalError; a test covers '0'"},
+    "3": {"pass": true, "why": "Counts books whose finishedYear equals the current year; markFinished records the year"},
+    "4": {"pass": true, "why": "checks_exit=0; the message reports JVM tests passed"},
+    "5": {"pass": true, "why": "Goal and draft live in BookListUiState, fed by repository streams in the ViewModel; the screen only renders and sends actions"},
+    "6": {"pass": true, "why": "Validation is in the ViewModel, goalError in state shows the goal_invalid string resource, and all new text is resources"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Goal stored per year in the Room reading_goals table; a JVM test reopens the DB and checks it"},
+    "2": {"pass": true, "why": "Dialog only enables Save for a positive integer, the ViewModel ignores <=0, and the repository require()s >0"},
+    "3": {"pass": true, "why": "finishedThisYear counts books whose finishedYear equals the current year; markFinished records the year"},
+    "4": {"pass": true, "why": "checks_exit=0; JVM tests reported passing"},
+    "5": {"pass": true, "why": "Goal flows through repository into UiState via the ViewModel; the composable keeps only dialog input state"},
+    "6": {"pass": false, "why": "Validation lives in the composable dialog with no state message, and the new text is hardcoded rather than string resources"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Goal stored per year in the Room reading_goals table (v3 auto-migration) and observed via the repository"},
+    "2": {"pass": true, "why": "ViewModel rejects a non-numeric or <=0 draft by setting goalInputError, the repository require()s >0, and a test covers '0'"},
+    "3": {"pass": true, "why": "finishedThisYear counts books whose finishedYear equals the current year; markFinished records the year; a test checks this"},
+    "4": {"pass": true, "why": "checks_exit=0 with :feature:notes:jvmTest in the log"},
+    "5": {"pass": true, "why": "Goal and draft live in BookListUiState, fed by repository streams in the ViewModel; the composable only renders and dispatches actions"},
+    "6": {"pass": true, "why": "Validation is in the ViewModel, goalInputError in state shows the goal_invalid resource, and new text is string resources"}
+  }
+}

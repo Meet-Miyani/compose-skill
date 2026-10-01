@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "It notes swallowed failures but does not connect them to a 0-page state indistinguishable from a genuine zero."},
+    "2": {"pass": true, "why": "It identifies a new long-lived collector on each action and redundant calculations from overlapping collections."},
+    "3": {"pass": true, "why": "It treats the dispatcher concern as minor, not blocking."},
+    "4": {"pass": true, "why": "It does not flag the helper's inferred return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It separates major and minor findings but never says what is fine as it is."},
+    "7": {"pass": true, "why": "It proposes an active Job guard and cites the reading-log list's guard."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "It identifies silent failures but does not say they leave 0 pages indistinguishable from a genuine zero."},
+    "2": {"pass": true, "why": "It explains that repeated loads stack long-lived collectors and duplicate calculations on each emission."},
+    "3": {"pass": true, "why": "It explicitly calls the Default dispatcher calculation fine as is."},
+    "4": {"pass": true, "why": "It does not flag the helper's inferred return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "6": {"pass": true, "why": "It has distinct Blocking, Worth Doing Later, and Fine as Is sections."},
+    "7": {"pass": true, "why": "It proposes storing the collection Job and returning when it is active."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "It says swallowed storage failures leave the UI showing 0 pages without feedback, matching a genuine zero."},
+    "2": {"pass": true, "why": "It identifies a new stream collection for every Load and duplicate active collectors."},
+    "3": {"pass": true, "why": "It explicitly calls the Default dispatcher calculation fine as is."},
+    "4": {"pass": true, "why": "It does not flag the helper's inferred return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "6": {"pass": true, "why": "It has distinct Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "It proposes retaining the Job and guarding against an already active collection."}
+  }
+}

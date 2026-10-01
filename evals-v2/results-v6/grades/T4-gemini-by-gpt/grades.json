@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies GlobalScope work outliving the ViewModel and the coroutine's later updateState write."},
+    "2": {"pass": false, "why": "Notes swallowed failures but does not identify that results retain their previous value with no error in state."},
+    "3": {"pass": true, "why": "Explains uncancelled searches can finish out of order and overwrite newer results."},
+    "4": {"pass": true, "why": "Discusses cleared-query behavior only as a should-fix issue, not initial empty query as blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates must-fix issues from later suggestions and identifies strengths that are fine."},
+    "8": {"pass": true, "why": "Proposes ViewModel-scoped launchGuarded and cancelling the prior search job."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Says GlobalScope coroutines survive ViewModel clearing and describes their result state updates."},
+    "2": {"pass": false, "why": "Mentions concealed failures but not that results remain empty or stale with no error in state."},
+    "3": {"pass": true, "why": "Explains overlapping uncancelled queries can overwrite current results with older results."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Calls case-insensitive title filtering fine as it is."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "7": {"pass": true, "why": "Has distinct Blocking, Worth doing later, and Fine as is sections."},
+    "8": {"pass": true, "why": "Proposes launchGuarded in the ViewModel scope and cancelling the active search job."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Identifies GlobalScope execution after ViewModel destruction and shows that search work updates state."},
+    "2": {"pass": false, "why": "Says failures are hidden but does not explain that results keep their previous value with no error in state."},
+    "3": {"pass": true, "why": "Explains uncancelled earlier searches can finish later and overwrite the newer results."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "7": {"pass": true, "why": "Separates Blocking, Worth Doing Later, and Fine as Is findings."},
+    "8": {"pass": true, "why": "Proposes ViewModel-scoped launchGuarded and cancellation of the previous search job."}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Finding 3 flags onError = { } as silently swallowing storage/database failures with no error emitted to state or popup"},
+    "2": {"pass": true, "why": "Finding 2: each action launches a new collector of getBooksStream with no guard or cancel, so concurrent collections and redundant calculations pile up"},
+    "3": {"pass": true, "why": "Dispatchers.Default is a Minor finding about injecting the dispatcher, not called blocking"},
+    "4": {"pass": true, "why": "Missing return type on calculatePages is not raised"},
+    "5": {"pass": true, "why": "Project diff is empty"},
+    "6": {"pass": false, "why": "Uses Major/Minor severities but has no section saying what is fine as it is"},
+    "7": {"pass": true, "why": "Proposes a streamJob isActive guard, citing BookListViewModel in the reading-log list"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocking 1: onError = { } swallows storage failures and leaves the UI showing 0 pages with no feedback"},
+    "2": {"pass": true, "why": "Blocking 2: every Load launches another stream collection with no check, so duplicate active collectors build up"},
+    "3": {"pass": true, "why": "Lists the Dispatchers.Default calculation under Fine as is"},
+    "4": {"pass": true, "why": "Return type on calculatePages is not raised"},
+    "5": {"pass": true, "why": "Project diff is empty; the corrected file appears only in the message"},
+    "6": {"pass": true, "why": "Has separate Blocking, Worth doing later and Fine as is sections"},
+    "7": {"pass": true, "why": "Proposes keeping the Job and returning early when streamJob is active"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking 2: onError = { } silently drops repository/storage failures without emitting an error"},
+    "2": {"pass": true, "why": "Blocking 1: each Load starts another collector of the long-lived stream with no active check, giving duplicate calculations on every emission"},
+    "3": {"pass": true, "why": "Lists the off-thread Dispatchers.Default calculation under Fine as Is"},
+    "4": {"pass": true, "why": "Return type on calculatePages is not raised"},
+    "5": {"pass": true, "why": "Project diff is empty"},
+    "6": {"pass": true, "why": "Has separate Blocking, Worth Doing Later and Fine as Is sections"},
+    "7": {"pass": true, "why": "Proposes storing the Job and returning early when it is active"}
+  }
+}

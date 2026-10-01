@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies GlobalScope outliving the cleared ViewModel and still writing its state."},
+    "2": {"pass": true, "why": "Says the empty catch hides failures and leaves stale or empty results with no message."},
+    "3": {"pass": true, "why": "Explains that uncancelled searches can finish out of order and overwrite newer results."},
+    "4": {"pass": true, "why": "Does not call the empty query blocking."},
+    "5": {"pass": true, "why": "Lists case-insensitive title filtering as fine."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates Blocking, Worth doing later, and Fine as is sections."},
+    "8": {"pass": true, "why": "Proposes the ViewModel scope through launchGuarded and cancelling the prior search job."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Says GlobalScope keeps running after the ViewModel is cleared."},
+    "2": {"pass": true, "why": "Says the empty catch hides failures and leaves stale or empty results without an error."},
+    "3": {"pass": true, "why": "Identifies independent uncancelled searches and older results overwriting newer ones."},
+    "4": {"pass": true, "why": "Its blank-query remark is about an empty query matching all books, not a blocking initial-query finding."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": false, "why": "Separates Blocking from Should fix but never says what is fine as it is."},
+    "8": {"pass": true, "why": "Proposes launchGuarded in the ViewModel scope and cancelling the previous Job."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Says GlobalScope continues after screen close and updates a cleared ViewModel."},
+    "2": {"pass": true, "why": "Says the empty catch leaves results unchanged and shows no error after a failed read."},
+    "3": {"pass": true, "why": "Says uncancelled jobs can finish out of order and display an older query's results."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates Blocking, Worth doing later, and Fine as is sections."},
+    "8": {"pass": true, "why": "Proposes launchGuarded on viewModelScope with a Job cancelled before each new search."}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The check run passed, and the diff preserves loading the requested book and rendering its title."},
+    "2": {"pass": true, "why": "The JVM test run finished with BUILD SUCCESSFUL and checks_exit=0."},
+    "3": {"pass": true, "why": "Changes are confined to book detail files, its navigation key, and a loading string resource."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation paths, persistence, or features."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, exposes its state, and uses launchGuarded and updateState without manual try/catch."},
+    "6": {"pass": true, "why": "A separate Route collects state with collectAsStateWithLifecycle and passes it to a stateless Screen."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The check run passed, and the requested-book lookup and visible loading/title behavior remain in the diff."},
+    "2": {"pass": true, "why": "The JVM test run finished with BUILD SUCCESSFUL and checks_exit=0."},
+    "3": {"pass": true, "why": "The diff changes only book detail files and the loading string resource."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation paths, persistence, or features."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and handles failures through launchGuarded with read-only exposed state."},
+    "6": {"pass": true, "why": "The Route and stateless Screen are separate, and the Route uses collectAsStateWithLifecycle."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The hidden behavior test passed after call-only adaptation for the changed constructor and action API."},
+    "2": {"pass": true, "why": "The JVM test run finished with BUILD SUCCESSFUL and checks_exit=0."},
+    "3": {"pass": true, "why": "Changes are limited to book detail, its required App wiring, and the loading string resource."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation paths, persistence, or features."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and uses launchGuarded and updateState instead of manual try/catch."},
+    "6": {"pass": true, "why": "A separate Route collects state with collectAsStateWithLifecycle and passes it to a stateless Screen."}
+  }
+}

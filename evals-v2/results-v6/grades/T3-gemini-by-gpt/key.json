@@ -1,0 +1,14 @@
+{
+ "A": {
+  "model": "gemini-3.8-flash-medium",
+  "arm": "nokit"
+ },
+ "B": {
+  "model": "gemini-3.8-flash-medium",
+  "arm": "kit61"
+ },
+ "C": {
+  "model": "gemini-3.8-flash-medium",
+  "arm": "kit60"
+ }
+}

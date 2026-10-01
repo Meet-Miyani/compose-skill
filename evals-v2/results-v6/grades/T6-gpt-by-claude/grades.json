@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Tapping an author chip sets selectedAuthor and the list shows only books matching that author"},
+    "2": {"pass": false, "why": "No separate screen or back-stack entry; Back does not clear the filter or return to the full list (only an 'All authors' chip does)"},
+    "3": {"pass": true, "why": "Filter matches on author only, so finished and unfinished books both stay"},
+    "4": {"pass": true, "why": "checks_exit=0, and :feature:notes:jvmTest ran in the build"},
+    "5": {"pass": false, "why": "No new nav key, ViewModel or UiState; it is an in-place filter on BookListScreen"},
+    "6": {"pass": false, "why": "visibleBooks is filtered inside the BookListScreen composable"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Author tap pushes AuthorBooksKey; the DAO query WHERE author = :author returns only that author's books"},
+    "2": {"pass": true, "why": "AuthorBooksKey is pushed onto backStack; the NavDisplay onBack removes it and returns to BookListKey"},
+    "3": {"pass": true, "why": "The query does not filter on isFinished; the screen shows Finished/Unread"},
+    "4": {"pass": true, "why": "checks_exit=0, and jvmTest ran"},
+    "5": {"pass": true, "why": "AuthorBooksKey is in the sealed ReadingLogNavKey and has its own AuthorBooksViewModel and AuthorBooksUiState contract"},
+    "6": {"pass": true, "why": "Filtering is in the data layer (DAO query via the repository)"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Author tap pushes AuthorBooksKey, and the screen shows booksByAuthor(...) for that author only"},
+    "2": {"pass": true, "why": "Destination is on backStack; system Back and the Back button both pop it"},
+    "3": {"pass": true, "why": "booksByAuthor filters only on author; both finished states are shown"},
+    "4": {"pass": true, "why": "checks_exit=0 with a successful build including tests"},
+    "5": {"pass": false, "why": "Key added, but the destination reuses BookListRoute/BookListViewModel/BookListUiState with no ViewModel or UiState of its own"},
+    "6": {"pass": false, "why": "booksByAuthor is called inside the BookListScreen composable to compute displayedBooks"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Author tap pushes AuthorBooksKey; the ViewModel filters the stream to that author (ignoring case)"},
+    "2": {"pass": true, "why": "Destination is pushed onto backStack and popped by the NavDisplay onBack"},
+    "3": {"pass": true, "why": "Filter is on author only; the screen shows Finished/Not finished"},
+    "4": {"pass": true, "why": "checks_exit=0, and jvmTest ran"},
+    "5": {"pass": true, "why": "AuthorBooksKey is in ReadingLogNavKey with its own AuthorBooksViewModel and AuthorBooksUiState/Action/Effect contract"},
+    "6": {"pass": true, "why": "Filtering is in AuthorBooksViewModel.observeBooks"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Author button pushes AuthorBooksKey; the repository/DAO query returns only that author's books"},
+    "2": {"pass": true, "why": "Destination is on backStack and popped by the NavDisplay onBack"},
+    "3": {"pass": true, "why": "The query does not filter on isFinished; the screen shows finished/unfinished labels"},
+    "4": {"pass": true, "why": "checks_exit=0, and the build including tests succeeded"},
+    "5": {"pass": true, "why": "AuthorBooksKey is in ReadingLogNavKey with its own AuthorBooksViewModel and AuthorBooksUiState contract"},
+    "6": {"pass": true, "why": "Filtering is in the data layer (getBooksByAuthorStream DAO query)"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Author button pushes AuthorBooksKey; the ViewModel filters the stream to the state's author"},
+    "2": {"pass": true, "why": "Destination is on backStack and popped by the NavDisplay onBack"},
+    "3": {"pass": true, "why": "Filter is on author only; the screen shows Finished/Not finished"},
+    "4": {"pass": true, "why": "checks_exit=0 with a successful build including tests"},
+    "5": {"pass": true, "why": "AuthorBooksKey is in ReadingLogNavKey with its own AuthorBooksViewModel and AuthorBooksUiState contract"},
+    "6": {"pass": true, "why": "Filtering is in AuthorBooksViewModel.observeBooks"}
+  }
+}

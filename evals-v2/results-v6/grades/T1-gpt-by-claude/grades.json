@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Same first-emission finished-page sum; checks_exit=0 with feature:notes:jvmTest run"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "Changes confined to stats files plus two new strings for its own text"},
+    "4": {"pass": false, "why": "Adds a Retry Button, error text and a new OnRetryClick action, which is a new UI control/feature"},
+    "5": {"pass": true, "why": "Extends BaseViewModel, uses updateState and launchGuarded, no manual try/catch"},
+    "6": {"pass": true, "why": "Separate ReadingStatsRoute/ReadingStatsScreen; collectAsStateWithLifecycle"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same sum of finished pages from first emission, error string kept; checks_exit=0"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "Only stats files changed plus a new stats test"},
+    "4": {"pass": true, "why": "No new UI controls, screens or features; screen text unchanged"},
+    "5": {"pass": false, "why": "Repository failures are caught manually by a flow .catch inside the block, so they never reach launchGuarded"},
+    "6": {"pass": true, "why": "Route/Screen split with collectAsStateWithLifecycle"}
+  },
+  "C": {
+    "1": {"pass": false, "why": "checks_exit=1: composeApp fails to compile (App.kt has no onEffect), no passing test run shown; error field also removed from state"},
+    "2": {"pass": false, "why": "Build failed, so the existing tests are not shown passing"},
+    "3": {"pass": true, "why": "Edits limited to the stats files"},
+    "4": {"pass": true, "why": "No new UI controls or features added"},
+    "5": {"pass": true, "why": "BaseViewModel with launchGuarded and emitError, no try/catch"},
+    "6": {"pass": true, "why": "Separate Route/Screen; collectAsStateWithLifecycle"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Same first-snapshot finished-page sum; checks_exit=0"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "Changes confined to stats files, its own strings and a new test"},
+    "4": {"pass": true, "why": "No new controls or features; same loading and total text"},
+    "5": {"pass": false, "why": "A manual try/catch with several catch branches sits inside the launchGuarded block"},
+    "6": {"pass": true, "why": "Route/Screen split; collectAsStateWithLifecycle"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Same first-emission finished-page sum; checks_exit=0"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "Edits limited to the stats files and a new test"},
+    "4": {"pass": false, "why": "Adds a Retry Button, error message UI and an OnRetryClick action"},
+    "5": {"pass": true, "why": "BaseViewModel and launchGuarded handle failures, no try/catch"},
+    "6": {"pass": true, "why": "Route/Screen split; collectAsStateWithLifecycle"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Same first-emission finished-page sum and error string in state; checks_exit=0"},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including jvmTest"},
+    "3": {"pass": true, "why": "Only the stats ViewModel, contract and screen are changed"},
+    "4": {"pass": true, "why": "No new UI or features"},
+    "5": {"pass": true, "why": "BaseViewModel with launchGuarded onError, no manual try/catch"},
+    "6": {"pass": false, "why": "No Route/Screen split: ReadingStatsRoute still renders the Column itself, although collection is lifecycle-aware"}
+  }
+}

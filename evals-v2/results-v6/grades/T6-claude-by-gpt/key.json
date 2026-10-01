@@ -1,0 +1,14 @@
+{
+ "A": {
+  "model": "claude-sonnet-5-5",
+  "arm": "kit60"
+ },
+ "B": {
+  "model": "claude-sonnet-5-5",
+  "arm": "nokit"
+ },
+ "C": {
+  "model": "claude-sonnet-5-5",
+  "arm": "kit61"
+ }
+}

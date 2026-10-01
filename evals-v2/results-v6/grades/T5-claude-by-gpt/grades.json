@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The goal is written to a file-backed Preferences DataStore and read through its stream on startup."},
+    "2": {"pass": true, "why": "The ViewModel rejects drafts that do not parse as an integer from 1 to 1000 before saving."},
+    "3": {"pass": true, "why": "Marking a book finished records a timestamp, and progress queries finished books within the current year's bounds."},
+    "4": {"pass": true, "why": "The packet's checks include a successful jvmTest run and successful build."},
+    "5": {"pass": true, "why": "A data-layer repository owns goal storage and the ViewModel exposes the goal through BookListUiState."},
+    "6": {"pass": false, "why": "The invalid-goal message is selected directly in the composable instead of reaching it through UiState."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The goal is stored in a Room reading_goals table and retrieved from the database on screen start."},
+    "2": {"pass": true, "why": "The ViewModel filters input to digits and rejects zero or unparseable values before calling setGoal."},
+    "3": {"pass": true, "why": "Progress queries books with a finish timestamp in the current local year, and marking finished records that timestamp."},
+    "4": {"pass": true, "why": "The packet's checks show jvmTest and the Android build completed successfully."},
+    "5": {"pass": true, "why": "The Room goal DAO is accessed through BookRepository, and the ViewModel puts progress in UiState for the screen."},
+    "6": {"pass": false, "why": "The diff adds no validation message in UiState or string resources for an invalid goal."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "A file-backed DataStore stores the goal, and a test reads it from a new store on the same file."},
+    "2": {"pass": true, "why": "The UI only offers a fixed positive starting goal and step controls that stop at one, so invalid input cannot be saved."},
+    "3": {"pass": true, "why": "Finishing a book records a timestamp, and progress counts finished books within the current local year."},
+    "4": {"pass": true, "why": "The packet's checks show a successful jvmTest run and Android build."},
+    "5": {"pass": true, "why": "Goal storage and progress are accessed through ReadingGoalRepository and reach the screen through ViewModel UiState."},
+    "6": {"pass": false, "why": "Goal clamping is in the data source, and no validation message is carried through UiState."}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Adapted hidden test (calls only, fake getBook over same seeded books, same expectations) passes: checks_exit=0, BUILD SUCCESSFUL."},
+    "2": {"pass": true, "why": ":feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": false, "why": "Rewrote unrelated data code: DefaultBookRepository switched from NotesDatabase to BookDao with a new mapper for getBooksStream/addBook/markFinished, BookRepository made explicitly public with KDoc, new DI provider."},
+    "4": {"pass": false, "why": "Adds Retry and Back buttons, error and missing-book screens, a NavigateBack effect with back-stack pop, and replaces 'Loading...' text with a spinner, so the message's 'no behavior change' claim is not supported."},
+    "5": {"pass": true, "why": "Extends BaseViewModel, uses updateState and launchGuarded with onError, the manual try/catch and public MutableStateFlow are removed, and the contract uses AppError."},
+    "6": {"pass": true, "why": "New BookDetailRoute owns LifecycleStartEffect and collectAsStateWithLifecycle/CollectEffect/HandleAppErrors, and BookDetailScreen is stateless."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Adapted hidden test (calls only, same inputs and expectations) passes: checks_exit=0, BUILD SUCCESSFUL."},
+    "2": {"pass": true, "why": ":feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Changes are confined to the detail contract/ViewModel/Route/Screen and the App.kt detail entry."},
+    "4": {"pass": true, "why": "Screen still renders only the loading text and title. No retry, back, error UI or new effects are added, and onEffect is a no-op."},
+    "5": {"pass": true, "why": "Extends BaseViewModel, uses updateState and launchGuarded(onError) instead of try/catch, the public MutableStateFlow is removed, and the contract uses AppError."},
+    "6": {"pass": true, "why": "New BookDetailRoute uses LifecycleStartEffect, collectAsStateWithLifecycle, CollectEffect and HandleAppErrors, and BookDetailScreen(state) is stateless."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Adapted hidden test (calls only, fake getBook over same seeded books, same expectations) passes: checks_exit=0, BUILD SUCCESSFUL."},
+    "2": {"pass": true, "why": ":feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Data-layer edits only add getBook to the DAO, repository interface and implementation. Existing methods are left untouched."},
+    "4": {"pass": false, "why": "Adds Retry and Back buttons, 'Something went wrong' and 'Book not found' screens, a NavigateBack effect with back-stack pop, and replaces 'Loading...' with a spinner."},
+    "5": {"pass": true, "why": "Extends BaseViewModel, uses updateState and launchGuarded with onError, the try/catch and public MutableStateFlow are removed, and the contract uses AppError."},
+    "6": {"pass": true, "why": "New BookDetailRoute uses LifecycleStartEffect, collectAsStateWithLifecycle, CollectEffect and HandleAppErrors, and BookDetailScreen is stateless."}
+  }
+}

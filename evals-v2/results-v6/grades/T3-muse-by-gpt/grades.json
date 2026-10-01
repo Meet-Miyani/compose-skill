@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies the empty error handler and says a storage failure leaves 0 pages with no message."},
+    "2": {"pass": true, "why": "Says repeat loads create overlapping endless collectors that both write totalPages."},
+    "3": {"pass": true, "why": "Discusses the dispatcher only under later improvements."},
+    "4": {"pass": true, "why": "Does not call the helper's missing explicit return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates blocking issues, later improvements, and what is fine as is."},
+    "7": {"pass": true, "why": "Proposes an active-job guard modeled on the reading-log list."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Says the empty error handler loses stream failures and leaves 0 pages without a message."},
+    "2": {"pass": false, "why": "Does not identify that the original Load starts a new collector on every call or describe stacked recalculations."},
+    "3": {"pass": true, "why": "Mentions the dispatcher change only under later improvements."},
+    "4": {"pass": true, "why": "Does not call the helper's missing explicit return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates blocking issues, later improvements, and what is fine as is."},
+    "7": {"pass": true, "why": "The proposed code guards collection with loadJob?.isActive."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Notes swallowed failures and absent error state but never connects them to the initial 0 looking like zero pages read."},
+    "2": {"pass": true, "why": "Says every Load launches a new infinite collection without an overlap guard."},
+    "3": {"pass": false, "why": "Lists the withContext dispatcher calculation as a blocking finding."},
+    "4": {"pass": true, "why": "Does not call the helper's missing explicit return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "Although it has good and nits sections, it puts nonblocking contract and dispatcher changes under Blocking."},
+    "7": {"pass": true, "why": "Proposes a streamJob active guard like the reading-log list."}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran with BUILD SUCCESSFUL; load still finds the book by id via first() and clears isLoading"},
+    "2": {"pass": true, "why": "Test run in the checks succeeded (BUILD SUCCESSFUL, checks_exit=0)"},
+    "3": {"pass": true, "why": "Diff touches only the book detail Contract/Screen/ViewModel, a new Route file and a new detail test"},
+    "4": {"pass": true, "why": "Screen renders the same Loading text and title; the only additions are the project's standard error/effect wiring, with no new controls, screens, navigation or persistence"},
+    "5": {"pass": true, "why": "Extends BaseViewModel, public MutableStateFlow removed in favour of updateState, try/catch replaced by launchGuarded(onError=...)"},
+    "6": {"pass": true, "why": "Separate BookDetailRoute uses collectAsStateWithLifecycle and passes state to a stateless BookDetailScreen(state)"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran with BUILD SUCCESSFUL; load logic is unchanged apart from the guard"},
+    "2": {"pass": true, "why": "Test run in the checks succeeded (BUILD SUCCESSFUL, checks_exit=0)"},
+    "3": {"pass": true, "why": "Changes are limited to the book detail files plus a new detail test"},
+    "4": {"pass": true, "why": "Same rendered content; adds an optional modifier parameter and the standard error/effect wiring, but no new controls, screens, navigation or persistence"},
+    "5": {"pass": true, "why": "BaseViewModel subclass using updateState; failures go through launchGuarded(onError = ::emitError) with no manual try/catch"},
+    "6": {"pass": true, "why": "Route split into its own file using collectAsStateWithLifecycle; BookDetailScreen takes state and a modifier"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran with BUILD SUCCESSFUL; same lookup and loading behaviour"},
+    "2": {"pass": true, "why": "Test run in the checks succeeded (BUILD SUCCESSFUL, checks_exit=0)"},
+    "3": {"pass": true, "why": "Diff touches only the four book detail files"},
+    "4": {"pass": true, "why": "Screen output unchanged; no new controls, screens, navigation or persistence"},
+    "5": {"pass": true, "why": "Extends BaseViewModel, state is changed only through updateState, and try/catch is replaced by launchGuarded(onError=...)"},
+    "6": {"pass": true, "why": "Separate BookDetailRoute uses collectAsStateWithLifecycle and calls a stateless BookDetailScreen(state)"}
+  }
+}
