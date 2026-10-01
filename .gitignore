@@ -25,3 +25,8 @@ Thumbs.db
 opencode.json
 handoff/work/logs/
 handoff/work/scratch/
+
+# worker transcripts and logs (each round's report is committed under handoff/work/reports/)
+handoff/work/fr*-codex/
+handoff/work/*-worker.log
+__pycache__/
