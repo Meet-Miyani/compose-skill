@@ -60,3 +60,20 @@ reported separately from the 5-model panel:
 - MiniMax M3
 
 Kimi K3, GLM 5.3 and Qwen 3.8 Max are added only if plan quota remains after these three.
+
+**Amendment 1 (2026-10-01, before any v6 task is accepted and before any run):**
+- **Task author:** the author's first two task sets passed the build gate but were rejected on content (answer
+  labels in code comments, hidden tests bound to the author's own names, rubric items about code the setup did not
+  contain). The author stays Gemini 3.1 Pro: Codex GPT-6-Sol wrote the kit, so it cannot author tasks
+  independently. The third attempt is the last. If it fails the content check, the moderator repairs the set; every
+  repair is listed in `verification.md` and disclosed with the results.
+- **Gate v2:** the task gate also checks the content rules mechanically: no labelling comments in setups, no
+  reflection in hidden tests, conform prompts name no project types or patterns, exactly 4 conform rubric items,
+  new-feature prompts name no design and have build/test checks, and the app's start screen is unchanged. The
+  content check by the moderator still follows.
+- **Hidden conform tests may receive name-only edits.** A behaviour test has to call some API, and a correct
+  conform may rename it. After a run, if a hidden test fails **to compile** only because the agent renamed or
+  restructured what it calls (class, function or property names; how an action is sent or state is read), the
+  moderator may change only those references, in a copy of the test. Inputs, fake data and expected values never
+  change. Every such edit is published as a per-run diff. A test that compiles and fails, or that cannot be adapted
+  because the behaviour is gone, fails rubric item 1.
