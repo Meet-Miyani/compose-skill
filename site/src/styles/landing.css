@@ -32,7 +32,7 @@
 }
 
 .landing-section__lede a,
-.landing-figure figcaption a,
+.landing-figure .chart-block figcaption a,
 .landing-cta p a {
   color: var(--kit-accent-text);
   text-decoration: underline;
@@ -355,12 +355,9 @@
   border-radius: var(--kit-radius-lg);
 }
 
-.landing-figure figcaption {
-  max-width: 46rem;
+.landing-figure .chart-block figcaption {
   margin-top: 1rem;
-  font-size: 0.875rem;
   line-height: 1.6;
-  color: var(--kit-slate);
 }
 
 .landing-grid {

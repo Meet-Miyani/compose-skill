@@ -13,12 +13,17 @@ This is the test v6.0.0-preview.1 shipped on. Five models got 8 tasks they had n
 The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit) is in progress, with a verdict expected around Oct 5, 2026. No v6.1 numbers are published yet. Everything on this page is the held-out v5 test.
 :::
 
-<figure class="kit-figure">
+<div class="kit-figure">
+<figure class="chart-block">
   <ThemedChart
     name="v5-kit-lift"
     alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)."
   />
+  <figcaption>
+    Held-out v5, both graders agree. Opus 5.5's +9.3 depends on two review tasks that had flawed setups (+3.4 without them); see the <a href="#erratum">erratum</a>.
+  </figcaption>
 </figure>
+</div>
 
 ## Scores by model
 
@@ -67,12 +72,17 @@ Full details: [VERDICT.md, Erratum](https://github.com/Meet-Miyani/compose-skill
 
 ## Kit context per task
 
-<figure class="kit-figure">
+<div class="kit-figure">
+<figure class="chart-block">
   <ThemedChart
     name="v5-kit-context"
     alt="Most kit tokens any single task loaded: Opus 5.5 9.9k, Sonnet 5.5 14.0k, GPT-6-Luna 18.3k, GPT-6-Sol 26.4k, Gemini 3.8 Flash 26.5k, against a 20k design budget."
   />
+  <figcaption>
+    Kit context is an upper bound (the full size of every kit file opened). Details: <a href="https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/kit-tokens.txt">kit-tokens.txt</a>.
+  </figcaption>
 </figure>
+</div>
 
 | Model | Max per task | Tasks over 20k | Loaded `compose` first |
 |---|---:|---:|---:|

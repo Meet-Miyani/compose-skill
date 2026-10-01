@@ -1138,6 +1138,26 @@ site-search dialog {
   display: none;
 }
 
+/* A chart and its caption share one column: the chart's own width (760px,
+   the SVG viewBox), centred. The caption starts where the SVG draws its title
+   (x=24 of 760 = 3.1579%), as a percentage so it holds as the SVG scales. */
+.chart-block {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.chart-block figcaption {
+  margin-top: 0.75rem;
+  padding-inline: 3.1579%;
+  color: var(--kit-slate);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.sl-markdown-content .chart-block figcaption a {
+  color: var(--kit-accent-text);
+}
+
 /* Docs-page figures: a hairline frame around a chart or diagram. */
 .kit-figure {
   margin-block: 1.5rem;
