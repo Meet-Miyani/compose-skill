@@ -235,3 +235,6 @@ a session that ran too long).
 | 13:40 | Antigravity refreshed at 13:38; the moderator restarted the sleeping Flash queue at 13:40 instead of its next retry (~14:02) | Moderator | — |
 | 13:56 | **All 120 panel runs complete** (plus 6 partial Gemini Pro cells and 24 Muse add-on cells) | — | 120/120 |
 | 14:00 | Claude grader complete: 24/24, 0 failures. Gemini grader started (16 packets); GPT on its last packet | — | — |
+| 14:48 | Gemini grader complete; all 64 packets fully graded. **Grades frozen and committed before any score was computed** | Moderator | `e58e6ae` |
+| 14:55 | Scores computed. Rule 3 showed 4 new kit-arm check failures, all GPT; diagnosed 3 as harness artifacts (Codex sandbox daemon locks) and confirmed with clean `--no-daemon` re-runs (after one more zsh word-splitting slip by the moderator); 1 real (Luna T8) | Moderator | — |
+| ~15:10 | **v5 verdict:** rules 1-3 hold for Sonnet, Opus, Sol and Flash; Luna fails rules 2 and 3. Pre-registered outcome: **preview release naming the four models.** Lifts: Sonnet +18.6, Opus +9.3, Flash +25.6; Sol +4.6 and Luna +2.3 not claimable. The kit helps on feature tasks (choice trees) and hurts on conform (over-restructuring) and review proportionality. Muse add-on: no lift. **Step 9 closed** | — | `VERDICT.md` |

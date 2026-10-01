@@ -107,7 +107,8 @@ def run(only=None):
 def score():
     ts = tasks(); tag = {tid: {n: ("kit" if "[kit]" in txt else "eng") for n, txt in t["items"]} for tid, t in ts.items()}
     agree, per = {}, {}
-    for d in sorted(glob.glob(os.path.join(G, "*"))):
+    frozen = os.path.join(REPO, "evals-v2", "results-v5", "grades")  # score only the frozen grades
+    for d in sorted(glob.glob(os.path.join(frozen, "T*-by-*"))):
         tid, rest = os.path.basename(d).split("-", 1); vendor, grader = rest.split("-by-")
         gp = os.path.join(d, "grades.json")
         if not os.path.isfile(gp): print("missing", d); continue

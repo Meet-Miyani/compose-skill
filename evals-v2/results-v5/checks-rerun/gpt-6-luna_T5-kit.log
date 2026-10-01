@@ -1,0 +1,420 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+Calculating task graph as no cached configuration is available for tasks: :composeApp:jvmJar :androidApp:assembleDebug :feature:workouts:allTests
+Type-safe project accessors is an incubating feature.
+> Task :build-logic:convention:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :build-logic:convention:compileKotlin UP-TO-DATE
+> Task :build-logic:convention:compileJava NO-SOURCE
+> Task :build-logic:convention:pluginDescriptors UP-TO-DATE
+> Task :build-logic:convention:processResources UP-TO-DATE
+> Task :build-logic:convention:classes UP-TO-DATE
+> Task :build-logic:convention:jar UP-TO-DATE
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :composeApp:copyNonXmlValueResourcesForJvmMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :core:designsystem:convertXmlValueResourcesForJvmMain NO-SOURCE
+> Task :core:designsystem:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :composeApp:convertXmlValueResourcesForJvmMain NO-SOURCE
+> Task :core:designsystem:copyNonXmlValueResourcesForJvmMain NO-SOURCE
+> Task :core:designsystem:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :composeApp:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :composeApp:generateComposeResClass UP-TO-DATE
+> Task :core:designsystem:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :core:designsystem:generateComposeResClass UP-TO-DATE
+> Task :composeApp:convertXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :composeApp:prepareComposeResourcesTaskForJvmMain NO-SOURCE
+> Task :core:designsystem:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :core:error:jvmProcessResources NO-SOURCE
+> Task :core:designsystem:prepareComposeResourcesTaskForJvmMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForJvmMain NO-SOURCE
+> Task :core:error:processJvmMainResources SKIPPED
+> Task :core:designsystem:generateResourceAccessorsForJvmMain NO-SOURCE
+> Task :composeApp:kmpPartiallyResolvedDependenciesChecker
+> Task :composeApp:checkJvmMainComposeLibrariesCompatibility
+> Task :core:mvi:checkJvmMainComposeLibrariesCompatibility
+> Task :core:designsystem:generateResourceAccessorsForCommonMain NO-SOURCE
+> Task :core:mvi:kmpPartiallyResolvedDependenciesChecker
+> Task :core:designsystem:checkJvmMainComposeLibrariesCompatibility
+> Task :core:error:kmpPartiallyResolvedDependenciesChecker
+> Task :composeApp:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:designsystem:kmpPartiallyResolvedDependenciesChecker
+> Task :core:mvi:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:designsystem:assembleJvmMainResources UP-TO-DATE
+> Task :core:mvi:convertXmlValueResourcesForCommonMain NO-SOURCE
+> Task :core:mvi:generateComposeResClass SKIPPED
+> Task :core:mvi:generateExpectResourceCollectorsForCommonMain SKIPPED
+> Task :core:mvi:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :core:designsystem:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:error:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:workouts:kmpPartiallyResolvedDependenciesChecker
+> Task :core:designsystem:generateActualResourceCollectorsForJvmMain UP-TO-DATE
+> Task :feature:workouts:checkJvmMainComposeLibrariesCompatibility
+> Task :core:mvi:copyNonXmlValueResourcesForJvmMain NO-SOURCE
+> Task :core:designsystem:jvmProcessResources UP-TO-DATE
+> Task :core:mvi:convertXmlValueResourcesForJvmMain NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForJvmMain NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :core:mvi:prepareComposeResourcesTaskForCommonMain NO-SOURCE
+> Task :feature:workouts:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:mvi:generateResourceAccessorsForCommonMain SKIPPED
+> Task :feature:workouts:copyNonXmlValueResourcesForJvmMain NO-SOURCE
+> Task :core:designsystem:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :core:mvi:prepareComposeResourcesTaskForJvmMain NO-SOURCE
+> Task :feature:workouts:generateComposeResClass UP-TO-DATE
+> Task :feature:workouts:generateExpectResourceCollectorsForCommonMain UP-TO-DATE
+> Task :core:designsystem:processJvmMainResources SKIPPED
+> Task :core:designsystem:androidPreBuild UP-TO-DATE
+> Task :core:error:androidPreBuild UP-TO-DATE
+> Task :core:error:preAndroidMainBuild UP-TO-DATE
+> Task :core:mvi:generateResourceAccessorsForJvmMain SKIPPED
+> Task :core:mvi:generateActualResourceCollectorsForJvmMain SKIPPED
+> Task :feature:workouts:copyNonXmlValueResourcesForCommonMain NO-SOURCE
+> Task :core:mvi:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :core:designsystem:preAndroidMainBuild UP-TO-DATE
+> Task :composeApp:prepareComposeResourcesTaskForCommonMain UP-TO-DATE
+> Task :core:designsystem:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :core:mvi:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForCommonMain UP-TO-DATE
+> Task :core:mvi:assembleJvmMainResources UP-TO-DATE
+> Task :core:mvi:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :composeApp:generateResourceAccessorsForCommonMain UP-TO-DATE
+> Task :core:designsystem:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForAndroidMain SKIPPED
+> Task :core:mvi:jvmProcessResources UP-TO-DATE
+> Task :core:mvi:processJvmMainResources SKIPPED
+> Task :core:mvi:generateActualResourceCollectorsForAndroidMain SKIPPED
+> Task :core:mvi:androidPreBuild UP-TO-DATE
+> Task :feature:workouts:prepareComposeResourcesTaskForJvmMain NO-SOURCE
+> Task :core:mvi:preAndroidMainBuild UP-TO-DATE
+> Task :composeApp:generateActualResourceCollectorsForJvmMain UP-TO-DATE
+> Task :feature:workouts:generateResourceAccessorsForCommonMain UP-TO-DATE
+> Task :core:designsystem:generateResourceAccessorsForAndroidMain NO-SOURCE
+> Task :core:designsystem:copyAndroidMainComposeResourcesToAndroidAssets UP-TO-DATE
+> Task :feature:workouts:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :core:error:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :feature:workouts:generateResourceAccessorsForJvmMain NO-SOURCE
+> Task :core:designsystem:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :core:mvi:copyAndroidMainComposeResourcesToAndroidAssets UP-TO-DATE
+> Task :core:error:packageAndroidMainResources UP-TO-DATE
+> Task :feature:workouts:androidPreBuild UP-TO-DATE
+> Task :core:designsystem:generateActualResourceCollectorsForAndroidMain UP-TO-DATE
+> Task :feature:workouts:preAndroidMainBuild UP-TO-DATE
+> Task :feature:workouts:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :feature:workouts:generateActualResourceCollectorsForJvmMain UP-TO-DATE
+> Task :core:designsystem:checkIosSimulatorArm64MainComposeLibrariesCompatibility
+> Task :core:designsystem:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :core:designsystem:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :core:designsystem:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :core:mvi:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :feature:workouts:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :core:designsystem:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :core:designsystem:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :core:designsystem:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :core:designsystem:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForAndroidMain NO-SOURCE
+> Task :core:designsystem:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :feature:workouts:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :core:designsystem:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :feature:workouts:copyAndroidMainComposeResourcesToAndroidAssets UP-TO-DATE
+> Task :core:designsystem:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :core:designsystem:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :feature:workouts:generateActualResourceCollectorsForAndroidMain UP-TO-DATE
+> Task :core:designsystem:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :core:error:parseAndroidMainLocalResources UP-TO-DATE
+> Task :core:designsystem:packageAndroidMainResources UP-TO-DATE
+> Task :core:mvi:packageAndroidMainResources UP-TO-DATE
+> Task :core:designsystem:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :core:designsystem:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :core:error:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+> Task :core:mvi:checkIosSimulatorArm64MainComposeLibrariesCompatibility
+> Task :core:designsystem:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :core:designsystem:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :core:designsystem:parseAndroidMainLocalResources UP-TO-DATE
+> Task :core:mvi:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :core:mvi:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :feature:workouts:packageAndroidMainResources UP-TO-DATE
+> Task :core:error:generateAndroidMainRFile UP-TO-DATE
+> Task :core:mvi:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForAppleMain SKIPPED
+> Task :core:mvi:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :feature:workouts:parseAndroidMainLocalResources UP-TO-DATE
+> Task :core:mvi:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :core:designsystem:generateAndroidMainRFile UP-TO-DATE
+> Task :core:mvi:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :core:mvi:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForIosMain SKIPPED
+> Task :core:mvi:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :core:mvi:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :core:mvi:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForIosSimulatorArm64Main SKIPPED
+> Task :core:mvi:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :core:mvi:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForNativeMain SKIPPED
+> Task :core:mvi:generateActualResourceCollectorsForIosSimulatorArm64Main SKIPPED
+> Task :core:mvi:parseAndroidMainLocalResources UP-TO-DATE
+> Task :feature:workouts:convertXmlValueResourcesForAppleMain NO-SOURCE
+> Task :core:designsystem:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :feature:workouts:copyNonXmlValueResourcesForAppleMain NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForIosMain NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForIosMain NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForAppleMain NO-SOURCE
+> Task :feature:workouts:generateAndroidMainRFile UP-TO-DATE
+> Task :core:mvi:generateAndroidMainRFile UP-TO-DATE
+> Task :feature:workouts:prepareComposeResourcesTaskForIosMain NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForAppleMain NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForIosMain NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForNativeMain NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForIosSimulatorArm64Main NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForNativeMain NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForNativeMain NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForIosSimulatorArm64Main NO-SOURCE
+> Task :core:designsystem:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+> Task :core:mvi:exportCrossCompilationMetadataForIosSimulatorArm64ApiElements UP-TO-DATE
+> Task :feature:workouts:generateResourceAccessorsForNativeMain NO-SOURCE
+> Task :feature:workouts:checkIosSimulatorArm64MainComposeLibrariesCompatibility
+> Task :feature:workouts:convertXmlValueResourcesForAppleTest NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForIosSimulatorArm64Main NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForIosSimulatorArm64Test NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForAppleTest NO-SOURCE
+> Task :core:error:compileKotlinJvm UP-TO-DATE
+> Task :feature:workouts:copyNonXmlValueResourcesForIosSimulatorArm64Test NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForAppleTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForIosSimulatorArm64Test NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :core:error:compileJvmMainJava NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForIosSimulatorArm64Test NO-SOURCE
+> Task :core:error:jvmMainClasses UP-TO-DATE
+> Task :feature:workouts:generateResourceAccessorsForAppleTest NO-SOURCE
+> Task :feature:workouts:convertXmlValueResourcesForNativeTest NO-SOURCE
+> Task :feature:workouts:generateActualResourceCollectorsForIosSimulatorArm64Main UP-TO-DATE
+> Task :feature:workouts:convertXmlValueResourcesForIosTest NO-SOURCE
+> Task :core:error:jvmJar UP-TO-DATE
+> Task :feature:workouts:copyNonXmlValueResourcesForNativeTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForIosTest NO-SOURCE
+> Task :core:designsystem:assembleIosSimulatorArm64MainResources UP-TO-DATE
+> Task :feature:workouts:generateResourceAccessorsForCommonTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForNativeTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForIosTest NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForIosTest NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForNativeTest NO-SOURCE
+> Task :core:designsystem:iosSimulatorArm64CopyHierarchicalMultiplatformResources UP-TO-DATE
+> Task :core:mvi:assembleIosSimulatorArm64MainResources UP-TO-DATE
+> Task :feature:workouts:assembleIosSimulatorArm64MainResources UP-TO-DATE
+> Task :core:mvi:iosSimulatorArm64CopyHierarchicalMultiplatformResources UP-TO-DATE
+> Task :core:designsystem:iosSimulatorArm64ZipMultiplatformResourcesForPublication UP-TO-DATE
+> Task :core:mvi:iosSimulatorArm64ZipMultiplatformResourcesForPublication UP-TO-DATE
+> Task :core:mvi:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :feature:workouts:convertXmlValueResourcesForJvmTest NO-SOURCE
+> Task :feature:workouts:copyNonXmlValueResourcesForJvmTest NO-SOURCE
+> Task :feature:workouts:prepareComposeResourcesTaskForJvmTest NO-SOURCE
+> Task :feature:workouts:generateResourceAccessorsForJvmTest NO-SOURCE
+> Task :feature:workouts:assembleJvmMainResources UP-TO-DATE
+> Task :composeApp:assembleJvmMainResources UP-TO-DATE
+> Task :feature:workouts:iosSimulatorArm64ResolveSelfResourcesCopyHierarchicalMultiplatformResources UP-TO-DATE
+> Task :androidApp:preBuild UP-TO-DATE
+> Task :androidApp:preDebugBuild UP-TO-DATE
+> Task :androidApp:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :composeApp:androidPreBuild UP-TO-DATE
+> Task :composeApp:preAndroidMainBuild UP-TO-DATE
+> Task :feature:workouts:iosSimulatorArm64ResolveResourcesFromDependencies UP-TO-DATE
+> Task :composeApp:jvmProcessResources UP-TO-DATE
+> Task :composeApp:processJvmMainResources SKIPPED
+> Task :composeApp:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :composeApp:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :core:designsystem:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :composeApp:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :feature:workouts:iosSimulatorArm64AggregateResources UP-TO-DATE
+> Task :androidApp:generateDebugResources UP-TO-DATE
+> Task :composeApp:generateAndroidMainEmptyResourceFiles UP-TO-DATE
+> Task :composeApp:generateResourceAccessorsForAndroidMain NO-SOURCE
+> Task :feature:workouts:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :core:error:downloadKotlinNativeDistribution UP-TO-DATE
+> Task :composeApp:generateActualResourceCollectorsForAndroidMain UP-TO-DATE
+> Task :androidApp:generateDebugAssets UP-TO-DATE
+> Task :composeApp:generateAndroidMainAssets UP-TO-DATE
+> Task :androidApp:javaPreCompileDebug UP-TO-DATE
+> Task :core:designsystem:generateAndroidMainAssets UP-TO-DATE
+> Task :core:error:generateAndroidMainAssets UP-TO-DATE
+> Task :composeApp:copyAndroidMainComposeResourcesToAndroidAssets UP-TO-DATE
+> Task :androidApp:packageDebugResources UP-TO-DATE
+> Task :feature:workouts:iosSimulatorArm64ProcessResources UP-TO-DATE
+> Task :core:mvi:generateAndroidMainAssets UP-TO-DATE
+> Task :core:error:mergeAndroidMainAssets UP-TO-DATE
+> Task :composeApp:mergeAndroidMainAssets UP-TO-DATE
+> Task :feature:workouts:generateAndroidMainAssets UP-TO-DATE
+> Task :core:designsystem:mergeAndroidMainAssets UP-TO-DATE
+> Task :composeApp:packageAndroidMainResources UP-TO-DATE
+> Task :feature:workouts:mergeAndroidMainAssets UP-TO-DATE
+> Task :core:mvi:mergeAndroidMainAssets UP-TO-DATE
+> Task :androidApp:desugarDebugFileDependencies UP-TO-DATE
+> Task :composeApp:parseAndroidMainLocalResources UP-TO-DATE
+> Task :core:designsystem:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :composeApp:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :core:error:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :core:mvi:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :feature:workouts:writeAndroidMainAarMetadata UP-TO-DATE
+> Task :androidApp:mapDebugSourceSetPaths UP-TO-DATE
+> Task :composeApp:generateAndroidMainRFile UP-TO-DATE
+> Task :androidApp:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :core:error:compileAndroidMain UP-TO-DATE
+> Task :androidApp:extractDeepLinksDebug UP-TO-DATE
+> Task :core:error:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :core:error:processAndroidMainJavaRes UP-TO-DATE
+> Task :core:designsystem:compileKotlinJvm UP-TO-DATE
+> Task :core:mvi:compileKotlinJvm UP-TO-DATE
+> Task :core:designsystem:compileJvmMainJava NO-SOURCE
+> Task :core:designsystem:jvmMainClasses UP-TO-DATE
+> Task :core:mvi:compileJvmMainJava NO-SOURCE
+> Task :core:mvi:jvmMainClasses UP-TO-DATE
+> Task :core:designsystem:jvmJar UP-TO-DATE
+> Task :core:error:bundleLibRuntimeToDirAndroidMain UP-TO-DATE
+> Task :composeApp:processAndroidMainManifest UP-TO-DATE
+> Task :core:designsystem:processAndroidMainManifest UP-TO-DATE
+> Task :core:mvi:jvmJar UP-TO-DATE
+> Task :core:error:processAndroidMainManifest UP-TO-DATE
+> Task :core:mvi:processAndroidMainManifest UP-TO-DATE
+> Task :feature:workouts:processAndroidMainManifest UP-TO-DATE
+> Task :core:mvi:compileAndroidMain FROM-CACHE
+> Task :core:designsystem:compileAndroidMain FROM-CACHE
+> Task :feature:workouts:kspKotlinJvm UP-TO-DATE
+> Task :androidApp:checkDebugDuplicateClasses UP-TO-DATE
+> Task :feature:workouts:jvmProcessResources UP-TO-DATE
+> Task :feature:workouts:processJvmMainResources SKIPPED
+> Task :core:designsystem:processAndroidMainJavaRes
+> Task :core:designsystem:bundleAndroidMainClassesToCompileJar
+> Task :core:mvi:processAndroidMainJavaRes
+> Task :feature:workouts:compileKotlinJvm UP-TO-DATE
+> Task :feature:workouts:compileJvmMainJava NO-SOURCE
+> Task :feature:workouts:jvmMainClasses UP-TO-DATE
+> Task :feature:workouts:kspTestKotlinJvm UP-TO-DATE
+> Task :feature:workouts:jvmJar UP-TO-DATE
+> Task :androidApp:mergeDebugResources UP-TO-DATE
+> Task :composeApp:compileKotlinJvm UP-TO-DATE
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses UP-TO-DATE
+> Task :androidApp:mergeDebugAssets UP-TO-DATE
+> Task :core:designsystem:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:processDebugNavigationResources UP-TO-DATE
+> Task :androidApp:checkDebugAarMetadata UP-TO-DATE
+> Task :androidApp:compileDebugNavigationResources UP-TO-DATE
+> Task :core:error:compileKotlinIosSimulatorArm64 UP-TO-DATE
+> Task :androidApp:parseDebugLocalResources UP-TO-DATE
+> Task :androidApp:compressDebugAssets UP-TO-DATE
+> Task :composeApp:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :composeApp:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :androidApp:generateDebugRFile UP-TO-DATE
+> Task :core:designsystem:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :core:error:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :core:designsystem:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :core:error:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :core:mvi:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :feature:workouts:mapAndroidMainSourceSetPaths UP-TO-DATE
+> Task :core:mvi:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :feature:workouts:compileAndroidMainLibraryResources UP-TO-DATE
+> Task :androidApp:mergeDebugJniLibFolders UP-TO-DATE
+> Task :composeApp:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :core:designsystem:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :core:designsystem:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :composeApp:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:error:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :core:designsystem:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :core:error:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :composeApp:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :core:error:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :core:mvi:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :feature:workouts:mergeAndroidMainJniLibFolders UP-TO-DATE
+> Task :feature:workouts:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:mvi:mergeAndroidMainNativeLibs NO-SOURCE
+> Task :core:mvi:copyAndroidMainJniLibsProjectOnly UP-TO-DATE
+> Task :androidApp:processDebugMainManifest UP-TO-DATE
+> Task :androidApp:processDebugManifest FROM-CACHE
+> Task :androidApp:processDebugManifestForPackage FROM-CACHE
+> Task :androidApp:writeDebugAppMetadata
+> Task :composeApp:jvmJar
+> Task :feature:workouts:checkIosSimulatorArm64TestComposeLibrariesCompatibility
+> Task :feature:workouts:computeLocalPackageDependencyInputFiles
+> Task :feature:workouts:generateSyntheticLinkageSwiftPMImportProjectForCinteropsAndLdDump SKIPPED
+> Task :androidApp:writeDebugSigningConfigVersions
+> Task :core:designsystem:serializeSwiftPMDependenciesMetadataForLockFiles
+> Task :composeApp:serializeSwiftPMDependenciesMetadataForLockFiles
+> Task :androidApp:mergeExtDexDebug UP-TO-DATE
+> Task :core:error:serializeSwiftPMDependenciesMetadataForLockFiles
+> Task :feature:workouts:serializeSwiftPMDependenciesMetadataForLockFiles
+> Task :core:mvi:serializeSwiftPMDependenciesMetadataForLockFiles
+> Task :feature:workouts:checkJvmTestComposeLibrariesCompatibility
+> Task :feature:workouts:assembleIosSimulatorArm64TestResources
+> Task :androidApp:validateSigningDebug
+> Task :feature:workouts:assembleJvmTestResources UP-TO-DATE
+> Task :feature:workouts:copyTestComposeResourcesForIosSimulatorArm64
+> Task :feature:workouts:jvmTestProcessResources UP-TO-DATE
+> Task :feature:workouts:processJvmTestResources SKIPPED
+> Task :composeApp:generateUmbrellaPackageIdentifierBasedResolutionForDefault SKIPPED
+> Task :composeApp:fetchUmbrellaPackageIdentifierForDefault SKIPPED
+> Task :core:mvi:bundleAndroidMainClassesToCompileJar
+> Task :feature:workouts:syncPersistedPackageResolvedToSynthetic SKIPPED
+> Task :feature:workouts:fetchSyntheticImportProjectPackages SKIPPED
+> Task :feature:workouts:convertSyntheticImportProjectIntoDefFileIphonesimulator
+> Task :core:mvi:bundleLibRuntimeToDirAndroidMain
+> Task :feature:workouts:copyAndroidMainJniLibsProjectOnly
+> Task :androidApp:processDebugResources FROM-CACHE
+> Task :androidApp:mergeDebugNativeLibs
+> Task :androidApp:stripDebugDebugSymbols
+> Task :core:designsystem:compileKotlinIosSimulatorArm64
+> Task :core:mvi:compileKotlinIosSimulatorArm64
+> Task :feature:workouts:kspAndroidMain
+> Task :feature:workouts:kspKotlinIosSimulatorArm64
+> Task :feature:workouts:compileTestKotlinJvm
+> Task :feature:workouts:compileJvmTestJava NO-SOURCE
+> Task :feature:workouts:jvmTestClasses
+> Task :feature:workouts:jvmTest
+
+> Task :feature:workouts:compileAndroidMain
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: file:///Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill/handoff/work/scratch/v5/runs/gpt-6-luna/T5-kit/project/feature/workouts/build/generated/ksp/android/androidMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file:///Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill/handoff/work/scratch/v5/runs/gpt-6-luna/T5-kit/project/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt:16:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:workouts:processAndroidMainJavaRes
+> Task :feature:workouts:bundleAndroidMainClassesToCompileJar
+> Task :feature:workouts:bundleLibRuntimeToDirAndroidMain
+
+> Task :feature:workouts:compileKotlinIosSimulatorArm64
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: file:///Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill/handoff/work/scratch/v5/runs/gpt-6-luna/T5-kit/project/feature/workouts/build/generated/ksp/iosSimulatorArm64/iosSimulatorArm64Main/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file:///Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill/handoff/work/scratch/v5/runs/gpt-6-luna/T5-kit/project/feature/workouts/src/commonMain/kotlin/com/example/feature/workouts/data/local/WorkoutsDatabase.kt:16:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:workouts:iosSimulatorArm64MainKlibrary
+> Task :feature:workouts:kspTestKotlinIosSimulatorArm64
+> Task :feature:workouts:copyRoomSchemas NO-SOURCE
+> Task :composeApp:compileAndroidMain
+> Task :composeApp:processAndroidMainJavaRes
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:compileDebugKotlin FROM-CACHE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :feature:workouts:compileTestKotlinIosSimulatorArm64
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+> Task :feature:workouts:linkDebugTestIosSimulatorArm64
+> Task :feature:workouts:iosSimulatorArm64Test
+> Task :feature:workouts:allTests
+
+[Incubating] Problems report is available at: file:///Users/meetmiyani/Documents/MeetMiyani/MEET/skills-main/compose-skill/handoff/work/scratch/v5/runs/gpt-6-luna/T5-kit/project/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 25s
+214 actionable tasks: 61 executed, 8 from cache, 145 up-to-date
+Configuration cache entry stored.
