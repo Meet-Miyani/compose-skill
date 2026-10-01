@@ -1,0 +1,6 @@
+flowchart TD
+    P["Your prompt"] --> E["compose entry tree · ~1.3k tokens"]
+    E --> K{"What kind of task?<br/>new feature · change · bug fix · review<br/>conform · setup · question"}
+    K --> A{"Which areas does it touch?<br/>architecture · feature · ui<br/>data · project · platform"}
+    A --> F["Load one reference file per affected area"]
+    F --> C["Code in the house style"]

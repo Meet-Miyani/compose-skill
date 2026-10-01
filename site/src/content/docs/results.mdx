@@ -1,0 +1,103 @@
+---
+title: 'Compose skill results: held-out v5 test on five models'
+description: 'Held-out v5 results for the Compose skill: five models, 8 never-seen tasks, 120 agentic runs, two blind cross-vendor graders, verdicts and the erratum.'
+sidebar:
+  label: Results
+---
+
+import ThemedChart from '../../components/ThemedChart.astro';
+
+This is the test v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each task ran three times: with no kit, with a short generic "senior engineer" prompt, and with the kit. That's 120 runs. Two models from the other vendors graded every answer blind, and an item only counts if both of them pass it. The rules were written down before the tasks existed, and the grades were frozen before anything was scored.
+
+:::note[v6.1 is being tested now]
+The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit) is in progress, with a verdict expected around Oct 5, 2026. No v6.1 numbers are published yet. Everything on this page is the held-out v5 test.
+:::
+
+<figure class="kit-figure">
+  <ThemedChart
+    name="v5-kit-lift"
+    alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)."
+  />
+</figure>
+
+## Scores by model
+
+% of rubric items passed, both graders agree.
+
+| Model | No kit | Generic prompt | **With the kit** | Kit − no kit | Verdict |
+|---|---:|---:|---:|---:|---|
+| Gemini 3.8 Flash | 51.2% | 46.5% | **76.7%** | **+25.6** | Recommended |
+| Sonnet 5.5 | 55.8% | 60.5% | **74.4%** | **+18.6** | Recommended |
+| Opus 5.5 | 65.1% | 62.8% | **74.4%** | **+9.3** | Recommended (see [erratum](#erratum)) |
+| GPT-6-Sol | 72.1% | 74.4% | **76.7%** | +4.6 | Neutral: within noise |
+| GPT-6-Luna | 65.1% | 60.5% | 67.4% | +2.3 | Not yet: engineering items fell (−11.1) |
+| *Muse Spark 1.3 (add-on)* | *58.1%* | *62.8%* | *60.5%* | *+2.4* | *No lift* |
+
+- **House-style items** rose for every model, from 37-50% without the kit to 56-69% with it.
+- **On engineering-only items,** Sonnet (+11.1) and Flash (+40.8) beat the generic prompt by 8+ points; for Opus, Sol and Luna a short generic prompt does about as well.
+
+Muse Spark 1.3 ran through OpenCode as an add-on, outside the pre-registered five-model panel, and is reported separately.
+
+## By task type
+
+All five panel models together (both graders agree):
+
+| Task type | No kit | Generic prompt | With the kit | |
+|---|---:|---:|---:|---|
+| New features (3 tasks) | 43.5% | 47.1% | **70.6%** | The biggest win: where data lives, navigation results, background work |
+| Bug fixes (2) | 80.0% | 88.6% | 82.9% | Every setup fixed the bugs; the kit adds little here |
+| Reviews (2) | 72.9% | 64.3% | **84.3%** | These two tasks had flawed setups, see the erratum below |
+| "Match our conventions" (1) | 68.0% | 60.0% | 44.0% | Worse with the kit: models restructured too much. This is the main v6.1 fix |
+
+Computed from the frozen grades by [`v5-by-task-type.py`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/method/tools/v5-by-task-type.py).
+
+## Erratum
+
+> **Erratum (2026-10-01).** Two review tasks had flawed setups. No pre-registered outcome changes, but Opus's +9.3 depends on those two tasks (+3.4 without them). The Claude model was Sonnet 5.5, first published as "Sonnet 5".
+
+What was wrong, from the verdict:
+
+1. **T6 rubric item 3 was wrong.** It treated the planted `GlobalScope.launch` call as a fine "custom coroutine scope", so a review that called it blocking was defensible.
+2. **The T6 and T7 setups labelled their planted items in code comments** ("Real defect", "Suspicious"). Every arm saw the same comments, so they favour no arm, but they primed every arm.
+3. **Minor: the T8 prompt said "MVI conventions",** naming the house pattern for every arm.
+
+The model label: all v5 Claude cells ran `claude-sonnet-5-5` (Sonnet 5.5) and `claude-opus-5-5` (Opus 5.5). Only the label changed; every number stands. For v6, the task gate also lints for labelling comments, and every rubric item is checked against the planted code before sealing.
+
+Full details: [VERDICT.md, Erratum](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/VERDICT.md#erratum-2026-10-01) and [`erratum-sensitivity.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/erratum-sensitivity.txt).
+
+## Kit context per task
+
+<figure class="kit-figure">
+  <ThemedChart
+    name="v5-kit-context"
+    alt="Most kit tokens any single task loaded: Opus 5.5 9.9k, Sonnet 5.5 14.0k, GPT-6-Luna 18.3k, GPT-6-Sol 26.4k, Gemini 3.8 Flash 26.5k, against a 20k design budget."
+  />
+</figure>
+
+| Model | Max per task | Tasks over 20k | Loaded `compose` first |
+|---|---:|---:|---:|
+| Opus 5.5 | 9.9k | 0/8 | 8/8 |
+| Sonnet 5.5 | 14.0k | 0/8 | 8/8 |
+| GPT-6-Luna | 18.3k | 0/8 | 8/8 |
+| GPT-6-Sol | 26.4k | 3/8 | 8/8 |
+| Gemini 3.8 Flash | 26.5k | 2/8 | 8/8 |
+
+Every panel model opened `compose` first on every task. Kit context is an upper bound (the full size of every kit file opened). Details: [kit-tokens.txt](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/kit-tokens.txt).
+
+## Limits
+
+- One generation per cell and 8 tasks, so per-model differences under ~8 points are noise.
+- One kit-shaped base project, so behaviour on a coherent non-kit project is not tested.
+- Gemini is tested at the cheaper tier only.
+- Blinding is imperfect (house syntax can reveal the kit arm).
+
+## Evidence
+
+Everything above comes from files in the repository:
+
+- [`evals-v2/results-v5/VERDICT.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/VERDICT.md): scores, pre-registered rules, limits, erratum
+- [`evals-v2/results-v5/`](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/results-v5): frozen grades, score output, kit tokens, run metadata
+- [`evals-v2/heldout-v5/`](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/heldout-v5): the 8 tasks, their rubrics and the base app
+- [`evals-v2/method/`](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/method): the pre-registration and the scoring tools
+
+How the test was run: [How we test](/how-we-test/).

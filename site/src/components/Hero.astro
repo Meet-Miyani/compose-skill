@@ -1,0 +1,263 @@
+---
+/**
+ * Starlight `Hero` override, registered in astro.config.mjs, and the whole
+ * landing page. The splash template renders this in place of the page title;
+ * index.mdx has no body of its own.
+ *
+ * Load-bearing details:
+ *   - the <h1> is `hero.title` from frontmatter ("Compose Skill"), the search
+ *     phrase; "Compose Kit" is the product name in the eyebrow and wordmark;
+ *   - every number on this page comes from src/data/site.ts, which copies the
+ *     README;
+ *   - the copy buttons ship `hidden` and CopyScript reveals them.
+ */
+import { agents, headline, license, quickInstall, repoUrl, skills, version } from '../data/site';
+import CopyScript from './landing/CopyScript.astro';
+import ThemedChart from './ThemedChart.astro';
+import StudioLine from './StudioLine.astro';
+import '../styles/landing.css';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline } = data.hero || {};
+
+const githubIcon =
+  'M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21';
+
+const why = [
+  {
+    title: 'One consistent style',
+    body: 'MVI on a shared BaseViewModel contract, Koin annotations, Navigation 3, feature-owned data/domain/presentation layers, and typed error handling.',
+  },
+  {
+    title: 'Progressive loading',
+    body: 'A ~1.3k-token entry tree picks the task path and the exact reference files. The full kit is about 127k tokens; in the v5 test, 35 of 40 kit runs loaded under 20k.',
+  },
+  {
+    title: 'Respects your project',
+    body: 'In a coherent existing codebase (Hilt, MVVM, Navigation 2, your own base class), the kit follows your pattern and proposes migration separately.',
+  },
+  {
+    title: 'Checked, not trusted',
+    body: '11 shell guard scripts catch drift in CI, backed by 90 fixture tests.',
+  },
+];
+
+const next = [
+  { href: '/install/', label: 'Install', body: 'Project or global, for every agent and channel.' },
+  { href: '/skills/', label: 'Skills', body: 'What each of the seven skills owns, and how routing works.' },
+  { href: '/results/', label: 'Results', body: 'Held-out v5: five models, verdicts, task types, erratum.' },
+  { href: '/how-we-test/', label: 'How we test', body: 'Sealed tasks, real agent CLIs, blind cross-vendor grading.' },
+  { href: '/roadmap/', label: 'Roadmap', body: 'The v6.1 A/B, the cheap-model benchmark, known issues.' },
+];
+---
+
+<div class="landing">
+  <section class="landing-hero" aria-labelledby="_top">
+    <p class="landing-eyebrow">
+      <span class="landing-pill"><span class="landing-pill__dot" aria-hidden="true"></span>Compose Kit</span>
+      <span>{version} · {license}</span>
+    </p>
+    <h1 id="_top" data-page-title class="landing-hero__title" set:html={title} />
+    {tagline && <p class="landing-hero__pitch" set:html={tagline} />}
+    <p class="landing-hero__sub">
+      Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform. One consistent house style,
+      measured on five models in real agent CLIs.
+    </p>
+
+    <div class="landing-install">
+      <span class="landing-install__prompt" aria-hidden="true">$</span>
+      <code class="landing-install__code" tabindex="0">{quickInstall}</code>
+      <button class="landing-copy" type="button" hidden data-copy={quickInstall} aria-label="Copy the install command">
+        <svg class="landing-copy__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        <svg class="landing-copy__icon landing-copy__icon--done" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+      </button>
+    </div>
+    <p class="landing-hero__hint">
+      Swap <code>claude-code</code> for <code>codex</code>, <code>cursor</code>, <code>opencode</code>, <code>github-copilot</code>, <code>gemini-cli</code> or <code>antigravity</code>. Add <code>-g</code> to
+      install globally.
+    </p>
+
+    <div class="landing-hero__actions">
+      <a class="landing-button landing-button--primary" href={repoUrl}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={githubIcon}></path></svg>
+        <span>Star on GitHub</span>
+      </a>
+      <a class="landing-button" href="/install/">
+        <span>All install options</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="landing-stats" aria-label="Held-out v5 in numbers">
+    <dl>
+      {
+        headline.map((item) => (
+          <div class="landing-stats__item">
+            <dt><span class="landing-count" data-count>{item.value}</span></dt>
+            <dd>{item.label}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="landing-section" aria-labelledby="landing-chart-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">01 · Evidence</p>
+      <h2 id="landing-chart-title">With the kit vs without</h2>
+      <p class="landing-section__lede">
+        Five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each task ran with
+        no kit, with a short generic prompt, and with the kit: 120 runs, graded blind by two models from the other
+        vendors.
+      </p>
+    </div>
+    <figure class="landing-figure">
+      <ThemedChart
+        name="v5-kit-lift"
+        alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)."
+      />
+      <figcaption>
+        Opus 5.5's +9.3 depends on two review tasks that had flawed setups (+3.4 without them). The Claude model was
+        Sonnet 5.5. <a href="/results/#erratum">Read the erratum</a> or <a href="/results/">the full results</a>.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="landing-section" aria-labelledby="landing-why-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">02 · Why</p>
+      <h2 id="landing-why-title">Compose that compiles, then drifts</h2>
+      <p class="landing-section__lede">
+        AI agents write Compose that compiles and then drifts: state ends up in the wrong place, every screen gets
+        its own pattern, error handling changes from file to file, and reviews flag perfectly fine code as blocking.
+        Compose Kit gives the agent one house style plus the reasoning behind it, and only loads the parts the
+        current task needs.
+      </p>
+    </div>
+    <ul class="landing-grid landing-grid--4">
+      {
+        why.map((item) => (
+          <li class="landing-card">
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="landing-section" aria-labelledby="landing-agents-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">03 · Install</p>
+      <h2 id="landing-agents-title">A Compose skill for your agent</h2>
+      <p class="landing-section__lede">
+        Install all seven skills, for one project or globally. Each page has the exact commands and paths for that
+        agent.
+      </p>
+    </div>
+    <ul class="landing-grid landing-grid--3">
+      {
+        agents.map((agent) => (
+          <li>
+            <a class="landing-card landing-card--link" href={agent.href}>
+              <h3>{agent.name}</h3>
+              <p class="landing-card__ids">
+                {agent.ids.map((id) => (
+                  <code>{id}</code>
+                ))}
+              </p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="landing-section" aria-labelledby="landing-skills-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">04 · Inside</p>
+      <h2 id="landing-skills-title">Seven skills, one entry tree</h2>
+      <p class="landing-section__lede">
+        <code>compose</code> is the entry point, and it hands each task to the other six.{' '}
+        <a href="/skills/">How routing works</a>
+      </p>
+    </div>
+    <ul class="landing-skills">
+      {
+        skills.map((skill) => (
+          <li>
+            <code>{skill.name}</code>
+            <span>{skill.owns}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="landing-section" aria-labelledby="landing-next-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">05 · Status</p>
+      <h2 id="landing-next-title">Where it stands</h2>
+      <p class="landing-section__lede">
+        v6.0.0-preview.1 is released. The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit, on new tasks) is in progress,
+        with a verdict expected around Oct 5, 2026. No v6.1 numbers are published yet.
+      </p>
+    </div>
+    <ul class="landing-grid landing-grid--5">
+      {
+        next.map((item) => (
+          <li>
+            <a class="landing-card landing-card--link" href={item.href}>
+              <h3>{item.label}</h3>
+              <p>{item.body}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="landing-cta" aria-labelledby="landing-cta-title">
+    <h2 id="landing-cta-title">Install it, then tell us what breaks.</h2>
+    <p>
+      Found a problem, or want a model benchmarked? <a href={`${repoUrl}/issues`}>Open an issue</a>. A reported
+      problem is exactly what kicks off the next test round.
+    </p>
+    <div class="landing-hero__actions">
+      <a class="landing-button landing-button--primary" href={repoUrl}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={githubIcon}></path></svg>
+        <span>Star on GitHub</span>
+      </a>
+      <a class="landing-button" href="/install/claude-code/"><span>Compose skill for Claude Code</span></a>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="landing-footer__top">
+      <div class="landing-footer__identity">
+        <p class="landing-footer__brand">
+          <svg class="landing-footer__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path d="M46.43 18.57 A19 19 0 1 0 46.43 45.43" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"></path>
+            <circle cx="50" cy="32" r="6" fill="var(--kit-accent)"></circle>
+          </svg>
+          <span translate="no">Compose Kit</span>
+        </p>
+        <StudioLine />
+      </div>
+      <nav aria-label="Site">
+        <ul class="landing-footer__links">
+          <li><a href="/install/">Install</a></li>
+          <li><a href="/skills/">Skills</a></li>
+          <li><a href="/results/">Results</a></li>
+          <li><a href="/how-we-test/">How we test</a></li>
+          <li><a href="/roadmap/">Roadmap</a></li>
+          <li><a href={repoUrl}>GitHub</a></li>
+          <li><a href={`${repoUrl}/blob/main/LICENSE`}>MIT license</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</div>
+
+<CopyScript />

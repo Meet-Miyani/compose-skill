@@ -1,0 +1,1320 @@
+/* site/src/styles/tokens.css
+ *
+ * The Compose Kit design language, mapped onto Starlight. Adapted from the
+ * AdMob CMP docs (ads.avinya.dev) and re-typed to the avinya.dev studio system:
+ * Space Grotesk for display, Inter for body, JetBrains Mono for labels and
+ * code, one accent colour, flat surfaces with hairlines (no gradients, no
+ * drop shadows).
+ *
+ * This is the only file allowed to contain literal colours or font stacks.
+ * Everything else references the --kit-* properties below.
+ *
+ * Colour rules: ink and slate clear 4.5:1 on paper and on surface in both
+ * themes. accent is a stroke / large-text colour only; accent-text is the
+ * text-safe accent and clears 4.5:1 on paper.
+ *
+ * This file is unlayered on purpose: Starlight ships its properties inside
+ * `@layer starlight.base`, and unlayered author rules beat layered ones.
+ */
+
+/* ------------------------------------------------------------------ fonts */
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-500.woff2') format('woff2');
+}
+
+/* ------------------------------------------------- tokens: dark (default) */
+
+:root,
+:root[data-theme='dark'] {
+  /* The avinya.dev dark palette. */
+  --kit-paper: #0e0f10;
+  --kit-surface: #171819;
+  --kit-raised: #1e2022;
+  --kit-code: #171819;
+  --kit-ink: #edeeec;
+  --kit-slate: #9a9f9c;
+  --kit-hair: #2a2c2e;
+  --kit-hair-soft: #1f2123;
+  --kit-accent: #ee3a20;
+  --kit-accent-text: #ff8b73;
+  --kit-accent-contrast: #ffffff;
+  --kit-accent-soft: rgba(238, 58, 32, 0.16);
+  --kit-tint: rgba(238, 58, 32, 0.05);
+  /* Flat system: depth is surfaces plus hairlines, never a drop shadow. */
+  --kit-shadow: none;
+  --kit-shadow-lg: none;
+  --kit-scrim: rgba(0, 0, 0, 0.72);
+  /* Code panels are dark in both themes. */
+  --kit-stage: #16181a;
+  --kit-stage-raised: #1e2022;
+  --kit-stage-hair: #2e3134;
+  --kit-ink-2: #c4c8c5;
+}
+
+/* ------------------------------------------------------- tokens: light */
+
+:root[data-theme='light'] {
+  /* The avinya.dev light palette: paper #F3F4F2, ink #16181A. */
+  --kit-paper: #f3f4f2;
+  --kit-surface: #ebecea;
+  --kit-raised: #fafbf9;
+  --kit-code: #ebecea;
+  --kit-ink: #16181a;
+  --kit-slate: #5a5f63;
+  --kit-hair: #d8dad6;
+  --kit-hair-soft: #e4e6e2;
+  --kit-accent: #ee3a20;
+  --kit-accent-text: #b32a12;
+  --kit-accent-contrast: #ffffff;
+  --kit-accent-soft: rgba(238, 58, 32, 0.1);
+  --kit-tint: rgba(238, 58, 32, 0.04);
+  --kit-shadow: none;
+  --kit-shadow-lg: none;
+  --kit-scrim: rgba(22, 24, 26, 0.5);
+  --kit-stage: #16181a;
+  --kit-stage-raised: #1e2022;
+  --kit-stage-hair: #2e3134;
+  --kit-ink-2: #3d4145;
+}
+
+/* -------------------------------------------- tokens: theme-independent */
+
+:root {
+  --kit-font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
+  --kit-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+    Arial, sans-serif;
+  --kit-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+  --kit-tracking-tight: -0.02em;
+  --kit-tracking-tighter: -0.035em;
+  --kit-tracking-label: 0.08em;
+  --kit-radius-sm: 4px;
+  --kit-radius: 8px;
+  --kit-radius-lg: 12px;
+  --kit-radius-xl: 18px;
+  /* The fill for accent buttons. Darker than --kit-accent so white 16px text
+     on it clears 4.5:1. */
+  --kit-accent-strong: #c8371f;
+  --kit-stage-ink: #edeeec;
+  --kit-stage-slate: #a0a5a2;
+  --kit-stage-accent: #ff8b73;
+  --kit-border: 1px solid var(--kit-hair);
+  --kit-content-max: 72rem;
+  --kit-reading: 45rem;
+  --kit-content-width: 50rem;
+  --kit-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --kit-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* The one motion curve: ease-out, no overshoot. */
+  --kit-ease-motion: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ------------------------------------------- remap Starlight onto tokens */
+
+:root,
+:root[data-theme='dark'] {
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #edeeec;
+  --sl-color-gray-2: #c4c8c5;
+  --sl-color-gray-3: #9a9f9c;
+  --sl-color-gray-4: #6a6f6c;
+  --sl-color-gray-5: #2a2c2e;
+  --sl-color-gray-6: #171819;
+  --sl-color-black: #0e0f10;
+
+  --sl-color-accent: var(--kit-accent);
+  --sl-color-accent-high: var(--kit-accent-text);
+  --sl-color-accent-low: #45130a;
+  --sl-color-text-invert: var(--kit-paper);
+}
+
+:root[data-theme='light'] {
+  --sl-color-white: #16181a;
+  --sl-color-gray-1: #1f2224;
+  --sl-color-gray-2: #43474a;
+  --sl-color-gray-3: #5a5f63;
+  --sl-color-gray-4: #82878a;
+  --sl-color-gray-5: #d8dad6;
+  --sl-color-gray-6: #e4e6e2;
+  --sl-color-gray-7: #ebecea;
+  --sl-color-black: #f3f4f2;
+
+  --sl-color-accent: var(--kit-accent);
+  --sl-color-accent-high: var(--kit-accent-text);
+  --sl-color-accent-low: #fbdcd6;
+  --sl-color-text-invert: #ffffff;
+}
+
+:root,
+:root[data-theme='dark'],
+:root[data-theme='light'] {
+  --sl-color-text-accent: var(--kit-accent-text);
+  --sl-color-bg: var(--kit-paper);
+  --sl-color-bg-nav: var(--kit-paper);
+  --sl-color-bg-sidebar: var(--kit-paper);
+  --sl-color-bg-inline-code: var(--kit-surface);
+  --sl-color-hairline: var(--kit-hair);
+  --sl-color-hairline-light: var(--kit-hair);
+  --sl-color-hairline-shade: var(--kit-hair);
+}
+
+:root {
+  --sl-font: var(--kit-font-body);
+  --sl-font-mono: var(--kit-font-mono);
+  --sl-content-width: var(--kit-content-width);
+  --sl-nav-height: 4rem;
+  --sl-text-code: 0.875rem;
+}
+
+/* ------------------------------------------------------------ typography */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.site-title {
+  font-family: var(--kit-font-display);
+  font-weight: 600;
+  letter-spacing: var(--kit-tracking-tight);
+}
+
+/* Space Grotesk ships 500 and 600 only: headings are 600, tight-tracked. */
+.sl-markdown-content h1,
+.content-panel h1 {
+  font-size: clamp(2.125rem, 1rem + 2.6vw, 2.875rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: var(--kit-tracking-tighter);
+  text-wrap: balance;
+}
+
+.sl-markdown-content h2 {
+  margin-block: 2.75rem 0.875rem;
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.sl-markdown-content h3 {
+  margin-block: 1.875rem 0.625rem;
+  font-size: 1.1875rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.sl-markdown-content {
+  color: var(--kit-ink);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+::selection {
+  background: var(--kit-accent);
+  color: var(--kit-accent-contrast);
+}
+
+:focus-visible {
+  outline: 2px solid var(--kit-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ----------------------------------------------------------- prose links */
+
+.sl-markdown-content p a,
+.sl-markdown-content li a,
+.sl-markdown-content td a {
+  color: var(--kit-accent-text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--kit-accent-text) 40%, transparent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 150ms var(--kit-ease), color 150ms var(--kit-ease);
+}
+
+.sl-markdown-content p a:hover,
+.sl-markdown-content li a:hover,
+.sl-markdown-content td a:hover {
+  color: var(--kit-accent-text);
+  text-decoration-color: var(--kit-accent-text);
+}
+
+/* ------------------------------------------------------------ inline code */
+
+.sl-markdown-content code:not(:where(.expressive-code *)) {
+  padding: 0.125em 0.375em;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-sm);
+  background: var(--kit-surface);
+  font-family: var(--kit-font-mono);
+  font-size: 0.85em;
+}
+
+/* -------------------------------------------------------------- sidebar */
+
+.sidebar-content a {
+  padding: 0.25em 0.5rem;
+  border-radius: var(--kit-radius-sm);
+  color: var(--kit-slate);
+  font-family: var(--kit-font-body);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  transition: color 150ms var(--kit-ease), background-color 150ms var(--kit-ease);
+}
+
+.sidebar-content a:hover,
+.sidebar-content a:focus-visible {
+  color: var(--kit-ink);
+  background: var(--kit-surface);
+}
+
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus-visible {
+  color: var(--kit-paper);
+  font-weight: 600;
+  background: var(--kit-ink);
+  box-shadow: none;
+}
+
+.sidebar-content .group-label .large {
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--kit-tracking-label);
+  text-transform: none;
+}
+
+.sidebar-content summary {
+  padding: 0.25em 0.5rem;
+  line-height: 1.4;
+}
+
+.sidebar-content ul ul li {
+  margin-inline-start: 0.375rem;
+  padding-inline-start: 0.375rem;
+  border-inline-start: 0;
+}
+
+.sidebar-content .top-level > li + li {
+  margin-top: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ TOC */
+
+starlight-toc nav > h2 {
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--kit-tracking-label);
+  text-transform: none;
+}
+
+starlight-toc nav a {
+  position: relative;
+  display: block;
+  padding-left: 0.875rem;
+  border: 0;
+  color: var(--kit-slate);
+  font-family: var(--kit-font-body);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: color 150ms var(--kit-ease);
+}
+
+starlight-toc nav a::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--kit-accent);
+  opacity: 0;
+  transition: opacity 150ms var(--kit-ease);
+}
+
+starlight-toc nav a:hover {
+  color: var(--kit-ink);
+}
+
+starlight-toc nav a[aria-current='true'] {
+  color: var(--kit-ink);
+  font-weight: 600;
+}
+
+starlight-toc nav a[aria-current='true']::before {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------- code blocks */
+
+.expressive-code .frame {
+  overflow: hidden;
+  border: 1px solid var(--kit-stage-hair);
+  border-radius: var(--kit-radius-lg);
+  box-shadow: none;
+}
+
+/* Code is always on the dark stage surface, in both themes: code reads as an
+   object on the page, the same way the landing stage does. */
+.expressive-code .frame.has-title .header,
+.expressive-code .frame.is-terminal .header {
+  border-bottom: 1px solid var(--kit-stage-hair);
+}
+
+.expressive-code .frame .header .title {
+  font-family: var(--kit-font-mono);
+  font-size: 0.75rem;
+}
+
+.expressive-code code {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.expressive-code .copy button {
+  border-radius: var(--kit-radius-sm);
+}
+
+/* --------------------------------------------------------------- asides
+ *
+ * A full hairline box tinted by the variant's own accent, not Starlight's thick
+ * start border: the callout reads as one object, like a card, and its colour
+ * still says what kind of note it is.
+ */
+
+.starlight-aside {
+  padding: 1rem 1.125rem;
+  border: 1px solid color-mix(in srgb, var(--sl-color-asides-text-accent) 32%, transparent);
+  border-radius: var(--kit-radius-lg);
+  background: color-mix(in srgb, var(--sl-color-asides-text-accent) 7%, var(--kit-paper));
+}
+
+.starlight-aside__title {
+  font-family: var(--kit-font-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.starlight-aside__icon {
+  display: block;
+}
+
+.starlight-aside__content {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------------------- tabs
+ *
+ * Tabs are a segmented control: the choice is between two views of the same
+ * step (Android / iOS), so it should look like a switch, not like navigation.
+ */
+
+starlight-tabs .tablist-wrapper {
+  border: 0;
+}
+
+starlight-tabs [role='tablist'] {
+  display: inline-flex;
+  gap: 0.125rem;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--kit-radius);
+  background: var(--kit-surface);
+}
+
+starlight-tabs [role='tablist'] a[role='tab'] {
+  height: 2.125rem;
+  margin: 0;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: var(--kit-radius-sm);
+  color: var(--kit-slate);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+starlight-tabs [role='tablist'] a[role='tab'][aria-selected='true'] {
+  background: var(--kit-raised);
+  box-shadow: var(--kit-shadow);
+  color: var(--kit-ink);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.sl-link-card,
+.card {
+  padding: 1.25rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-lg);
+  background: var(--kit-raised);
+  box-shadow: none;
+  transition: border-color 150ms var(--kit-ease),
+    background-color 150ms var(--kit-ease), box-shadow 150ms var(--kit-ease);
+}
+
+.sl-link-card:hover,
+.card:hover {
+  border-color: color-mix(in srgb, var(--kit-accent) 45%, var(--kit-hair));
+  background: var(--kit-surface);
+  box-shadow: var(--kit-shadow);
+}
+
+.sl-link-card .title,
+.card .title {
+  color: var(--kit-ink);
+  font-family: var(--kit-font-body);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: var(--kit-tracking-tight);
+}
+
+.sl-link-card .description,
+.card .body {
+  color: var(--kit-slate);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.sl-link-card .icon {
+  color: var(--kit-slate);
+}
+
+.card-grid {
+  gap: 0.75rem;
+}
+
+/* ----------------------------------------------------------- pagination */
+
+.pagination-links a {
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-lg);
+  background: var(--kit-raised);
+  box-shadow: none;
+  transition: border-color 150ms var(--kit-ease),
+    background-color 150ms var(--kit-ease), box-shadow 150ms var(--kit-ease);
+}
+
+.pagination-links a:hover {
+  border-color: color-mix(in srgb, var(--kit-accent) 45%, var(--kit-hair));
+  background: var(--kit-surface);
+  box-shadow: var(--kit-shadow);
+}
+
+.pagination-links a > span:first-child {
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--kit-tracking-label);
+  text-transform: none;
+}
+
+.pagination-links .link-title {
+  color: var(--kit-ink);
+  font-family: var(--kit-font-body);
+  font-weight: 600;
+  letter-spacing: var(--kit-tracking-tight);
+}
+
+/* ------------------------------------------------------------- chrome
+ *
+ * The header is Header.astro (a Starlight override). It is a solid bar with a
+ * hairline, never translucent: over the dark landing panels a see-through
+ * header turned into a grey smear. On the landing page its content sits on the
+ * same 80rem column as the page; on docs pages it spans the frame.
+ */
+
+header.header {
+  border-bottom: 1px solid var(--kit-hair);
+  background: var(--kit-paper);
+}
+
+:root[data-has-hero] {
+  --sl-nav-height: 4.5rem;
+}
+
+.kit-header {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  height: 100%;
+}
+
+:root[data-has-hero] .kit-header {
+  max-width: var(--kit-content-max);
+  margin-inline: auto;
+}
+
+.kit-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.kit-header__nav a {
+  color: var(--kit-ink-2);
+  text-decoration: none;
+  transition: color 150ms var(--kit-ease);
+}
+
+.kit-header__nav a:hover,
+.kit-header__nav a[aria-current='page'] {
+  color: var(--kit-ink);
+}
+
+.kit-header__search {
+  display: flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-inline-start: auto;
+}
+
+.right-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kit-header__github {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius);
+  color: var(--kit-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 150ms var(--kit-ease), background-color 150ms var(--kit-ease);
+}
+
+.kit-header__github:hover {
+  border-color: var(--kit-ink);
+  background: var(--kit-surface);
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--kit-radius);
+  background: transparent;
+  color: var(--kit-slate);
+  cursor: pointer;
+  transition: color 150ms var(--kit-ease), background-color 150ms var(--kit-ease);
+}
+
+.theme-toggle-btn:hover,
+.theme-toggle-btn:focus-visible {
+  background: var(--kit-surface);
+  color: var(--kit-ink);
+}
+
+/* Docs pages: search sits beside the wordmark, the links move to the right,
+   and GitHub is a quiet text link rather than a button. */
+:root[data-has-sidebar] .kit-header {
+  gap: 2rem;
+}
+
+:root[data-has-sidebar] .kit-header__search {
+  order: 1;
+  margin-inline-start: 0;
+}
+
+:root[data-has-sidebar] .kit-header__nav {
+  order: 2;
+  margin-inline-start: auto;
+  font-size: 0.875rem;
+}
+
+:root[data-has-sidebar] .right-group {
+  order: 3;
+}
+
+:root[data-has-sidebar] .kit-header__github {
+  height: auto;
+  padding: 0;
+  border: 0;
+  color: var(--kit-ink-2);
+  font-weight: 500;
+}
+
+:root[data-has-sidebar] .kit-header__github:hover {
+  background: transparent;
+  color: var(--kit-ink);
+}
+
+:root[data-has-sidebar] .kit-header__github svg {
+  display: none;
+}
+
+/* The landing page's phone menu (Header.astro). Hidden everywhere else. */
+.kit-header__menu {
+  display: none;
+}
+
+@media (max-width: 50rem) {
+  .kit-header {
+    gap: 0.25rem;
+  }
+
+  .kit-header__nav,
+  .right-group {
+    display: none;
+  }
+
+  :root:not([data-has-sidebar]) .kit-header__menu {
+    display: block;
+  }
+
+  .kit-header__menu > summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    color: var(--kit-ink);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .kit-header__menu > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .kit-header__menu-panel {
+    position: fixed;
+    inset: var(--sl-nav-height) 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 1rem 1rem;
+    border-bottom: 1px solid var(--kit-hair);
+    background: var(--kit-paper);
+  }
+
+  .kit-header__menu-panel a {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--kit-hair-soft);
+    color: var(--kit-ink);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .kit-header__menu-panel a:last-child {
+    border-bottom: 0;
+  }
+
+  /* On a phone, search is a plain icon, like the canvas. The :root prefix
+     outranks the base search rule further down this file. */
+  :root site-search button[data-open-modal] {
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--kit-ink);
+  }
+}
+
+/* ------------------------------------------------------- the site title */
+
+.site-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5625rem;
+  color: var(--kit-ink);
+  font-family: var(--kit-font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: var(--kit-tracking-tight);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand-mark {
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  color: var(--kit-ink);
+}
+
+.brand-mark__dot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.site-title__version {
+  padding: 0.1875rem 0.4375rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: 999px;
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* The landing hero states the version in its own pill. */
+:root[data-has-hero] .site-title__version {
+  display: none;
+}
+
+@media (max-width: 30rem) {
+  .site-title__version {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------- search */
+
+site-search button[data-open-modal] {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius);
+  background: var(--kit-raised);
+  color: var(--kit-slate);
+  font-family: var(--kit-font-body);
+  font-size: 0.875rem;
+  transition: border-color 150ms var(--kit-ease), color 150ms var(--kit-ease);
+}
+
+@media (min-width: 50rem) {
+  site-search button[data-open-modal] {
+    width: 16.25rem;
+    max-width: none;
+  }
+
+  :root[data-has-sidebar] site-search button[data-open-modal] {
+    width: 26.25rem;
+  }
+
+  site-search button[data-open-modal] > span {
+    flex-grow: 1;
+    text-align: start;
+  }
+}
+
+/* Between phone and laptop widths there is not room for the wordmark, the
+   links, a full search field and GitHub on one line: search becomes an icon
+   button, like on a phone but still boxed. */
+@media (min-width: 50rem) and (max-width: 64rem) {
+  :root site-search button[data-open-modal],
+  :root[data-has-sidebar] site-search button[data-open-modal] {
+    justify-content: center;
+    width: 2.5rem;
+    padding: 0;
+  }
+
+  site-search button[data-open-modal] > span,
+  site-search button[data-open-modal] > kbd {
+    display: none !important;
+  }
+
+  .kit-header,
+  :root[data-has-sidebar] .kit-header {
+    gap: 1.25rem;
+  }
+
+  .kit-header__nav {
+    gap: 1.25rem;
+  }
+}
+
+site-search button[data-open-modal] kbd {
+  gap: 0.125rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-sm);
+  background: transparent;
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+}
+
+site-search button[data-open-modal] kbd kbd {
+  padding: 0;
+  border: 0;
+}
+
+site-search button[data-open-modal]:hover {
+  border-color: var(--kit-ink);
+  color: var(--kit-ink);
+}
+
+site-search dialog {
+  border: 1px solid var(--kit-hair);
+  box-shadow: var(--kit-shadow-lg);
+}
+
+@media (min-width: 50rem) {
+  site-search dialog {
+    border-radius: var(--kit-radius-lg);
+  }
+}
+
+/* ---------------------------------------------------------- page title
+ *
+ * PageTitle.astro: a mono breadcrumb, the title, and the page's description
+ * as a lede. Docs pages only; the landing page has its own hero.
+ */
+
+.kit-page-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding-top: 1rem;
+}
+
+.kit-page-title__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.75rem;
+  list-style: none;
+}
+
+.kit-page-title__crumbs li + li::before {
+  content: '/';
+  margin-inline-end: 0.5rem;
+}
+
+.kit-page-title__crumbs [aria-current='page'] {
+  color: var(--kit-ink);
+}
+
+.content-panel .kit-page-title h1 {
+  margin: 0;
+  color: var(--kit-ink);
+}
+
+.kit-page-title__lede {
+  max-width: 40rem;
+  margin: 0;
+  color: var(--kit-ink-2);
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------- steps */
+
+.sl-steps > li::before {
+  border: 0;
+  background: var(--kit-ink);
+  color: var(--kit-paper);
+  font-family: var(--kit-font-mono);
+  font-weight: 500;
+}
+
+.sl-steps > li::after {
+  background: var(--kit-hair);
+}
+
+/* ------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* -------------------------------------------------------------- tables */
+
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-lg);
+  scrollbar-color: var(--kit-slate) transparent;
+  scrollbar-width: thin;
+}
+
+.table-scroll:focus-visible {
+  outline-offset: 4px;
+}
+
+.sl-markdown-content .table-scroll table {
+  /* Starlight makes every table `display: block; overflow-x: auto` so a bare
+     table can scroll. rehype-table-scroll already wraps each one in
+     .table-scroll, so that is redundant here — and a block-display table sizes
+     its box like a div while its cells lay out wider, so any column that cannot
+     compress spills outside the table instead of scrolling the wrapper. */
+  display: table;
+  overflow: visible;
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.sl-markdown-content .table-scroll--wide table {
+  min-width: 42rem;
+}
+
+.sl-markdown-content .table-scroll th,
+.sl-markdown-content .table-scroll td {
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--kit-hair-soft);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* The mono eyebrow is for COLUMN headers only. `<th scope="row">` is a row
+   label — it is read as content, so it keeps the body face at body size and is
+   distinguished by weight instead. Applying the eyebrow to every `th` set the
+   whole first column of every row-header table in 11px mono. */
+.sl-markdown-content .table-scroll thead th {
+  border-bottom: 1px solid var(--kit-hair);
+  background: var(--kit-surface);
+  color: var(--kit-ink);
+  font-family: var(--kit-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--kit-tracking-label);
+  text-transform: none;
+}
+
+.sl-markdown-content .table-scroll tbody th {
+  background: transparent;
+  color: var(--kit-ink);
+  font-family: var(--kit-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.sl-markdown-content .table-scroll tbody tr:last-child th,
+.sl-markdown-content .table-scroll tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sl-markdown-content .table-scroll tbody tr {
+  transition: background-color 120ms var(--kit-ease);
+}
+
+.sl-markdown-content .table-scroll tbody tr:hover {
+  background: var(--kit-surface);
+}
+
+/* No `td:first-child { font-weight: 500 }` here on purpose. Emphasis belongs to
+   real row headers — `<th scope="row">`, styled above — not to whatever happens
+   to sit in the first column. Markdown pipe tables have no row headers, so
+   bolding their first column was emphasis without meaning, and it made those
+   tables disagree with the component-authored ones. */
+
+/* ------------------------------------------------------------ overflow */
+
+.sl-markdown-content pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.sl-markdown-content img,
+.sl-markdown-content svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ------------------------------------------------------- themed charts
+ *
+ * ThemedChart.astro inlines the light and the dark drawing; show the one that
+ * matches the current theme. Dark is the default (no data-theme yet).
+ */
+
+.themed-chart {
+  display: block;
+}
+
+.themed-chart svg {
+  display: block;
+  width: 100%;
+  max-width: 760px;
+  height: auto;
+  margin-inline: auto;
+}
+
+.themed-chart__light {
+  display: none;
+}
+
+:root[data-theme='light'] .themed-chart__light {
+  display: block;
+}
+
+:root[data-theme='light'] .themed-chart__dark {
+  display: none;
+}
+
+/* Docs-page figures: a hairline frame around a chart or diagram. */
+.kit-figure {
+  margin-block: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid var(--kit-hair);
+  border-radius: var(--kit-radius-lg);
+}
+
+.kit-figure figcaption {
+  margin-top: 0.75rem;
+  color: var(--kit-slate);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.kit-figure svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* ----------------------------------------------------- the studio line
+ *
+ * StudioLine.astro: "Built by Meet Miyani at Avinya·", with the avinya.dev
+ * wordmark and its accent dot.
+ */
+
+.studio-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.375rem;
+  margin: 0;
+  color: var(--kit-slate);
+  font-family: var(--kit-font-mono);
+  font-size: 0.75rem;
+}
+
+.studio-line a {
+  color: var(--kit-ink);
+  text-decoration: none;
+}
+
+.studio-line a:hover {
+  color: var(--kit-accent-text);
+}
+
+.studio-line__mark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.1875rem;
+  font-family: var(--kit-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: var(--kit-tracking-tight);
+}
+
+.studio-line__dot {
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--kit-accent);
+}
+
+.kit-docs-footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--kit-hair);
+}
+
+/* Header links in the studio's mono label face. */
+.kit-header__nav {
+  font-family: var(--kit-font-mono);
+}
+
+:root .kit-header__nav,
+:root[data-has-sidebar] .kit-header__nav {
+  font-size: 0.8125rem;
+}
+
+/* ---------------------------------------------------------------- motion
+ *
+ * Calm, one-shot motion (Motion.astro arms the scroll-driven parts). Every
+ * rule that moves anything sits inside `prefers-reduced-motion:
+ * no-preference`, so under `reduce` the page is its final state from the
+ * first paint. Only opacity and transform animate: no layout shift.
+ */
+
+@keyframes kit-dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes kit-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* The logo's accent dot settles in once per visit (the head script sets
+     data-logo-seen after the first page). */
+  :root:not([data-logo-seen]) .brand-mark__dot {
+    animation: kit-dot-in 450ms var(--kit-ease-motion) 120ms both;
+  }
+
+  /* Scroll reveal, armed by Motion.astro for off-screen elements only. */
+  .kit-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 500ms var(--kit-ease-motion),
+      transform 500ms var(--kit-ease-motion);
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+
+  .kit-reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The lift chart: connectors draw no-kit → with-kit, then the with-kit dots
+     and lift labels fade in, one row after another. */
+  .kit-chart-anim.is-armed .chart-connector {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .kit-chart-anim.is-armed .chart-kit-dot,
+  .kit-chart-anim.is-armed .chart-lift {
+    opacity: 0;
+  }
+
+  .kit-chart-anim.is-armed.is-in .chart-connector {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 600ms var(--kit-ease-motion) calc(var(--row, 0) * 70ms);
+  }
+
+  .kit-chart-anim.is-armed.is-in .chart-kit-dot,
+  .kit-chart-anim.is-armed.is-in .chart-lift {
+    opacity: 1;
+    transition: opacity 300ms var(--kit-ease-motion) calc(var(--row, 0) * 70ms + 420ms);
+  }
+
+  /* Header links: an accent underline slides in from the left. */
+  .kit-header__nav a {
+    position: relative;
+  }
+
+  .kit-header__nav a::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -4px;
+    left: 0;
+    height: 1px;
+    background: var(--kit-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 200ms var(--kit-ease-motion);
+  }
+
+  .kit-header__nav a:hover::after,
+  .kit-header__nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+}

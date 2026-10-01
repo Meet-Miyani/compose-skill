@@ -1,0 +1,29 @@
+---
+/**
+ * Starlight `SiteTitle` override, registered in astro.config.mjs.
+ *
+ * The lockup: the Compose Kit mark (an open "C" with the Avinya accent dot in
+ * its mouth) and the wordmark, plus the version on docs pages (the landing
+ * hero states the version in its own pill, so tokens.css hides it there).
+ *
+ * The mark is drawn inline so it takes currentColor in both themes and its dot
+ * can land on load and hover (tokens.css, `.brand-mark__dot`).
+ */
+import { version } from '../data/site';
+
+const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="site-title" aria-label={`${siteTitle} home`}>
+  <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <path
+      d="M46.43 18.57 A19 19 0 1 0 46.43 45.43"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="9"
+      stroke-linecap="round"></path>
+    <circle class="brand-mark__dot" cx="50" cy="32" r="6" fill="var(--kit-accent)"></circle>
+  </svg>
+  <span translate="no" aria-hidden="true">Compose Kit</span>
+  <span class="site-title__version" aria-hidden="true">{version}</span>
+</a>

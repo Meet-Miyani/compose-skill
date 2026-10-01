@@ -1,0 +1,8 @@
+/* Loaded into the headless browser by scripts/render-diagrams.mjs so Mermaid
+   measures labels with the same Inter face the site serves. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../../public/fonts/inter-400.woff2') format('woff2');
+}

@@ -1,0 +1,15 @@
+---
+/**
+ * The Avinya attribution: the studio wordmark with its accent dot, linking to
+ * avinya.dev. Shown under every docs page and in the landing footer, so the
+ * site reads as part of the avinya.dev family.
+ */
+import { authorName, authorUrl, studioName, studioUrl } from '../data/site';
+---
+
+<p class="studio-line">
+  <span>Built by <a href={authorUrl}>{authorName}</a> at</span>
+  <a class="studio-line__mark" href={studioUrl}>
+    {studioName}<span class="studio-line__dot" aria-hidden="true"></span>
+  </a>
+</p>

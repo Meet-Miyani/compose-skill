@@ -1,0 +1,80 @@
+/* docs-site/src/styles/mermaid.css
+ *
+ * `rehype-mermaid`'s `inline-svg` strategy has no dark-mode support: it bakes
+ * one palette into a <style> element inside each generated <svg>. Those are
+ * author rules, so `!important` here beats them in both directions.
+ *
+ * The light palette is configured in `mermaidConfig.themeVariables` in
+ * astro.config.mjs; this file re-tints the same SVG for the dark theme.
+ */
+
+.sl-markdown-content svg[id^='mermaid'] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  background: transparent !important;
+}
+
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .node rect,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .node circle,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .node polygon,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .node path,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .cluster rect,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .labelBox,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .actor {
+  fill: var(--kit-surface) !important;
+  stroke: var(--kit-hair) !important;
+}
+
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgePath .path,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .flowchart-link,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .messageLine0,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .messageLine1,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] line {
+  stroke: var(--kit-slate) !important;
+}
+
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .arrowheadPath,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] marker path {
+  fill: var(--kit-slate) !important;
+  stroke: var(--kit-slate) !important;
+}
+
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] text,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .nodeLabel,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgeLabel,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .messageText,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .labelText,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .loopText {
+  fill: var(--kit-ink) !important;
+  color: var(--kit-ink) !important;
+}
+
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgeLabel rect,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgeLabel foreignObject div {
+  background: var(--kit-paper) !important;
+  fill: var(--kit-paper) !important;
+}
+
+/* Mermaid renders a flowchart edge label as
+ *   <foreignObject><div class="labelBkg"><span class="edgeLabel">text</span>
+ * and the SPAN carries its own white background from the baked-in light theme.
+ * The rule above only reaches the div, so in the dark theme these labels were
+ * near-white text on a white chip — the branch labels on the consent decision
+ * tree were invisible. `background-color` only: `fill` does not paint HTML
+ * inside a foreignObject, and the text colour is set by the rule above.
+ */
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] span.edgeLabel,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgeLabel .labelBkg,
+:root[data-theme='dark'] .sl-markdown-content svg[id^='mermaid'] .edgeLabel p {
+  background-color: var(--kit-paper) !important;
+}
+
+/* Starlight spaces adjacent children inside .sl-markdown-content with a top
+ * margin. Inside a Mermaid label that pushes the lines after a <br> out of the
+ * fixed-height foreignObject, so the last line of each diamond disappeared.
+ */
+.sl-markdown-content svg[id^='mermaid'] foreignObject * {
+  margin-block: 0 !important;
+}

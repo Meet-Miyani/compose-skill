@@ -1,0 +1,77 @@
+---
+title: Compose skill for Claude Code
+description: 'Install the Compose skill for Claude Code: npx skills, gh skill or the compose-kit plugin, per project or globally, for Jetpack Compose and CMP work.'
+sidebar:
+  label: Claude Code
+---
+
+Compose Kit is a set of seven Claude Code skills for Jetpack Compose and Compose Multiplatform. Install all seven: `compose` is the entry point, and it hands each task to the other six. In the held-out v5 test, Claude Code ran Sonnet 5.5 and Opus 5.5 with the kit ([results](/results/)).
+
+Agent id: `claude-code`.
+
+| Scope | Where the skills go |
+|---|---|
+| This project | `.claude/skills/` |
+| Global, every project | `~/.claude/skills/` |
+
+## Claude Code plugin
+
+Inside Claude Code:
+
+```text
+/plugin marketplace add Meet-Miyani/compose-skill
+/plugin install compose-kit@compose-kit
+```
+
+From a terminal, the same with a scope: `user` (the default, every project), `project` (shared through the repo) or `local` (this project, just you).
+
+```sh
+claude plugin marketplace add Meet-Miyani/compose-skill
+
+# Pick one scope
+claude plugin install compose-kit@compose-kit --scope user
+claude plugin install compose-kit@compose-kit --scope project
+claude plugin install compose-kit@compose-kit --scope local
+```
+
+## npx skills
+
+Needs Node 22.20+.
+
+```sh
+# This project only (run it in the repo root), into .claude/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a claude-code
+
+# Globally, for every project, into ~/.claude/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a claude-code -g
+```
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent claude-code`: without it, a non-interactive run installs for GitHub Copilot.
+
+```sh
+# This project only
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent claude-code --scope project
+done
+
+# Globally
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent claude-code --scope user
+done
+```
+
+## Point Claude Code at it
+
+Add this line to the project's `CLAUDE.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first.
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from `.claude/skills/` or `~/.claude/skills/`, then install with any option above. The old CLI's `update` can't fetch v6.
+
+See also: [all install options](/install/), [what each skill owns](/skills/).

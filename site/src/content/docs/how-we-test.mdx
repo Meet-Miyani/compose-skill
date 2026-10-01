@@ -1,0 +1,56 @@
+---
+title: How we test the Compose skill
+description: 'How Compose Kit is tested: sealed held-out tasks, real agent CLIs on a Kotlin Multiplatform app, blind cross-vendor grading, pre-registered rules.'
+sidebar:
+  label: How we test
+---
+
+Every claim about the Compose skill comes from a held-out test: new tasks the kit has never seen, run by real agents, graded blind. This page is the method; the numbers are on [Results](/results/).
+
+## The method
+
+- **New tasks every round.** A separate model writes them in a new app domain without ever seeing the kit, and they're sealed before the first run.
+- **A gate, not a promise.** A script builds every task's setup and runs its hidden behaviour tests. Tasks that fail the gate or a manual content check go back to the author or get repaired, and every repair is written down.
+- **Real agents on a real app.** Claude Code, Codex, Antigravity and OpenCode, each driving its own model headless on a Kotlin Multiplatform project.
+- **Blind, cross-vendor grading.** Answers are shuffled and stripped of anything that gives away the model or the setup. Two graders from the other vendors score each one.
+- **Pre-registered.** Pass/fail rules come before the tasks, grades are frozen before scoring, and mistakes get a public erratum.
+
+Method and tools: [evals-v2/method](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/method) · Results: [evals-v2/results-v5](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/results-v5) · Tasks and base app: [evals-v2/heldout-v5](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/heldout-v5)
+
+## The v5 setup
+
+Each model ran every task in three arms:
+
+- **no kit:** the kit's guard scripts and config are removed from the project
+- **generic:** a 320-word generic "senior engineer" prompt as the tool's instruction file, no skills
+- **kit:** the seven skills installed natively, plus the one-line pointer in the tool's instruction file
+
+The 8 tasks: 3 new features, 2 bug fixes (each with a hidden regression test the harness adds after the run), 2 review-only tasks and 1 "match our conventions" task. Each task has rubric items of two kinds: `[eng]` items written by the independent task author (observable behaviour), and `[kit]` items for the house style, written by the moderator and marked as such. The task list and rubrics are in [`heldout-v5/tasks.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/heldout-v5/tasks.md).
+
+## The pre-registered rules
+
+Written before any v5 task existed ([`preregistration-v5.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/method/preregistration-v5.md)):
+
+1. Every model's kit arm scores above its own no-kit arm, both-graders-agree, on all items.
+2. No model's kit arm scores more than 5 points below its no-kit arm on `[eng]` items.
+3. No new critical failure in a kit arm where the no-kit arm had none on the same task: broken build, failing existing tests, data loss, crash.
+4. Claims against the generic arm are made only where the kit arm leads by 8 points or more on `[eng]`.
+5. No per-model lift under 8 points is claimed as a lift; with 8 tasks it is noise.
+6. Kit tokens per run are reported, not scored.
+
+Rules 1-3 held for 4 of 5 models, so v6.0 was released as a preview naming Sonnet 5.5, Opus 5.5, GPT-6-Sol and Gemini 3.8 Flash, and not GPT-6-Luna.
+
+## Testing so far
+
+| Round | Domain | Format | What it showed |
+|---|---|---|---|
+| v1-v2 | Habits, expenses | Single-shot scenarios | The early kit made models lecture and over-escalate reviews, and engineering on new tasks fell (83% → 72%). Fixed. |
+| v3 | Workout log | 8 single-shot scenarios, 2 graders | Muse Spark 1.3: 54% → 91% with the kit; DeepSeek V4.1 Flash: 57% → 77% *(earlier candidate)* |
+| v4 | Plant care | 12 scenarios | Fed the redesign into 7 skills with an entry tree (results not published) |
+| **v5** | **Workout log** | **8 agentic tasks, 150 runs incl. add-ons** | **The [results](/results/): release evidence for v6.0** |
+| v6 | Reading log | 6 agentic tasks, 90 runs | In progress: v6.0 vs v6.1 vs no kit (see [roadmap](/roadmap/)) |
+
+## Checks on the kit itself
+
+- **Guard precision on a real app:** run read-only on a ~1,600-file production KMP codebase, the guard scripts went from 539 hits (527 false) to 12 hits, all true.
+- **Templates build:** following the bootstrap guide literally gave a zero-patch build for Android, desktop and iOS, and 36/36 scaffolded tests passed *(earlier candidate)*.
