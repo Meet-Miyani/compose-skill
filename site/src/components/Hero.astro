@@ -14,6 +14,7 @@
 import { agents, headline, license, quickInstall, repoUrl, skills, version } from '../data/site';
 import CopyScript from './landing/CopyScript.astro';
 import ThemedChart from './ThemedChart.astro';
+import AgentWindow from './AgentWindow.astro';
 import StudioLine from './StudioLine.astro';
 import '../styles/landing.css';
 
@@ -53,39 +54,44 @@ const next = [
 
 <div class="landing">
   <section class="landing-hero" aria-labelledby="_top">
-    <p class="landing-eyebrow">
-      <span class="landing-pill"><span class="landing-pill__dot" aria-hidden="true"></span>Compose Kit</span>
-      <span>{version} · {license}</span>
-    </p>
-    <h1 id="_top" data-page-title class="landing-hero__title" set:html={title} />
-    {tagline && <p class="landing-hero__pitch" set:html={tagline} />}
-    <p class="landing-hero__sub">
-      Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform. One consistent house style,
-      measured on five models in real agent CLIs.
-    </p>
+    <div class="landing-hero__lead">
+      <p class="landing-eyebrow">
+        <span class="landing-pill"><span class="landing-pill__dot" aria-hidden="true"></span>Compose Kit</span>
+        <span>{version} · {license}</span>
+      </p>
+      <h1 id="_top" data-page-title class="landing-hero__title" set:html={title} />
+      {tagline && <p class="landing-hero__pitch" set:html={tagline} />}
+      <p class="landing-hero__sub">
+        Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform. One consistent house style,
+        measured on five models in real agent CLIs.
+      </p>
 
-    <div class="landing-install">
-      <span class="landing-install__prompt" aria-hidden="true">$</span>
-      <code class="landing-install__code" tabindex="0">{quickInstall}</code>
-      <button class="landing-copy" type="button" hidden data-copy={quickInstall} aria-label="Copy the install command">
-        <svg class="landing-copy__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
-        <svg class="landing-copy__icon landing-copy__icon--done" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-      </button>
+      <div class="landing-install">
+        <span class="landing-install__prompt" aria-hidden="true">$</span>
+        <code class="landing-install__code" tabindex="0">{quickInstall}</code>
+        <button class="landing-copy" type="button" hidden data-copy={quickInstall} aria-label="Copy the install command">
+          <svg class="landing-copy__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+          <svg class="landing-copy__icon landing-copy__icon--done" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </button>
+      </div>
+      <p class="landing-hero__hint">
+        Swap <code>claude-code</code> for <code>codex</code>, <code>cursor</code>, <code>opencode</code>, <code>github-copilot</code>, <code>gemini-cli</code> or <code>antigravity</code>. Add <code>-g</code> to
+        install globally.
+      </p>
+
+      <div class="landing-hero__actions">
+        <a class="landing-button landing-button--primary" href={repoUrl}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={githubIcon}></path></svg>
+          <span>Star on GitHub</span>
+        </a>
+        <a class="landing-button" href="/install/">
+          <span>All install options</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
     </div>
-    <p class="landing-hero__hint">
-      Swap <code>claude-code</code> for <code>codex</code>, <code>cursor</code>, <code>opencode</code>, <code>github-copilot</code>, <code>gemini-cli</code> or <code>antigravity</code>. Add <code>-g</code> to
-      install globally.
-    </p>
-
-    <div class="landing-hero__actions">
-      <a class="landing-button landing-button--primary" href={repoUrl}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={githubIcon}></path></svg>
-        <span>Star on GitHub</span>
-      </a>
-      <a class="landing-button" href="/install/">
-        <span>All install options</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-      </a>
+    <div class="landing-hero__aside">
+      <AgentWindow />
     </div>
   </section>
 

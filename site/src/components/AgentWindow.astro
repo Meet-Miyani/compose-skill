@@ -1,0 +1,203 @@
+---
+/**
+ * The hero's "agent window": one v5-style task, answered without the kit and
+ * with it. Live HTML/CSS plus the small inline script below; no video, no
+ * libraries.
+ *
+ * The only numbers it shows are the two README "By task type" averages for
+ * new-feature tasks (43.5% without the kit, 70.6% with it). The lines are an
+ * illustration of what the v5 rubric for that kind of task checks.
+ *
+ * States:
+ *   - HTML as shipped (no script, reduced motion, print): phase B rendered in
+ *     full with the static 43.5% → 70.6% comparison; the two segment buttons
+ *     still switch phases, without motion.
+ *   - Motion allowed: the script clears `data-static` before first paint and
+ *     plays A (~5 s) then B (~6 s) in a loop. It pauses while the window is
+ *     off screen or the tab is hidden; hover or focus holds the current phase.
+ *
+ * The window has a fixed height and every effect is opacity or transform, so
+ * nothing on the page moves. The animated lines are aria-hidden; screen
+ * readers get the static summary.
+ */
+import { newFeatureScore } from '../data/site';
+
+const prompt = 'Add a photo to each workout entry, saved on the device.';
+const withoutKit = [
+  'writes the photo file straight from the composable',
+  'keeps the picker result in a global variable',
+  'no error state, no test',
+];
+const withKit = [
+  { text: 'compose → task: new feature · areas: feature, data', route: true },
+  { text: 'reads only the reference files it needs', route: true },
+  { text: 'storage in the data layer, off the main thread' },
+  { text: 'picker is its own destination, result returned without globals' },
+  { text: 'ViewModel + UiState contract, failures shown to the user' },
+];
+const { without, with: withScore } = newFeatureScore;
+---
+
+<div class="agent" data-agent data-static data-phase="b">
+  <p class="sr-only">
+    Illustration of a v5 task, "{prompt}" Without the kit, an agent writes the photo file straight from the
+    composable, keeps the picker result in a global variable, and adds no error state or test. With Compose Kit,
+    the compose entry tree routes it as a new feature touching the feature and data areas and reads only the
+    reference files it needs; storage goes in the data layer off the main thread, the picker is its own
+    destination that returns its result without globals, and a ViewModel with a UiState contract shows failures
+    to the user. On v5 new-feature tasks, the measured average across 5 models was {without}% without the kit
+    and {withScore}% with it.
+  </p>
+
+  <div class="agent__segments" role="group" aria-label="Show the agent without or with Compose Kit">
+    <button type="button" class="agent__segment" data-show="a" aria-pressed="false">Without the kit</button>
+    <button type="button" class="agent__segment" data-show="b" aria-pressed="true">With Compose Kit</button>
+  </div>
+
+  <div class="agent__window" aria-hidden="true">
+    <div class="agent__bar">
+      <span class="agent__dots"><span></span><span></span><span></span></span>
+      <span class="agent__title">claude — workout-app</span>
+    </div>
+    <div class="agent__body">
+      <section class="agent__phase" data-phase="a">
+        <p class="agent__line agent__prompt"><span class="agent__caret">&gt;</span> {prompt}</p>
+        {
+          withoutKit.map((line) => (
+            <p class="agent__line">
+              <span class="agent__marker">•</span>
+              <span>{line}</span>
+            </p>
+          ))
+        }
+        <div class="agent__line agent__result">
+          <span class="agent__result-label">New features, v5 rubric: {without}%</span>
+          <span class="agent__track"><span class="agent__fill" style={`--to:${without / 100}`}></span></span>
+        </div>
+      </section>
+
+      <section class="agent__phase" data-phase="b">
+        <p class="agent__line agent__prompt"><span class="agent__caret">&gt;</span> {prompt}</p>
+        {
+          withKit.map((line) => (
+            <p class:list={['agent__line', line.route && 'agent__line--route']}>
+              <span class="agent__marker agent__marker--kit">{line.route ? '›' : '•'}</span>
+              <span>{line.text}</span>
+            </p>
+          ))
+        }
+        <div class="agent__line agent__result agent__result--kit">
+          <span class="agent__result-label">
+            New features, v5 rubric:{' '}
+            <span class="agent__score">
+              <span class="agent__score-static">{without}% → {withScore}%</span>
+              <span class="agent__score-from">{without}%</span>
+              <span class="agent__score-to">{withScore}%</span>
+            </span>
+          </span>
+          <span class="agent__track">
+            <span class="agent__fill agent__fill--before" style={`--to:${without / 100}`}></span>
+            <span class="agent__fill agent__fill--kit" style={`--from:${without / 100}; --to:${withScore / 100}`}></span>
+            <span class="agent__tick" style={`left:${without}%`}></span>
+          </span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <p class="agent__caption">
+    Illustration of a <a href="/results/">v5</a> task. Scores are the measured averages for new-feature tasks
+    across 5 models.
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.currentScript && document.currentScript.previousElementSibling;
+    if (!root || !root.matches('[data-agent]')) return;
+    const buttons = [...root.querySelectorAll('[data-show]')];
+    const phases = { a: root.querySelector('.agent__phase[data-phase="a"]'), b: root.querySelector('.agent__phase[data-phase="b"]') };
+
+    const show = (name) => {
+      root.dataset.phase = name;
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.show === name)));
+    };
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) {
+      // Static: every line shown, buttons switch phases without motion.
+      buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.show)));
+      return;
+    }
+
+    delete root.dataset.static;
+
+    // Per phase: when each line appears (ms), when the bar grows, how long it holds.
+    const plan = {
+      a: { lines: [0, 400, 650, 900, 1150], grow: Infinity, end: 5000 },
+      b: { lines: [0, 400, 650, 900, 1150, 1400, 1650], grow: 1900, end: 6000 },
+    };
+    const lines = { a: [...phases.a.querySelectorAll('.agent__line')], b: [...phases.b.querySelectorAll('.agent__line')] };
+
+    let phase = 'a';
+    let elapsed = 0;
+    let last = 0;
+    let onScreen = false;
+    let held = false;
+    let frame = 0;
+
+    const reset = (name) => {
+      const el = phases[name];
+      el.classList.add('is-resetting');
+      lines[name].forEach((l) => l.classList.remove('is-on'));
+      el.classList.remove('is-grown');
+      void el.offsetWidth; // apply the reset before transitions come back
+      el.classList.remove('is-resetting');
+    };
+
+    const enter = (name) => {
+      reset(name);
+      phase = name;
+      elapsed = 0;
+      show(name);
+    };
+
+    const tick = (now) => {
+      const dt = last ? Math.min(now - last, 100) : 0;
+      last = now;
+      elapsed += dt;
+      const p = plan[phase];
+      lines[phase].forEach((l, i) => {
+        if (elapsed >= p.lines[i] && !l.classList.contains('is-on')) l.classList.add('is-on');
+      });
+      if (elapsed >= p.grow) phases[phase].classList.add('is-grown');
+      if (elapsed >= p.end && !held) enter(phase === 'a' ? 'b' : 'a');
+      frame = requestAnimationFrame(tick);
+    };
+
+    const run = () => {
+      const should = onScreen && !document.hidden;
+      if (should && !frame) {
+        last = 0;
+        frame = requestAnimationFrame(tick);
+      } else if (!should && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    enter('a');
+
+    new IntersectionObserver((entries) => {
+      onScreen = entries[0].isIntersecting;
+      run();
+    }).observe(root);
+    document.addEventListener('visibilitychange', run);
+
+    root.addEventListener('pointerenter', () => (held = true));
+    root.addEventListener('pointerleave', () => (held = root.contains(document.activeElement)));
+    root.addEventListener('focusin', () => (held = true));
+    root.addEventListener('focusout', (e) => (held = root.contains(e.relatedTarget) || root.matches(':hover')));
+    buttons.forEach((b) => b.addEventListener('click', () => enter(b.dataset.show)));
+  })();
+</script>

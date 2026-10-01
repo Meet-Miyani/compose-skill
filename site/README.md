@@ -33,7 +33,9 @@ Other scripts:
 - `src/charts/`: the two v5 charts, byte-for-byte copies of `docs/assets/` (light and dark), inlined by
   `ThemedChart.astro`.
 - `src/pages/og/[...route].ts`: build-time 1200×630 OG cards (satori + resvg), one per page.
-- `src/components/Motion.astro`: the only motion script (scroll reveal, count-up, chart draw). Everything is off under
+- `src/components/AgentWindow.astro`: the hero's animated without-kit / with-kit agent window (inline vanilla JS).
+  Its only numbers are the README's new-feature averages, 43.5% and 70.6%.
+- `src/components/Motion.astro`: the site-wide motion script (scroll reveal, count-up, chart draw). Everything is off under
   `prefers-reduced-motion: reduce`.
 - `functions/_middleware.js`: Cloudflare Pages host guard. `<project>.pages.dev` 301s to compose.avinya.dev;
   per-deployment preview hosts get `X-Robots-Tag: noindex, nofollow`.

@@ -81,7 +81,7 @@ if (missingEvidence.length) {
 } else {
   const norm = (s) => s.replace(/−/g, '-');
   const corpus = norm(EVIDENCE.map((f) => readFileSync(join(REPO_ROOT, f), 'utf8')).join('\n'));
-  const numberSources = [...files, 'src/components/Hero.astro', 'src/data/site.ts', 'astro.config.mjs'];
+  const numberSources = [...files, 'src/components/Hero.astro', 'src/components/AgentWindow.astro', 'src/data/site.ts', 'astro.config.mjs'];
   const seen = new Set();
   for (const file of numberSources) {
     let text = readFileSync(file, 'utf8');
@@ -91,6 +91,9 @@ if (missingEvidence.length) {
     text = text
       .replace(/'M[\d\s.,a-zA-Z-]+'/g, '')
       .replace(/^import .*$/gm, '')
+      .replace(/<script[\s\S]*?<\/script>/g, '')
+      .replace(/<style[\s\S]*?<\/style>/g, '')
+      .replace(/\bstyle=\{`[^`]*`\}/g, '')
       .replace(/https?:\/\/[^\s"')\]]+/g, '')
       .replace(/\b(width|height|size|stroke-width|viewBox|cx|cy|r|rx|x|y|d)=("[^"]*"|\{[^}]*\})/g, '')
       .replace(/<svg[\s\S]*?<\/svg>/g, '');

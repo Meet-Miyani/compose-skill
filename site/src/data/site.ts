@@ -59,3 +59,9 @@ export const skills = [
   { name: 'compose-project', owns: 'New projects, adopting the kit, modules, convention plugins, version catalog, CI and agent hooks' },
   { name: 'compose-platform', owns: 'commonMain vs expect/actual, iOS/Swift interop, desktop and web targets, platform lifecycle' },
 ] as const;
+
+/**
+ * README "By task type", new features (3 tasks), all five panel models, both
+ * graders agree. The only numbers the hero's agent window shows.
+ */
+export const newFeatureScore = { without: 43.5, with: 70.6 } as const;
