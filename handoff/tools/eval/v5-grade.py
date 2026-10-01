@@ -117,10 +117,10 @@ def score():
                 ok = bool(((grades.get(L) or {}).get(n) or {}).get("pass"))
                 cell = (who["model"], who["arm"], tag[tid][n])
                 per.setdefault((grader,) + cell, []).append(ok)
-                agree.setdefault((tid, L, vendor, n) + cell, []).append(ok)
+                agree.setdefault((tid, vendor, n) + cell, []).append(ok)  # matched by model+arm, never by letter
     tot = {}
     for k, v in agree.items():
-        cell = k[4:]; tot.setdefault(cell, []).append(len(v) == 2 and all(v))
+        cell = k[3:]; tot.setdefault(cell, []).append(len(v) == 2 and all(v))
     def pct(xs): return f"{100 * sum(xs) / len(xs):5.1f} ({sum(xs)}/{len(xs)})" if xs else "   -"
     print("both graders agree (item passes only if both pass)")
     print(f"{'model':26s} {'arm':8s} {'all':>14s} {'[eng]':>14s} {'[kit]':>14s}")
