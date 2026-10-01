@@ -1,0 +1,51 @@
+
+== as published
+model         nokit    kit   lift  eng nk eng kit  eng d  rule1 rule2 claim8
+sonnet         55.8   74.4  +18.6    66.7    77.8  +11.1  ok    ok    yes
+opus           65.1   74.4   +9.3    77.8    77.8   +0.0  ok    ok    yes
+gpt-6-luna     65.1   67.4   +2.3    77.8    66.7  -11.1  ok    FAIL  no
+gpt-6-sol      72.1   76.7   +4.7    85.2    81.5   -3.7  ok    ok    no
+gemini-3.8-f   51.2   76.7  +25.6    59.3    88.9  +29.6  ok    ok    yes
+opencode_mus   58.1   60.5   +2.3    66.7    55.6  -11.1  ok    FAIL  no
+
+== without T6 item 3
+model         nokit    kit   lift  eng nk eng kit  eng d  rule1 rule2 claim8
+sonnet         54.8   76.2  +21.4    65.4    80.8  +15.4  ok    ok    yes
+opus           66.7   76.2   +9.5    80.8    80.8   +0.0  ok    ok    yes
+gpt-6-luna     64.3   66.7   +2.4    76.9    65.4  -11.5  ok    FAIL  no
+gpt-6-sol      71.4   78.6   +7.1    84.6    84.6   +0.0  ok    ok    no
+gemini-3.8-f   50.0   78.6  +28.6    57.7    92.3  +34.6  ok    ok    yes
+opencode_mus   59.5   61.9   +2.4    69.2    57.7  -11.5  ok    FAIL  no
+
+== without T6 and T7 (labelled review tasks)
+model         nokit    kit   lift  eng nk eng kit  eng d  rule1 rule2 claim8
+sonnet         51.7   69.0  +17.2    58.8    76.5  +17.6  ok    ok    yes
+opus           65.5   69.0   +3.4    76.5    76.5   +0.0  ok    ok    no
+gpt-6-luna     58.6   55.2   -3.4    64.7    47.1  -17.6  FAIL  FAIL  no
+gpt-6-sol      69.0   72.4   +3.4    76.5    76.5   +0.0  ok    ok    no
+gemini-3.8-f   37.9   79.3  +41.4    35.3    88.2  +52.9  ok    ok    yes
+opencode_mus   58.6   51.7   -6.9    64.7    41.2  -23.5  FAIL  FAIL  no
+
+== without T6, T7 and T8
+model         nokit    kit   lift  eng nk eng kit  eng d  rule1 rule2 claim8
+sonnet         54.2   66.7  +12.5    64.3    78.6  +14.3  ok    ok    yes
+opus           66.7   79.2  +12.5    78.6    85.7   +7.1  ok    ok    yes
+gpt-6-luna     54.2   66.7  +12.5    57.1    57.1   +0.0  ok    ok    yes
+gpt-6-sol      66.7   79.2  +12.5    71.4    85.7  +14.3  ok    ok    yes
+gemini-3.8-f   29.2   79.2  +50.0    21.4    85.7  +64.3  ok    ok    yes
+opencode_mus   54.2   45.8   -8.3    57.1    35.7  -21.4  FAIL  FAIL  no
+
+T6 1 eng {'nokit': 5, 'generic': 5, 'kit': 5}
+T6 2 eng {'nokit': 5, 'generic': 4, 'kit': 5}
+T6 3 eng {'nokit': 4, 'generic': 0, 'kit': 1}
+T6 4 eng {'nokit': 4, 'generic': 3, 'kit': 3}
+T6 5 eng {'nokit': 5, 'generic': 5, 'kit': 5}
+T6 6 kit {'nokit': 0, 'generic': 0, 'kit': 4}
+T6 7 kit {'nokit': 0, 'generic': 0, 'kit': 2}
+T7 1 eng {'nokit': 5, 'generic': 4, 'kit': 5}
+T7 2 eng {'nokit': 5, 'generic': 4, 'kit': 5}
+T7 3 eng {'nokit': 4, 'generic': 4, 'kit': 5}
+T7 4 eng {'nokit': 4, 'generic': 5, 'kit': 5}
+T7 5 eng {'nokit': 5, 'generic': 5, 'kit': 5}
+T7 6 kit {'nokit': 0, 'generic': 1, 'kit': 5}
+T7 7 kit {'nokit': 5, 'generic': 5, 'kit': 4}
