@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies the swallowed StorageException and missing UI feedback."},
+    "2": {"pass": true, "why": "Identifies uncancelled searches and stale results overwriting newer ones."},
+    "3": {"pass": true, "why": "Treats logging as part of the swallowed-error defect, not as a blocking defect itself."},
+    "4": {"pass": true, "why": "Places the empty init block under later improvements."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates blocking findings from improvements and calls the existing save implementation sound."},
+    "7": {"pass": true, "why": "Proposes emitting an AppError to a user-visible popup on storage failure."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Identifies the swallowed StorageException and absence of a UI error signal."},
+    "2": {"pass": true, "why": "Identifies missing cancellation and stale search results overwriting newer ones."},
+    "3": {"pass": true, "why": "Does not characterize logging itself as blocking."},
+    "4": {"pass": true, "why": "Lists the empty init block as a later cleanup."},
+    "5": {"pass": true, "why": "The project diff is empty; the Kotlin change is only in the message."},
+    "6": {"pass": true, "why": "Has blocking, later, and fine-as-is sections."},
+    "7": {"pass": false, "why": "Its proposed callback defaults to a no-op and never updates a user-visible error state."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Identifies the swallowed StorageException and missing UI error state or signal."},
+    "2": {"pass": true, "why": "Identifies missing cancellation and the stale-result race."},
+    "3": {"pass": true, "why": "Treats swallowing the error as blocking, not logging itself."},
+    "4": {"pass": true, "why": "Labels the empty init block a minor issue."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "Separates severity levels but does not say what is fine as it is."},
+    "7": {"pass": true, "why": "Explicitly proposes an inline UiState.error or MVI error channel for storage failure."}
+  }
+}

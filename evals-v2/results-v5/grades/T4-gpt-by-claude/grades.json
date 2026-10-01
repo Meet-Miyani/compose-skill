@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnTitleChanged now writes draftTitle to SavedStateHandle, which the recreated ViewModel reads; build and tests pass"},
+    "2": {"pass": true, "why": "Process-death test now types through OnTitleChanged on the original VM and checks the recreated VM, which fails without the fix; edge-case tests are added too"},
+    "3": {"pass": true, "why": "One-line production change plus tests for the draft behaviour only"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same one-line SavedStateHandle write on each edit, so the draft is restored after recreation; checks pass"},
+    "2": {"pass": false, "why": "No test added or changed; the message says tests were not run"},
+    "3": {"pass": true, "why": "Only the one-line fix changed"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "OnTitleChanged writes to SavedStateHandle, so the recreated VM restores the draft; allTests passes"},
+    "2": {"pass": true, "why": "New test types on the first VM, recreates it with the same handle and checks the draft, which fails without the fix"},
+    "3": {"pass": true, "why": "One-line fix plus one focused regression test"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Edits are written to SavedStateHandle and the load reads the handle value, so the draft survives recreation; checks pass"},
+    "2": {"pass": true, "why": "Existing process-death test now drives typing through OnTitleChanged before recreation, so it reproduces the bug"},
+    "3": {"pass": true, "why": "The second edit is a small change to the draft-restore line in load, part of the same bug path rather than an unrelated refactor"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "OnTitleChanged persists to SavedStateHandle, so the recreated VM restores the typed or cleared draft; checks pass"},
+    "2": {"pass": true, "why": "Process-death test now types via OnTitleChanged and asserts the handle and the recreated VM; a cleared-draft test is also added"},
+    "3": {"pass": true, "why": "One-line fix plus draft-focused tests only"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Same SavedStateHandle write on each edit, so the draft is restored after recreation; checks pass"},
+    "2": {"pass": false, "why": "No test added; the message says tests were not run"},
+    "3": {"pass": true, "why": "Only the one-line fix changed"}
+  }
+}

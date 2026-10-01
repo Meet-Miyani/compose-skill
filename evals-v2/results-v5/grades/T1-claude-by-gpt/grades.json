@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen adds an Attach photo button."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button launches FileKit's image picker through WorkoutsRoute."
+    },
+    "3": {
+      "pass": false,
+      "why": "The selected bytes are stored as a Room BLOB, not saved as a local photo file."
+    },
+    "4": {
+      "pass": false,
+      "why": "WorkoutEntity gains no photo file path; a separate table stores image bytes."
+    },
+    "5": {
+      "pass": false,
+      "why": "No photo file is written by the data layer."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new button and photo description use string resources."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen renders an Attach photo button."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button launches FileKit's image picker in WorkoutsRoute."
+    },
+    "3": {
+      "pass": true,
+      "why": "WorkoutPhotoStorage copies the picked file into the app's private photo directory."
+    },
+    "4": {
+      "pass": false,
+      "why": "WorkoutEntity stores only photoFileName, not a path to the local file."
+    },
+    "5": {
+      "pass": true,
+      "why": "The repository calls photo storage from the ViewModel's IO dispatcher."
+    },
+    "6": {
+      "pass": true,
+      "why": "All added user-facing labels use string resources."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen renders an Attach photo button."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button triggers platform image pickers through the Route's PickPhoto effect."
+    },
+    "3": {
+      "pass": true,
+      "why": "The repository writes selected bytes to an app-private photo file."
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutEntity adds photoPath and the DAO updates that column."
+    },
+    "5": {
+      "pass": true,
+      "why": "The repository writes the file inside the ViewModel's IO dispatcher."
+    },
+    "6": {
+      "pass": false,
+      "why": "The desktop picker uses the literal user-facing title \"Select photo\"."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": false,
+      "why": "The attach button is hidden on iOS because its picker returns null."
+    },
+    "2": {
+      "pass": false,
+      "why": "The iOS picker is a stub, so tapping cannot launch an image picker there."
+    },
+    "3": {
+      "pass": false,
+      "why": "The iOS photo store is a stub and cannot save a selected image."
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutEntity adds photoPath and the DAO persists it for supported attachments."
+    },
+    "5": {
+      "pass": true,
+      "why": "Android and JVM photo stores write files in Dispatchers.IO through the repository."
+    },
+    "6": {
+      "pass": false,
+      "why": "The desktop picker hardcodes the user-facing title \"Select photo\"."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen adds a visible Attach photo button."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button launches FileKit's image picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "WorkoutPhotoStore writes selected bytes to an app-private photo file."
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutEntity adds photoPath and the repository updates it through the DAO."
+    },
+    "5": {
+      "pass": true,
+      "why": "The repository calls the photo store within the ViewModel's IO dispatcher."
+    },
+    "6": {
+      "pass": true,
+      "why": "The added user-facing labels all come from string resources."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen renders an Attach photo button."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button launches FileKit's image picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "WorkoutPhotoStorage writes selected bytes into the app's photo directory."
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutEntity adds photoPath and the DAO updates that column."
+    },
+    "5": {
+      "pass": true,
+      "why": "The data-layer photo storage runs inside the ViewModel's IO dispatcher."
+    },
+    "6": {
+      "pass": true,
+      "why": "The added button labels and photo description use string resources."
+    }
+  }
+}

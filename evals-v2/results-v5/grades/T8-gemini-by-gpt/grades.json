@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Add now runs in a coroutine, so loading and input clearing no longer occur synchronously as in the original presenter."},
+    "2": {"pass": true, "why": "The supplied check results show a successful Gradle build and test tasks."},
+    "3": {"pass": true, "why": "The diff changes only Quick Add implementation and its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with UiState, UiAction, and UiEffect contract types."},
+    "5": {"pass": false, "why": "The diff adds neither a Quick Add Route/Screen split nor string resource usage."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The add path retains the original synchronous loading, save placeholder, hide loading, and clear input sequence."},
+    "2": {"pass": true, "why": "The supplied check results show BUILD SUCCESSFUL with test tasks completed."},
+    "3": {"pass": true, "why": "The diff is confined to Quick Add implementation and its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel and uses the project's UiState, UiAction, and UiEffect interfaces."},
+    "5": {"pass": false, "why": "The widget remains a single component; no Route/Screen split or string resources appear in the diff."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The add path keeps the original synchronous loading, save placeholder, hide loading, and clear input sequence."},
+    "2": {"pass": true, "why": "The supplied check results show BUILD SUCCESSFUL with test tasks completed."},
+    "3": {"pass": true, "why": "The diff changes only Quick Add implementation and its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with UiState, UiAction, and UiEffect contract types."},
+    "5": {"pass": false, "why": "The diff provides no Route/Screen split and uses no string resources."}
+  }
+}

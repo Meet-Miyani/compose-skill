@@ -1,0 +1,134 @@
+{
+  "A": {
+    "1": {
+      "pass": false,
+      "why": "Moving state to the ViewModel makes text survive screen rotation, which is a behaviour change."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks output shows checks_exit=0, indicating tests pass."
+    },
+    "3": {
+      "pass": false,
+      "why": "Modifies WorkoutsListContract and WorkoutsListViewModel instead of isolating changes to Quick Add."
+    },
+    "4": {
+      "pass": false,
+      "why": "Merges logic into WorkoutsListViewModel instead of creating a dedicated Quick Add ViewModel."
+    },
+    "5": {
+      "pass": false,
+      "why": "Retains QuickAddWidget instead of implementing a Route/Screen split."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Adding visible UI elements (TextField, Button) where there were none changes behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks output shows checks_exit=0, indicating tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are isolated to new Quick Add files and removing the old widget."
+    },
+    "4": {
+      "pass": true,
+      "why": "QuickAddViewModel extends BaseViewModel and follows the required MVI contract pattern."
+    },
+    "5": {
+      "pass": true,
+      "why": "Implements QuickAddRoute and QuickAddScreen, and utilizes string resources."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "The agent explicitly admits that making text survive process death is a behaviour change."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks output shows checks_exit=0, indicating tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are isolated strictly to the Quick Add feature."
+    },
+    "4": {
+      "pass": true,
+      "why": "QuickAddViewModel extends BaseViewModel and follows the MVI contract."
+    },
+    "5": {
+      "pass": true,
+      "why": "Properly splits UI into Route and Screen and uses existing string resources."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The widget still draws nothing and logic remains synchronous, keeping behaviour strictly unchanged."
+    },
+    "2": {
+      "pass": false,
+      "why": "The checks output shows checks_exit=1 due to a Gradle build failure."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only Quick Add specific files were modified without rewriting unrelated code."
+    },
+    "4": {
+      "pass": true,
+      "why": "QuickAddViewModel extends BaseViewModel and implements the required pattern."
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses QuickAddWidget instead of a Route/Screen split and does not use string resources."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": false,
+      "why": "The agent notes that state updates now run asynchronously in a coroutine, changing timing behaviour."
+    },
+    "2": {
+      "pass": false,
+      "why": "The checks output shows checks_exit=1 due to a Gradle build failure."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes were safely isolated to the Quick Add specific files."
+    },
+    "4": {
+      "pass": true,
+      "why": "QuickAddViewModel extends BaseViewModel and follows the MVI contract pattern."
+    },
+    "5": {
+      "pass": false,
+      "why": "Retains QuickAddWidget instead of splitting into Route/Screen and lacks string resources."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": false,
+      "why": "Placing the previously unplaced widget into WorkoutsListScreen modifies the UI hierarchy and behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks output shows checks_exit=0, indicating tests pass."
+    },
+    "3": {
+      "pass": false,
+      "why": "Rewrites WorkoutsListRoute and WorkoutsListScreen to integrate the widget, modifying unrelated code."
+    },
+    "4": {
+      "pass": false,
+      "why": "Merges logic into WorkoutsListViewModel instead of creating a Quick Add ViewModel."
+    },
+    "5": {
+      "pass": false,
+      "why": "Keeps QuickAddWidget without a Route/Screen split and does not use new string resources."
+    }
+  }
+}

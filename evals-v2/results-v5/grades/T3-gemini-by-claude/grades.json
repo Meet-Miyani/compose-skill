@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Empty diff; only a proposal, no export button or background job implemented."},
+    "2": {"pass": false, "why": "Empty diff; nothing produces a file at all."},
+    "3": {"pass": false, "why": "Empty diff; no CSV generation code exists."},
+    "4": {"pass": false, "why": "Empty diff; app scope only described, not implemented."},
+    "5": {"pass": false, "why": "Empty diff; no error surfacing implemented."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Export button dispatches OnExportClick; ViewModel calls WorkoutExportService.exportWorkouts which launches in injected appScope."},
+    "2": {"pass": true, "why": "Job runs in a Koin @Single SupervisorJob scope independent of viewModelScope; test nulls the ViewModel mid-export and the file is still written."},
+    "3": {"pass": true, "why": "formatWorkoutsCsv writes a header plus one row per workout with RFC 4180 quoting of commas, quotes and newlines; test checks escaped output."},
+    "4": {"pass": true, "why": "provideAppCoroutineScope @Single in WorkoutsFeatureModule supplies CoroutineScope(SupervisorJob()+Default) via Koin DI; no GlobalScope or viewModelScope."},
+    "5": {"pass": false, "why": "ExportStatus.Error is set but the ViewModel maps only isExporting from Running; the error never reaches UI state or an effect."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Empty diff; only a design proposal awaiting approval."},
+    "2": {"pass": false, "why": "Empty diff; no export is implemented."},
+    "3": {"pass": false, "why": "Empty diff; no CSV code exists."},
+    "4": {"pass": false, "why": "Empty diff; app-lifetime scope only proposed."},
+    "5": {"pass": false, "why": "Empty diff; no error handling implemented."}
+  }
+}

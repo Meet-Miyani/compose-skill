@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds Button(onClick = onAttachPhoto) labelled with Res.string.attach_photo"},
+    "2": {"pass": true, "why": "Android launches GetContent(\"image/*\") and desktop a JFileChooser; iOS no-op is disclosed in the message"},
+    "3": {"pass": true, "why": "saveWorkoutPhoto actuals write bytes to filesDir/workout-photos (Android), Documents (iOS), user home (JVM)"},
+    "4": {"pass": true, "why": "WorkoutEntity gains photoPath; repository calls dao.updatePhotoPath with the saved file path; auto-migration 1->2"},
+    "5": {"pass": true, "why": "DefaultWorkoutsRepository.attachPhoto writes the file via data/local saveWorkoutPhoto, called from the ViewModel inside withContext(ioDispatcher)"},
+    "6": {"pass": false, "why": "JVM picker adds hard-coded user-facing text: dialogTitle \"Choose workout photo\" and filter label \"Images\""}
+  },
+  "B": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds Button calling photoPicker.launchGallery() with Res.string.attach_photo"},
+    "2": {"pass": true, "why": "rememberImagePickerKMP gallery picker is launched on tap"},
+    "3": {"pass": true, "why": "saveWorkoutPhotoFile writes bytes with kotlinx-io into platform app-private photo directories"},
+    "4": {"pass": true, "why": "WorkoutEntity.photoPath added, dao.updatePhotoPath stores returned path, manual migration 1->2 adds the column"},
+    "5": {"pass": true, "why": "Repository saveWorkoutPhoto writes the file via data/local helper; ViewModel invokes it inside withContext(ioDispatcher)"},
+    "6": {"pass": true, "why": "New texts attach_photo and photo_attached are string resources; no new literals"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "PhotoAttachmentButton renders a Button with Res.string.attach_photo on the workout screen"},
+    "2": {"pass": true, "why": "Android button launches GetContent(\"image/*\"); iOS/JVM placeholders are disclosed"},
+    "3": {"pass": true, "why": "Android copies the selected image into filesDir/workout-photos"},
+    "4": {"pass": true, "why": "WorkoutEntity.photoPath added and repository stores the path via dao.updatePhotoPath; migration 1->2"},
+    "5": {"pass": false, "why": "File copy (copyPhotoToAppStorage) runs in the composable's activity-result callback on the main thread, not in the data layer"},
+    "6": {"pass": true, "why": "attach_photo and photo_attached are string resources"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds Button(onClick = onAttachPhoto) with attach/change photo string resources"},
+    "2": {"pass": true, "why": "Android GetContent, iOS UIImagePickerController, JVM FileDialog are launched on tap"},
+    "3": {"pass": false, "why": "Image is stored as a BLOB in the Room database; no image file is saved to app storage"},
+    "4": {"pass": false, "why": "Entity stores photo bytes (ByteArray), not a path to a local file"},
+    "5": {"pass": false, "why": "No photo file is written at all; bytes go into a DB column"},
+    "6": {"pass": false, "why": "JVM picker adds hard-coded dialog title \"Choose a workout photo\""}
+  },
+  "E": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds Button(onClick = onAttachPhoto) with Res.string.attach_photo"},
+    "2": {"pass": true, "why": "PickVisualMedia (Android), UIDocumentPicker (iOS), JFileChooser (JVM) launched on tap"},
+    "3": {"pass": true, "why": "WorkoutPhotoStorage.save writes the file under filesDir/workout_photos (and iOS/JVM equivalents)"},
+    "4": {"pass": false, "why": "WorkoutEntity gets no path field; photo presence is derived from file existence, nothing saved on the entity"},
+    "5": {"pass": true, "why": "Repository writes via data/local WorkoutPhotoStorage, called from the ViewModel inside withContext(ioDispatcher)"},
+    "6": {"pass": true, "why": "All new UI text (attach_photo, saving_photo, photo_error, images, photo_attached) uses string resources"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "WorkoutPhotoPicker renders a Button labelled stringResource(Res.string.attach_photo) on the workout screen"},
+    "2": {"pass": true, "why": "PickVisualMedia (Android), UIImagePickerController (iOS), JFileChooser (JVM) launched on tap"},
+    "3": {"pass": true, "why": "WorkoutPhotoStore.save writes bytes to filesDir/workout-photos (and iOS/JVM equivalents)"},
+    "4": {"pass": true, "why": "WorkoutEntity.photoPath added; repository stores the saved path via dao.updatePhotoPath"},
+    "5": {"pass": true, "why": "Repository writes via injected data/local WorkoutPhotoStore, called inside withContext(ioDispatcher) from the ViewModel"},
+    "6": {"pass": false, "why": "JVM picker adds hard-coded user-facing filter label \"Images\""}
+  }
+}

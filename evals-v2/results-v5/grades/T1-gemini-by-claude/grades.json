@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Empty diff; only proposed approaches, no button added."},
+    "2": {"pass": false, "why": "Empty diff; no image picker implemented."},
+    "3": {"pass": false, "why": "Empty diff; nothing saves an image to local storage."},
+    "4": {"pass": false, "why": "Empty diff; WorkoutEntity unchanged."},
+    "5": {"pass": false, "why": "Empty diff; no photo-writing code exists in any layer."},
+    "6": {"pass": false, "why": "Empty diff; no string resources added."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Empty diff; only a plan, no button added."},
+    "2": {"pass": false, "why": "Empty diff; no image picker implemented."},
+    "3": {"pass": false, "why": "Empty diff; nothing saves an image to local storage."},
+    "4": {"pass": false, "why": "Empty diff; WorkoutEntity unchanged."},
+    "5": {"pass": false, "why": "Empty diff; no photo-writing code exists in any layer."},
+    "6": {"pass": false, "why": "Empty diff; no string resources added."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a Button showing attach_photo/change_photo text wired to onAttachPhoto."},
+    "2": {"pass": true, "why": "OnAttachPhotoClick sends PickPhoto effect; Route calls rememberPhotoPicker launcher (PickVisualMedia/FileDialog/UIImagePickerController)."},
+    "3": {"pass": true, "why": "Picked bytes go to repository.attachWorkoutPhoto, which writes to filesDir/workout-photos (Android), ~/.workouts-app/photos (JVM), Documents (iOS)."},
+    "4": {"pass": true, "why": "WorkoutEntity gains photoPath column (v2 auto-migration, schema 2.json) and dao.updatePhotoPath stores the written file path."},
+    "5": {"pass": true, "why": "File write happens in DefaultWorkoutsRepository via writeWorkoutPhotoFile, called inside withContext(ioDispatcher) from the ViewModel, not from a composable."},
+    "6": {"pass": false, "why": "Screen text uses string resources, but the JVM picker adds a hard-coded user-visible dialog title \"Select photo\"."}
+  }
+}

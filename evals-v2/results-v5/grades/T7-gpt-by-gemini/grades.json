@@ -1,0 +1,182 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the exception is caught and printed without reporting failure to the UI."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that an earlier job can publish results while a newer search is pending."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention or classify the empty init block as a blocking defect."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Separates major from minor issues but does not state what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes producing an AppError that reaches the error snackbar."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that a storage error is caught and printed without the caller receiving a failure."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that an older request can overwrite newer results."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention or classify the empty init block as a blocking defect."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking findings, worth doing later, and explicitly states what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing a real repository save through the ViewModel's guarded error path."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the save path catches StorageException and only prints it without recoverable error state."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that a slow response for an older query can overwrite a newer result."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention or classify the empty init block as a blocking defect."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not separate blocking from later improvements and omits what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing expected storage failures through the app's existing guarded ViewModel error handling."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that it catches and prints the error and the failure never reaches the UI."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that overlapping calls can let an older query replace newer results."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Places the empty init block under worth doing later, not blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking findings, worth doing later, and explicitly states what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing the save through the ViewModel's guarded action to send failures to the UI."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": false,
+      "why": "Notes it only prints the error but does not explicitly mention the failure to update UI state for this specific defect."
+    },
+    "2": {
+      "pass": false,
+      "why": "Mentions testing rapid query changes but does not identify the race condition defect where older responses overwrite newer ones."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention or classify the empty init block as a blocking defect."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Has 'Must fix' and 'Can wait' but lacks a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes testing that a failed save keeps the editor open with a visible, retryable error."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that save failures are swallowed and the UI cannot show an error or offer a retry."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that an earlier search taking longer can overwrite the results from a later query."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not classify the logging statement itself as a blocking defect."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention or classify the empty init block as a blocking defect."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not separate blocking from later improvements or state what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing the failure through the app's error handling to show in the UI."
+    }
+  }
+}

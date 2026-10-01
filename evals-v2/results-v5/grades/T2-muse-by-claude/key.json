@@ -1,0 +1,14 @@
+{
+ "A": {
+  "model": "opencode_muse-spark-1.3-contributor-free",
+  "arm": "kit"
+ },
+ "B": {
+  "model": "opencode_muse-spark-1.3-contributor-free",
+  "arm": "generic"
+ },
+ "C": {
+  "model": "opencode_muse-spark-1.3-contributor-free",
+  "arm": "nokit"
+ }
+}

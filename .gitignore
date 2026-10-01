@@ -1,1 +1,30 @@
 .DS_Store
+__MACOSX/
+
+# Release artifacts
+dist/
+tmp/
+tmp-*/
+
+# Editor/local
+.idea/
+.vscode/
+.env
+.env.*
+
+# OS
+Thumbs.db
+opencode.json
+handoff/work/logs/
+handoff/work/scratch/
+
+# worker transcripts and logs (each round's report is committed under handoff/work/reports/)
+handoff/work/fr*-codex/
+handoff/work/*-worker.log
+__pycache__/
+
+# Local evaluation reruns
+evals-v2/method/work/
+
+# internal working record (owner decision 2026-10-01): kept locally, not published
+handoff/

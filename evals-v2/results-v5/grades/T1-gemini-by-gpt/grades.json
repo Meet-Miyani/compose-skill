@@ -1,0 +1,80 @@
+{
+  "A": {
+    "1": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "2": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "3": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "4": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "5": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "6": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "2": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "3": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "4": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "5": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    },
+    "6": {
+      "pass": false,
+      "why": "The diff is empty; the final message proposes this behavior but implements nothing."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "WorkoutsScreen adds a Button labeled with the attach_photo string resource."
+    },
+    "2": {
+      "pass": true,
+      "why": "The button action reaches rememberPhotoPicker, whose platform implementations launch a photo or file picker."
+    },
+    "3": {
+      "pass": true,
+      "why": "Picked bytes reach the repository, which writes a file in the app's local photo directory."
+    },
+    "4": {
+      "pass": true,
+      "why": "WorkoutEntity adds photoPath and the DAO updates it with the written file path."
+    },
+    "5": {
+      "pass": true,
+      "why": "The repository writes the photo file, called by the ViewModel inside withContext(ioDispatcher)."
+    },
+    "6": {
+      "pass": false,
+      "why": "The JVM file picker uses the user-facing literal \"Select photo\" instead of a string resource."
+    }
+  }
+}

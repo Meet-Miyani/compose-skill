@@ -1,0 +1,110 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The viewModel drops requests if addJob is active or awaitingNavigation is true, preventing duplicate entries."
+    },
+    "2": {
+      "pass": true,
+      "why": "The viewmodel drops overlapping save requests explicitly using addJob?.isActive and awaitingNavigation."
+    },
+    "3": {
+      "pass": true,
+      "why": "A regression test is added using a CompletableDeferred gate to reproduce and verify the double add bug."
+    },
+    "4": {
+      "pass": true,
+      "why": "The changes are strictly limited to fixing the bug and adding the regression test."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "The UI disables the button and viewmodel drops requests while isAdding is true, preventing duplicates."
+    },
+    "2": {
+      "pass": true,
+      "why": "The UI prevents further clicks by disabling the button and the viewmodel drops overlapping requests."
+    },
+    "3": {
+      "pass": true,
+      "why": "Tests are added that reproduce the double add using a CompletableDeferred gate and also test error recovery."
+    },
+    "4": {
+      "pass": true,
+      "why": "Changes are limited to fixing the bug, managing the adding state, and testing it."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The viewmodel updates state synchronously and the UI disables the button, preventing duplicate workouts."
+    },
+    "2": {
+      "pass": true,
+      "why": "The UI disables the button and the viewmodel ignores actions when currentState.isAdding is true."
+    },
+    "3": {
+      "pass": true,
+      "why": "A test is added that sends two rapid add clicks to reproduce the bug and verify the fix."
+    },
+    "4": {
+      "pass": true,
+      "why": "The changes are entirely focused on fixing the bug and verifying it in the test."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The viewmodel guard prevents overlapping runs, ensuring only one workout is created."
+    },
+    "2": {
+      "pass": true,
+      "why": "The UI disables the button and the viewmodel drops overlapping requests when addJob is active."
+    },
+    "3": {
+      "pass": false,
+      "why": "No test was added to reproduce the double add."
+    },
+    "4": {
+      "pass": true,
+      "why": "The change is minimal and limited strictly to fixing the bug."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The viewmodel ignores subsequent taps if addJob is active, preventing duplicate entries."
+    },
+    "2": {
+      "pass": true,
+      "why": "The viewmodel drops overlapping save requests by checking addJob?.isActive."
+    },
+    "3": {
+      "pass": false,
+      "why": "No test was added to reproduce the double add."
+    },
+    "4": {
+      "pass": true,
+      "why": "The change is minimal and limited strictly to the bug."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The viewmodel uses an isAddingWorkout flag to drop requests, preventing duplicates."
+    },
+    "2": {
+      "pass": true,
+      "why": "The viewmodel explicitly drops overlapping save requests using the isAddingWorkout flag."
+    },
+    "3": {
+      "pass": true,
+      "why": "A test is added that sends two add actions consecutively to reproduce the bug and verify the fix."
+    },
+    "4": {
+      "pass": true,
+      "why": "The changes are limited to the bug fix and the test, including minimal test fake updates."
+    }
+  }
+}

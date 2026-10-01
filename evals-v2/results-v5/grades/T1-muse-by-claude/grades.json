@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a Button labelled with Res.string.attach_photo on the workout screen."},
+    "2": {"pass": false, "why": "No image picker; the button sends hard-coded samplePhotoBytes() (1x1 PNG placeholder), as the message admits."},
+    "3": {"pass": false, "why": "The user cannot select an image; only placeholder bytes are written to app files, so selecting-then-saving is not implemented."},
+    "4": {"pass": true, "why": "WorkoutEntity gains photoPath, DAO updatePhotoPath is called by the repository with the path returned from the file write; DB v2 with AutoMigration."},
+    "5": {"pass": true, "why": "File is written by WorkoutPhotoStorage (data/local) called from the repository; Android/JVM use Dispatchers.IO and the ViewModel wraps the call in withContext(ioDispatcher)."},
+    "6": {"pass": true, "why": "attach_photo, attaching_photo and photo_attached are added to strings.xml and used via stringResource."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a Button with stringResource(Res.string.attach_photo)."},
+    "2": {"pass": false, "why": "The button dispatches OnAttachPhotoClick, which only writes a fixed path; no picker is launched."},
+    "3": {"pass": false, "why": "No image is selected or written anywhere; only a made-up string path is saved in Room."},
+    "4": {"pass": false, "why": "The entity stores a hard-coded path 'photos/workout-<id>.jpg' that points to no file that was written."},
+    "5": {"pass": false, "why": "No photo file is written at all by any layer; the ViewModel invents the path itself."},
+    "6": {"pass": true, "why": "The new button label is the attach_photo string resource; the other new text shows state.photoPath, not a literal."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds an Attach photo Button using Res.string.attach_photo."},
+    "2": {"pass": true, "why": "The button calls rememberWorkoutPhotoPicker, which launches PickVisualMedia ImageOnly on Android and JFileChooser on JVM (the iOS actual is a no-op stub)."},
+    "3": {"pass": true, "why": "Picked bytes go through OnPhotoPicked to the repository, and WorkoutPhotoStorage writes them to filesDir/workout_photos (app-private)."},
+    "4": {"pass": true, "why": "The repository saves the path returned by savePhoto via dao.updatePhotoPath; the entity/model have photoPath with v2 AutoMigration."},
+    "5": {"pass": true, "why": "The file write happens in data/local WorkoutPhotoStorage, called from DefaultWorkoutsRepository inside withContext(ioDispatcher); the composable only reads the picked URI."},
+    "6": {"pass": true, "why": "attach_photo, attaching_photo and photo_attached are string resources used via stringResource."}
+  }
+}

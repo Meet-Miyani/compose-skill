@@ -1,0 +1,182 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the error is swallowed and the user never learns the save failed."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that performSearch launches a new job without canceling the previous one, causing overwrites."
+    },
+    "3": {
+      "pass": true,
+      "why": "Focuses on the swallowing as the blocking defect, not the use of println itself."
+    },
+    "4": {
+      "pass": true,
+      "why": "Places the empty init block in the 'Worth doing later' section, not blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it made no edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates findings into 'Blocking', 'Worth doing later', and 'Fine as is'."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes using launchGuarded and emitError to show a popup."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies the save error is caught and printed, so the user never sees a failure."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that the previous job isn't cancelled, allowing a slow answer to replace a newer one."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the critique of println under 'Smaller points', not as a blocking issue."
+    },
+    "4": {
+      "pass": true,
+      "why": "Places the empty init block under 'Smaller points', not as a blocking issue."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it didn't change anything."
+    },
+    "6": {
+      "pass": false,
+      "why": "The review does not have a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing through launchGuarded to turn the exception into an AppError for the error host."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the error is swallowed and the user gets no error state."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that performSearch starts a new coroutine without canceling the previous one."
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists 'println isn't real logging' as a bullet point under the 'Must fix' (blocking) heading."
+    },
+    "4": {
+      "pass": true,
+      "why": "Places the empty init block under 'Can wait', not blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it hasn't changed any code."
+    },
+    "6": {
+      "pass": false,
+      "why": "The review does not have a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes using updateState to copy the error so it stays on the screen with a Retry button."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that saveWorkout catches the error and no AppError reaches the UI state."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that performSearch launches two jobs and the stale one can overwrite the newer one."
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists 'println isn't real logging' as a point under 'Problems' (blocking)."
+    },
+    "4": {
+      "pass": false,
+      "why": "Lists the empty init block as point 5 under 'Problems' (blocking)."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it hasn't changed anything."
+    },
+    "6": {
+      "pass": false,
+      "why": "The review does not have a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes routing the save through an existing path that handles errors correctly."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the error is caught and only printed, giving the user no message."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that no coroutine is cancelled, so a slow earlier search can overwrite a newer one."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the printing critique in a non-blocking section."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention the empty init block, thus does not call it blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it didn't edit anything."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates Blocking from Worth doing later and explicitly has a 'Fine as is' section."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes mapping database failures to StorageException so the ViewModel can show them."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the failure is hidden, the error is caught straight away, and the user never sees it."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that slow earlier searches can finish last and overwrite newer results."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the critique of println under 'Minor', not blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Places the empty init block under 'Minor', not blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty and the agent explicitly states it didn't build or test."
+    },
+    "6": {
+      "pass": false,
+      "why": "The review does not have a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes catching database errors and throwing StorageException so the existing guard catches it."
+    }
+  }
+}

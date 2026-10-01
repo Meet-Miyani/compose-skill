@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Blocking item 1: StorageException swallowed with println, UI and user get no feedback."},
+    "2": {"pass": true, "why": "Blocking item 2: no cancellation of in-flight searches, older slow response overwrites newer."},
+    "3": {"pass": true, "why": "Blocks on the swallowing, not on the println logging itself."},
+    "4": {"pass": true, "why": "Empty init block listed under Can Wait."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Must Fix vs Can Wait sections; states existing WorkoutsViewModel.save() follows conventions well."},
+    "7": {"pass": true, "why": "Proposes launchGuarded with onError = ::emitError so AppError surfaces to the user."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocking 1: StorageException caught and printed, failure hidden from caller and user."},
+    "2": {"pass": true, "why": "Blocking 2: new searches do not cancel in-flight ones, stale result overwrites newer."},
+    "3": {"pass": true, "why": "The blocking finding is the swallowing; logging itself is not called blocking."},
+    "4": {"pass": true, "why": "Empty init block placed under Worth doing later."},
+    "5": {"pass": true, "why": "Diff is empty; corrected code shown only in the message."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": false, "why": "Fix is an onError callback defaulting to a no-op; no user-visible error state proposed for the failure."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Finding 1 (Blocker): swallowed StorageException, UI/caller get no error state."},
+    "2": {"pass": true, "why": "Finding 2 (Blocker): no search job cancellation, stale response overwrites latestResults."},
+    "3": {"pass": true, "why": "Blocker is the swallowing; println removal is only a fix step, not called blocking."},
+    "4": {"pass": true, "why": "Empty init block rated Minor."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Uses severity labels but has no deferred/later section and never says what is fine as it is."},
+    "7": {"pass": true, "why": "Proposes routing via emitError / UiState.error mapped to AppError so the UI is notified."}
+  }
+}

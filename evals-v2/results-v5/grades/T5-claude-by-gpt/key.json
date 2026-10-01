@@ -1,0 +1,26 @@
+{
+ "A": {
+  "model": "sonnet",
+  "arm": "nokit"
+ },
+ "B": {
+  "model": "opus",
+  "arm": "generic"
+ },
+ "C": {
+  "model": "opus",
+  "arm": "nokit"
+ },
+ "D": {
+  "model": "sonnet",
+  "arm": "kit"
+ },
+ "E": {
+  "model": "sonnet",
+  "arm": "generic"
+ },
+ "F": {
+  "model": "opus",
+  "arm": "kit"
+ }
+}

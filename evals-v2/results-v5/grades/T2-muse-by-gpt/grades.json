@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "The picker opens from the workouts list, not from the workout editor's type control."},
+    "2": {"pass": false, "why": "TypeSelected only pops the picker; no selected type is passed to or applied in the workout editor."},
+    "3": {"pass": false, "why": "The editor has no type draft in this diff, so preservation of that draft is not demonstrated."},
+    "4": {"pass": false, "why": "No workout model, save path, or persistence code stores the chosen type."},
+    "5": {"pass": false, "why": "Although the picker is a navigation destination, App discards its TypeSelected payload instead of delivering it to the editor."},
+    "6": {"pass": true, "why": "The picker has its own UiState, UiAction, UiEffect contract and ViewModel."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The editor's picker button emits an effect that pushes a dedicated picker navigation key."},
+    "2": {"pass": false, "why": "Selection stays in the picker until Confirm, which writes the repository; no editor type draft is updated."},
+    "3": {"pass": true, "why": "Back pops without calling saveWorkoutType, while an unconfirmed selection remains local to the picker."},
+    "4": {"pass": false, "why": "The picker saves the type on Confirm, independently of the workout editor's Save action."},
+    "5": {"pass": false, "why": "The TypeSaved effect only pops navigation; the diff does not show its result being delivered to the editor."},
+    "6": {"pass": true, "why": "The dedicated picker defines UiState, UiAction, UiEffect and a ViewModel."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The editor's type button pushes a separate WorkoutTypePickerKey destination."},
+    "2": {"pass": false, "why": "A type tap writes directly to the repository and pops, with no update to an editor draft type."},
+    "3": {"pass": true, "why": "The Back action only emits NavigateBack and does not save or change the type."},
+    "4": {"pass": false, "why": "The picker persists the type immediately on tap, not when the workout editor is saved."},
+    "5": {"pass": false, "why": "The picker only emits NavigateBack after saving; the diff does not show a result reaching the editor."},
+    "6": {"pass": true, "why": "The picker has its own UiState, UiAction, UiEffect contract and ViewModel."}
+  }
+}

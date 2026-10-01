@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a visible Attach photo button using a string resource."},
+    "2": {"pass": false, "why": "The button sends built-in samplePhotoBytes directly; no image picker is launched."},
+    "3": {"pass": false, "why": "There is no image selection path, so a user-selected image cannot be saved."},
+    "4": {"pass": true, "why": "WorkoutEntity has photoPath and the repository writes the saved file path through updatePhotoPath."},
+    "5": {"pass": true, "why": "The repository invokes data-layer photo storage from the ViewModel's IO context, not a composable."},
+    "6": {"pass": true, "why": "The new button and status labels use strings.xml resources."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a visible Attach photo button."},
+    "2": {"pass": false, "why": "The click goes straight to OnAttachPhotoClick; the diff contains no picker launcher."},
+    "3": {"pass": false, "why": "No image bytes are selected or written; only a fabricated path is stored in Room."},
+    "4": {"pass": false, "why": "The entity stores a path string, but the diff never creates the local photo file it should reference."},
+    "5": {"pass": false, "why": "No data-layer photo-file write exists; the repository only updates a database path."},
+    "6": {"pass": true, "why": "The new Attach photo label is defined in strings.xml and read with stringResource."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "WorkoutsScreen adds a visible Attach photo button using a string resource."},
+    "2": {"pass": false, "why": "Android and JVM launch pickers, but the iOS picker implementation returns an empty lambda."},
+    "3": {"pass": true, "why": "On supported picker paths, selected bytes go through the repository to app-private photo storage."},
+    "4": {"pass": true, "why": "WorkoutEntity has photoPath and the repository persists the saved file path with updatePhotoPath."},
+    "5": {"pass": true, "why": "The file write lives in data-layer storage called by the repository from the ViewModel's IO context."},
+    "6": {"pass": false, "why": "The JVM file chooser adds the user-facing filter label Images as a literal."}
+  }
+}

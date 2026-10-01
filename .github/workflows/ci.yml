@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test architecture guards
+        run: bash tests/skills/compose-architecture/run-tests.sh
+
+      - name: Validate plugin manifests
+        run: python3 scripts/validate-plugin-manifests.py

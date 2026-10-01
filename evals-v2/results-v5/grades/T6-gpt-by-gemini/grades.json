@@ -1,0 +1,182 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the callback runs even when permission is denied, reporting it as set."
+    },
+    "2": {
+      "pass": false,
+      "why": "Does not mention the 24dp touch target."
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists the GlobalScope issue under P1 (blocking)."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the hardcoded time format blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not separate blocking from later improvements or state what is fine."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose how to handle permission denial."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that onTimeSelected runs even when permission is denied."
+    },
+    "2": {
+      "pass": true,
+      "why": "Mentions the 24 dp touch target."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not mention coroutine scope, thus does not call it blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the hardcoded time format blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not include a section for what is fine as it is."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose the specified behavior for permission denial."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that it invokes onTimeSelected regardless of the permission result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Mentions the target is constrained to 24 dp."
+    },
+    "3": {
+      "pass": true,
+      "why": "Lists the GlobalScope issue as Minor, not blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Mentions timeFormat unused under Major, not Blocker."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not explicitly state what is fine as it is."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose the specified behavior for permission denial."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the click handler ignores the permission result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Mentions giving the entry point a normal sized touch target."
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope under the Blocking section."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the hardcoded time format blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly separates Blocking, Worth doing later, and Fine as is."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose the specified behavior for permission denial."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the dialog ignores the permission result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Mentions the 24 dp clickable text."
+    },
+    "3": {
+      "pass": true,
+      "why": "Lists replacing GlobalScope under Worth doing later, not blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the hardcoded time format blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly separates Blocking, Worth doing later, and Fine as is."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose the specified behavior for permission denial."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the callback ignores the permission result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Mentions the 24 dp touch target."
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists the unbounded coroutine under Must fix (blocking)."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the hardcoded time format blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Makes no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not state what is fine as it is."
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose the specified behavior for permission denial."
+    }
+  }
+}

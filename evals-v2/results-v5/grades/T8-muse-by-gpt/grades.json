@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "SavedStateHandle restores typed input after recreation, whereas the original remember state did not."},
+    "2": {"pass": true, "why": "The supplied checks show allTests and the build succeeding."},
+    "3": {"pass": true, "why": "The diff only replaces Quick Add code and adds its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with UiState, UiAction, and UiEffect types."},
+    "5": {"pass": true, "why": "Separate Route and Screen composables use existing workout string resources."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The initial state and synchronous loading, clearing, and reset sequence match the original presenter."},
+    "2": {"pass": true, "why": "The supplied checks show allTests and the build succeeding."},
+    "3": {"pass": true, "why": "The diff is confined to replacing the Quick Add slice."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with UiState, UiAction, and UiEffect types."},
+    "5": {"pass": false, "why": "The Route and Screen split is present, but the button uses hard-coded Add text instead of a string resource."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "SavedStateHandle restores typed input after recreation, whereas the original remember state did not."},
+    "2": {"pass": true, "why": "The supplied checks show allTests and the build succeeding."},
+    "3": {"pass": true, "why": "The diff is confined to replacing the Quick Add slice."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with UiState, UiAction, and UiEffect types."},
+    "5": {"pass": true, "why": "Separate Route and Screen composables use existing workout string resources."}
+  }
+}

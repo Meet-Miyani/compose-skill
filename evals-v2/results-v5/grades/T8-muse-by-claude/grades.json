@@ -1,0 +1,23 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnAddClick keeps loading on -> off + text cleared with no save call, same as the presenter; SavedStateHandle only adds draft restore."},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including allTests; no existing tests edited."},
+    "3": {"pass": true, "why": "Diff touches only the Quick Add files (old widget deleted, new slice and test added)."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel<Action,State,Effect>, single onAction, updateState; contract types implement UiState/UiAction/UiEffect."},
+    "5": {"pass": true, "why": "QuickAddRoute collects state/effects/errors and forwards to a stateless QuickAddScreen that uses Res.string.workout_title/add_workout."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same initial state and same add sequence (loading true -> false + text cleared) with the save placeholder preserved."},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including allTests; no tests modified."},
+    "3": {"pass": true, "why": "Only the Quick Add widget is replaced; nothing else in the diff."},
+    "4": {"pass": true, "why": "Extends BaseViewModel with a QuickAdd contract implementing UiState/UiAction/UiEffect, single onAction, updateState."},
+    "5": {"pass": false, "why": "Route/Screen split exists, but the Screen hardcodes Text(\"Add\") and uses no string resources."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Add still sets loading, clears the draft and ends not-loading; the isLoading guard never fires because add is synchronous."},
+    "2": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL including allTests; existing tests untouched."},
+    "3": {"pass": true, "why": "Diff limited to removing QuickAddWidget and adding the Quick Add slice."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with a contract implementing UiState/UiAction/UiEffect; onAction is the only entry point."},
+    "5": {"pass": true, "why": "QuickAddRoute collects state/effects/errors and forwards to a stateless QuickAddScreen that uses the workout_title/add_workout resources."}
+  }
+}

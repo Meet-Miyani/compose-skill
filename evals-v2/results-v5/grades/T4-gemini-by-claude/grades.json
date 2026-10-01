@@ -1,0 +1,17 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnTitleChanged now writes savedStateHandle[\"draftTitle\"], so the draft is restored after process recreation and load() keeps it; checks pass"},
+    "2": {"pass": true, "why": "Added test asserts the handle holds the typed text and the draft survives OnScreenStarted; both asserts fail without the fix"},
+    "3": {"pass": true, "why": "Diff is a one-line ViewModel fix plus one test; nothing unrelated"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same one-line fix persists the draft to SavedStateHandle, which load() honours after recreation; checks pass"},
+    "2": {"pass": true, "why": "Added test checks the handle and that the draft survives OnScreenStarted; fails before the fix"},
+    "3": {"pass": true, "why": "Change is limited to the missing savedStateHandle write and one test"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "OnTitleChanged writes the draft to SavedStateHandle, so it survives process recreation and reload; checks pass"},
+    "2": {"pass": true, "why": "Two added tests (handle write, survives OnScreenStarted reload) both fail without the fix"},
+    "3": {"pass": true, "why": "Diff touches only the OnTitleChanged branch and adds tests; no refactor"}
+  }
+}

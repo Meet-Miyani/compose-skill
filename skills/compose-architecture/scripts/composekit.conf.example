@@ -1,0 +1,54 @@
+# .composekit.conf — project configuration for the composekit guard scripts.
+#
+# Copy this file to the project root as `.composekit.conf` (or run
+# `scripts/composekit/install-guards.sh <project-root>`, which writes it
+# when absent) and adjust the values. Every value is a space-separated
+# list of project-relative directories, except where noted.
+#
+# Lines starting with `#` are ignored. Quote values that contain spaces.
+
+# Directories holding `:feature:*` modules (arch rule 1: no feature
+# depends on another feature).
+FEATURE_DIRS="feature"
+
+# Directories holding `:core:*` modules (arch rule 1: core never depends
+# on a feature, on data, or on the composition root).
+CORE_DIRS="core"
+
+# Directories holding `:data:*` modules (arch rule 1: data never depends
+# on a feature or on the composition root).
+DATA_DIRS="data"
+
+# Project-relative directory of the composition root module
+# (the `:composeApp` module on CMP, the single `:app` module on
+# Android-only, that owns NavDisplay and aggregates Koin
+# modules). Nothing depends on it except the root itself.
+COMPOSITION_ROOT="composeApp"
+
+# Project-relative directory of the design-system module (the only place
+# where raw color literals such as `Color(0x...)` may appear).
+# Kept as a one-item alias for DESIGN_SYSTEM_DIRS below.
+DESIGN_SYSTEM_MODULE="core/designsystem"
+
+# Project-relative directories whose palette files may hold raw color
+# literals (branding or theme modules count; feature code never does).
+# Space-separated list. When empty, DESIGN_SYSTEM_MODULE alone is used.
+DESIGN_SYSTEM_DIRS=""
+
+# Locale parity: leave empty to discover every resource root automatically.
+# Each src/*/composeResources and Android src/*/res directory holding
+# values*/strings.xml is compared across its own locales only, so modules
+# with different key sets pass when each module is internally consistent.
+# Set a space-separated list of locale directories (each holds one
+# locale's strings.xml) only to scope the check to those directories.
+LOCALE_DIRS=""
+
+# Root package of the project's feature code, used to detect
+# cross-feature imports (arch rules 1-3).
+BASE_PACKAGE="com.example"
+
+# UiModel scaffold default (ruling M-11/M-12): when-needed means
+# new-feature.sh writes model/ + mapper/ only with --ui-model; always
+# makes --ui-model the default (--no-ui-model forces it off). A recorded
+# ## Project decisions entry of "UiModel for every feature" sets always.
+UI_MODEL="when-needed"

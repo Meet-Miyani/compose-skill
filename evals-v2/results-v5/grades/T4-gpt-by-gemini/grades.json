@@ -1,0 +1,86 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": true,
+      "why": "Tests for recreating ViewModel and clearing drafts were added."
+    },
+    "3": {
+      "pass": true,
+      "why": "The changes are strictly limited to the bug and related tests."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": false,
+      "why": "No test reproducing the bug was added."
+    },
+    "3": {
+      "pass": true,
+      "why": "The changes are strictly limited to the bug."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": true,
+      "why": "A regression test reproducing the lost text was added."
+    },
+    "3": {
+      "pass": true,
+      "why": "The changes are strictly limited to the bug and related test."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": false,
+      "why": "Message contains unsupported claims about 11 kit checks and the existing test failing."
+    },
+    "3": {
+      "pass": false,
+      "why": "Includes an unrelated refactor for draftTitle initialization."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": true,
+      "why": "A test for a cleared draft was added and the existing test was updated to reproduce the bug."
+    },
+    "3": {
+      "pass": true,
+      "why": "The changes are strictly limited to the bug and related tests."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The draft is saved to SavedStateHandle on every title change."
+    },
+    "2": {
+      "pass": false,
+      "why": "No test reproducing the bug was added."
+    },
+    "3": {
+      "pass": true,
+      "why": "The changes are strictly limited to the bug."
+    }
+  }
+}

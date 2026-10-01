@@ -1,0 +1,23 @@
+# .gitignore template. Copy to the new repository root.
+# Build outputs.
+build/
+**/build/
+out/
+
+# Gradle and Kotlin caches.
+.gradle/
+.kotlin/
+
+# Local SDK and signing config.
+local.properties
+
+# IDE folders.
+.idea/
+*.iml
+.DS_Store
+
+# iOS build products (iosApp is an Xcode project, never a Gradle module).
+DerivedData/
+iosApp/build/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/

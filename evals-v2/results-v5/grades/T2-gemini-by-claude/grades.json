@@ -1,0 +1,80 @@
+{
+  "A": {
+    "1": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "2": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "3": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "4": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "5": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "6": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "2": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "3": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "4": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "5": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    },
+    "6": {
+      "pass": false,
+      "why": "diff is empty; agent only proposed approaches and asked a question"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "new 'Select workout type' button on the workout screen emits OpenWorkoutTypePicker, and App.kt pushes WorkoutTypeNavKey"
+    },
+    "2": {
+      "pass": false,
+      "why": "tapping a type only changes the picker's own state; the picker's Save writes straight to the repository and pops the screen, so the editor's draft is never updated"
+    },
+    "3": {
+      "pass": true,
+      "why": "Back sends NavigateBack and pops the screen without calling saveWorkoutType, so the stored type is unchanged"
+    },
+    "4": {
+      "pass": true,
+      "why": "type is persisted through saveWorkoutType/updateType with a Room v2 column and migration, and the workout save does not clear it (it is saved at picker-save time, not as part of the workout save)"
+    },
+    "5": {
+      "pass": true,
+      "why": "picker is its own WorkoutTypeNavKey entry; the result travels through the repository/DB, with no file-level or global mutable variable"
+    },
+    "6": {
+      "pass": true,
+      "why": "adds WorkoutTypeUiState/UiAction/UiEffect contract, WorkoutTypeViewModel (BaseViewModel, @KoinViewModel), Route and Screen, matching the existing screens"
+    }
+  }
+}

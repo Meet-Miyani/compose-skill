@@ -1,0 +1,44 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The export button calls startExport, which launches the exporter coroutine."},
+    "2": {"pass": true, "why": "The singleton exporter owns the coroutine, so leaving the ViewModel does not cancel the file write."},
+    "3": {"pass": true, "why": "It reads the workouts stream and writes escaped, headered CSV to a platform file."},
+    "4": {"pass": false, "why": "The exporter creates its own CoroutineScope; the scope is not provided through DI."},
+    "5": {"pass": false, "why": "Only StorageException becomes Failed; repository or other export failures leave no user error."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The button starts a WorkManager job on Android and a coroutine scheduler on other targets."},
+    "2": {"pass": true, "why": "WorkManager and the singleton non-Android scheduler outlive the list screen."},
+    "3": {"pass": true, "why": "The exporter snapshots workouts and writes an escaped id,title,body CSV file."},
+    "4": {"pass": false, "why": "The iOS and desktop scopes are constructed inside factory functions rather than provided through DI."},
+    "5": {"pass": false, "why": "The schedulers catch only StorageException, so other export failures are not reported in status."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The button calls start on a dedicated exporter that launches a coroutine."},
+    "2": {"pass": true, "why": "The export uses a DI-provided process-lifetime scope independent of the screen."},
+    "3": {"pass": true, "why": "The DAO reads all workouts and the writer saves correctly escaped CSV with a header."},
+    "4": {"pass": true, "why": "Koin provides WorkoutsExportScope and the exporter launches work in that scope."},
+    "5": {"pass": false, "why": "Only storage errors become Failed, and a new ViewModel suppresses a failure completed while away."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The button starts WorkManager work on Android or the coroutine scheduler on other targets."},
+    "2": {"pass": true, "why": "The platform schedulers run outside the ViewModel and continue after leaving the screen."},
+    "3": {"pass": true, "why": "The shared export reads all workouts and writes headered, escaped CSV through platform sinks."},
+    "4": {"pass": true, "why": "Android uses platform work; iOS and desktop DI providers construct and supply app-lifetime schedulers."},
+    "5": {"pass": false, "why": "The non-Android scheduler catches only StorageException, leaving other export failures unreported."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The button enqueues WorkManager work or launches the singleton exporter coroutine."},
+    "2": {"pass": true, "why": "Both WorkManager and the singleton in-process exporter continue after the screen closes."},
+    "3": {"pass": true, "why": "The DAO reads every workout and the formatter writes escaped, headered CSV to a file."},
+    "4": {"pass": false, "why": "The desktop and iOS exporter creates its own scope instead of receiving an app-lifetime scope through DI."},
+    "5": {"pass": true, "why": "Both exporter paths map caught export exceptions to Failed, which the screen displays."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The export button starts an asynchronous coroutine job that performs the write off the main thread."},
+    "2": {"pass": false, "why": "The export job belongs to the list ViewModel and is cancelled when that screen is cleared."},
+    "3": {"pass": true, "why": "The DAO reads all rows and the formatter writes escaped id,title,body CSV to a file."},
+    "4": {"pass": false, "why": "The job runs through the ViewModel rather than a DI app-lifetime scope or platform work."},
+    "5": {"pass": true, "why": "launchGuarded routes an export exception to emitError for the user."}
+  }
+}

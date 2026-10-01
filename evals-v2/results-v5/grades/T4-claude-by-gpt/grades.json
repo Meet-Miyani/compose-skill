@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnTitleChanged writes the draft to SavedStateHandle, which the existing restore path reads."},
+    "2": {"pass": true, "why": "The added test types a draft, triggers the return reload, and verifies the text remains."},
+    "3": {"pass": true, "why": "The diff changes only the draft write and its focused test."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "OnTitleChanged now saves the draft in SavedStateHandle for the existing restore path."},
+    "2": {"pass": false, "why": "The new test checks the handle after typing but never reproduces a return or recreation that loses text."},
+    "3": {"pass": true, "why": "The diff contains only the draft write and a focused test."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "OnTitleChanged persists the draft in SavedStateHandle for restoration after recreation."},
+    "2": {"pass": true, "why": "The added test types a draft, reloads on return, and asserts the draft survives."},
+    "3": {"pass": true, "why": "The diff is limited to the draft write and its focused test."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The new SavedStateHandle write supplies the draft to the existing restoration logic."},
+    "2": {"pass": true, "why": "The new test types text, creates another ViewModel with saved state, and checks restoration."},
+    "3": {"pass": true, "why": "The diff changes only the draft write and a focused recreation test."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The title change now writes to SavedStateHandle, which is read during restoration."},
+    "2": {"pass": true, "why": "The new test types text, recreates the ViewModel using saved state, and asserts the text remains."},
+    "3": {"pass": true, "why": "The diff is limited to the draft write and a focused recreation test."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "OnTitleChanged now persists the draft to SavedStateHandle for the restore path."},
+    "2": {"pass": true, "why": "The new tests reproduce both reload on return and ViewModel recreation after typing."},
+    "3": {"pass": true, "why": "The diff contains only the draft write and two focused regression tests."}
+  }
+}

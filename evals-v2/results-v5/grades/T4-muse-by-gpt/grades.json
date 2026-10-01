@@ -1,0 +1,17 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnTitleChanged now writes the draft to SavedStateHandle, and the successful checks support restoration."},
+    "2": {"pass": false, "why": "The diff adds no regression test; the final message cites an existing test."},
+    "3": {"pass": true, "why": "The diff changes only draft persistence in WorkoutsViewModel."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "OnTitleChanged now writes the draft to SavedStateHandle, and the successful checks support restoration."},
+    "2": {"pass": false, "why": "The diff adds no regression test; the final message cites an existing test."},
+    "3": {"pass": true, "why": "The diff changes only draft persistence in WorkoutsViewModel."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The fix stores the draft in SavedStateHandle, and the added recreation test passes in the checks."},
+    "2": {"pass": true, "why": "The diff adds a test that types a title, recreates the view model, and asserts the draft remains."},
+    "3": {"pass": true, "why": "The diff contains only the draft persistence fix and its focused regression test."}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Must-fix #1: StorageException caught and only printed, nothing observable to UI."},
+    "2": {"pass": true, "why": "Must-fix #2: no cancellation, slow old query overwrites newer one."},
+    "3": {"pass": true, "why": "println listed under 'Can wait', not blocking."},
+    "4": {"pass": true, "why": "Empty init listed under 'Can wait', not blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "Splits must-fix vs can-wait but never states what is fine as it is; existing code is only cited as a reference pattern for the fix."},
+    "7": {"pass": true, "why": "Proposes routing via toAppError to emitError popup or UiState.error."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Item 1: swallowed StorageException invisible to UI."},
+    "2": {"pass": true, "why": "Item 2: no cancellation, 'a' can overwrite 'ab'."},
+    "3": {"pass": true, "why": "println is mentioned only as the swallowing mechanism, not as a separate blocking defect."},
+    "4": {"pass": true, "why": "Empty init appears only as an 'also remove' cleanup note, not as a blocking finding."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": false, "why": "No split between blocking and later items; both findings are critical and there is no later section."},
+    "7": {"pass": true, "why": "Proposes exposing errors Flow<AppError> / state.error instead of println."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking #1: storage failure only printed, user never sees it."},
+    "2": {"pass": true, "why": "Blocking #2: slow 'a' result lands after 'ab'; fix cancels the prior job."},
+    "3": {"pass": true, "why": "println listed under 'Worth doing later'."},
+    "4": {"pass": true, "why": "Empty init listed under 'Worth doing later'."},
+    "5": {"pass": true, "why": "Diff is empty; corrected code appears only in the message."},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Forwards the failure as an AppError to a popup with retry instead of printing."}
+  }
+}

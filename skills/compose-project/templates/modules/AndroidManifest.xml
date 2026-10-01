@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- :androidApp manifest template. Copy to androidApp/src/main/AndroidManifest.xml. -->
+<!-- EDIT: the activity name must match the shell's MainActivity. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name="com.example.app.MainApplication"
+        android:label="Notes"
+        android:theme="@android:style/Theme.Material.NoActionBar">
+        <activity
+            android:name="com.example.app.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

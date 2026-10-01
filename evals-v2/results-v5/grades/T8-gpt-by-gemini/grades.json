@@ -1,0 +1,134 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Logic behavior is unchanged and the widget remains a visual placeholder."
+    },
+    "2": {
+      "pass": true,
+      "why": "checks_exit=0 confirms existing tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel and MVI pattern correctly."
+    },
+    "5": {
+      "pass": false,
+      "why": "Lacks Route/Screen split and does not use string resources."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Behavior changed by adding UI controls and merging into WorkoutsList."
+    },
+    "2": {
+      "pass": false,
+      "why": "checks_exit=1 confirms tests failed (compileTestKotlinJvm FAILED)."
+    },
+    "3": {
+      "pass": false,
+      "why": "Rewrote unrelated WorkoutsList code."
+    },
+    "4": {
+      "pass": false,
+      "why": "Quick Add logic was merged into WorkoutsListViewModel instead of having its own."
+    },
+    "5": {
+      "pass": false,
+      "why": "Lacks Quick Add Route/Screen split."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "Behavior changed by completely removing the logic wiring from the widget."
+    },
+    "2": {
+      "pass": false,
+      "why": "checks_exit=1 confirms build failed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel and MVI pattern correctly."
+    },
+    "5": {
+      "pass": false,
+      "why": "Lacks Route/Screen split and does not use string resources."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": false,
+      "why": "Behavior changed by adding new visible UI elements to a previously empty placeholder."
+    },
+    "2": {
+      "pass": true,
+      "why": "checks_exit=0 confirms existing tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel and MVI pattern correctly."
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses string resources but lacks the Route/Screen split."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Logic behavior is unchanged and the widget remains a visual placeholder."
+    },
+    "2": {
+      "pass": true,
+      "why": "checks_exit=0 confirms existing tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel and MVI pattern correctly."
+    },
+    "5": {
+      "pass": false,
+      "why": "Has Route/Screen split but does not use string resources."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Logic behavior is unchanged and the widget remains a visual placeholder."
+    },
+    "2": {
+      "pass": true,
+      "why": "checks_exit=0 confirms existing tests pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel and MVI pattern correctly."
+    },
+    "5": {
+      "pass": false,
+      "why": "Has Route/Screen split but does not use string resources."
+    }
+  }
+}

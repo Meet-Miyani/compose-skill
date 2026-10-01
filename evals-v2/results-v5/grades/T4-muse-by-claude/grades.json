@@ -1,0 +1,17 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "OnTitleChanged now writes draftTitle to SavedStateHandle, which the existing init/load restore path reads; checks pass"},
+    "2": {"pass": false, "why": "Diff adds no test; it relies only on the existing process-death test"},
+    "3": {"pass": true, "why": "One-line change in OnTitleChanged only"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Same SavedStateHandle write in OnTitleChanged; the existing restore logic now has a value to restore; checks pass"},
+    "2": {"pass": false, "why": "No test added in the diff"},
+    "3": {"pass": true, "why": "One-line change limited to the bug"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "SavedStateHandle write added; the new test recreates the ViewModel with the same handle and checks the draft; checks pass"},
+    "2": {"pass": true, "why": "Adds a regression test that types text, recreates the ViewModel from the handle and asserts the text is restored"},
+    "3": {"pass": true, "why": "Only the one-line fix plus its test; no unrelated changes"}
+  }
+}

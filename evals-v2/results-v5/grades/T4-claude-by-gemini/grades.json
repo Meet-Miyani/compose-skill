@@ -1,0 +1,86 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": true,
+      "why": "adds test that reproduces lost text by simulating app background and foreground"
+    },
+    "3": {
+      "pass": true,
+      "why": "change is limited to the bug and all claims are supported by the diff"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": false,
+      "why": "test only asserts handle update and does not reproduce returning or reloading where text is lost"
+    },
+    "3": {
+      "pass": false,
+      "why": "claims about other text inputs and old test pre-seeding are not supported by the diff"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": true,
+      "why": "adds test that reproduces lost text by simulating app background and foreground"
+    },
+    "3": {
+      "pass": true,
+      "why": "change is limited to the bug and all claims are supported by the diff"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": true,
+      "why": "adds test that reproduces lost text by simulating process death and recreation"
+    },
+    "3": {
+      "pass": false,
+      "why": "claims old test filled handle by hand but the diff does not support this claim"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": true,
+      "why": "adds test that reproduces lost text by simulating process death and recreation"
+    },
+    "3": {
+      "pass": false,
+      "why": "claims workout list screen has no typed-input state which the diff does not support"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "fix correctly writes to SavedStateHandle which survives process recreation"
+    },
+    "2": {
+      "pass": true,
+      "why": "adds tests that reproduce lost text on both return and process death"
+    },
+    "3": {
+      "pass": true,
+      "why": "change is limited to the bug and all claims are supported by the diff"
+    }
+  }
+}

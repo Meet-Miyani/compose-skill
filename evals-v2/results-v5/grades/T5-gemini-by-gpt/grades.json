@@ -1,0 +1,20 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The active-job guard and passing double-add test show two rapid taps create one entry."},
+    "2": {"pass": true, "why": "addWorkout returns while addJob is active, dropping overlapping requests."},
+    "3": {"pass": true, "why": "The diff adds a double-add regression test that asserts one item and one navigation effect."},
+    "4": {"pass": true, "why": "The diff only changes the add guard and its regression test."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The active-job guard and passing double-add test show two rapid taps create one entry."},
+    "2": {"pass": true, "why": "addWorkout returns while addJob is active, dropping overlapping requests."},
+    "3": {"pass": true, "why": "The diff adds a double-add regression test that asserts one item and one navigation effect."},
+    "4": {"pass": true, "why": "The diff only changes the add guard and its regression test."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The active-job guard and passing double-add test show two rapid taps create one entry."},
+    "2": {"pass": true, "why": "addWorkout returns while addJob is active, dropping overlapping requests."},
+    "3": {"pass": true, "why": "The diff adds a double-add regression test that asserts one item and one navigation effect."},
+    "4": {"pass": true, "why": "The diff only changes the add guard and its regression test."}
+  }
+}

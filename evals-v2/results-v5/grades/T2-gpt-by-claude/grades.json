@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Editor 'Choose workout type' button sends OnTypeClick -> OpenTypePicker -> backStack.add(WorkoutTypeKey)"},
+    "2": {"pass": true, "why": "Selection persists type and emits NavigateBack; editor shows type from reloaded item on OnScreenStarted, title draft kept in savedStateHandle"},
+    "3": {"pass": true, "why": "OnBackClick only sends NavigateBack; no write happens unless a type is selected"},
+    "4": {"pass": true, "why": "Room column 'type' with 1->2 migration and updateType DAO; type persisted on the workout and not touched by title save"},
+    "5": {"pass": true, "why": "WorkoutTypeKey(workoutId) is its own entry; result reaches editor through the repository, no global mutable variable"},
+    "6": {"pass": true, "why": "WorkoutTypeUiState/UiAction/UiEffect contract and @KoinViewModel WorkoutTypeViewModel added"}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Picker opens from the list Add button; there is no workout-type control on the workout screen to tap"},
+    "2": {"pass": false, "why": "Selection creates a new workout and opens it; no existing draft is updated, type only rides in the nav key"},
+    "3": {"pass": true, "why": "Back on picker just pops to the list; nothing is created or overwritten"},
+    "4": {"pass": false, "why": "Type is never stored; it lives only in WorkoutsDetailKey and is lost on reopen (message admits existing workouts have no type)"},
+    "5": {"pass": true, "why": "WorkoutTypeSelectionKey is its own entry; type passed via nav key, no global mutable variable"},
+    "6": {"pass": false, "why": "Picker reuses WorkoutsListViewModel and list contract; no own UiState/UiAction/ViewModel"}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Picker opens from the list Add button, not from a workout-type control on the workout screen"},
+    "2": {"pass": false, "why": "Selection creates a new workout and sets its title to the type string; no draft type is updated"},
+    "3": {"pass": true, "why": "Back on picker pops to the list; nothing created or overwritten"},
+    "4": {"pass": false, "why": "No type field persisted; type only used as initial title text"},
+    "5": {"pass": true, "why": "WorkoutTypeSelectionKey is its own entry; value passed via nav key/params, no global mutable variable"},
+    "6": {"pass": false, "why": "No picker contract or ViewModel; entry reuses WorkoutsListViewModel and a stateless screen with hardcoded strings"}
+  },
+  "D": {
+    "1": {"pass": false, "why": "Picker opens from the list Add button, not from a workout-type control on the workout screen"},
+    "2": {"pass": false, "why": "Selection creates a new workout titled with the type label; no existing draft's type is updated"},
+    "3": {"pass": true, "why": "OnBackClick only emits NavigateBack; nothing is written"},
+    "4": {"pass": false, "why": "No type field; message itself says type is saved only as the initial title"},
+    "5": {"pass": true, "why": "WorkoutTypePickerKey is its own entry; result passed as OpenWorkout(id) effect, no global mutable variable"},
+    "6": {"pass": true, "why": "WorkoutTypePickerUiState/UiAction/UiEffect contract and @KoinViewModel WorkoutTypePickerViewModel added"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Editor type button sends OnTypeClick -> OpenTypePicker -> backStack.add(WorkoutTypePickerKey)"},
+    "2": {"pass": true, "why": "Selection saves type and NavigateBack; editor reloads on resume (LifecycleResumeEffect) and shows the item's type"},
+    "3": {"pass": true, "why": "OnBackClick only emits NavigateBack; no write without a selection"},
+    "4": {"pass": true, "why": "Room type column with AutoMigration 1->2 and updateType; type persisted on the workout"},
+    "5": {"pass": true, "why": "WorkoutTypePickerKey(workoutId) is its own entry; result flows through the repository, no global mutable variable"},
+    "6": {"pass": true, "why": "WorkoutTypePickerUiState/UiAction/UiEffect contract and @KoinViewModel WorkoutTypePickerViewModel added"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Editor 'Choose workout type' button sends OnTypeClick -> OpenTypePicker -> backStack.add(WorkoutTypeKey)"},
+    "2": {"pass": true, "why": "Selection saves and NavigateBack; editor reload sets state.type, test confirms type refresh and title draft kept"},
+    "3": {"pass": true, "why": "OnBackClick only emits NavigateBack; no write without a selection"},
+    "4": {"pass": true, "why": "Room type column with 1->2 migration and updateType; type persisted on the workout"},
+    "5": {"pass": true, "why": "WorkoutTypeKey(workoutId) is its own entry; result via repository, pending write in SavedStateHandle, no global mutable variable"},
+    "6": {"pass": true, "why": "WorkoutTypeUiState/UiAction/UiEffect contract and @KoinViewModel WorkoutTypeViewModel added"}
+  }
+}

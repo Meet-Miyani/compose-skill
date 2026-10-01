@@ -1,0 +1,182 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that a permission denial is never handled"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the 24dp touch target is too small"
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope.launch under Must fix"
+    },
+    "4": {
+      "pass": false,
+      "why": "Lists the unused timeFormat under Must fix"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": false,
+      "why": "Lacks a clear section stating what is fine as it is"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose keeping the feature usable with alerts off without re-prompting"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the result of requestPermission is ignored"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the tap target is 24dp"
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not categorize the coroutine scope issue as blocking"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not categorize the hardcoded time format as blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not separate blocking findings from later improvements"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose how to handle permission denial"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that a denial is ignored"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the clickable area is below the 48dp minimum"
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope.launch under Must fix"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention the hardcoded time format"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not state what is fine as it is"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not explicitly propose avoiding a re-prompt loop"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the code carries on even if permission is denied"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the 24dp touch target is below the minimum"
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope.launch under Blocking"
+    },
+    "4": {
+      "pass": false,
+      "why": "Lists timeFormat under Blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not state what is fine as it is"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not propose how to handle permission denial"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the result is thrown away and the user gets no feedback"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the 24.dp box is below the minimum touch target"
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope.launch under Blocking"
+    },
+    "4": {
+      "pass": false,
+      "why": "Lists timeFormat under Blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": true,
+      "why": "Has a Fine as is section and separates blocking findings"
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes showing alerts are off and not asking again"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that if the user denies it, the app does nothing"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies the tap target is 24dp"
+    },
+    "3": {
+      "pass": false,
+      "why": "Lists GlobalScope.launch under Blocking"
+    },
+    "4": {
+      "pass": false,
+      "why": "Lists timeFormat under Blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff is empty"
+    },
+    "6": {
+      "pass": true,
+      "why": "Has a Fine as is section and separates blocking findings"
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping the feature usable and offering settings access without nagging"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Add still sets loading, clears it and resets input; widget still renders nothing; only the entry signature now takes the ViewModel"},
+    "2": {"pass": true, "why": "Checks exit 0; jvmTest and iOS tests ran, BUILD SUCCESSFUL"},
+    "3": {"pass": true, "why": "Only QuickAddWidget.kt changed, plus two new Quick Add files"},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with a QuickAddUiState/UiAction/UiEffect contract, @KoinViewModel, updateState"},
+    "5": {"pass": false, "why": "No QuickAddRoute/Screen: the stateful entry is still QuickAddWidget with a private content function, so it does not follow the project's Route/Screen naming"}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Adds a visible text field and button to WorkoutsListScreen and changes the WorkoutsListViewModel constructor; the original widget rendered nothing"},
+    "2": {"pass": false, "why": "compileTestKotlinJvm failed: existing WorkoutsListViewModelTest calls no longer compile (savedStateHandle missing)"},
+    "3": {"pass": false, "why": "Rewrites the WorkoutsListViewModel constructor and changes the list contract, Route and Screen"},
+    "4": {"pass": false, "why": "No Quick Add ViewModel or contract; Quick Add state is folded into WorkoutsListViewModel"},
+    "5": {"pass": true, "why": "Stateless widget is wired through the existing WorkoutsListRoute/Screen and uses stringResource(Res.string.add_workout)"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Add still sets then clears loading and clears the name; widget stays blank with the same signature"},
+    "2": {"pass": false, "why": "The check failed on a configuration-cache lock timeout, so tests never ran; the message's claim that tests passed is unsupported"},
+    "3": {"pass": true, "why": "Only Quick Add files touched, plus new contract, ViewModel and test"},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with a sealed UiState/UiAction/UiEffect contract"},
+    "5": {"pass": false, "why": "No Route/Screen split; QuickAddWidget is an empty composable not connected to the ViewModel"}
+  },
+  "D": {
+    "1": {"pass": false, "why": "The widget now renders a new OutlinedTextField and button where the original rendered nothing, and it changes the public signature; visible UI changed"},
+    "2": {"pass": true, "why": "Checks exit 0, BUILD SUCCESSFUL"},
+    "3": {"pass": true, "why": "Changes are limited to Quick Add files and a new test"},
+    "4": {"pass": true, "why": "BaseViewModel with QuickAddUiState/UiAction/UiEffect; the effect is a data object rather than a sealed interface but still implements UiEffect"},
+    "5": {"pass": false, "why": "Uses a string resource, but there is no Route that collects state from the ViewModel; there is only a stateless widget"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Add logic is preserved and the widget still renders nothing; no save is added"},
+    "2": {"pass": true, "why": "Checks exit 0, BUILD SUCCESSFUL; jvmTest passed"},
+    "3": {"pass": true, "why": "Only Quick Add files changed or added"},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with a sealed QuickAddUiState/UiAction/UiEffect contract"},
+    "5": {"pass": true, "why": "QuickAddRoute collects state, effects and errors and passes them to a stateless QuickAddWidget; there is no user-facing text and no hardcoded strings"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Add still completes immediately and clears the text; the widget is still a placeholder"},
+    "2": {"pass": true, "why": "Checks exit 0, BUILD SUCCESSFUL"},
+    "3": {"pass": true, "why": "Only Quick Add files changed or added"},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with a sealed QuickAddUiState/UiAction/UiEffect contract"},
+    "5": {"pass": true, "why": "QuickAddRoute collects state and passes it to a stateless QuickAddWidget; there is no user-facing text and no hardcoded strings"}
+  }
+}

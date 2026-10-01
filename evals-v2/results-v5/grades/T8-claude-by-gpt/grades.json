@@ -1,0 +1,44 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The widget still renders only a placeholder and the add action still only clears text; no caller is added."},
+    "2": {"pass": true, "why": "The check log shows allTests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff changes only Quick Add, its list contract and ViewModel, and related tests."},
+    "4": {"pass": true, "why": "Quick Add actions and state are handled by the existing BaseViewModel and UiState/UiAction/UiEffect list contract."},
+    "5": {"pass": false, "why": "QuickAddWidget is not connected through the list Route/Screen and has no string resource use."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "The new QuickAddScreen draws a text field, button, and spinner where the old widget drew no UI."},
+    "2": {"pass": true, "why": "The check log shows jvmTest and allTests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is confined to Quick Add implementation and its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with QuickAdd UiState, UiAction, and UiEffect types."},
+    "5": {"pass": true, "why": "QuickAddRoute delegates to a stateless QuickAddScreen that uses the add_workout string resource."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "SavedStateHandle preserves text across recreation and the new Screen draws controls absent from the original widget."},
+    "2": {"pass": true, "why": "The check log shows allTests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff only replaces Quick Add code and adds Quick Add tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel and uses a QuickAdd UiState/UiAction/UiEffect contract."},
+    "5": {"pass": true, "why": "QuickAddRoute collects state for QuickAddScreen, which uses workout_title and add_workout resources."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The widget still renders no UI and Add synchronously toggles loading and clears text without saving."},
+    "2": {"pass": true, "why": "The check log shows jvmTest and allTests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff changes only Quick Add implementation and its tests."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with QuickAdd UiState, UiAction, and UiEffect types."},
+    "5": {"pass": false, "why": "Although it adds a Route, the UI remains QuickAddWidget with no string resources or QuickAddScreen."}
+  },
+  "E": {
+    "1": {"pass": false, "why": "Add now runs in a coroutine and can reject overlapping clicks, unlike the synchronous presenter."},
+    "2": {"pass": false, "why": "The checks failed before Gradle ran tests, so there is no passing-test evidence."},
+    "3": {"pass": true, "why": "The diff is limited to Quick Add implementation files."},
+    "4": {"pass": true, "why": "QuickAddViewModel extends BaseViewModel with QuickAdd UiState, UiAction, and UiEffect types."},
+    "5": {"pass": false, "why": "It adds a Route but retains QuickAddWidget without a Screen or string resources."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The newly mounted widget draws nothing and Quick Add still has no save operation."},
+    "2": {"pass": true, "why": "The check log shows allTests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff touches only Quick Add wiring, list state and actions, and related tests."},
+    "4": {"pass": true, "why": "Quick Add state and actions are managed by WorkoutsListViewModel, which uses the existing MVI contract."},
+    "5": {"pass": true, "why": "The list Route passes Quick Add actions to its Screen, which uses existing string resources for its visible UI."}
+  }
+}

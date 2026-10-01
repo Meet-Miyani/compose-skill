@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": { "pass": true, "why": "The attach photo button is visible on the screen" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker" },
+    "3": { "pass": true, "why": "Saving to Room database counts as local app storage" },
+    "4": { "pass": false, "why": "Workout entity does not save a path; it uses a separate table to store a blob" },
+    "5": { "pass": false, "why": "No photo file is written (the blob is saved directly to the Room DB)" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  },
+  "B": {
+    "1": { "pass": true, "why": "The button is visible on the screen" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker" },
+    "3": { "pass": true, "why": "Saves the image to private local storage" },
+    "4": { "pass": true, "why": "The workout entity saves the photo filename" },
+    "5": { "pass": true, "why": "The file is written by the data layer off the main thread" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  },
+  "C": {
+    "1": { "pass": true, "why": "The button is visible on the screen" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker" },
+    "3": { "pass": true, "why": "Saves the image to local app storage" },
+    "4": { "pass": true, "why": "The workout entity saves the path" },
+    "5": { "pass": true, "why": "The file is written by the data layer off the main thread" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  },
+  "D": {
+    "1": { "pass": false, "why": "The message explicitly states the button is hidden on iOS, so it is not visible there" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker on supported platforms" },
+    "3": { "pass": true, "why": "Saves the image to local app storage" },
+    "4": { "pass": true, "why": "The workout entity saves the path" },
+    "5": { "pass": true, "why": "The file is written by the data layer off the main thread" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  },
+  "E": {
+    "1": { "pass": true, "why": "The button is visible on the screen" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker" },
+    "3": { "pass": true, "why": "Saves the image to local app storage" },
+    "4": { "pass": true, "why": "The workout entity saves the path" },
+    "5": { "pass": true, "why": "The file is written by the data layer off the main thread" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  },
+  "F": {
+    "1": { "pass": false, "why": "Message falsely claims the button reads 'Saving photo...' and that 18 tests pass" },
+    "2": { "pass": true, "why": "Tapping the button launches the picker" },
+    "3": { "pass": true, "why": "Saves the image to local app storage" },
+    "4": { "pass": true, "why": "The workout entity saves the path" },
+    "5": { "pass": true, "why": "The file is written by the data layer off the main thread" },
+    "6": { "pass": true, "why": "Uses string resources for the new text" }
+  }
+}
