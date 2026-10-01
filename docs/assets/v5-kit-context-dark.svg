@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320" role="img" aria-label="Most kit context loaded on any one task, per model, against the 20k design budget">
+<text x="24" y="32" fill="#f0f0ee" font-size="17" font-weight="600" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Kit context per task: progressive loading</text>
+<text x="24" y="54" fill="#c3c2b7" font-size="12" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Most kit tokens any single task loaded (upper bound) · full kit ≈ 127k tokens · held-out v5</text>
+<line x1="150.0" y1="94" x2="150.0" y2="270" stroke="#33332f" stroke-width="1"/>
+<text x="150.0" y="288" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">0k</text>
+<line x1="320.0" y1="94" x2="320.0" y2="270" stroke="#33332f" stroke-width="1"/>
+<text x="320.0" y="288" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">10k</text>
+<line x1="490.0" y1="94" x2="490.0" y2="270" stroke="#33332f" stroke-width="1"/>
+<text x="490.0" y="288" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">20k</text>
+<line x1="660.0" y1="94" x2="660.0" y2="270" stroke="#33332f" stroke-width="1"/>
+<text x="660.0" y="288" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">30k</text>
+<line x1="490.0" y1="86" x2="490.0" y2="270" stroke="#5c5b56" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="496.0" y="84" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">20k design budget</text>
+<text x="136" y="116" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Opus 5.5</text>
+<path d="M150,104 H313.5 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 H150 Z" fill="#3987e5"/>
+<text x="325.5" y="117" fill="#f0f0ee" font-size="12" font-weight="400" stroke="#0d1117" stroke-width="4" paint-order="stroke" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">9.9k</text>
+<text x="136" y="150" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Sonnet 5.5</text>
+<path d="M150,138 H383.8 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 H150 Z" fill="#3987e5"/>
+<text x="395.8" y="151" fill="#f0f0ee" font-size="12" font-weight="400" stroke="#0d1117" stroke-width="4" paint-order="stroke" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">14.0k</text>
+<text x="136" y="184" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">GPT-6-Luna</text>
+<path d="M150,172 H456.4 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 H150 Z" fill="#3987e5"/>
+<text x="468.4" y="185" fill="#f0f0ee" font-size="12" font-weight="400" stroke="#0d1117" stroke-width="4" paint-order="stroke" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">18.3k</text>
+<text x="136" y="218" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">GPT-6-Sol</text>
+<path d="M150,206 H594.9 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 H150 Z" fill="#3987e5"/>
+<text x="606.9" y="219" fill="#f0f0ee" font-size="12" font-weight="400" stroke="#0d1117" stroke-width="4" paint-order="stroke" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">26.4k</text>
+<text x="136" y="252" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Gemini 3.8 Flash</text>
+<path d="M150,240 H597.1 a4,4 0 0 1 4,4 v10 a4,4 0 0 1 -4,4 H150 Z" fill="#3987e5"/>
+<text x="609.1" y="253" fill="#f0f0ee" font-size="12" font-weight="400" stroke="#0d1117" stroke-width="4" paint-order="stroke" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">26.5k</text>
+<text x="24" y="306" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Reviews and bug fixes stayed at 1–13k; only new features read past 20k (Sol, Flash).</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="352" viewBox="0 0 760 352" role="img" aria-label="Held-out v5: rubric score with and without the kit for five models">
+<text x="24" y="32" fill="#f0f0ee" font-size="17" font-weight="600" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">With the kit vs without: held-out v5</text>
+<text x="24" y="54" fill="#c3c2b7" font-size="12" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">% of 43 rubric items passed, both blind graders agree · 120 agentic runs · 8 new tasks</text>
+<circle cx="156" cy="74" r="6" fill="#d95926"/><text x="168" y="78" fill="#c3c2b7" font-size="12" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">No kit</text>
+<circle cx="246" cy="74" r="6" fill="#3987e5"/><text x="258" y="78" fill="#c3c2b7" font-size="12" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">With the kit</text>
+<text x="732" y="78" fill="#c3c2b7" font-size="12" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">lift</text>
+<line x1="150.0" y1="100" x2="150.0" y2="298" stroke="#33332f" stroke-width="1"/>
+<text x="150.0" y="316" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">40%</text>
+<line x1="285.0" y1="100" x2="285.0" y2="298" stroke="#33332f" stroke-width="1"/>
+<text x="285.0" y="316" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">50%</text>
+<line x1="420.0" y1="100" x2="420.0" y2="298" stroke="#33332f" stroke-width="1"/>
+<text x="420.0" y="316" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">60%</text>
+<line x1="555.0" y1="100" x2="555.0" y2="298" stroke="#33332f" stroke-width="1"/>
+<text x="555.0" y="316" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">70%</text>
+<line x1="690.0" y1="100" x2="690.0" y2="298" stroke="#33332f" stroke-width="1"/>
+<text x="690.0" y="316" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">80%</text>
+<text x="136" y="120" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Gemini 3.8 Flash</text>
+<line x1="301.2" y1="116" x2="645.5" y2="116" stroke="#5c5b56" stroke-width="2"/>
+<circle cx="301.2" cy="116" r="6" fill="#d95926"/>
+<circle cx="645.5" cy="116" r="6" fill="#3987e5"/>
+<text x="732" y="120" fill="#f0f0ee" font-size="13" font-weight="600" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">+25.6</text>
+<text x="136" y="160" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Sonnet 5.5</text>
+<line x1="363.3" y1="156" x2="614.4" y2="156" stroke="#5c5b56" stroke-width="2"/>
+<circle cx="363.3" cy="156" r="6" fill="#d95926"/>
+<circle cx="614.4" cy="156" r="6" fill="#3987e5"/>
+<text x="732" y="160" fill="#f0f0ee" font-size="13" font-weight="600" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">+18.6</text>
+<text x="136" y="200" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Opus 5.5</text>
+<line x1="488.8" y1="196" x2="614.4" y2="196" stroke="#5c5b56" stroke-width="2"/>
+<circle cx="488.8" cy="196" r="6" fill="#d95926"/>
+<circle cx="614.4" cy="196" r="6" fill="#3987e5"/>
+<text x="732" y="200" fill="#f0f0ee" font-size="13" font-weight="600" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">+9.3</text>
+<text x="136" y="240" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">GPT-6-Sol</text>
+<line x1="583.3" y1="236" x2="645.5" y2="236" stroke="#5c5b56" stroke-width="2"/>
+<circle cx="583.3" cy="236" r="6" fill="#d95926"/>
+<circle cx="645.5" cy="236" r="6" fill="#3987e5"/>
+<text x="732" y="240" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">+4.6</text>
+<text x="136" y="280" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">GPT-6-Luna</text>
+<line x1="488.8" y1="276" x2="519.9" y2="276" stroke="#5c5b56" stroke-width="2"/>
+<circle cx="488.8" cy="276" r="6" fill="#d95926"/>
+<circle cx="519.9" cy="276" r="6" fill="#3987e5"/>
+<text x="732" y="280" fill="#f0f0ee" font-size="13" font-weight="400" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">+2.3</text>
+<text x="24" y="338" fill="#c3c2b7" font-size="11" font-weight="400" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">Lifts of 8+ points are claimable under the pre-registered rules; smaller ones are within noise.</text>
+</svg>
