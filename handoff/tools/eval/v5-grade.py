@@ -19,6 +19,10 @@ G = os.path.join(W, "grading")
 VENDOR = {"sonnet": "claude", "opus": "claude", "gpt-6-luna": "gpt", "gpt-6-sol": "gpt",
           "gemini-3.8-flash-medium": "gemini", "gemini-3.1-pro-high": "gemini"}
 ARMS = ["nokit", "generic", "kit"]
+# answering panel: Gemini 3.1 Pro dropped by the owner on 2026-10-01 after 6/24 cells, before any Gemini grade
+# (older generation than 3.8 Flash, so it did not fill the "stronger Gemini" slot). Its partial cells are reported
+# separately and never enter packets or pass rules. It stays the pre-registered Gemini grader.
+PANEL = ["sonnet", "opus", "gpt-6-luna", "gpt-6-sol", "gemini-3.8-flash-medium"]
 CAP = 120_000  # chars per answer diff; longer diffs are cut with a visible marker
 
 def tasks():
@@ -50,9 +54,10 @@ def packets():
     ts = tasks(); os.makedirs(G, exist_ok=True); rng = random.Random(20260930)
     for tid, t in ts.items():
         for vendor in ("claude", "gpt", "gemini"):
-            runs = [(m, a) for m in VENDOR if VENDOR[m] == vendor for a in ARMS
+            runs = [(m, a) for m in PANEL if VENDOR[m] == vendor for a in ARMS
                     if os.path.isfile(os.path.join(W, "runs", m, f"{tid}-{a}", "meta.txt"))]
-            if len(runs) < 6: continue  # build a packet only when all 2 models x 3 arms are done
+            need = 3 * sum(1 for m in PANEL if VENDOR[m] == vendor)
+            if len(runs) < need: continue  # build a packet only when every panel model x 3 arms is done
             rng.shuffle(runs)
             key = {chr(65 + i): {"model": m, "arm": a} for i, (m, a) in enumerate(runs)}
             items = "\n".join(f"{n}. {txt}" for n, txt in t["items"])
@@ -110,7 +115,7 @@ def score():
     def pct(xs): return f"{100 * sum(xs) / len(xs):5.1f} ({sum(xs)}/{len(xs)})" if xs else "   -"
     print("both graders agree (item passes only if both pass)")
     print(f"{'model':26s} {'arm':8s} {'all':>14s} {'[eng]':>14s} {'[kit]':>14s}")
-    for m in VENDOR:
+    for m in PANEL:
         for a in ARMS:
             e, k = tot.get((m, a, "eng"), []), tot.get((m, a, "kit"), [])
             if e or k: print(f"{m:26s} {a:8s} {pct(e + k):>14s} {pct(e):>14s} {pct(k):>14s}")
