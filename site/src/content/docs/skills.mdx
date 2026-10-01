@@ -1,0 +1,42 @@
+---
+title: The seven Compose agent skills and how routing works
+description: 'What each of the seven Compose Kit agent skills owns, from architecture to UI, data and platform code, and how the compose entry tree routes a task.'
+sidebar:
+  label: Skills
+---
+
+import RoutingDiagram from '../../components/RoutingDiagram.astro';
+
+Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform. One of them, `compose`, is a small entry decision tree; the other six each own one area of a Kotlin Multiplatform app. Install all seven: skills cross-reference each other.
+
+## What's inside
+
+| Skill | What it owns |
+|---|---|
+| **`compose`** | The entry decision tree (~1.3k tokens): task kind → affected area → exact reference files |
+| `compose-architecture` | Module graph, MVI/`BaseViewModel` contract, error tiers, state ownership, naming, Koin DI, Navigation 3, coroutines |
+| `compose-feature` | A screen or feature slice end to end: contract, ViewModel, UI, navigation, DI and tests; review mode |
+| `compose-ui` | Composables: Route/Screen split, stability, loading/empty/error states, lists, animation, accessibility, resources |
+| `compose-data` | Repositories, Ktor, Room, DataStore, Paging 3, offline-first, data-layer tests |
+| `compose-project` | New projects, adopting the kit, modules, convention plugins, version catalog, CI and agent hooks |
+| `compose-platform` | `commonMain` vs `expect`/`actual`, iOS/Swift interop, desktop and web targets, platform lifecycle |
+
+Also included: project and feature templates, and the guard scripts (`compose-architecture/scripts/`).
+
+## The house style
+
+- **One consistent style:** MVI on a shared `BaseViewModel` contract, Koin annotations, Navigation 3, feature-owned data/domain/presentation layers, and typed error handling.
+- **Respects your project:** in a coherent existing codebase (Hilt, MVVM, Navigation 2, your own base class), the kit follows your pattern and proposes migration separately.
+- **Checked, not trusted:** 11 shell guard scripts catch drift in CI, backed by 90 fixture tests.
+
+## How routing works
+
+<RoutingDiagram />
+
+**Progressive loading:** a ~1.3k-token entry tree picks the task path and the exact reference files. The full kit is about 127k tokens; in the v5 test, 35 of 40 kit runs loaded under 20k.
+
+Every panel model opened `compose` first on every task in the v5 test. Reviews and bug fixes stayed at 1-13k tokens of kit context; new features exceed 20k for the models that read beyond the tree. The numbers per model are on the [results page](/results/#kit-context-per-task).
+
+## Source
+
+The skills live in [`skills/`](https://github.com/Meet-Miyani/compose-skill/tree/main/skills) in the repository, one folder per skill. To install them, see [Install](/install/).

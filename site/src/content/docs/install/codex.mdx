@@ -1,0 +1,66 @@
+---
+title: Compose skill for Codex
+description: 'Install the Compose skill for OpenAI Codex: the compose-kit Codex plugin, npx skills or gh skill, for Jetpack Compose and Compose Multiplatform code.'
+sidebar:
+  label: Codex
+---
+
+Compose Kit is a set of seven Codex skills for Jetpack Compose and Compose Multiplatform. Install all seven: `compose` is the entry point, and it hands each task to the other six. In the held-out v5 test, Codex ran GPT-6-Sol (neutral: within noise) and GPT-6-Luna (not yet recommended: engineering items fell). See the [results](/results/) before you rely on it with those models.
+
+Agent id: `codex`.
+
+| Scope | Where the skills go |
+|---|---|
+| This project | `.agents/skills/` |
+| Global, every project | `~/.codex/skills/` |
+
+## Codex plugin
+
+```sh
+codex plugin marketplace add Meet-Miyani/compose-skill
+codex plugin add compose-kit@compose-kit
+```
+
+Codex plugins install for your user, so they're available in every project. There is no project scope for the plugin; use npx skills or gh skill below for a per-project install.
+
+## npx skills
+
+Needs Node 22.20+.
+
+```sh
+# This project only (run it in the repo root), into .agents/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a codex
+
+# Globally, for every project, into ~/.codex/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a codex -g
+```
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent codex`: without it, a non-interactive run installs for GitHub Copilot.
+
+```sh
+# This project only
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent codex --scope project
+done
+
+# Globally
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent codex --scope user
+done
+```
+
+## Point Codex at it
+
+Add this line to the project's `AGENTS.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first.
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from `.agents/skills/` or `~/.codex/skills/`, then install with any option above. The old CLI's `update` can't fetch v6.
+
+See also: [all install options](/install/), [what each skill owns](/skills/).

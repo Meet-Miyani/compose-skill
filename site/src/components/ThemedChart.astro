@@ -1,0 +1,66 @@
+---
+/**
+ * One chart, two drawings: the light and dark SVGs from docs/assets in the
+ * repository, copied byte for byte to src/charts/. Both are inlined; tokens.css
+ * shows the one that matches the current theme (`data-theme`, which follows
+ * the toggle as well as the system preference).
+ *
+ * Inline, not <img>, so the lift chart can animate (src/components/Motion.astro):
+ * at build time its connector lines, with-kit dots and lift labels get a class
+ * and a row index. Only attributes are added; no coordinate, colour or label
+ * is touched, so the drawing and its data are exactly the repository's.
+ */
+import liftLight from '../charts/v5-kit-lift-light.svg?raw';
+import liftDark from '../charts/v5-kit-lift-dark.svg?raw';
+import contextLight from '../charts/v5-kit-context-light.svg?raw';
+import contextDark from '../charts/v5-kit-context-dark.svg?raw';
+
+interface Props {
+  name: 'v5-kit-lift' | 'v5-kit-context';
+  alt: string;
+}
+const { name, alt } = Astro.props;
+
+const sources = {
+  'v5-kit-lift': { light: liftLight, dark: liftDark },
+  'v5-kit-context': { light: contextLight, dark: contextDark },
+};
+
+const escapeAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
+function prepare(svg: string): string {
+  let out = svg
+    .replace(/<\?xml[^>]*>\s*/, '')
+    .replace(/aria-label="[^"]*"/, `aria-label="${escapeAttr(alt)}"`);
+  if (name === 'v5-kit-lift') {
+    // Connectors: the only 2px lines. They run from the no-kit dot (x1) to the
+    // with-kit dot (x2), so a dash offset draws them in that direction.
+    let row = 0;
+    out = out.replace(/<line ([^>]*stroke-width="2"[^>]*)\/>/g, (_m, attrs) => {
+      return `<line class="chart-connector" style="--row:${row++}" pathLength="1" ${attrs}/>`;
+    });
+    // With-kit dots: the second circle on each data row (the legend sits at y=74).
+    const seen = new Map<string, number>();
+    out = out.replace(/<circle cx="([^"]+)" cy="([^"]+)"/g, (m, _cx, cy) => {
+      if (cy === '74') return m;
+      const n = (seen.get(cy) ?? 0) + 1;
+      seen.set(cy, n);
+      if (n !== 2) return m;
+      const r = [...seen.keys()].length - 1;
+      return `<circle class="chart-kit-dot" style="--row:${r}" ${m.slice('<circle '.length)}`;
+    });
+    // Lift labels: the right-aligned "+n" texts.
+    let liftRow = 0;
+    out = out.replace(/<text x="732" y="(?!78")[^"]+"/g, (m) => `<text class="chart-lift" style="--row:${liftRow++}" ${m.slice('<text '.length)}`);
+  }
+  return out;
+}
+
+const light = prepare(sources[name].light);
+const dark = prepare(sources[name].dark);
+---
+
+<div class:list={['themed-chart', name === 'v5-kit-lift' && 'kit-chart-anim']} data-chart={name}>
+  <div class="themed-chart__light" set:html={light} />
+  <div class="themed-chart__dark" set:html={dark} />
+</div>

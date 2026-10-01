@@ -1,0 +1,97 @@
+---
+// Custom minimalist theme toggle button (light / dark)
+---
+
+<starlight-theme-select>
+  <!-- No `id`: Starlight renders this override in both the header and the mobile menu, so an id
+       here would be duplicated in every page. The script scopes its lookup to the element. -->
+  <button
+    class="theme-toggle-btn"
+    type="button"
+    aria-label="Toggle theme"
+    title="Toggle light / dark theme"
+  >
+    <!-- Sun icon (shown in dark mode to switch to light) -->
+    <svg class="sun-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2"></path>
+      <path d="M12 20v2"></path>
+      <path d="m4.93 4.93 1.41 1.41"></path>
+      <path d="m17.66 17.66 1.41 1.41"></path>
+      <path d="M2 12h2"></path>
+      <path d="M20 12h2"></path>
+      <path d="m6.34 17.66-1.41 1.41"></path>
+      <path d="m19.07 4.93-1.41 1.41"></path>
+    </svg>
+    <!-- Moon icon (shown in light mode to switch to dark) -->
+    <svg class="moon-icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </svg>
+  </button>
+</starlight-theme-select>
+
+<script>
+  class StarlightThemeSelect extends HTMLElement {
+    constructor() {
+      super();
+      const button = this.querySelector('.theme-toggle-btn');
+      if (!button) return;
+
+      const storageKey = 'starlight-theme';
+      const getOpposite = () => (document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+
+      button.addEventListener('click', () => {
+        const next = getOpposite();
+        document.documentElement.dataset.theme = next;
+        try {
+          localStorage.setItem(storageKey, next);
+        } catch {}
+      });
+    }
+  }
+  customElements.define('starlight-theme-select', StarlightThemeSelect);
+</script>
+
+<style>
+  starlight-theme-select {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: var(--kit-radius-sm);
+    background: transparent;
+    color: var(--kit-slate);
+    cursor: pointer;
+    transition: color 150ms var(--kit-ease), background-color 150ms var(--kit-ease);
+  }
+
+  .theme-toggle-btn:hover,
+  .theme-toggle-btn:focus-visible {
+    background: var(--kit-surface);
+    color: var(--kit-ink);
+  }
+
+  /* Default icon visibility based on data-theme */
+  :global(:root[data-theme='dark']) .sun-icon {
+    display: block;
+  }
+  :global(:root[data-theme='dark']) .moon-icon {
+    display: none;
+  }
+
+  :global(:root[data-theme='light']) .sun-icon {
+    display: none;
+  }
+  :global(:root[data-theme='light']) .moon-icon {
+    display: block;
+  }
+</style>

@@ -1,0 +1,8 @@
+# https://compose.avinya.dev/robots.txt
+# Compose Kit project site. Everything here is public documentation for an
+# MIT-licensed open-source project, open to every crawler.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://compose.avinya.dev/sitemap-index.xml

@@ -1,0 +1,54 @@
+---
+/**
+ * Starlight `PageTitle` override, registered in astro.config.mjs.
+ *
+ * Docs pages open with a breadcrumb, the title, and the page's description as
+ * a lede. The breadcrumb is read from the sidebar Starlight already built for
+ * this page, so it can never disagree with the navigation: the group that
+ * contains the current page, then the page's own sidebar label.
+ *
+ * The <h1> keeps Starlight's id (`_top`) — the skip link and the "Overview"
+ * entry in the table of contents both target it — and the full `title`, which
+ * carries the page's search keywords.
+ */
+type SidebarEntry = {
+  type: 'link' | 'group';
+  label: string;
+  href?: string;
+  isCurrent?: boolean;
+  entries?: SidebarEntry[];
+};
+
+const { entry, sidebar } = Astro.locals.starlightRoute;
+
+function trail(entries: SidebarEntry[], parents: string[] = []): { groups: string[]; label: string } | null {
+  for (const item of entries) {
+    if (item.type === 'link' && item.isCurrent) return { groups: parents, label: item.label };
+    if (item.type === 'group' && item.entries) {
+      const found = trail(item.entries, [...parents, item.label]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+const path = trail(sidebar as SidebarEntry[]);
+const description = entry.data.description;
+---
+
+<div class="kit-page-title">
+  {
+    path && (
+      <nav aria-label="Breadcrumb">
+        <ol class="kit-page-title__crumbs">
+          {path.groups.map((group) => (
+            <li>{group}</li>
+          ))}
+          <li aria-current="page">{path.label}</li>
+        </ol>
+      </nav>
+    )
+  }
+  <h1 id="_top">{entry.data.title}</h1>
+  {description && <p class="kit-page-title__lede">{description}</p>}
+</div>

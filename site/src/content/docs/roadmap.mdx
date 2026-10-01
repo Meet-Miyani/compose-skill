@@ -1,0 +1,36 @@
+---
+title: Compose Kit roadmap and known issues
+description: 'Compose Kit roadmap: the v6.1 A/B test in progress, the cheap-model benchmark, promoting v6 to Latest, and the known issues in v6.0.'
+sidebar:
+  label: Roadmap
+---
+
+Where the Compose skill is going next, and what is known to be wrong in the current release.
+
+## Roadmap
+
+- [x] **v6.0.0-preview.1:** 7 skills, entry tree, 4 install channels *(released 2026-10-01)*
+- [ ] **v6.1 A/B, in progress:** v6.0 vs the v6.1 fixes vs no kit, 5 models × 6 new tasks = 90 runs. The fixes target conform over-restructuring, over-strict reviews and over-reading.
+  - blind grading under way
+  - verdict expected around **Oct 5, 2026**, once the last grader's plan quota resets
+  - **v6.1.0-preview.2** ships only if the pre-registered rules hold: no model worse, conform improves, reviews over-flag no more
+- [ ] **Cheap-model benchmark:** the same tasks on DeepSeek V4.1 Flash, DeepSeek V4 Pro and MiniMax M3, then Kimi K3, GLM and Qwen if plan quota allows
+- [ ] **Promote v6 to "Latest"** on GitHub once v6.1 is confirmed (until then `gh skill` needs `--pin`)
+- [ ] **A project site** with the full test history (this site is the first version)
+- [ ] *Maybe:* a kit CLI for project tooling (new project, add feature, run guards), if users ask for it
+
+After v6 and the cheap-model benchmark, new benchmark rounds start only for a concrete reason: a reported problem, a major new model, or a large change to the kit.
+
+No v6.1 results are published yet; the current evidence is the [held-out v5 test](/results/).
+
+## Known issues in v6.0
+
+- On "make this match our conventions" tasks, the kit can lead models to restructure too much *(v6.1 fix under test)*.
+- Reviews sometimes call fine code blocking *(v6.1 fix under test)*.
+- GPT-6-Luna scored lower on engineering items with the kit in v5.
+- New features can exceed 20k kit tokens when a model reads past the entry tree.
+- Installing only some of the skills isn't supported yet; skills cross-reference each other, so install all 7.
+
+## Feedback
+
+Found a problem, or want a model benchmarked? [Open an issue](https://github.com/Meet-Miyani/compose-skill/issues). A reported problem is exactly what kicks off the next test round.
