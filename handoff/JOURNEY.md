@@ -207,3 +207,12 @@ a session that ran too long).
 | 15:19 | The last in-flight run (Gemini 3.1 Pro, T1, kit) hit its 60-min cap. **MISTAKE:** the pause point had been added by editing `v5-run.sh` while this run was executing it. Bash reads scripts incrementally, so its wrap-up step crashed (syntax error at line 61) and the queue moved on without a result. Cost: that cell's result bookkeeping | Moderator |
 | 15:25 | Recovered from the saved agent log: final message and diff written; the cell is recorded as a timeout (`agent_exit=142`); its checks run at resume. Lesson: never edit a script a running job is executing; add pause points in a new file | Moderator |
 | 15:24 | The Gradle `--stop` had not stopped our daemons, and Cursor's daemons had outlived Cursor. All of them force-stopped (free memory 60 MB → 2.8 GB); Android Studio's own daemon left alone | Moderator |
+
+## Day 9: Thursday 2026-10-01: v5 resumed
+
+| Time | Event | Who | Outcome |
+|---|---|---|---|
+| ~08:34 | The Mac restarted overnight; the detached queues ended with it (as expected; nothing on disk lost). Owner: "resume" | Owner | — |
+| 08:36 | **Correction:** the queue logs show the 09-30 script-edit crash hit **all three** in-flight runs, not only Gemini's: Opus T3-generic and Luna T1-kit had also lost their wrap-up. The moderator had told the owner those two finished cleanly. **MISTAKE** (an unchecked claim) | Moderator | — |
+| 08:37 | New `v5-finalize.sh` (a new file; the runner is not edited) performs the runner's exact wrap-up on the 3 saved cells: final message, blind diff, hidden test, checks. All 3 checks pass; Gemini recorded as a timeout | Moderator | 28/144 |
+| 08:38 | Limits: Claude 3% of 5h / 23% of week used; Codex ~53% of week used, 5h reset. Pause removed, queues relaunched (detached), watchers re-armed | Moderator | queues running |
