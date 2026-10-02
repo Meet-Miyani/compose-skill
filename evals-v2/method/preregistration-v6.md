@@ -83,3 +83,16 @@ pinned to **`claude-sonnet-5-5` (Sonnet 5.5)**. The `sonnet` alias resolves to i
 all 24 v5 "Sonnet 5" cells also ran `claude-sonnet-5-5`. So "Sonnet 5" above was a mislabel, and pinning keeps the
 same model as v5 while stopping the alias from changing during the runs. The v5 results carry the same mislabel and
 will be corrected there.
+
+**Amendment 3 (2026-10-02, before any Gemini grade exists; 84 of 90 runs done):**
+- **Disclosure:** this amendment comes after the Claude and GPT grades of the 30 packets that existed were frozen
+  (`a7554c9`) and after a single-grader provisional readout of them was seen. It changes no rule above. Part 2 only
+  adds a condition, so it can make a stable release harder, never a preview easier.
+- **1. Muse incomplete:** Muse Spark 1.3 runs on OpenCode Zen's free tier, which stopped answering on 2026-10-01
+  (two stalled cells, and a direct probe also hung). If Muse still cannot finish its 4 missing cells (T5-`kit61`,
+  T6 × 3) once every other run and grade is complete, it is reported as incomplete with the cells it has. Rules 1-3
+  are then applied to the 4 complete panel models only.
+- **2. Stable release:** on the full two-grader data, if rules 1-3 hold **and** no panel model's `kit61` total is
+  below its own `nokit` total, `kit61` is released as **v6.1.0 stable** and becomes the GitHub "Latest" release. If
+  rules 1-3 hold but some model's `kit61` total is below its `nokit` total, it is released as v6.1.0-preview.2 as
+  planned. If rules 1-3 fail, nothing changes from the rule above.
