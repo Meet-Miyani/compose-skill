@@ -96,3 +96,15 @@ will be corrected there.
   below its own `nokit` total, `kit61` is released as **v6.1.0 stable** and becomes the GitHub "Latest" release. If
   rules 1-3 hold but some model's `kit61` total is below its `nokit` total, it is released as v6.1.0-preview.2 as
   planned. If rules 1-3 fail, nothing changes from the rule above.
+
+**Add-on scope (owner, 2026-10-05 16:59, after the panel verdict and before any add-on run):**
+- **Models:** DeepSeek V4.1 Flash (`opencode-go/deepseek-v4.1-flash`, the newest DeepSeek Flash on OpenCode Go) runs
+  first. DeepSeek V4 Pro (`opencode-go/deepseek-v4-pro`, the only DeepSeek Pro there) runs only if the OpenCode Go plan
+  quota allows after Flash. MiniMax M3 is dropped from the add-on list. Kimi K3, GLM 5.3 and Qwen 3.8 Max are not run.
+- **Grading:** as planned, Claude + GPT, both-agree, frozen before scoring. Packets group answers by vendor, so both
+  DeepSeek models share a packet per task. If V4 Pro does not run, V4.1 Flash is packeted alone (3 answers per
+  packet), decided before any add-on packet exists.
+- **Reporting:** separately from the 5-model panel, against the add-on's own no-kit result and `kit60`. Add-ons never
+  change the v6.1 release decision, which was made on the panel.
+- **Task-evidence fix carried over:** none. The add-on packets use the same packet builder as the panel, so the
+  hidden-test result is again not stated; the panel VERDICT's sensitivity method applies to them too.
