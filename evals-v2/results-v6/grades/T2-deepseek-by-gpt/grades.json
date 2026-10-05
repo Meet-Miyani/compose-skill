@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with the same inputs and expectations."},
+    "2": {"pass": true, "why": "The project JVM tests and compile checks completed successfully."},
+    "3": {"pass": true, "why": "The changes are confined to book detail and its supporting book lookup API."},
+    "4": {"pass": false, "why": "The diff adds a visible Retry button and retry action to book detail."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and uses its state updates and guarded launch."},
+    "6": {"pass": true, "why": "The new Route owns lifecycle-aware state collection and calls a stateless Screen."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with unchanged inputs and expectations."},
+    "2": {"pass": true, "why": "The existing JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff changes only book detail and its app entry wiring."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation, persistence, or new feature."},
+    "5": {"pass": true, "why": "The ViewModel uses BaseViewModel, the UI contract types, and launchGuarded without manual catch."},
+    "6": {"pass": true, "why": "The Route and stateless Screen are separate, with collectAsStateWithLifecycle in the Route."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with unchanged inputs and expectations."},
+    "2": {"pass": true, "why": "The existing JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is limited to book detail files and their app entry wiring."},
+    "4": {"pass": true, "why": "The screen retains loading and title output without new controls or features."},
+    "5": {"pass": true, "why": "The ViewModel uses BaseViewModel state and guarded launch with an error handler."},
+    "6": {"pass": true, "why": "The Route separately collects state with lifecycle awareness and renders a stateless Screen."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with unchanged inputs and expectations."},
+    "2": {"pass": true, "why": "The existing JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is confined to book detail and its app entry wiring."},
+    "4": {"pass": false, "why": "Emitting errors to HandleAppErrors adds a visible snackbar that did not exist before."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and handles failures through launchGuarded and emitError."},
+    "6": {"pass": true, "why": "The separate Route collects state lifecycle-aware and passes it to a stateless Screen."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The diff retains the same id lookup and loading/title behavior, and checks succeeded."},
+    "2": {"pass": true, "why": "The existing JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The resource and code edits all support the book detail presentation."},
+    "4": {"pass": true, "why": "The diff adds no UI controls, screens, navigation, persistence, or features."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and uses guarded launch and read-only state."},
+    "6": {"pass": true, "why": "The separate Route collects state with collectAsStateWithLifecycle and renders a stateless Screen."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with unchanged inputs and expectations."},
+    "2": {"pass": true, "why": "The existing JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is limited to book detail and its app entry wiring."},
+    "4": {"pass": true, "why": "The diff retains the loading/title UI and adds no controls or other feature."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel and uses guarded launch instead of manual catch."},
+    "6": {"pass": true, "why": "The separate Route collects state lifecycle-aware and renders a stateless Screen."}
+  }
+}

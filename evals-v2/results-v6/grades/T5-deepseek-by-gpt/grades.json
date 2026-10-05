@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "A Room reading_goals table and v2-to-v3 migration persist the target across launches."},
+    "2": {"pass": true, "why": "The ViewModel rejects null, zero, and negative parsed targets before saving."},
+    "3": {"pass": true, "why": "Progress counts books marked finished with finishedYear equal to the current year."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "The Room goal is accessed through ReadingGoalRepository and exposed in BookListUiState."},
+    "6": {"pass": false, "why": "Invalid input is silently ignored; no validation message reaches the screen through state, and new UI text is hardcoded."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Preferences DataStore stores the goal in an app file through the goal repository."},
+    "2": {"pass": true, "why": "The ViewModel saves only a parsed positive integer, including when invoked directly."},
+    "3": {"pass": true, "why": "Progress counts books whose recorded finish instant falls in the current calendar year."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "The repository mediates DataStore access and the ViewModel places the goal in UiState."},
+    "6": {"pass": false, "why": "Although new text uses resources, validation has no message in UiState and the button's validity check lives in the composable."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The goal is stored in a Room table with a v2-to-v3 migration."},
+    "2": {"pass": false, "why": "The ViewModel accepts zero and negative integers and passes them to the repository."},
+    "3": {"pass": true, "why": "The screen counts books whose isFinished flag is true, which the rubric permits."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "The BookRepository mediates Room goal storage and the ViewModel exposes goalTarget in UiState."},
+    "6": {"pass": false, "why": "The ViewModel has no validation message in state for the screen to display."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "The goal is stored in a Room table with a v2-to-v3 migration."},
+    "2": {"pass": false, "why": "Zero can be saved, and filtering a negative draft to digits can save it as a positive goal."},
+    "3": {"pass": true, "why": "The screen counts books whose isFinished flag is true, which the rubric permits."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "ReadingGoalRepository mediates Room access and the ViewModel exposes the goal in UiState."},
+    "6": {"pass": false, "why": "There is no validation message in UiState, and new goal text is hardcoded in composables."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "A per-year Room goal table with migration persists targets across launches."},
+    "2": {"pass": true, "why": "The ViewModel returns without saving unless the draft parses to a positive integer."},
+    "3": {"pass": true, "why": "Progress counts books whose finish year matches the saved goal year."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "The BookRepository mediates Room goal storage and the ViewModel exposes the goal in UiState."},
+    "6": {"pass": false, "why": "Invalid input is silently ignored; no validation message reaches the screen through state, and new goal text is hardcoded."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Preferences DataStore stores the goal in an app file through the goal repository."},
+    "2": {"pass": true, "why": "The ViewModel rejects non-numeric, zero, and negative targets before saving."},
+    "3": {"pass": true, "why": "Progress counts finished books stamped with the current finish year."},
+    "4": {"pass": true, "why": "The supplied check results report BUILD SUCCESSFUL with tests passing."},
+    "5": {"pass": true, "why": "The repository mediates DataStore access and the ViewModel exposes the goal in UiState."},
+    "6": {"pass": false, "why": "New text uses resources, but invalid input is silently ignored without a validation message in UiState."}
+  }
+}

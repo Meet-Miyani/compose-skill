@@ -1,0 +1,62 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Identifies GlobalScope outliving the ViewModel, but does not say it can keep writing state after clear."},
+    "2": {"pass": true, "why": "Says the empty catch drops failures and leaves stale or no results without an error in state."},
+    "3": {"pass": true, "why": "Says query changes launch concurrent jobs and stale results can win."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates blocking, should-fix, and nit findings and says the state/action shape is roughly right."},
+    "8": {"pass": false, "why": "Proposes ViewModel-scoped work and an overlap guard, but does not propose cancelling the previous search."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Says GlobalScope work continues after clear, but does not identify writes to state after clear."},
+    "2": {"pass": true, "why": "Says the empty catch silently drops errors and leaves blank results with no error."},
+    "3": {"pass": true, "why": "Explicitly identifies uncancelled searches and older results overwriting newer ones."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "7": {"pass": true, "why": "Has blocking and later sections plus a Fine as is section."},
+    "8": {"pass": true, "why": "The proposed code cancels searchJob before launching through launchGuarded."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Says GlobalScope work outlives the ViewModel, but does not identify writes to state after clear."},
+    "2": {"pass": false, "why": "Identifies swallowed failures but does not say results retain the previous value."},
+    "3": {"pass": true, "why": "Says each query launches independent work and an older result can overwrite a newer one."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": false, "why": "Separates blocking from smaller issues but does not say what is fine as it is."},
+    "8": {"pass": false, "why": "Proposes launchGuarded and an overlap guard, but does not specifically propose cancelling the previous search."}
+  },
+  "D": {
+    "1": {"pass": false, "why": "Says GlobalScope work is not cancelled when the screen goes away, but does not identify state writes after clear."},
+    "2": {"pass": true, "why": "Says the empty catch swallows failures and leaves an empty result list without an error message or state."},
+    "3": {"pass": true, "why": "Says each keystroke starts work without a guard and older results can overwrite newer ones."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Calls ignoreCase filtering reasonable."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "7": {"pass": true, "why": "Has blocking, later, and Fine as is sections."},
+    "8": {"pass": true, "why": "Proposes launchGuarded with a saved Job cancelled on each new query."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Explicitly says GlobalScope work continues after clear and writes state to the cleared holder."},
+    "2": {"pass": true, "why": "Says the empty catch drops all failures and a failed search does nothing, leaving state unchanged with no error feedback."},
+    "3": {"pass": true, "why": "Says searches overlap and an earlier result can arrive after a later one."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Calls the filter simple and correct."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected version appears only in the message."},
+    "7": {"pass": true, "why": "Separates blocking, later, and Fine as is findings."},
+    "8": {"pass": true, "why": "Proposes launchGuarded and cancels searchJob before starting the next search."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Explicitly says the GlobalScope job continues after clear and calls updateState on the cleared ViewModel."},
+    "2": {"pass": false, "why": "Identifies swallowed failures and absent feedback but does not state that results retain their previous value."},
+    "3": {"pass": true, "why": "Says every keystroke launches overlapping work and older results can overwrite newer ones."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "7": {"pass": true, "why": "Separates blocking, later, and Fine as is findings."},
+    "8": {"pass": true, "why": "Proposes launchGuarded with cancellation of searchJob on each new query."}
+  }
+}

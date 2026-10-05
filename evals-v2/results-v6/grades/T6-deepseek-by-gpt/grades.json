@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Author headers are not tappable and the list still shows every author."},
+    "2": {"pass": false, "why": "No author destination or Back action is added."},
+    "3": {"pass": false, "why": "There is no author-specific view; books remain grouped on the main list."},
+    "4": {"pass": true, "why": "Checks exited successfully and the build reports success."},
+    "5": {"pass": false, "why": "Only the existing list contract and ViewModel are changed; no author destination is added."},
+    "6": {"pass": true, "why": "BookListViewModel groups books by author before passing sections to the composable."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Tapping an author opens a destination fed by a DAO query for that author."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack, which removes the author entry from the back stack."},
+    "3": {"pass": true, "why": "The query selects all books for the author without a finished-status condition."},
+    "4": {"pass": true, "why": "Checks exited successfully and the build reports success."},
+    "5": {"pass": true, "why": "AuthorBooksKey is registered as a destination with its own ViewModel and UiState."},
+    "6": {"pass": true, "why": "The DAO filters with WHERE author = :author; the composable only renders results."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The clickable author line opens a destination using a stream queried by author."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack and App removes the author entry."},
+    "3": {"pass": true, "why": "The author query has no finished-status filter and the screen renders all returned books."},
+    "4": {"pass": true, "why": "Checks exited successfully and the build reports success."},
+    "5": {"pass": true, "why": "AuthorBooksKey has an App entry and a separate ViewModel and UiState contract."},
+    "6": {"pass": true, "why": "The DAO applies the author condition before data reaches the screen."}
+  },
+  "D": {
+    "1": {"pass": false, "why": "Author headings are static and do not open a filtered view."},
+    "2": {"pass": false, "why": "There is no author destination or Back action."},
+    "3": {"pass": false, "why": "Books are grouped on the main list; no author-specific view exists."},
+    "4": {"pass": true, "why": "The checks include jvmTest and report a successful build."},
+    "5": {"pass": false, "why": "The diff changes only BookListScreen and adds no destination or ViewModel."},
+    "6": {"pass": false, "why": "BookListScreen groups state.items by author inside the composable."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The author button opens a destination populated by getBooksByAuthor(author)."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack and App removes the author destination."},
+    "3": {"pass": true, "why": "The DAO selects all books for the author and the screen displays either finished status."},
+    "4": {"pass": true, "why": "Checks exited successfully and the build reports success."},
+    "5": {"pass": true, "why": "AuthorBooksKey is an App destination with its own ViewModel and UiState."},
+    "6": {"pass": true, "why": "The DAO filters by author; the composable does not filter books."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The author action opens a destination supplied by an author-filtered DAO stream."},
+    "2": {"pass": true, "why": "NavDisplay's onBack removes the author entry and returns to the list."},
+    "3": {"pass": true, "why": "The author query has no finished-status condition and the screen lists its results."},
+    "4": {"pass": true, "why": "Checks exited successfully and the build reports success."},
+    "5": {"pass": true, "why": "BooksByAuthorKey is registered as a destination with its own ViewModel and UiState."},
+    "6": {"pass": true, "why": "The DAO filters by author before results reach the composable."}
+  }
+}
