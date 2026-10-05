@@ -1,0 +1,224 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 6586176..c5bf3f9 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -53,7 +53,11 @@ fun App() {
+                 onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                 entryProvider = entryProvider {
+                     entry<BookDetailKey> { key ->
+-                        BookDetailRoute(viewModel = koinViewModel(), bookId = key.bookId)
++                        BookDetailRoute(
++                            viewModel = koinViewModel(),
++                            bookId = key.bookId,
++                            onEffect = {},
++                        )
+                     }
+ 
+                     entry<BookListKey> {
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
+index 9087fee..78569c7 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
+@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
+ internal interface BookDao {
+     @Query("SELECT * FROM books")
+     fun getBooksStream(): Flow<List<BookEntity>>
++    @Query("SELECT * FROM books WHERE id = :id")
++    suspend fun getBook(id: Long): BookEntity?
+     @Insert
+     suspend fun insert(book: BookEntity): Long
+     @Query("UPDATE books SET isFinished = 1 WHERE id = :id")
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+index f5c072d..46e35a1 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+@@ -10,6 +10,9 @@ internal class DefaultBookRepository(private val db: NotesDatabase) : BookReposi
+     override fun getBooksStream(): Flow<List<Book>> = db.bookDao().getBooksStream().map { entities -> 
+         entities.map { Book(it.id, it.title, it.author, it.pages, it.isFinished) } 
+     }
++    override suspend fun getBook(id: Long): Book? {
++        return db.bookDao().getBook(id)?.let { Book(it.id, it.title, it.author, it.pages, it.isFinished) }
++    }
+     override suspend fun addBook(title: String, author: String, pages: Int): Long {
+         return db.bookDao().insert(BookEntity(title = title, author = author, pages = pages, isFinished = false))
+     }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+index 70bbf95..fecbbfb 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+@@ -3,6 +3,7 @@ import com.example.feature.notes.readinglog.domain.model.Book
+ import kotlinx.coroutines.flow.Flow
+ interface BookRepository {
+     fun getBooksStream(): Flow<List<Book>>
++    suspend fun getBook(id: Long): Book?
+     suspend fun addBook(title: String, author: String, pages: Int): Long
+     suspend fun markFinished(id: Long)
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+index e4a7003..9719367 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+@@ -1,8 +1,20 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookDetailUiState(val book: Book? = null, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface BookDetailUiAction : UiAction { data class OnScreenStarted(val id: Long) : BookDetailUiAction }
++
++data class BookDetailUiState(
++    val book: Book? = null,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++) : UiState
++
++sealed interface BookDetailUiAction : UiAction {
++    data class OnScreenStarted(val id: Long) : BookDetailUiAction
++    data class OnRetryClick(val error: AppError) : BookDetailUiAction
++}
++
+ sealed interface BookDetailUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+new file mode 100644
+index 0000000..7c19ec5
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+@@ -0,0 +1,27 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
++
++@Composable
++fun BookDetailRoute(
++    viewModel: BookDetailViewModel,
++    bookId: Long,
++    onEffect: suspend (BookDetailUiEffect) -> Unit,
++) {
++    LifecycleStartEffect(bookId) {
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    CollectEffect(viewModel.effect) { onEffect(it) }
++    HandleAppErrors(viewModel.errors)
++    BookDetailScreen(
++        state = state,
++        onRetry = { state.error?.let { viewModel.onAction(BookDetailUiAction.OnRetryClick(it)) } },
++    )
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index 09a492f..5eeed1c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -1,21 +1,24 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.material3.Button
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.compose.ui.Modifier
++
+ @Composable
+-fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+-    LifecycleStartEffect(bookId) {
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
+-    Column {
+-        if (state.isLoading) { Text("Loading...") }
+-        state.book?.let {
+-            Text(it.title)
++fun BookDetailScreen(
++    state: BookDetailUiState,
++    onRetry: () -> Unit,
++    modifier: Modifier = Modifier,
++) {
++    val error = state.error
++    when {
++        state.isLoading -> Text("Loading...", modifier = modifier)
++        error != null -> Column(modifier = modifier) {
++            Text(error.serverMessage ?: error.type.name)
++            Button(onClick = onRetry) { Text("Retry") }
+         }
++        else -> state.book?.let { Text(it.title, modifier = modifier) }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index 50f860b..724cd1c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,40 @@
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
+-import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
++import kotlinx.coroutines.Job
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class BookDetailViewModel(private val repository: BookRepository) :
++    BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(BookDetailUiState()) {
++
++    private var loadJob: Job? = null
++    private var requestedId: Long = 0L
++
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            is BookDetailUiAction.OnScreenStarted -> {
++                requestedId = action.id
++                load()
+             }
++            is BookDetailUiAction.OnRetryClick -> retry()
+         }
+     }
++
++    private fun load() {
++        if (loadJob?.isActive == true) return
++        updateState { copy(isLoading = true, error = null) }
++        loadJob = launchGuarded(onError = { error ->
++            updateState { copy(isLoading = false, error = error) }
++        }) {
++            val book = repository.getBook(requestedId)
++            updateState { copy(book = book, isLoading = false) }
++        }
++    }
++
++    private fun retry() {
++        updateState { copy(error = null) }
++        load()
++    }
+ }

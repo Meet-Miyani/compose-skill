@@ -1,0 +1,83 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+index 372e1f3..a6dc066 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+@@ -2,8 +2,8 @@ package com.example.feature.notes.readinglog.presentation.list
+ import com.example.core.mvi.UiAction
+ import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
+-import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookListUiState(val items: List<Book> = emptyList(), val isLoading: Boolean = false) : UiState
++import com.example.feature.notes.readinglog.presentation.list.model.AuthorSection
++data class BookListUiState(val sections: List<AuthorSection> = emptyList(), val isLoading: Boolean = false) : UiState
+ sealed interface BookListUiAction : UiAction {
+     data object OnScreenStarted : BookListUiAction
+     data object OnAddClick : BookListUiAction
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+index 6b50bac..a4732fb 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+@@ -3,6 +3,7 @@ import androidx.compose.foundation.layout.Column
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material3.Button
++import androidx.compose.material3.MaterialTheme
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+ @Composable
+@@ -10,9 +11,14 @@ fun BookListScreen(state: BookListUiState, onAdd: () -> Unit, onMarkFinished: (L
+     Column {
+         Button(onClick = onAdd) { Text("Add Book") }
+         LazyColumn {
+-            items(state.items, key = { it.id }) { book ->
+-                Text("${book.title} by ${book.author} (${book.pages} pages) - Finished: ${book.isFinished}")
+-                if (!book.isFinished) { Button(onClick = { onMarkFinished(book.id) }) { Text("Mark Finished") } }
++            state.sections.forEach { section ->
++                item(key = "author-${section.author}", contentType = "author") {
++                    Text(section.author, style = MaterialTheme.typography.titleMedium)
++                }
++                items(section.books, key = { it.id }, contentType = { "book" }) { book ->
++                    Text("${book.title} (${book.pages} pages) - Finished: ${book.isFinished}")
++                    if (!book.isFinished) { Button(onClick = { onMarkFinished(book.id) }) { Text("Mark Finished") } }
++                }
+             }
+         }
+     }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+index 2c463f7..385337b 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+@@ -1,6 +1,8 @@
+ package com.example.feature.notes.readinglog.presentation.list
+ import com.example.core.mvi.BaseViewModel
++import com.example.feature.notes.readinglog.domain.model.Book
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import com.example.feature.notes.readinglog.presentation.list.model.AuthorSection
+ import kotlinx.coroutines.Job
+ import org.koin.core.annotation.KoinViewModel
+ @KoinViewModel
+@@ -18,10 +20,14 @@ class BookListViewModel(private val repository: BookRepository) :
+         if (streamJob?.isActive == true) return
+         updateState { copy(isLoading = true) }
+         streamJob = launchGuarded(onError = ::emitError) {
+-            repository.getBooksStream().collect { books -> updateState { copy(items = books, isLoading = false) } }
++            repository.getBooksStream().collect { books -> updateState { copy(sections = groupByAuthor(books), isLoading = false) } }
+         }
+     }
+     private fun markFinished(id: Long) { launchGuarded(onError = ::emitError) { repository.markFinished(id) } }
++    private fun groupByAuthor(books: List<Book>): List<AuthorSection> =
++        books.groupBy { it.author }
++            .toSortedMap()
++            .map { (author, byAuthor) -> AuthorSection(author, byAuthor.sortedBy { it.title }) }
+     fun createBook(title: String, author: String, pages: Int) {
+         launchGuarded(onError = ::emitError) { repository.addBook(title, author, pages) }
+     }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/model/AuthorSection.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/model/AuthorSection.kt
+new file mode 100644
+index 0000000..1ba0c97
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/model/AuthorSection.kt
+@@ -0,0 +1,3 @@
++package com.example.feature.notes.readinglog.presentation.list.model
++import com.example.feature.notes.readinglog.domain.model.Book
++data class AuthorSection(val author: String, val books: List<Book>)

@@ -17,3 +17,9 @@ Pre-registration: `evals-v2/method/preregistration-v6.md` (Amendments 1-3).
 Scoring: `evals-v2/method/tools/v6-verdict.py` (an item passes only when both graders pass it; it reads the frozen
 grades and `run-meta.txt`, so it runs from the repo). Grading tool: `evals-v2/method/tools/v6-grade.py`
 (`score` runs from the repo; `packets` and `run` need the local scratch of runs and packets).
+
+**Add-ons (DeepSeek V4.1 Flash, DeepSeek V4 Pro; reported separately, frozen 2026-10-05 before add-on scoring):**
+- `grades/<task>-deepseek-by-<grader>/`: 12 packets (Claude 6, GPT 6), each holding both DeepSeek models × 3 arms.
+- `packets-addons.sha256`, `answers/opencode-go_deepseek-*` (36 cells), the DeepSeek lines in `run-meta.txt`.
+- `score-output-addons.txt`: the output of `evals-v2/method/tools/v6-addon-score.py`.
+- `ADDONS.md`: the add-on results, kit context, cost and run record.

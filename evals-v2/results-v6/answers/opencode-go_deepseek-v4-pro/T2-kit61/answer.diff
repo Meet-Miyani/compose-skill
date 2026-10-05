@@ -1,0 +1,198 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 6586176..a0845a8 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -14,6 +14,7 @@ import com.example.feature.notes.navigation.NotesDetailKey
+ import com.example.feature.notes.navigation.NotesListKey
+ import com.example.feature.notes.readinglog.navigation.BookListKey
+ import com.example.feature.notes.readinglog.navigation.BookDetailKey
++import com.example.feature.notes.readinglog.presentation.detail.BookDetailParams
+ import com.example.feature.notes.readinglog.presentation.detail.BookDetailRoute
+ import com.example.feature.notes.readinglog.navigation.readingLogNavSerializers
+ import kotlinx.serialization.modules.plus
+@@ -53,7 +54,11 @@ fun App() {
+                 onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                 entryProvider = entryProvider {
+                     entry<BookDetailKey> { key ->
+-                        BookDetailRoute(viewModel = koinViewModel(), bookId = key.bookId)
++                        BookDetailRoute(
++                            viewModel = koinViewModel(parameters = { parametersOf(BookDetailParams(bookId = key.bookId)) }),
++                            bookId = key.bookId,
++                            onEffect = { },
++                        )
+                     }
+ 
+                     entry<BookListKey> {
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+index e4a7003..3f2689d 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+@@ -1,8 +1,26 @@
++/**
++ * MVI contract for the Book Detail destination.
++ *
++ * Reading Log detail: exactly three top-level declarations live here.
++ * UiState holds the domain Book directly (no UiModel trigger fires on
++ * this screen).
++ */
+ package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookDetailUiState(val book: Book? = null, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface BookDetailUiAction : UiAction { data class OnScreenStarted(val id: Long) : BookDetailUiAction }
++
++data class BookDetailUiState(
++    val book: Book? = null,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++) : UiState
++
++sealed interface BookDetailUiAction : UiAction {
++    data object OnScreenStarted : BookDetailUiAction
++}
++
+ sealed interface BookDetailUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+new file mode 100644
+index 0000000..2491d8e
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+@@ -0,0 +1,30 @@
++/**
++ * Lifecycle-aware wrapper for the Book Detail destination.
++ *
++ * Koin-free: the composition root resolves the ViewModel and passes it in.
++ * This wrapper owns lifecycle and effect collection only.
++ */
++package com.example.feature.notes.readinglog.presentation.detail
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
++
++@Composable
++fun BookDetailRoute(
++    viewModel: BookDetailViewModel,
++    bookId: Long,
++    onEffect: suspend (BookDetailUiEffect) -> Unit,
++) {
++    LifecycleStartEffect(bookId) {
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
++    HandleAppErrors(viewModel.errors)
++    BookDetailScreen(state = state)
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index 09a492f..f9fc03b 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -1,21 +1,20 @@
++/**
++ * Stateless content for the Book Detail destination.
++ *
++ * Renders state only. No ViewModel, no Koin, no state reads beyond params.
++ */
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++
+ @Composable
+-fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+-    LifecycleStartEffect(bookId) {
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun BookDetailScreen(state: BookDetailUiState) {
+     Column {
+-        if (state.isLoading) { Text("Loading...") }
+-        state.book?.let {
+-            Text(it.title)
++        if (state.isLoading) {
++            Text("Loading...")
+         }
++        state.book?.let { Text(it.title) }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index 50f860b..37da740 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,41 @@
++/**
++ * ViewModel for the Book Detail destination in the Reading Log.
++ *
++ * Owns the UiState and the cold load of one Book by identity from the key.
++ */
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
+-            }
++import org.koin.core.annotation.InjectedParam
++import org.koin.core.annotation.KoinViewModel
++
++/** Construction bag for the destination's nav arguments. Top-level so entries and tests share it. */
++data class BookDetailParams(val bookId: Long)
++
++/** ViewModel behind the Book Detail destination; owns its UiState and cold-load of one Book. */
++@KoinViewModel
++class BookDetailViewModel(
++    private val repository: BookRepository,
++    @InjectedParam private val params: BookDetailParams,
++) : BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(BookDetailUiState()) {
++
++    private var loadJob: Job? = null
++
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            BookDetailUiAction.OnScreenStarted -> load()
++        }
++    }
++
++    private fun load() {
++        if (loadJob?.isActive == true) return
++        updateState { copy(isLoading = true) }
++        loadJob = launchGuarded(onError = { updateState { copy(isLoading = false, error = it) } }) {
++            val book = repository.getBooksStream().first().find { it.id == params.bookId }
++            updateState { copy(book = book, isLoading = false) }
+         }
+     }
+ }
