@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Hidden test passes (checks_exit=0) after a calls-only fake adaptation for the new getBook; inputs and expectations unchanged."},
+    "2": {"pass": true, "why": ":feature:notes:jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Edits stay in the detail slice, its repository/DAO read and the App.kt entry; nothing unrelated is rewritten."},
+    "4": {"pass": false, "why": "Adds a new Retry Button, an OnRetryClick action, a retry() path and an inline error UI that did not exist before."},
+    "5": {"pass": true, "why": "Extends BaseViewModel with @KoinViewModel, read-only state through updateState, and failures go through launchGuarded(onError) with no try/catch."},
+    "6": {"pass": true, "why": "New BookDetailRoute owns lifecycle and collectAsStateWithLifecycle; BookDetailScreen is stateless."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Hidden test passes (checks_exit=0) after a calls-only adaptation for the BookDetailParams constructor."},
+    "2": {"pass": true, "why": "jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Changes limited to the detail files and its App.kt entry."},
+    "4": {"pass": true, "why": "No new controls or screens; the Screen renders the same loading text and title."},
+    "5": {"pass": true, "why": "BaseViewModel, @KoinViewModel, updateState, and launchGuarded with onError/onStart/onComplete replace the manual try/catch."},
+    "6": {"pass": true, "why": "Separate Route with LifecycleStartEffect and collectAsStateWithLifecycle; stateless Screen."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Hidden test passes (checks_exit=0) after a calls-only adaptation for BookDetailParams."},
+    "2": {"pass": true, "why": "jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Only the detail slice and its App.kt entry change."},
+    "4": {"pass": true, "why": "Screen body is unchanged (loading text and title); no new UI or features."},
+    "5": {"pass": true, "why": "BaseViewModel with @KoinViewModel, updateState, and launchGuarded(onError) with no try/catch."},
+    "6": {"pass": true, "why": "Route/Screen split with collectAsStateWithLifecycle in the Route."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Hidden test passes (checks_exit=0) after a calls-only adaptation for BookDetailParams."},
+    "2": {"pass": true, "why": "jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Only the detail slice and its App.kt entry change."},
+    "4": {"pass": true, "why": "No new controls or screens. Errors go through the project's existing emitError/HandleAppErrors channel, which the message discloses."},
+    "5": {"pass": true, "why": "BaseViewModel with @KoinViewModel, updateState, and launchGuarded(onError = ::emitError) with no try/catch."},
+    "6": {"pass": true, "why": "Route/Screen split with collectAsStateWithLifecycle in the Route."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Hidden test compiles unadapted and passes (checks_exit=0)."},
+    "2": {"pass": true, "why": "jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Changes limited to the detail slice, its App.kt entry, and one string resource for its loading text."},
+    "4": {"pass": true, "why": "Same loading text (now a string resource) and title; no new UI or features."},
+    "5": {"pass": true, "why": "BaseViewModel with @KoinViewModel, updateState, and launchGuarded(onError) with no try/catch."},
+    "6": {"pass": true, "why": "Route/Screen split with collectAsStateWithLifecycle in the Route."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Hidden test passes (checks_exit=0) after a calls-only adaptation for BookDetailParams."},
+    "2": {"pass": true, "why": "jvmTest and composeApp compile report BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Only the detail slice and its App.kt entry change."},
+    "4": {"pass": true, "why": "Screen renders the same loading text and title; no new UI or features."},
+    "5": {"pass": true, "why": "BaseViewModel with @KoinViewModel, updateState, and launchGuarded(onError) with no try/catch."},
+    "6": {"pass": true, "why": "Route/Screen split with collectAsStateWithLifecycle in the Route."}
+  }
+}

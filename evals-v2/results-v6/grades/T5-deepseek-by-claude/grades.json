@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Goal stored in a new Room table reading_goals (DB v3, auto-migration 2->3), read back via a DAO Flow"},
+    "2": {"pass": true, "why": "saveGoal returns early when toIntOrNull is null or <= 0, so zero, negative and non-numeric input are never persisted"},
+    "3": {"pass": true, "why": "finishedThisYear counts isFinished books whose finishedYear equals the current year; markFinished stamps the year"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "ReadingGoalRepository/DefaultReadingGoalRepository in data layer; ViewModel combines it into BookListUiState; composable only reads state"},
+    "6": {"pass": false, "why": "Validation is in the ViewModel but invalid input is silently ignored with no message in state, and new text ('Reading Goal', 'Set Goal', 'Goal reached!') is hardcoded, not string resources"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Goal persisted in a file-backed Preferences DataStore with Android/iOS/JVM paths, Android context set before Koin"},
+    "2": {"pass": true, "why": "ViewModel setGoal rejects non-integers and values <= 0 (takeIf { it > 0 }), and the Set button is also disabled"},
+    "3": {"pass": true, "why": "Counts books whose finishedAt falls in the current calendar year; markFinished records clock.now()"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "DefaultReadingGoalRepository behind ReadingGoalRepository; ViewModel puts goalTarget/booksFinishedThisYear into UiState"},
+    "6": {"pass": false, "why": "Strings are resources, but there is no validation message in state (silent return / disabled button), and the enabled check is duplicated in the composable"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Goal stored in a Room reading_goal table (DB v3 auto-migration), observed via a DAO Flow"},
+    "2": {"pass": false, "why": "saveGoal only checks toIntOrNull, so 0 and negative numbers are saved"},
+    "3": {"pass": true, "why": "Progress counts all books with isFinished against the target"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "Goal read/written via BookRepository in the data layer and delivered to the screen as UiState.goalTarget"},
+    "6": {"pass": false, "why": "Validation is incomplete (zero/negative accepted) and no validation message reaches the screen through state"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Goal stored in a Room reading_goal single-row table (DB v3 auto-migration)"},
+    "2": {"pass": false, "why": "Draft is digits-only and toIntOrNull-checked, but '0' passes and is saved; there is no > 0 check"},
+    "3": {"pass": true, "why": "Screen counts all isFinished books against the goal"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "ReadingGoalRepository/DefaultReadingGoalRepository; ViewModel exposes goal in BookListUiState"},
+    "6": {"pass": false, "why": "No validation message in state, zero accepted, and new strings are hardcoded (the message admits it)"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Goal stored per year in a Room reading_goal table (DB v3 auto-migration), upserted on save"},
+    "2": {"pass": true, "why": "saveGoal returns when toIntOrNull is null or <= 0"},
+    "3": {"pass": true, "why": "Progress counts books whose finishedYear (stamped only on markFinished) equals the goal's year"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "Goal accessed through BookRepository/DefaultBookRepository (Room DAO); ViewModel puts goal/progress into UiState"},
+    "6": {"pass": false, "why": "Invalid input is silently ignored with no message in state, and new text ('Yearly goal: ...', 'Set Goal') is hardcoded"}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Goal persisted as JSON in a file-backed Preferences DataStore with per-platform paths, Android context set before Koin"},
+    "2": {"pass": true, "why": "saveGoal returns when trimmed toIntOrNull is null or <= 0"},
+    "3": {"pass": true, "why": "finishedThisYear counts isFinished books with finishedYear == current year; markFinished stamps the year"},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL"},
+    "5": {"pass": true, "why": "DefaultReadingGoalRepository behind ReadingGoalRepository; ViewModel combines it into BookListUiState"},
+    "6": {"pass": false, "why": "All new text is in strings.xml, but invalid input is silently ignored and no validation message reaches the screen through state"}
+  }
+}

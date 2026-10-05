@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The diff keeps the one-shot finished-book page sum, and the JVM build succeeds."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are confined to stats code, its strings, and its App route call."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and uses launchGuarded with updateState and error forwarding."
+    },
+    "6": {
+      "pass": true,
+      "why": "A separate Route collects state with collectAsStateWithLifecycle and renders a stateless Screen."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Changing first() to collect makes totals update on later stream emissions, altering the original one-shot behavior."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only the reading stats contract, screen, and ViewModel are changed."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and replaces manual try/catch with launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Route and Screen are separate composables, and Route uses collectAsStateWithLifecycle."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The diff retains first(), the finished-book filter, and the same page sum."
+    },
+    "2": {
+      "pass": true,
+      "why": "The packet checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "The diff changes only the reading stats files."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and handles failures in launchGuarded rather than manual try/catch."
+    },
+    "6": {
+      "pass": true,
+      "why": "The new Route collects state with collectAsStateWithLifecycle and calls a stateless Screen."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The diff retains the one-shot finished-book page sum and loading transition."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are confined to reading stats and its App route call."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and handles failures through launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "A separate Route uses collectAsStateWithLifecycle and renders a stateless Screen."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The diff keeps first() and sums pages only for finished books; the JVM build succeeds."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are confined to stats code, its strings, and its App route call."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and uses launchGuarded with updateState and error forwarding."
+    },
+    "6": {
+      "pass": true,
+      "why": "A separate Route collects state with collectAsStateWithLifecycle and renders a stateless Screen."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The diff keeps first() and the finished-book page sum; the JVM build succeeds."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks show :feature:notes:jvmTest and the build succeeded."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes are confined to reading stats and its string resources."
+    },
+    "4": {
+      "pass": true,
+      "why": "The diff adds no controls, screens, navigation paths, persistence, or new feature."
+    },
+    "5": {
+      "pass": true,
+      "why": "The ViewModel extends BaseViewModel and uses launchGuarded with updateState and error forwarding."
+    },
+    "6": {
+      "pass": true,
+      "why": "A separate Route collects state with collectAsStateWithLifecycle and renders a stateless Screen."
+    }
+  }
+}

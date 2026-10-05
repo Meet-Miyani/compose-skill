@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Item 4: onError = { } swallows errors; failed stream leaves totalPages = 0 with no error/isLoading field to explain it"},
+    "2": {"pass": true, "why": "Item 3: every Load starts a fresh collector, so repeated dispatches open concurrent collects"},
+    "3": {"pass": true, "why": "Hardcoded Dispatchers.Default listed under 'Worth doing later', not blocking"},
+    "4": {"pass": true, "why": "Missing return type on calculatePages not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty; corrected file only shown in message"},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections"},
+    "7": {"pass": true, "why": "Points to the siblings' streamJob?.isActive guard as the missing overlap guard"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Item 3: onError = { } swallows StorageException; totalPages stays stale with no feedback"},
+    "2": {"pass": true, "why": "Item 2: each Load starts an uncancellable collector; repeats accumulate observers and redundant state writes"},
+    "3": {"pass": true, "why": "Dispatchers.Default remark is under Conventions, not Blocking"},
+    "4": {"pass": true, "why": "Return type not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty"},
+    "6": {"pass": false, "why": "Separates Blocking from Conventions but never says what is fine as is"},
+    "7": {"pass": true, "why": "Proposes storing the Job and guarding with streamJob?.isActive like BookListViewModel, with code"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking item 1: failure is swallowed, screen renders 0 as if it succeeded, with no error"},
+    "2": {"pass": true, "why": "Every Load starts another collector with no Job check; repeated starts leak collectors and double-update state"},
+    "3": {"pass": true, "why": "Calls the Dispatchers.Default switch fine as is"},
+    "4": {"pass": true, "why": "Return type not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty"},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections"},
+    "7": {"pass": true, "why": "Corrected file stores streamJob and returns early if it is active"}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Item 1: onError = { } swallows errors; failed cold load shows totalPages = 0 with no signal"},
+    "2": {"pass": true, "why": "Item 2: each Load starts a fresh collect with no guard; a second collector is never cancelled"},
+    "3": {"pass": true, "why": "Calls the withContext hop harmless under Fine as is"},
+    "4": {"pass": true, "why": "Return type not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty"},
+    "6": {"pass": true, "why": "Says nothing is blocking, then gives Worth doing later and Fine as is sections"},
+    "7": {"pass": true, "why": "Names the missing streamJob?.isActive check that BookListViewModel/NotesListViewModel use"}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Blocking 1: failure dropped; screen sits at totalPages = 0 with no message, shown as if real"},
+    "2": {"pass": false, "why": "Review text never says repeated Loads stack collectors; the guard only appears silently in the corrected code"},
+    "3": {"pass": true, "why": "Dispatchers.Default remark is under Worth doing later"},
+    "4": {"pass": true, "why": "Return type not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty"},
+    "6": {"pass": true, "why": "Has Blocking, Worth doing later and Fine as is sections"},
+    "7": {"pass": false, "why": "Never discusses stacked collectors, so it never proposes a fix for them; the unexplained guard in the code does not count"}
+  },
+  "F": {
+    "1": {"pass": false, "why": "Flags the silent onError but never says the failure leaves totalPages at 0, indistinguishable from zero pages"},
+    "2": {"pass": true, "why": "Item 3: a second Load starts a second collector on getBooksStream with no guard"},
+    "3": {"pass": true, "why": "Dispatchers.Default remark is under Minor"},
+    "4": {"pass": true, "why": "Return type not raised as blocking"},
+    "5": {"pass": true, "why": "Diff is empty"},
+    "6": {"pass": true, "why": "Splits Blocking from Minor and says the core page-summing logic is correct"},
+    "7": {"pass": true, "why": "Proposes a streamJob: Job? guard like the sibling ViewModels"}
+  }
+}

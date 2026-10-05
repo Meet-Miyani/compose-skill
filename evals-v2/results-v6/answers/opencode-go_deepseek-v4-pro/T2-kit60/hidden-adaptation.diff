@@ -1,0 +1,10 @@
+--- HiddenT2Test.kt (original)
++++ HiddenT2Test.kt (adapted)
+@@ -26,6 +26,7 @@
+     override fun getBooksStream(): Flow<List<Book>> = books
+     override suspend fun addBook(title: String, author: String, pages: Int): Long = 0L
+     override suspend fun markFinished(id: Long) {}
++    override suspend fun getBook(id: Long): Book? = books.value.find { it.id == id }
+     fun seed(newBooks: List<Book>) { books.value = newBooks }
+ }
+ 

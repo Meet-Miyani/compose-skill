@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Same one-shot .first() read, finished filter and page sum; isLoading set on start and cleared on completion, so success-path behaviour is preserved; resource strings render the same text."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest succeeded (from cache)."},
+    "3": {"pass": true, "why": "Changes are limited to the stats slice, its App.kt entry wiring and two string resources it uses."},
+    "4": {"pass": true, "why": "No new controls, screens, navigation or persistence; the error goes to the existing HandleAppErrors channel."},
+    "5": {"pass": true, "why": "Extends BaseViewModel with read-only state, uses updateState, and launchGuarded(onError = ::emitError) with no manual try/catch."},
+    "6": {"pass": true, "why": "Separate ReadingStatsRoute.kt (collectAsStateWithLifecycle, CollectEffect, HandleAppErrors) plus a stateless ReadingStatsScreen."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Changes the one-shot .first() read into a continuous collect, so the total now updates live with later emissions; behaviour changed despite the message saying it is unchanged."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Only the three stats files are touched."},
+    "4": {"pass": true, "why": "No new controls, screens, navigation or persistence added."},
+    "5": {"pass": true, "why": "BaseViewModel with read-only state and launchGuarded(onError = ::emitError); try/catch removed."},
+    "6": {"pass": true, "why": "Stateful ReadingStatsRoute collects with collectAsStateWithLifecycle and delegates to a stateless ReadingStatsScreen(state), but both stay in one file instead of a separate Route file like the siblings."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Keeps the .first() one-shot read, finished filter, sum and loading flags; the error is still stored inline in state."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Changes are confined to the stats presentation files."},
+    "4": {"pass": true, "why": "No new UI controls, screens, navigation or persistence; no error UI added."},
+    "5": {"pass": true, "why": "BaseViewModel with read-only state; failures are handled by launchGuarded's onError, and the try/catch is gone."},
+    "6": {"pass": true, "why": "New ReadingStatsRoute.kt uses collectAsStateWithLifecycle and calls a stateless ReadingStatsScreen(state)."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Same .first() read, filter, sum and isLoading transitions; the error is still stored inline."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Only the stats slice and its App.kt entry (the required onEffect param) changed."},
+    "4": {"pass": true, "why": "No new controls, screens, navigation or persistence."},
+    "5": {"pass": true, "why": "BaseViewModel with updateState and launchGuarded(onError=...); no manual try/catch or mutable public state."},
+    "6": {"pass": true, "why": "Separate ReadingStatsRoute.kt with collectAsStateWithLifecycle, CollectEffect and HandleAppErrors; ReadingStatsScreen takes only state."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Diff is identical to A: same one-shot read, filter, sum and loading flags. The claimed 'three stats cases' test is not in the diff, so it was not used as evidence."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest was up to date (passing)."},
+    "3": {"pass": true, "why": "Changes are confined to the stats slice, its App.kt wiring and its string resources."},
+    "4": {"pass": true, "why": "No new controls, screens, navigation or persistence."},
+    "5": {"pass": true, "why": "BaseViewModel, read-only state, and launchGuarded(onError = ::emitError) with no try/catch."},
+    "6": {"pass": true, "why": "Separate lifecycle-aware Route (collectAsStateWithLifecycle) plus a stateless Screen."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Same .first() read, filter, sum and loading on start/complete; rendered text unchanged through resources."},
+    "2": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest ran and the build succeeded."},
+    "3": {"pass": true, "why": "Only the stats files and two string resources it uses; the Route default for onEffect avoids touching App.kt."},
+    "4": {"pass": true, "why": "No new controls, screens, navigation or persistence."},
+    "5": {"pass": true, "why": "BaseViewModel with updateState and launchGuarded(onError = ::emitError); try/catch removed."},
+    "6": {"pass": true, "why": "Separate ReadingStatsRoute.kt with collectAsStateWithLifecycle, CollectEffect and HandleAppErrors; stateless ReadingStatsScreen."}
+  }
+}

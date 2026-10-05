@@ -1,0 +1,56 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "It says a failed stream leaves totalPages at 0 without an error or explanation."},
+    "2": {"pass": true, "why": "It says every Load opens another concurrent collector without an overlap guard."},
+    "3": {"pass": true, "why": "It places the dispatcher concern under later improvements, not blocking."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It has distinct Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": false, "why": "It notes sibling guards but does not propose a single active collection for this ViewModel."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "It says the value stays stale without feedback but does not identify the initial 0 as indistinguishable from zero pages read."},
+    "2": {"pass": true, "why": "It says repeated Load calls accumulate uncancelled collectors and redundant state writes."},
+    "3": {"pass": true, "why": "It discusses the dispatcher only under conventions."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It separates blocking and convention issues but never says what is fine as it is."},
+    "7": {"pass": true, "why": "It explicitly proposes storing and guarding the collection Job."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "It says a failed first load is swallowed and shows 0 as though it succeeded."},
+    "2": {"pass": true, "why": "It says each Load adds a collector and repeated starts double-update state."},
+    "3": {"pass": true, "why": "It lists the dispatcher switch as fine as is."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It separates Blocking, Worth doing later, and Fine as is."},
+    "7": {"pass": true, "why": "Its proposed code stores the Job and guards an active collection."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "It says a failed cold load shows totalPages = 0 with no signal."},
+    "2": {"pass": true, "why": "It says each Load starts a fresh collector and a second one is never cancelled."},
+    "3": {"pass": true, "why": "It calls the dispatcher hop harmless under Fine as is."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": false, "why": "It labels the failed load and stacked collectors as later improvements rather than blocking findings."},
+    "7": {"pass": true, "why": "It says to fix the missing overlap guard and points to sibling Job guards."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "It says a failed first load leaves 0 with no error or retry, appearing as a real number."},
+    "2": {"pass": false, "why": "It never identifies repeated Load calls stacking collectors or redundant writes."},
+    "3": {"pass": true, "why": "It calls the dispatcher hop a later improvement."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It has Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "Its proposed code keeps one active collection with a stored Job guard."}
+  },
+  "F": {
+    "1": {"pass": false, "why": "It flags silent errors but never connects a failed first load to 0 appearing as zero pages read."},
+    "2": {"pass": true, "why": "It says a second Load starts another collector and calls the resulting collectors duplicates."},
+    "3": {"pass": true, "why": "It puts the dispatcher concern among minor consistency points."},
+    "4": {"pass": true, "why": "It does not call the helper's inferred return type blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "It separates blocking and minor findings and says the page-summing logic is right."},
+    "7": {"pass": true, "why": "It explicitly proposes adding a stored Job guard."}
+  }
+}

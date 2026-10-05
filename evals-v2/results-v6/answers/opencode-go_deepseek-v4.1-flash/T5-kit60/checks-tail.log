@@ -1,0 +1,60 @@
+> Task :feature:notes:jvmJar UP-TO-DATE
+> Task :feature:notes:compileAndroidMain UP-TO-DATE
+> Task :feature:notes:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :composeApp:compileKotlinJvm UP-TO-DATE
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses UP-TO-DATE
+> Task :composeApp:jvmJar UP-TO-DATE
+> Task :feature:notes:processAndroidMainJavaRes UP-TO-DATE
+> Task :androidApp:mergeDebugAssets UP-TO-DATE
+> Task :androidApp:compressDebugAssets UP-TO-DATE
+> Task :androidApp:mergeDebugResources UP-TO-DATE
+> Task :androidApp:checkDebugAarMetadata UP-TO-DATE
+> Task :androidApp:processDebugNavigationResources UP-TO-DATE
+> Task :feature:notes:jvmTestProcessResources UP-TO-DATE
+> Task :composeApp:compileTestKotlinJvm NO-SOURCE
+> Task :androidApp:parseDebugLocalResources UP-TO-DATE
+> Task :androidApp:compileDebugNavigationResources UP-TO-DATE
+> Task :composeApp:compileJvmTestJava NO-SOURCE
+> Task :feature:notes:processJvmTestResources SKIPPED
+> Task :composeApp:jvmTestClasses UP-TO-DATE
+> Task :composeApp:jvmTest NO-SOURCE
+> Task :androidApp:generateDebugRFile UP-TO-DATE
+> Task :feature:notes:bundleLibRuntimeToDirAndroidMain UP-TO-DATE
+> Task :feature:notes:compileTestKotlinJvm UP-TO-DATE
+> Task :androidApp:mergeDebugNativeLibs UP-TO-DATE
+> Task :feature:notes:compileJvmTestJava NO-SOURCE
+> Task :feature:notes:jvmTestClasses UP-TO-DATE
+> Task :androidApp:stripDebugDebugSymbols UP-TO-DATE
+> Task :feature:notes:jvmTest UP-TO-DATE
+> Task :androidApp:processDebugMainManifest UP-TO-DATE
+> Task :androidApp:processDebugManifest UP-TO-DATE
+> Task :composeApp:compileAndroidMain UP-TO-DATE
+> Task :androidApp:processDebugManifestForPackage UP-TO-DATE
+> Task :composeApp:bundleAndroidMainClassesToCompileJar UP-TO-DATE
+> Task :composeApp:processAndroidMainJavaRes UP-TO-DATE
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain UP-TO-DATE
+> Task :androidApp:mergeExtDexDebug UP-TO-DATE
+> Task :androidApp:mergeLibDexDebug UP-TO-DATE
+> Task :androidApp:compileDebugKotlin UP-TO-DATE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes UP-TO-DATE
+> Task :androidApp:mergeDebugJavaResource UP-TO-DATE
+> Task :androidApp:processDebugResources UP-TO-DATE
+> Task :androidApp:dexBuilderDebug UP-TO-DATE
+> Task :androidApp:mergeProjectDexDebug UP-TO-DATE
+> Task :androidApp:packageDebug UP-TO-DATE
+> Task :androidApp:assembleDebug UP-TO-DATE
+> Task :androidApp:createDebugApkListingFileRedirect UP-TO-DATE
+
+[Incubating] Problems report is available at: <project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8s
+180 actionable tasks: 13 executed, 167 up-to-date
+Configuration cache entry stored.

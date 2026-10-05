@@ -97,3 +97,44 @@ opencode_muse-spark-1.3-contributor-free/T5-nokit/meta.txt: agent_exit=0 seconds
 opencode_muse-spark-1.3-contributor-free/T6-kit60/meta.txt: agent_exit=0 seconds=60 checks_exit=0 
 opencode_muse-spark-1.3-contributor-free/T6-kit61/meta.txt: agent_exit=0 seconds=150 checks_exit=0 
 opencode_muse-spark-1.3-contributor-free/T6-nokit/meta.txt: agent_exit=0 seconds=121 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T1-kit60/meta.txt: agent_exit=0 seconds=270 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T1-kit61/meta.txt: agent_exit=0 seconds=331 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T1-nokit/meta.txt: agent_exit=0 seconds=210 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T2-kit60/meta.txt: agent_exit=0 seconds=390 checks_exit=1 
+opencode-go_deepseek-v4.1-flash/T2-kit60/meta-final.txt: checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T2-kit61/meta.txt: agent_exit=0 seconds=210 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T2-nokit/meta.txt: agent_exit=0 seconds=211 checks_exit=1 
+opencode-go_deepseek-v4.1-flash/T2-nokit/meta-final.txt: checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T3-kit60/meta.txt: agent_exit=0 seconds=120 checks=none 
+opencode-go_deepseek-v4.1-flash/T3-kit61/meta.txt: agent_exit=0 seconds=150 checks=none 
+opencode-go_deepseek-v4.1-flash/T3-nokit/meta.txt: agent_exit=0 seconds=90 checks=none 
+opencode-go_deepseek-v4.1-flash/T4-kit60/meta.txt: agent_exit=0 seconds=120 checks=none 
+opencode-go_deepseek-v4.1-flash/T4-kit61/meta.txt: agent_exit=0 seconds=91 checks=none 
+opencode-go_deepseek-v4.1-flash/T4-nokit/meta.txt: agent_exit=0 seconds=60 checks=none 
+opencode-go_deepseek-v4.1-flash/T5-kit60/meta.txt: agent_exit=0 seconds=750 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T5-kit61/meta.txt: agent_exit=0 seconds=751 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T5-nokit/meta.txt: agent_exit=0 seconds=270 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T6-kit60/meta.txt: agent_exit=0 seconds=300 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T6-kit61/meta.txt: agent_exit=0 seconds=361 checks_exit=0 
+opencode-go_deepseek-v4.1-flash/T6-nokit/meta.txt: agent_exit=0 seconds=240 checks_exit=0 
+opencode-go_deepseek-v4-pro/T1-kit60/meta.txt: agent_exit=0 seconds=270 checks_exit=0 
+opencode-go_deepseek-v4-pro/T1-kit61/meta.txt: agent_exit=0 seconds=360 checks_exit=0 
+opencode-go_deepseek-v4-pro/T1-nokit/meta.txt: agent_exit=0 seconds=210 checks_exit=0 
+opencode-go_deepseek-v4-pro/T2-kit60/meta.txt: agent_exit=0 seconds=900 checks_exit=1 
+opencode-go_deepseek-v4-pro/T2-kit60/meta-final.txt: checks_exit=0 
+opencode-go_deepseek-v4-pro/T2-kit61/meta.txt: agent_exit=0 seconds=510 checks_exit=1 
+opencode-go_deepseek-v4-pro/T2-kit61/meta-final.txt: checks_exit=0 
+opencode-go_deepseek-v4-pro/T2-nokit/meta.txt: agent_exit=0 seconds=360 checks_exit=1 
+opencode-go_deepseek-v4-pro/T2-nokit/meta-final.txt: checks_exit=0 
+opencode-go_deepseek-v4-pro/T3-kit60/meta.txt: agent_exit=0 seconds=210 checks=none 
+opencode-go_deepseek-v4-pro/T3-kit61/meta.txt: agent_exit=0 seconds=150 checks=none 
+opencode-go_deepseek-v4-pro/T3-nokit/meta.txt: agent_exit=0 seconds=90 checks=none 
+opencode-go_deepseek-v4-pro/T4-kit60/meta.txt: agent_exit=0 seconds=120 checks=none 
+opencode-go_deepseek-v4-pro/T4-kit61/meta.txt: agent_exit=0 seconds=180 checks=none 
+opencode-go_deepseek-v4-pro/T4-nokit/meta.txt: agent_exit=0 seconds=90 checks=none 
+opencode-go_deepseek-v4-pro/T5-kit60/meta.txt: agent_exit=0 seconds=480 checks_exit=0 
+opencode-go_deepseek-v4-pro/T5-kit61/meta.txt: agent_exit=0 seconds=631 checks_exit=0 
+opencode-go_deepseek-v4-pro/T5-nokit/meta.txt: agent_exit=0 seconds=510 checks_exit=0 
+opencode-go_deepseek-v4-pro/T6-kit60/meta.txt: agent_exit=0 seconds=331 checks_exit=0 
+opencode-go_deepseek-v4-pro/T6-kit61/meta.txt: agent_exit=0 seconds=360 checks_exit=0 
+opencode-go_deepseek-v4-pro/T6-nokit/meta.txt: agent_exit=0 seconds=121 checks_exit=0 

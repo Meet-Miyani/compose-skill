@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "No tap action on an author; the list is only grouped under headers, and the final message admits tap-to-filter was not built."},
+    "2": {"pass": false, "why": "No author view or navigation exists, so there is nothing to go Back from."},
+    "3": {"pass": true, "why": "groupByAuthor in the ViewModel keeps every book, finished and unfinished, in its author's section."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": false, "why": "No new destination, key, ViewModel or contract; only the existing BookList state was changed."},
+    "6": {"pass": true, "why": "Grouping by author is done in BookListViewModel.groupByAuthor, not in a composable."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "A clickable author Text sends OnAuthorClick, then OpenAuthor pushes AuthorBooksKey; the DAO queries WHERE author = :author."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack and App.kt pops the back stack; system back uses the existing NavDisplay onBack."},
+    "3": {"pass": true, "why": "The query filters only by author, with no isFinished filter; finished and unfinished books are both shown."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": true, "why": "AuthorBooksKey is added to the sealed ReadingLogNavKey (registered through subclassesOfSealed), with its own entry, AuthorBooksViewModel and AuthorBooksUiState contract."},
+    "6": {"pass": true, "why": "Filtering is done by the Room query in the data layer."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The clickable 'By author' Text sends OnAuthorClick, then OpenAuthor pushes AuthorBooksKey; the DAO filters by author."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack and App.kt removes the top back-stack entry."},
+    "3": {"pass": true, "why": "The query has no isFinished filter, and the test shows finished and unfinished books by Alice together."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": true, "why": "AuthorBooksKey is in the ReadingLogNavKey sealed hierarchy, with its own entry, ViewModel and Contract/UiState."},
+    "6": {"pass": true, "why": "Filtering is done by the Room WHERE author query."}
+  },
+  "D": {
+    "1": {"pass": false, "why": "No tap action on an author; the list is only grouped."},
+    "2": {"pass": false, "why": "There is no author view and no navigation to go Back from."},
+    "3": {"pass": true, "why": "Grouping keeps every book, finished and unfinished, under its author header."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": false, "why": "There is no new destination, key, ViewModel or contract."},
+    "6": {"pass": false, "why": "Grouping by author is done with groupBy inside the BookListScreen composable, in remember."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "The 'View books by' TextButton sends OnAuthorClick, then OpenAuthorBooks pushes AuthorBooksKey; the DAO filters by author."},
+    "2": {"pass": true, "why": "The Back button emits NavigateBack and App.kt pops the back stack."},
+    "3": {"pass": true, "why": "The query has no isFinished filter, and the screen shows a finished or not-finished label for each book."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": true, "why": "AuthorBooksKey is in the ReadingLogNavKey sealed hierarchy, with its own entry, AuthorBooksViewModel and AuthorBooksUiState contract."},
+    "6": {"pass": true, "why": "Filtering is done by the Room WHERE author query in the data layer."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "The 'See books by this author' button sends OnAuthorClick, then OpenBooksByAuthor pushes BooksByAuthorKey; the DAO filters by author."},
+    "2": {"pass": true, "why": "The screen has no Back button, but the new entry sits on the back stack and the existing NavDisplay onBack pops it back to the list."},
+    "3": {"pass": true, "why": "The query filters only by author, so both finished and unfinished books are listed."},
+    "4": {"pass": true, "why": "checks_exit=0 and the build is successful."},
+    "5": {"pass": true, "why": "BooksByAuthorKey is in the ReadingLogNavKey sealed hierarchy, with its own entry, BooksByAuthorViewModel and BooksByAuthorUiState contract."},
+    "6": {"pass": true, "why": "Filtering is done by the Room WHERE author query in the data layer."}
+  }
+}

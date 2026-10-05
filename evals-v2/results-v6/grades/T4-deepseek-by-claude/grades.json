@@ -1,0 +1,206 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Says GlobalScope isn't lifecycle-bound and leaks after the ViewModel clears."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch swallows everything; no error on state, failed search shows stale/no results."
+    },
+    "3": {
+      "pass": true,
+      "why": "Item 5: each OnQueryChange spawns a new coroutine, results can land out of order, stale wins."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "ignoreCase not raised as blocking."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Blocking / Should fix / Nit sections; notes the shape (data class state, sealed action, updateState) is right."
+    },
+    "8": {
+      "pass": false,
+      "why": "Proposes viewModelScope via launchGuarded but an isActive overlap guard plus debounce, not cancelling the previous search."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Job keeps running after the ViewModel is cleared."
+    },
+    "2": {
+      "pass": true,
+      "why": "Failures dropped silently with no error state; results not updated."
+    },
+    "3": {
+      "pass": true,
+      "why": "Blocking 3: uncancelled race, slower earlier query overwrites newer one."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Corrected code keeps ignoreCase; not called blocking."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty; corrected file only in message."
+    },
+    "7": {
+      "pass": true,
+      "why": "Blocking, Worth doing later, and Fine as is sections."
+    },
+    "8": {
+      "pass": true,
+      "why": "Corrected file uses launchGuarded on viewModelScope with searchJob?.cancel() before each new search."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Work outlives the ViewModel and is never cancelled on clear."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch silently swallows all failures; no error field so no failure feedback."
+    },
+    "3": {
+      "pass": true,
+      "why": "Item 5: independent coroutines never cancelled, older result can overwrite newer."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "ignoreCase not raised as blocking."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": false,
+      "why": "Separates blocking from conventions but never says what is fine as it is."
+    },
+    "8": {
+      "pass": false,
+      "why": "Proposes launchGuarded but a job?.isActive overlap guard, not cancelling the previous search."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Runs outside the ViewModel's scope, never cancelled when the screen goes away."
+    },
+    "2": {
+      "pass": true,
+      "why": "Swallows every failure; failed search shows no message, no error state."
+    },
+    "3": {
+      "pass": true,
+      "why": "Each keystroke starts another coroutine; older result can overwrite newer list."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Calls ignoreCase title filtering reasonable (fine as is)."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Blocking, Worth doing later, and Fine as is sections."
+    },
+    "8": {
+      "pass": true,
+      "why": "launchGuarded on viewModelScope with a kept Job cancelled on new query; corrected file shows it."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Coroutine keeps running after ViewModel cleared and writes state to a dead holder."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch drops every failure; failed search does nothing with no message."
+    },
+    "3": {
+      "pass": true,
+      "why": "No guard between keystrokes; earlier query's result can land after a later one."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "ignoreCase not called blocking; filter called simple and correct."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Blocking, Worth doing later, and Fine as is sections."
+    },
+    "8": {
+      "pass": true,
+      "why": "launchGuarded plus searchJob?.cancel() so a new query supersedes the previous one."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Coroutine outlives the ViewModel and calls updateState on a cleared ViewModel."
+    },
+    "2": {
+      "pass": true,
+      "why": "Every failure dropped silently, no message, onError tier never chosen."
+    },
+    "3": {
+      "pass": true,
+      "why": "Blocking 3: slow earlier query can finish later and overwrite newer results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Empty initial query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "ignoreCase not called blocking."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Blocking, Worth doing later, and Fine as is sections."
+    },
+    "8": {
+      "pass": true,
+      "why": "launchGuarded on viewModelScope with searchJob?.cancel() before each new search."
+    }
+  }
+}

@@ -1,0 +1,1 @@
+Make the reading stats feature follow the rest of the project's conventions. Don't change what it does.

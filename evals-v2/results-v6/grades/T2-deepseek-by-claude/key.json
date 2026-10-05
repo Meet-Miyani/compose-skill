@@ -1,0 +1,26 @@
+{
+ "A": {
+  "model": "opencode-go_deepseek-v4-pro",
+  "arm": "kit60"
+ },
+ "B": {
+  "model": "opencode-go_deepseek-v4.1-flash",
+  "arm": "nokit"
+ },
+ "C": {
+  "model": "opencode-go_deepseek-v4.1-flash",
+  "arm": "kit60"
+ },
+ "D": {
+  "model": "opencode-go_deepseek-v4-pro",
+  "arm": "nokit"
+ },
+ "E": {
+  "model": "opencode-go_deepseek-v4.1-flash",
+  "arm": "kit61"
+ },
+ "F": {
+  "model": "opencode-go_deepseek-v4-pro",
+  "arm": "kit61"
+ }
+}
