@@ -1,0 +1,60 @@
+> Task :core:designsystem:processJvmTestResources SKIPPED
+> Task :core:error:compileKotlinJvm UP-TO-DATE
+> Task :core:error:compileJvmMainJava NO-SOURCE
+> Task :core:error:jvmMainClasses UP-TO-DATE
+> Task :core:error:jvmJar UP-TO-DATE
+> Task :core:error:compileTestKotlinJvm NO-SOURCE
+> Task :core:error:compileJvmTestJava NO-SOURCE
+> Task :core:error:jvmTestClasses UP-TO-DATE
+> Task :core:error:jvmTest NO-SOURCE
+> Task :core:mvi:compileKotlinJvm UP-TO-DATE
+> Task :core:mvi:compileJvmMainJava NO-SOURCE
+> Task :core:mvi:jvmMainClasses UP-TO-DATE
+> Task :core:mvi:jvmJar UP-TO-DATE
+> Task :core:designsystem:compileKotlinJvm UP-TO-DATE
+> Task :core:designsystem:compileJvmMainJava NO-SOURCE
+> Task :core:mvi:compileTestKotlinJvm NO-SOURCE
+> Task :core:designsystem:jvmMainClasses UP-TO-DATE
+> Task :core:mvi:compileJvmTestJava NO-SOURCE
+> Task :core:mvi:jvmTestClasses UP-TO-DATE
+> Task :core:designsystem:jvmJar UP-TO-DATE
+> Task :core:mvi:jvmTest NO-SOURCE
+> Task :core:designsystem:compileTestKotlinJvm NO-SOURCE
+> Task :core:designsystem:compileJvmTestJava NO-SOURCE
+> Task :core:designsystem:jvmTestClasses UP-TO-DATE
+> Task :core:designsystem:jvmTest NO-SOURCE
+> Task :feature:notes:kspKotlinJvm UP-TO-DATE
+> Task :feature:notes:jvmProcessResources UP-TO-DATE
+> Task :feature:notes:processJvmMainResources SKIPPED
+> Task :feature:notes:compileKotlinJvm UP-TO-DATE
+> Task :feature:notes:compileJvmMainJava NO-SOURCE
+> Task :feature:notes:jvmMainClasses UP-TO-DATE
+> Task :feature:notes:jvmJar UP-TO-DATE
+> Task :composeApp:compileKotlinJvm UP-TO-DATE
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses UP-TO-DATE
+> Task :composeApp:jvmJar UP-TO-DATE
+> Task :composeApp:compileTestKotlinJvm NO-SOURCE
+> Task :composeApp:compileJvmTestJava NO-SOURCE
+> Task :composeApp:jvmTestClasses UP-TO-DATE
+> Task :composeApp:jvmTest NO-SOURCE
+> Task :feature:notes:kspTestKotlinJvm
+> Task :feature:notes:copyRoomSchemas NO-SOURCE
+> Task :feature:notes:jvmTestProcessResources UP-TO-DATE
+> Task :feature:notes:processJvmTestResources SKIPPED
+> Task :feature:notes:compileTestKotlinJvm
+> Task :feature:notes:compileJvmTestJava NO-SOURCE
+> Task :feature:notes:jvmTestClasses
+> Task :feature:notes:jvmTest
+
+[Incubating] Problems report is available at: file://<project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 7s
+62 actionable tasks: 16 executed, 46 up-to-date
+Configuration cache entry stored.

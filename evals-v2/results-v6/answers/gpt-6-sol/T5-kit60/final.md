@@ -1,0 +1,3 @@
+Added a yearly reading goal to the Reading Log. You can enter or change a target, and the screen shows books finished this year, the target, and a progress bar. Goals and finish years are stored in Room, so they remain after relaunch.
+
+The JVM tests, iOS compile, Android debug build, and all 11 project checks passed. Books marked finished before this update have no recorded finish year, so they are excluded from yearly progress.

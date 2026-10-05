@@ -1,0 +1,5 @@
+**Findings**
+
+- **High — Search jobs outlive the ViewModel and can return stale results.** [BookSearchViewModel.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/search/BookSearchViewModel.kt:25) launches each query in `GlobalScope`. If the user types another query before an earlier job finishes, the earlier result can overwrite the newer one; jobs also continue after the ViewModel is cleared. Use the ViewModel’s scoped coroutine support and cancel or supersede prior searches.
+
+- **Medium — Search failures are silently discarded, including cancellation.** [BookSearchViewModel.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/search/BookSearchViewModel.kt:30) catches every `Exception` with an empty handler. Repository failures leave the UI with no indication that search failed, and swallowing `CancellationException` prevents structured cancellation from working correctly. Route expected failures through the ViewModel’s guarded error handling and rethrow cancellation.

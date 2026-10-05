@@ -1,0 +1,151 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+index e4a7003..3d5826d 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+@@ -1,8 +1,19 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookDetailUiState(val book: Book? = null, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface BookDetailUiAction : UiAction { data class OnScreenStarted(val id: Long) : BookDetailUiAction }
++
++data class BookDetailUiState(
++    val book: Book? = null,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++) : UiState
++
++sealed interface BookDetailUiAction : UiAction {
++    data class OnScreenStarted(val id: Long) : BookDetailUiAction
++}
++
+ sealed interface BookDetailUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+new file mode 100644
+index 0000000..dd22104
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+@@ -0,0 +1,25 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
++
++/** Entry for the Book Detail destination; owns lifecycle, effect collection, and error forwarding. */
++@Composable
++fun BookDetailRoute(
++    viewModel: BookDetailViewModel,
++    bookId: Long,
++    onEffect: suspend (BookDetailUiEffect) -> Unit = {},
++) {
++    LifecycleStartEffect(bookId) {
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
++    HandleAppErrors(viewModel.errors)
++    BookDetailScreen(state = state)
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index 09a492f..6fe7684 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -1,19 +1,17 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++
+ @Composable
+-fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+-    LifecycleStartEffect(bookId) {
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun BookDetailScreen(
++    state: BookDetailUiState,
++) {
+     Column {
+-        if (state.isLoading) { Text("Loading...") }
++        if (state.isLoading) {
++            Text("Loading...")
++        }
+         state.book?.let {
+             Text(it.title)
+         }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index 50f860b..6967cd2 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,36 @@
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
+-            }
++import org.koin.core.annotation.KoinViewModel
++
++/** ViewModel for the Book Detail destination; owns its UiState and loading lifecycle. */
++@KoinViewModel
++class BookDetailViewModel(
++    private val repository: BookRepository,
++) : BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(
++    BookDetailUiState(),
++) {
++    private var loadJob: Job? = null
++
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            is BookDetailUiAction.OnScreenStarted -> loadBook(action.id)
++        }
++    }
++
++    private fun loadBook(id: Long) {
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { error -> updateState { copy(error = error) } },
++            onStart = { updateState { copy(isLoading = true) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val books = repository.getBooksStream().first()
++            val book = books.find { it.id == id }
++            updateState { copy(book = book) }
+         }
+     }
+ }

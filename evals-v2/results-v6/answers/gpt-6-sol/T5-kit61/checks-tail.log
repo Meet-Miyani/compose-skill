@@ -1,0 +1,60 @@
+> Task :core:mvi:prepareComposeResourcesTaskForJvmTest NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForJvmTest SKIPPED
+> Task :composeApp:compileTestKotlinJvm NO-SOURCE
+> Task :core:mvi:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :core:mvi:generateResourceAccessorsForCommonTest SKIPPED
+> Task :core:mvi:compileTestKotlinJvm NO-SOURCE
+> Task :core:designsystem:jvmTestProcessResources
+> Task :core:designsystem:processJvmTestResources SKIPPED
+> Task :core:designsystem:jvmTestClasses
+> Task :core:mvi:compileJvmTestJava NO-SOURCE
+> Task :composeApp:compileJvmTestJava NO-SOURCE
+> Task :composeApp:jvmTestClasses
+> Task :core:designsystem:jvmTest NO-SOURCE
+> Task :feature:notes:checkJvmTestComposeLibrariesCompatibility
+> Task :core:mvi:assembleJvmTestResources
+> Task :composeApp:jvmTest NO-SOURCE
+> Task :feature:notes:assembleJvmTestResources UP-TO-DATE
+> Task :feature:notes:jvmTestProcessResources UP-TO-DATE
+> Task :feature:notes:processJvmTestResources SKIPPED
+> Task :core:mvi:jvmTestProcessResources
+> Task :core:mvi:processJvmTestResources SKIPPED
+> Task :core:mvi:jvmTestClasses
+> Task :core:mvi:jvmTest NO-SOURCE
+> Task :feature:notes:bundleLibRuntimeToDirAndroidMain
+> Task :feature:notes:compileTestKotlinJvm UP-TO-DATE
+> Task :feature:notes:compileJvmTestJava NO-SOURCE
+> Task :feature:notes:jvmTestClasses UP-TO-DATE
+> Task :feature:notes:jvmTest UP-TO-DATE
+> Task :androidApp:mergeDebugNativeLibs
+> Task :androidApp:mergeDebugResources FROM-CACHE
+> Task :androidApp:mergeExtDexDebug FROM-CACHE
+> Task :androidApp:compressDebugAssets
+> Task :androidApp:processDebugResources FROM-CACHE
+> Task :androidApp:stripDebugDebugSymbols
+> Task :composeApp:compileAndroidMain
+> Task :composeApp:processAndroidMainJavaRes
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:compileDebugKotlin FROM-CACHE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+
+[Incubating] Problems report is available at: file://<project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 11s
+180 actionable tasks: 80 executed, 31 from cache, 69 up-to-date
+Configuration cache entry stored.

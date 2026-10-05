@@ -1,0 +1,1 @@
+Real failure, reviewed by the moderator: the agent changed the stats route signature and did not update App.kt (no value passed for 'onEffect'); the original checks stand.

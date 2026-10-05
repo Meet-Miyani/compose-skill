@@ -1,0 +1,264 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+index e4a7003..8d4f44c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+@@ -1,8 +1,18 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookDetailUiState(val book: Book? = null, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface BookDetailUiAction : UiAction { data class OnScreenStarted(val id: Long) : BookDetailUiAction }
++
++data class BookDetailUiState(
++    val book: Book? = null,
++    val isLoading: Boolean = false,
++    val error: String? = null,
++) : UiState
++
++sealed interface BookDetailUiAction : UiAction {
++    data class OnScreenStarted(val id: Long) : BookDetailUiAction
++}
++
+ sealed interface BookDetailUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+new file mode 100644
+index 0000000..3b48d1d
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+@@ -0,0 +1,16 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++
++@Composable
++fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
++    LifecycleStartEffect(bookId) {
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    BookDetailScreen(state)
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index 09a492f..03f81da 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -1,21 +1,13 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++
+ @Composable
+-fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+-    LifecycleStartEffect(bookId) {
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun BookDetailScreen(state: BookDetailUiState) {
+     Column {
+         if (state.isLoading) { Text("Loading...") }
+-        state.book?.let {
+-            Text(it.title)
+-        }
++        state.book?.let { Text(it.title) }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index 50f860b..5ab734c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,32 @@
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
+-            }
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class BookDetailViewModel(private val repository: BookRepository) :
++    BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(BookDetailUiState()) {
++
++    private var loadJob: Job? = null
++
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            is BookDetailUiAction.OnScreenStarted -> loadBook(action.id)
++        }
++    }
++
++    private fun loadBook(id: Long) {
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { error -> updateState { copy(error = error.serverMessage ?: error.type.name) } },
++            onStart = { updateState { copy(isLoading = true) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val book = repository.getBooksStream().first().find { it.id == id }
++            updateState { copy(book = book) }
+         }
+     }
+ }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt
+new file mode 100644
+index 0000000..e4913c5
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt
+@@ -0,0 +1,123 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.StorageException
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import kotlinx.coroutines.CompletableDeferred
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.flow
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++import kotlin.test.assertNotNull
++import kotlin.test.assertNull
++import kotlin.test.assertTrue
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class BookDetailViewModelTest {
++    private val scheduler = TestCoroutineScheduler()
++    private val mainDispatcher = StandardTestDispatcher(scheduler)
++
++    @BeforeTest
++    fun setUp() {
++        Dispatchers.setMain(mainDispatcher)
++    }
++
++    @AfterTest
++    fun tearDown() {
++        Dispatchers.resetMain()
++    }
++
++    @Test
++    fun `start loads the matching book and clears loading`() = runTest(scheduler) {
++        val book = Book(2L, "Second", "Author", 100, false)
++        val fake = FakeBookRepository(listOf(Book(1L, "First", "Author", 50, false), book))
++        val gate = CompletableDeferred<Unit>()
++        fake.gate = gate
++        val viewModel = BookDetailViewModel(fake)
++
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(2L))
++        advanceUntilIdle()
++        assertTrue(viewModel.state.value.isLoading)
++        assertNull(viewModel.state.value.book)
++
++        gate.complete(Unit)
++        advanceUntilIdle()
++        assertEquals(book, viewModel.state.value.book)
++        assertFalse(viewModel.state.value.isLoading)
++        assertNull(viewModel.state.value.error)
++    }
++
++    @Test
++    fun `missing book stays empty after loading`() = runTest(scheduler) {
++        val viewModel = BookDetailViewModel(FakeBookRepository(emptyList()))
++
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(9L))
++        advanceUntilIdle()
++
++        assertNull(viewModel.state.value.book)
++        assertFalse(viewModel.state.value.isLoading)
++    }
++
++    @Test
++    fun `failed load keeps the existing error state`() = runTest(scheduler) {
++        val fake = FakeBookRepository(emptyList())
++        fake.failure = StorageException(IllegalStateException("database unavailable"))
++        val viewModel = BookDetailViewModel(fake)
++
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(1L))
++        advanceUntilIdle()
++
++        assertNull(viewModel.state.value.book)
++        assertFalse(viewModel.state.value.isLoading)
++        assertNotNull(viewModel.state.value.error)
++    }
++
++    @Test
++    fun `overlapping starts use the first lookup`() = runTest(scheduler) {
++        val fake = FakeBookRepository(listOf(Book(1L, "First", "Author", 50, false)))
++        val gate = CompletableDeferred<Unit>()
++        fake.gate = gate
++        val viewModel = BookDetailViewModel(fake)
++
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(1L))
++        advanceUntilIdle()
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted(1L))
++        advanceUntilIdle()
++        assertEquals(1, fake.readCount)
++
++        gate.complete(Unit)
++        advanceUntilIdle()
++        assertEquals(1L, viewModel.state.value.book?.id)
++    }
++}
++
++private class FakeBookRepository(private val books: List<Book>) : BookRepository {
++    var gate: CompletableDeferred<Unit>? = null
++    var failure: Throwable? = null
++    var readCount = 0
++
++    override fun getBooksStream(): Flow<List<Book>> = flow {
++        readCount++
++        gate?.await()
++        failure?.let { throw it }
++        emit(books)
++    }
++
++    override suspend fun addBook(title: String, author: String, pages: Int): Long =
++        error("Not used by book detail")
++
++    override suspend fun markFinished(id: Long) {
++        error("Not used by book detail")
++    }
++}

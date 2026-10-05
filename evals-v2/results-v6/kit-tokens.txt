@@ -1,0 +1,15 @@
+kit tokens per kit-arm run (full size/4 of every distinct kit .md file opened; upper bound)
+model                                     arm       T1    T2    T3    T4    T5    T6   max  >20k  first=compose
+claude-sonnet-5-5                         kit60   8204  4791  4791  4791 19373  6441 19373    0      6/6
+claude-sonnet-5-5                         kit61   5036  3031  5036  5036 17377  6687 17377    0      6/6
+gpt-6-luna                                kit60  18060 17805 11304 15236 27604 12218 27604    1      6/6
+gpt-6-luna                                kit61  17896 12675  5036 12124 24228 25777 25777    2      6/6
+gpt-6-sol                                 kit60  25931 16324 15236  8724 22226 25163 25931    3      6/6
+gpt-6-sol                                 kit61  21060 21309 18944 12124 29676 21216 29676    4      6/6
+gemini-3.8-flash-medium                   kit60  22727 22679 15236 11304 19240  9275 22727    2      6/6
+gemini-3.8-flash-medium                   kit61  24665 20946 11548 11548 17370 16918 24665    2      6/6
+opencode_muse-spark-1.3-contributor-free  kit60  34968 31355 14669 11304 14269  6441 34968    2      6/6
+opencode_muse-spark-1.3-contributor-free  kit61  29324  5036 14348  5036 24197 13671 29324    2      6/6
+
+Note: unlike v5, OpenCode's `skill` tool events are counted (so Muse's SKILL.md loads are included; v5 omitted them).
+Kit arms only (kit60 = skills/ at v6.0.0-preview.1, kit61 = skills/ at dab2af3), T1-T6, all 5 models. The verdict's Rule 4 reports T5 and T6 from this table.

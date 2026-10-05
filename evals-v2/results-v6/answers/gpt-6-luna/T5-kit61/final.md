@@ -1,0 +1,3 @@
+Implemented a yearly reading goal that persists in the Room database. The reading list now lets you adjust the goal from 1 to 365 books and shows how many books you’ve finished this calendar year. Finishing a book records its year, and the database migrates existing data.
+
+Verification passed: JVM and iOS simulator compilation, JVM tests, and all 11 ComposeKit checks. Existing finished books have no recorded completion year, so they won’t count toward this year’s progress.

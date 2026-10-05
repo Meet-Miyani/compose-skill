@@ -1,0 +1,60 @@
+> Task :composeApp:generateActualResourceCollectorsForJvmMain
+> Task :core:error:compileKotlinJvm UP-TO-DATE
+> Task :core:error:compileJvmMainJava NO-SOURCE
+> Task :core:error:jvmMainClasses UP-TO-DATE
+> Task :core:error:jvmJar UP-TO-DATE
+> Task :core:error:compileTestKotlinJvm NO-SOURCE
+> Task :core:error:compileJvmTestJava NO-SOURCE
+> Task :core:error:jvmTestClasses UP-TO-DATE
+> Task :core:error:jvmTest NO-SOURCE
+> Task :core:mvi:compileKotlinJvm UP-TO-DATE
+> Task :core:mvi:compileJvmMainJava NO-SOURCE
+> Task :core:mvi:jvmMainClasses UP-TO-DATE
+> Task :core:mvi:jvmJar UP-TO-DATE
+> Task :core:designsystem:compileKotlinJvm UP-TO-DATE
+> Task :core:designsystem:compileJvmMainJava NO-SOURCE
+> Task :core:mvi:compileTestKotlinJvm NO-SOURCE
+> Task :core:designsystem:jvmMainClasses UP-TO-DATE
+> Task :core:mvi:compileJvmTestJava NO-SOURCE
+> Task :core:mvi:jvmTestClasses
+> Task :core:designsystem:jvmJar UP-TO-DATE
+> Task :core:mvi:jvmTest NO-SOURCE
+> Task :core:designsystem:compileTestKotlinJvm NO-SOURCE
+> Task :core:designsystem:compileJvmTestJava NO-SOURCE
+> Task :core:designsystem:jvmTestClasses
+> Task :core:designsystem:jvmTest NO-SOURCE
+> Task :feature:notes:kspKotlinJvm UP-TO-DATE
+> Task :feature:notes:jvmProcessResources UP-TO-DATE
+> Task :feature:notes:processJvmMainResources SKIPPED
+> Task :feature:notes:compileKotlinJvm UP-TO-DATE
+> Task :feature:notes:compileJvmMainJava NO-SOURCE
+> Task :feature:notes:jvmMainClasses UP-TO-DATE
+> Task :feature:notes:jvmJar UP-TO-DATE
+> Task :feature:notes:kspTestKotlinJvm
+> Task :feature:notes:jvmTestProcessResources UP-TO-DATE
+> Task :feature:notes:processJvmTestResources SKIPPED
+> Task :feature:notes:copyRoomSchemas NO-SOURCE
+> Task :composeApp:compileKotlinJvm
+> Task :feature:notes:compileTestKotlinJvm
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :feature:notes:compileJvmTestJava NO-SOURCE
+> Task :composeApp:jvmMainClasses
+> Task :feature:notes:jvmTestClasses
+> Task :composeApp:jvmJar
+> Task :composeApp:compileTestKotlinJvm NO-SOURCE
+> Task :composeApp:compileJvmTestJava NO-SOURCE
+> Task :composeApp:jvmTestClasses
+> Task :composeApp:jvmTest NO-SOURCE
+> Task :feature:notes:jvmTest
+
+[Incubating] Problems report is available at: file://<project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 25s
+62 actionable tasks: 27 executed, 35 up-to-date
+Configuration cache entry stored.

@@ -1,0 +1,3 @@
+Book detail now uses the project’s `BaseViewModel` and Koin ViewModel annotation, with separate Route and Screen composables. It still looks up the book from the stream once and shows the same loading text and title.
+
+The existing tests passed before the change. Afterward, the detail tests, JVM tests, common metadata compile, and all 11 project checks passed. I left the existing hidden error field and loading text as they were to preserve the feature’s current behavior.

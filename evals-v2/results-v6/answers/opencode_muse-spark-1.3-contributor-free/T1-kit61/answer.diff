@@ -1,0 +1,225 @@
+diff --git a/feature/notes/src/commonMain/composeResources/values/strings.xml b/feature/notes/src/commonMain/composeResources/values/strings.xml
+index ca8938c..a594e50 100644
+--- a/feature/notes/src/commonMain/composeResources/values/strings.xml
++++ b/feature/notes/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,5 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="note_title">Note title</string>
++    <string name="reading_stats_total">Total pages read: %d</string>
+ </resources>
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/ReadingStatsKey.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/ReadingStatsKey.kt
+index 479149b..c0edd83 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/ReadingStatsKey.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/ReadingStatsKey.kt
+@@ -1,4 +1,12 @@
++/**
++ * Navigation key for the Reading stats destination.
++ */
+ package com.example.feature.notes.readinglog.navigation
+-import androidx.navigation3.runtime.NavKey
++
+ import kotlinx.serialization.Serializable
+-@Serializable data object ReadingStatsKey : ReadingLogNavKey
++
++/**
++ * Reading stats destination key.
++ */
++@Serializable
++data object ReadingStatsKey : ReadingLogNavKey
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+index 6c4a0b5..bedefcf 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+@@ -1,7 +1,25 @@
++/**
++ * MVI contract for the Reading stats destination.
++ *
++ * Exactly three top-level declarations live here. The state holds the
++ * finished-books page total directly; no extra model file is needed.
++ */
+ package com.example.feature.notes.readinglog.presentation.stats
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
+-data class ReadingStatsUiState(val totalPages: Int = 0, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface ReadingStatsUiAction : UiAction { data object OnScreenStarted : ReadingStatsUiAction }
++import com.example.core.mvi.UiState
++
++data class ReadingStatsUiState(
++    val totalPages: Int = 0,
++    val isLoading: Boolean = true,
++    val error: AppError? = null,
++) : UiState
++
++sealed interface ReadingStatsUiAction : UiAction {
++    data object OnScreenStarted : ReadingStatsUiAction
++    data class OnRetryClick(val error: AppError) : ReadingStatsUiAction
++}
++
+ sealed interface ReadingStatsUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+new file mode 100644
+index 0000000..540b010
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+@@ -0,0 +1,33 @@
++/**
++ * Lifecycle-aware wrapper for the Reading stats destination.
++ *
++ * Koin-free: the composition root resolves the ViewModel and passes it in.
++ * This wrapper owns lifecycle, effect collection, and error forwarding only.
++ */
++package com.example.feature.notes.readinglog.presentation.stats
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.core.mvi.CollectEffect
++import com.example.designsystem.error.HandleAppErrors
++
++/** Entry for the Reading stats destination; owns lifecycle, effect collection, and error forwarding. */
++@Composable
++fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
++    LifecycleStartEffect(Unit) {
++        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    CollectEffect(viewModel.effect) {}
++    HandleAppErrors(viewModel.errors)
++    ReadingStatsScreen(
++        state = state,
++        onRetry = {
++            // Retry holds the error it retries; no-op when no error is showing.
++            viewModel.onAction(ReadingStatsUiAction.OnRetryClick(state.error ?: return@ReadingStatsScreen))
++        },
++    )
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+index c709141..fba32c9 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+@@ -1,19 +1,34 @@
+ package com.example.feature.notes.readinglog.presentation.stats
++
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Button
++import androidx.compose.material3.CircularProgressIndicator
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++import org.jetbrains.compose.resources.stringResource
++import notes.feature.notes.generated.resources.Res
++import notes.feature.notes.generated.resources.error_message
++import notes.feature.notes.generated.resources.reading_stats_total
++import notes.feature.notes.generated.resources.retry
++
+ @Composable
+-fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
+-    LifecycleStartEffect(Unit) {
+-        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
+-    Column {
+-        if (state.isLoading) { Text("Loading...") }
+-        Text("Total pages read: ${state.totalPages}")
++fun ReadingStatsScreen(
++    state: ReadingStatsUiState,
++    onRetry: () -> Unit,
++    modifier: Modifier = Modifier,
++) {
++    when {
++        state.isLoading -> CircularProgressIndicator(modifier = modifier)
++        state.error != null -> Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
++            Text(stringResource(Res.string.error_message))
++            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
++        }
++        else -> Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
++            Text(stringResource(Res.string.reading_stats_total, state.totalPages))
++        }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+index 415ab49..e2dfb0a 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+@@ -1,26 +1,48 @@
++/**
++ * ViewModel behind the Reading stats destination; owns its UiState and
++ * the cold-load observation of the book stream.
++ */
+ package com.example.feature.notes.readinglog.presentation.stats
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
+-import kotlinx.coroutines.flow.first
+-@Factory
+-class ReadingStatsViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(ReadingStatsUiState())
+-    fun onAction(action: ReadingStatsUiAction) {
+-        if (action is ReadingStatsUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val pages = books.filter { it.isFinished }.sumOf { it.pages }
+-                    state.value = state.value.copy(totalPages = pages, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
++import kotlinx.coroutines.Job
++import org.koin.core.annotation.KoinViewModel
++
++/** ViewModel behind the Reading stats destination; owns its UiState and book-stream load. */
++@KoinViewModel
++class ReadingStatsViewModel(
++    private val repository: BookRepository,
++) : BaseViewModel<ReadingStatsUiAction, ReadingStatsUiState, ReadingStatsUiEffect>(ReadingStatsUiState()) {
++
++    private var loadJob: Job? = null
++
++    override fun onAction(action: ReadingStatsUiAction) {
++        when (action) {
++            ReadingStatsUiAction.OnScreenStarted -> load()
++            is ReadingStatsUiAction.OnRetryClick -> retry()
++        }
++    }
++
++    private fun load() {
++        // Overlap guard: the first load owns the response; later overlapping loads return early.
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { updateState { copy(isLoading = false, error = it) } },
++            onStart = { updateState { copy(isLoading = true, error = null) } },
++        ) {
++            repository.getBooksStream().collect { books ->
++                // Keep finished books only; the total is the sum of their pages.
++                val pages = books
++                    .filter { it.isFinished }
++                    .sumOf { it.pages }
++                updateState { copy(totalPages = pages, isLoading = false, error = null) }
+             }
+         }
+     }
++
++    private fun retry() {
++        updateState { copy(error = null) }
++        load()
++    }
+ }

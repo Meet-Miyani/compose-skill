@@ -1,0 +1,655 @@
+diff --git a/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json b/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json
+new file mode 100644
+index 0000000..9b4bf58
+--- /dev/null
++++ b/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json
+@@ -0,0 +1,109 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 3,
++    "identityHash": "26870ced3dd67dc2f37b815d1bc496f7",
++    "entities": [
++      {
++        "tableName": "notes",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      },
++      {
++        "tableName": "books",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `pages` INTEGER NOT NULL, `isFinished` INTEGER NOT NULL)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "author",
++            "columnName": "author",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "pages",
++            "columnName": "pages",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "isFinished",
++            "columnName": "isFinished",
++            "affinity": "INTEGER",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      },
++      {
++        "tableName": "reading_goals",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`year` INTEGER NOT NULL, `targetBooks` INTEGER NOT NULL, PRIMARY KEY(`year`))",
++        "fields": [
++          {
++            "fieldPath": "year",
++            "columnName": "year",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "targetBooks",
++            "columnName": "targetBooks",
++            "affinity": "INTEGER",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": false,
++          "columnNames": [
++            "year"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '26870ced3dd67dc2f37b815d1bc496f7')"
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
+index 5328577..1486d58 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
+@@ -1,12 +1,25 @@
+ package com.example.feature.notes.data.local
+ 
++import androidx.room.AutoMigration
+ import androidx.room.ConstructedBy
+ import androidx.room.Database
+ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+ 
+-@Database(entities = [NoteEntity::class, com.example.feature.notes.readinglog.data.BookEntity::class], version = 2, autoMigrations = [androidx.room.AutoMigration(from = 1, to = 2)], exportSchema = true)
++@Database(
++    entities = [
++        NoteEntity::class,
++        com.example.feature.notes.readinglog.data.BookEntity::class,
++        com.example.feature.notes.readinglog.data.ReadingGoalEntity::class,
++    ],
++    version = 3,
++    autoMigrations = [
++        AutoMigration(from = 1, to = 2),
++        AutoMigration(from = 2, to = 3),
++    ],
++    exportSchema = true,
++)
+ @ConstructedBy(NotesDatabaseConstructor::class)
+ internal abstract class NotesDatabase : RoomDatabase() {
+     abstract fun notesDao(): NotesDao
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
+index 9087fee..01c9ff2 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/BookDao.kt
+@@ -1,14 +1,25 @@
+ package com.example.feature.notes.readinglog.data
++
+ import androidx.room.Dao
+ import androidx.room.Insert
+ import androidx.room.Query
++import androidx.room.Upsert
+ import kotlinx.coroutines.flow.Flow
++
+ @Dao
+ internal interface BookDao {
+     @Query("SELECT * FROM books")
+     fun getBooksStream(): Flow<List<BookEntity>>
++
+     @Insert
+     suspend fun insert(book: BookEntity): Long
++
+     @Query("UPDATE books SET isFinished = 1 WHERE id = :id")
+     suspend fun markFinished(id: Long)
++
++    @Query("SELECT * FROM reading_goals WHERE year = :year LIMIT 1")
++    fun getReadingGoalStream(year: Int): Flow<ReadingGoalEntity?>
++
++    @Upsert
++    suspend fun upsertReadingGoal(goal: ReadingGoalEntity)
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+index f5c072d..d1ff7ad 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+@@ -1,19 +1,32 @@
+ package com.example.feature.notes.readinglog.data
++
+ import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.model.ReadingGoal
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+ import com.example.feature.notes.data.local.NotesDatabase
+ import kotlinx.coroutines.flow.Flow
+ import kotlinx.coroutines.flow.map
+ import org.koin.core.annotation.Factory
++
+ @Factory
+ internal class DefaultBookRepository(private val db: NotesDatabase) : BookRepository {
+     override fun getBooksStream(): Flow<List<Book>> = db.bookDao().getBooksStream().map { entities -> 
+         entities.map { Book(it.id, it.title, it.author, it.pages, it.isFinished) } 
+     }
++
+     override suspend fun addBook(title: String, author: String, pages: Int): Long {
+         return db.bookDao().insert(BookEntity(title = title, author = author, pages = pages, isFinished = false))
+     }
++
+     override suspend fun markFinished(id: Long) {
+         db.bookDao().markFinished(id)
+     }
++
++    override fun getReadingGoalStream(year: Int): Flow<ReadingGoal?> = db.bookDao().getReadingGoalStream(year).map { entity ->
++        entity?.let { ReadingGoal(targetBooks = it.targetBooks, year = it.year) }
++    }
++
++    override suspend fun setReadingGoal(targetBooks: Int, year: Int) {
++        db.bookDao().upsertReadingGoal(ReadingGoalEntity(year = year, targetBooks = targetBooks))
++    }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt
+new file mode 100644
+index 0000000..b0569d0
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt
+@@ -0,0 +1,10 @@
++package com.example.feature.notes.readinglog.data
++
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++
++@Entity(tableName = "reading_goals")
++internal data class ReadingGoalEntity(
++    @PrimaryKey val year: Int = 2026,
++    val targetBooks: Int,
++)
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/model/ReadingGoal.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/model/ReadingGoal.kt
+new file mode 100644
+index 0000000..89d078e
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/model/ReadingGoal.kt
+@@ -0,0 +1,3 @@
++package com.example.feature.notes.readinglog.domain.model
++
++data class ReadingGoal(val targetBooks: Int, val year: Int = 2026)
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+index 70bbf95..cef6da7 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+@@ -1,8 +1,13 @@
+ package com.example.feature.notes.readinglog.domain.repository
++
+ import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.model.ReadingGoal
+ import kotlinx.coroutines.flow.Flow
++
+ interface BookRepository {
+     fun getBooksStream(): Flow<List<Book>>
+     suspend fun addBook(title: String, author: String, pages: Int): Long
+     suspend fun markFinished(id: Long)
++    fun getReadingGoalStream(year: Int = 2026): Flow<ReadingGoal?>
++    suspend fun setReadingGoal(targetBooks: Int, year: Int = 2026)
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+index 372e1f3..0fd29e5 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+@@ -1,14 +1,25 @@
+ package com.example.feature.notes.readinglog.presentation.list
++
+ import com.example.core.mvi.UiAction
+ import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookListUiState(val items: List<Book> = emptyList(), val isLoading: Boolean = false) : UiState
++
++data class BookListUiState(
++    val items: List<Book> = emptyList(),
++    val isLoading: Boolean = false,
++    val yearlyGoal: Int? = null,
++    val goalInput: String = "",
++) : UiState
++
+ sealed interface BookListUiAction : UiAction {
+     data object OnScreenStarted : BookListUiAction
+     data object OnAddClick : BookListUiAction
+     data class OnMarkFinishedClick(val id: Long) : BookListUiAction
++    data class OnGoalInputChanged(val input: String) : BookListUiAction
++    data object OnSetGoalClick : BookListUiAction
+ }
++
+ sealed interface BookListUiEffect : UiEffect {
+     data object OpenAddSheet : BookListUiEffect
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+index 38da481..b1c41f9 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+@@ -1,10 +1,12 @@
+ package com.example.feature.notes.readinglog.presentation.list
++
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.getValue
+ import androidx.lifecycle.compose.LifecycleStartEffect
+ import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import com.example.core.mvi.CollectEffect
+ import com.example.designsystem.error.HandleAppErrors
++
+ @Composable
+ fun BookListRoute(viewModel: BookListViewModel, onEffect: suspend (BookListUiEffect) -> Unit) {
+     LifecycleStartEffect(Unit) {
+@@ -16,12 +18,13 @@ fun BookListRoute(viewModel: BookListViewModel, onEffect: suspend (BookListUiEff
+     CollectEffect(viewModel.effect) { effect ->
+         when (effect) {
+             BookListUiEffect.OpenAddSheet -> viewModel.createBook("New Book", "Author", 100)
+-            else -> onEffect(effect)
+         }
+     }
+     BookListScreen(
+         state = state,
+         onAdd = { viewModel.onAction(BookListUiAction.OnAddClick) },
+-        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) }
++        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) },
++        onGoalInputChange = { viewModel.onAction(BookListUiAction.OnGoalInputChanged(it)) },
++        onSetGoal = { viewModel.onAction(BookListUiAction.OnSetGoalClick) },
+     )
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+index 6b50bac..cf13838 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+@@ -1,18 +1,87 @@
+ package com.example.feature.notes.readinglog.presentation.list
++
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.height
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.width
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
++import androidx.compose.foundation.text.KeyboardOptions
+ import androidx.compose.material3.Button
++import androidx.compose.material3.Card
++import androidx.compose.material3.LinearProgressIndicator
++import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.text.input.KeyboardType
++import androidx.compose.ui.unit.dp
++
+ @Composable
+-fun BookListScreen(state: BookListUiState, onAdd: () -> Unit, onMarkFinished: (Long) -> Unit) {
+-    Column {
++fun BookListScreen(
++    state: BookListUiState,
++    onAdd: () -> Unit,
++    onMarkFinished: (Long) -> Unit,
++    onGoalInputChange: (String) -> Unit,
++    onSetGoal: () -> Unit,
++) {
++    val finishedCount = state.items.count { it.isFinished }
++    val goal = state.yearlyGoal
++    val progress = if (goal != null && goal > 0) {
++        (finishedCount.toFloat() / goal).coerceIn(0f, 1f)
++    } else {
++        0f
++    }
++    val percentage = (progress * 100).toInt()
++
++    Column(modifier = Modifier.padding(16.dp)) {
++        Card(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
++            Column(modifier = Modifier.padding(16.dp)) {
++                Text("Yearly Reading Goal")
++                Spacer(modifier = Modifier.height(8.dp))
++                if (goal != null && goal > 0) {
++                    Text("Goal: $goal books")
++                    Text("Progress: $finishedCount of $goal books finished ($percentage%)")
++                    Spacer(modifier = Modifier.height(8.dp))
++                    LinearProgressIndicator(
++                        progress = { progress },
++                        modifier = Modifier.fillMaxWidth(),
++                    )
++                } else {
++                    Text("No reading goal set for this year.")
++                }
++                Spacer(modifier = Modifier.height(12.dp))
++                Row(verticalAlignment = Alignment.CenterVertically) {
++                    OutlinedTextField(
++                        value = state.goalInput,
++                        onValueChange = onGoalInputChange,
++                        label = { Text("Yearly Goal (books)") },
++                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
++                        modifier = Modifier.weight(1f),
++                        singleLine = true,
++                    )
++                    Spacer(modifier = Modifier.width(8.dp))
++                    Button(onClick = onSetGoal) {
++                        Text("Set Goal")
++                    }
++                }
++            }
++        }
++
+         Button(onClick = onAdd) { Text("Add Book") }
++        Spacer(modifier = Modifier.height(8.dp))
+         LazyColumn {
+             items(state.items, key = { it.id }) { book ->
+                 Text("${book.title} by ${book.author} (${book.pages} pages) - Finished: ${book.isFinished}")
+-                if (!book.isFinished) { Button(onClick = { onMarkFinished(book.id) }) { Text("Mark Finished") } }
++                if (!book.isFinished) {
++                    Button(onClick = { onMarkFinished(book.id) }) {
++                        Text("Mark Finished")
++                    }
++                }
+             }
+         }
+     }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+index 2c463f7..122777d 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+@@ -1,28 +1,70 @@
+ package com.example.feature.notes.readinglog.presentation.list
++
+ import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+ import kotlinx.coroutines.Job
+ import org.koin.core.annotation.KoinViewModel
++
+ @KoinViewModel
+ class BookListViewModel(private val repository: BookRepository) :
+     BaseViewModel<BookListUiAction, BookListUiState, BookListUiEffect>(BookListUiState()) {
+     private var streamJob: Job? = null
++    private var goalJob: Job? = null
++
+     override fun onAction(action: BookListUiAction) {
+         when (action) {
+-            BookListUiAction.OnScreenStarted -> observeBooks()
++            BookListUiAction.OnScreenStarted -> {
++                observeBooks()
++                observeGoal()
++            }
+             BookListUiAction.OnAddClick -> sendEffect(BookListUiEffect.OpenAddSheet)
+             is BookListUiAction.OnMarkFinishedClick -> markFinished(action.id)
++            is BookListUiAction.OnGoalInputChanged -> updateState { copy(goalInput = action.input) }
++            BookListUiAction.OnSetGoalClick -> setGoal()
+         }
+     }
++
+     private fun observeBooks() {
+         if (streamJob?.isActive == true) return
+         updateState { copy(isLoading = true) }
+         streamJob = launchGuarded(onError = ::emitError) {
+-            repository.getBooksStream().collect { books -> updateState { copy(items = books, isLoading = false) } }
++            repository.getBooksStream().collect { books ->
++                updateState { copy(items = books, isLoading = false) }
++            }
+         }
+     }
+-    private fun markFinished(id: Long) { launchGuarded(onError = ::emitError) { repository.markFinished(id) } }
++
++    private fun observeGoal() {
++        if (goalJob?.isActive == true) return
++        goalJob = launchGuarded(onError = ::emitError) {
++            repository.getReadingGoalStream().collect { goal ->
++                updateState {
++                    copy(
++                        yearlyGoal = goal?.targetBooks,
++                        goalInput = if (goalInput.isEmpty() && goal != null) goal.targetBooks.toString() else goalInput,
++                    )
++                }
++            }
++        }
++    }
++
++    private fun setGoal() {
++        val target = state.value.goalInput.toIntOrNull() ?: return
++        if (target <= 0) return
++        launchGuarded(onError = ::emitError) {
++            repository.setReadingGoal(target)
++        }
++    }
++
++    private fun markFinished(id: Long) {
++        launchGuarded(onError = ::emitError) {
++            repository.markFinished(id)
++        }
++    }
++
+     fun createBook(title: String, author: String, pages: Int) {
+-        launchGuarded(onError = ::emitError) { repository.addBook(title, author, pages) }
++        launchGuarded(onError = ::emitError) {
++            repository.addBook(title, author, pages)
++        }
+     }
+ }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModelTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModelTest.kt
+new file mode 100644
+index 0000000..b34b55b
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModelTest.kt
+@@ -0,0 +1,107 @@
++package com.example.feature.notes.readinglog.presentation.list
++
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.model.ReadingGoal
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.toList
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.UnconfinedTestDispatcher
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class BookListViewModelTest {
++    private val scheduler = TestCoroutineScheduler()
++
++    @BeforeTest
++    fun setUp() {
++        Dispatchers.setMain(StandardTestDispatcher(scheduler))
++    }
++
++    @AfterTest
++    fun tearDown() {
++        Dispatchers.resetMain()
++    }
++
++    @Test
++    fun `observes books and reading goal on screen started`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        fake.seedBooks(
++            listOf(
++                Book(id = 1L, title = "Atomic Habits", author = "James Clear", pages = 300, isFinished = true),
++                Book(id = 2L, title = "Deep Work", author = "Cal Newport", pages = 250, isFinished = false),
++            )
++        )
++        fake.seedGoal(ReadingGoal(targetBooks = 12, year = 2026))
++
++        val viewModel = BookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertFalse(viewModel.state.value.isLoading)
++        assertEquals(2, viewModel.state.value.items.size)
++        assertEquals(12, viewModel.state.value.yearlyGoal)
++        assertEquals("12", viewModel.state.value.goalInput)
++    }
++
++    @Test
++    fun `setting goal updates repository and state`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        val viewModel = BookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        viewModel.onAction(BookListUiAction.OnGoalInputChanged("20"))
++        assertEquals("20", viewModel.state.value.goalInput)
++
++        viewModel.onAction(BookListUiAction.OnSetGoalClick)
++        advanceUntilIdle()
++
++        assertEquals(20, viewModel.state.value.yearlyGoal)
++    }
++
++    @Test
++    fun `marking book finished updates state`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        fake.seedBooks(
++            listOf(
++                Book(id = 1L, title = "Atomic Habits", author = "James Clear", pages = 300, isFinished = false),
++            )
++        )
++        val viewModel = BookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertFalse(viewModel.state.value.items.single().isFinished)
++
++        viewModel.onAction(BookListUiAction.OnMarkFinishedClick(1L))
++        advanceUntilIdle()
++
++        assertEquals(true, viewModel.state.value.items.single().isFinished)
++    }
++
++    @Test
++    fun `add click emits OpenAddSheet effect`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        val viewModel = BookListViewModel(fake)
++        val effects = mutableListOf<BookListUiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) {
++            viewModel.effect.toList(effects)
++        }
++
++        viewModel.onAction(BookListUiAction.OnAddClick)
++        advanceUntilIdle()
++
++        assertEquals(BookListUiEffect.OpenAddSheet, effects.single())
++    }
++}
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/FakeBookRepository.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/FakeBookRepository.kt
+new file mode 100644
+index 0000000..00a2067
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/list/FakeBookRepository.kt
+@@ -0,0 +1,41 @@
++package com.example.feature.notes.readinglog.presentation.list
++
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.model.ReadingGoal
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.MutableStateFlow
++
++class FakeBookRepository : BookRepository {
++    private val booksFlow = MutableStateFlow<List<Book>>(emptyList())
++    private val goalFlow = MutableStateFlow<ReadingGoal?>(null)
++
++    override fun getBooksStream(): Flow<List<Book>> = booksFlow
++
++    override suspend fun addBook(title: String, author: String, pages: Int): Long {
++        val newId = (booksFlow.value.size + 1).toLong()
++        val newBook = Book(id = newId, title = title, author = author, pages = pages, isFinished = false)
++        booksFlow.value = booksFlow.value + newBook
++        return newId
++    }
++
++    override suspend fun markFinished(id: Long) {
++        booksFlow.value = booksFlow.value.map {
++            if (it.id == id) it.copy(isFinished = true) else it
++        }
++    }
++
++    override fun getReadingGoalStream(year: Int): Flow<ReadingGoal?> = goalFlow
++
++    override suspend fun setReadingGoal(targetBooks: Int, year: Int) {
++        goalFlow.value = ReadingGoal(targetBooks = targetBooks, year = year)
++    }
++
++    fun seedBooks(books: List<Book>) {
++        booksFlow.value = books
++    }
++
++    fun seedGoal(goal: ReadingGoal?) {
++        goalFlow.value = goal
++    }
++}

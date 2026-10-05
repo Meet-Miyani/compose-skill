@@ -1,0 +1,1 @@
+The original check run failed for an environment reason unrelated to the answer (a build sandbox left a Gradle daemon that could not write to this project). The checks were re-run without a daemon. Re-run result:

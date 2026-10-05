@@ -1,0 +1,481 @@
+diff --git a/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json b/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json
+new file mode 100644
+index 0000000..812279d
+--- /dev/null
++++ b/feature/notes/schemas/com.example.feature.notes.data.local.NotesDatabase/3.json
+@@ -0,0 +1,109 @@
++{
++  "formatVersion": 1,
++  "database": {
++    "version": 3,
++    "identityHash": "08631ffcedbab336486f62a5efe495ec",
++    "entities": [
++      {
++        "tableName": "notes",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `body` TEXT NOT NULL)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "body",
++            "columnName": "body",
++            "affinity": "TEXT",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      },
++      {
++        "tableName": "books",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `author` TEXT NOT NULL, `pages` INTEGER NOT NULL, `isFinished` INTEGER NOT NULL)",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "title",
++            "columnName": "title",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "author",
++            "columnName": "author",
++            "affinity": "TEXT",
++            "notNull": true
++          },
++          {
++            "fieldPath": "pages",
++            "columnName": "pages",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "isFinished",
++            "columnName": "isFinished",
++            "affinity": "INTEGER",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": true,
++          "columnNames": [
++            "id"
++          ]
++        }
++      },
++      {
++        "tableName": "reading_goal",
++        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `target` INTEGER NOT NULL, PRIMARY KEY(`id`))",
++        "fields": [
++          {
++            "fieldPath": "id",
++            "columnName": "id",
++            "affinity": "INTEGER",
++            "notNull": true
++          },
++          {
++            "fieldPath": "target",
++            "columnName": "target",
++            "affinity": "INTEGER",
++            "notNull": true
++          }
++        ],
++        "primaryKey": {
++          "autoGenerate": false,
++          "columnNames": [
++            "id"
++          ]
++        }
++      }
++    ],
++    "setupQueries": [
++      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
++      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08631ffcedbab336486f62a5efe495ec')"
++    ]
++  }
++}
+\ No newline at end of file
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
+index 5328577..b1fae15 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt
+@@ -6,11 +6,12 @@ import androidx.room.RoomDatabase
+ import androidx.room.RoomDatabaseConstructor
+ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+ 
+-@Database(entities = [NoteEntity::class, com.example.feature.notes.readinglog.data.BookEntity::class], version = 2, autoMigrations = [androidx.room.AutoMigration(from = 1, to = 2)], exportSchema = true)
++@Database(entities = [NoteEntity::class, com.example.feature.notes.readinglog.data.BookEntity::class, com.example.feature.notes.readinglog.data.ReadingGoalEntity::class], version = 3, autoMigrations = [androidx.room.AutoMigration(from = 1, to = 2), androidx.room.AutoMigration(from = 2, to = 3)], exportSchema = true)
+ @ConstructedBy(NotesDatabaseConstructor::class)
+ internal abstract class NotesDatabase : RoomDatabase() {
+     abstract fun notesDao(): NotesDao
+     abstract fun bookDao(): com.example.feature.notes.readinglog.data.BookDao
++    abstract fun readingGoalDao(): com.example.feature.notes.readinglog.data.ReadingGoalDao
+ }
+ 
+ @Suppress("KotlinNoActualForExpect")
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+index f5c072d..ba1e0dd 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/DefaultBookRepository.kt
+@@ -16,4 +16,8 @@ internal class DefaultBookRepository(private val db: NotesDatabase) : BookReposi
+     override suspend fun markFinished(id: Long) {
+         db.bookDao().markFinished(id)
+     }
++    override fun getReadingGoalStream(): Flow<Int?> = db.readingGoalDao().getGoalStream()
++    override suspend fun setReadingGoal(target: Int) {
++        db.readingGoalDao().setGoal(ReadingGoalEntity(target = target))
++    }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalDao.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalDao.kt
+new file mode 100644
+index 0000000..f18eca9
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalDao.kt
+@@ -0,0 +1,15 @@
++package com.example.feature.notes.readinglog.data
++
++import androidx.room.Dao
++import androidx.room.Query
++import androidx.room.Upsert
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++internal interface ReadingGoalDao {
++    @Query("SELECT target FROM reading_goal WHERE id = 1")
++    fun getGoalStream(): Flow<Int?>
++
++    @Upsert
++    suspend fun setGoal(goal: ReadingGoalEntity)
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt
+new file mode 100644
+index 0000000..1efb908
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/data/ReadingGoalEntity.kt
+@@ -0,0 +1,10 @@
++package com.example.feature.notes.readinglog.data
++
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++
++@Entity(tableName = "reading_goal")
++internal data class ReadingGoalEntity(
++    @PrimaryKey val id: Long = 1,
++    val target: Int,
++)
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+index 70bbf95..00c6eed 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/domain/repository/BookRepository.kt
+@@ -5,4 +5,8 @@ interface BookRepository {
+     fun getBooksStream(): Flow<List<Book>>
+     suspend fun addBook(title: String, author: String, pages: Int): Long
+     suspend fun markFinished(id: Long)
++    /** Yearly reading goal (books to finish). Null when the user has not set one yet. */
++    fun getReadingGoalStream(): Flow<Int?>
++    /** Persists the yearly reading goal so it is remembered between launches. */
++    suspend fun setReadingGoal(target: Int)
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+index 372e1f3..b620a1c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+@@ -3,11 +3,19 @@ import com.example.core.mvi.UiAction
+ import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookListUiState(val items: List<Book> = emptyList(), val isLoading: Boolean = false) : UiState
++data class BookListUiState(
++    val items: List<Book> = emptyList(),
++    val isLoading: Boolean = false,
++    val readingGoal: Int? = null,
++    val goalDraft: String = "",
++    val goalError: String? = null,
++) : UiState
+ sealed interface BookListUiAction : UiAction {
+     data object OnScreenStarted : BookListUiAction
+     data object OnAddClick : BookListUiAction
+     data class OnMarkFinishedClick(val id: Long) : BookListUiAction
++    data class OnGoalDraftChanged(val draft: String) : BookListUiAction
++    data object OnSaveGoalClick : BookListUiAction
+ }
+ sealed interface BookListUiEffect : UiEffect {
+     data object OpenAddSheet : BookListUiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+index 38da481..0a29f93 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+@@ -22,6 +22,8 @@ fun BookListRoute(viewModel: BookListViewModel, onEffect: suspend (BookListUiEff
+     BookListScreen(
+         state = state,
+         onAdd = { viewModel.onAction(BookListUiAction.OnAddClick) },
+-        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) }
++        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) },
++        onGoalDraftChanged = { viewModel.onAction(BookListUiAction.OnGoalDraftChanged(it)) },
++        onSaveGoal = { viewModel.onAction(BookListUiAction.OnSaveGoalClick) },
+     )
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+index 6b50bac..80cba17 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+@@ -3,11 +3,39 @@ import androidx.compose.foundation.layout.Column
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material3.Button
++import androidx.compose.material3.LinearProgressIndicator
+ import androidx.compose.material3.Text
++import androidx.compose.material3.TextField
+ import androidx.compose.runtime.Composable
+ @Composable
+-fun BookListScreen(state: BookListUiState, onAdd: () -> Unit, onMarkFinished: (Long) -> Unit) {
++fun BookListScreen(
++    state: BookListUiState,
++    onAdd: () -> Unit,
++    onMarkFinished: (Long) -> Unit,
++    onGoalDraftChanged: (String) -> Unit,
++    onSaveGoal: () -> Unit,
++) {
+     Column {
++        if (state.isLoading) {
++            Text("Loading…")
++        }
++        if (state.readingGoal == null) {
++            Text("Set a yearly reading goal to track your progress")
++        } else {
++            val finished = state.items.count { it.isFinished }
++            val target = state.readingGoal
++            val percent = if (target > 0) (finished * 100 / target).coerceAtMost(100) else 0
++            Text("$finished of $target books read ($percent%)")
++            LinearProgressIndicator(progress = { (finished.toFloat() / target.toFloat()).coerceIn(0f, 1f) })
++        }
++        TextField(
++            value = state.goalDraft,
++            onValueChange = onGoalDraftChanged,
++            label = { Text("Yearly goal") },
++            isError = state.goalError != null,
++            supportingText = { if (state.goalError != null) Text(state.goalError) },
++        )
++        Button(onClick = onSaveGoal) { Text("Save Goal") }
+         Button(onClick = onAdd) { Text("Add Book") }
+         LazyColumn {
+             items(state.items, key = { it.id }) { book ->
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+index 2c463f7..577f140 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+@@ -1,17 +1,28 @@
+ package com.example.feature.notes.readinglog.presentation.list
+ import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import androidx.lifecycle.SavedStateHandle
+ import kotlinx.coroutines.Job
+ import org.koin.core.annotation.KoinViewModel
+ @KoinViewModel
+-class BookListViewModel(private val repository: BookRepository) :
+-    BaseViewModel<BookListUiAction, BookListUiState, BookListUiEffect>(BookListUiState()) {
++class BookListViewModel(
++    private val repository: BookRepository,
++    private val savedStateHandle: SavedStateHandle,
++) : BaseViewModel<BookListUiAction, BookListUiState, BookListUiEffect>(
++    BookListUiState(goalDraft = savedStateHandle["goalDraft"] ?: ""),
++) {
+     private var streamJob: Job? = null
++    private var goalJob: Job? = null
+     override fun onAction(action: BookListUiAction) {
+         when (action) {
+             BookListUiAction.OnScreenStarted -> observeBooks()
+             BookListUiAction.OnAddClick -> sendEffect(BookListUiEffect.OpenAddSheet)
+             is BookListUiAction.OnMarkFinishedClick -> markFinished(action.id)
++            is BookListUiAction.OnGoalDraftChanged -> {
++                savedStateHandle["goalDraft"] = action.draft
++                updateState { copy(goalDraft = action.draft, goalError = null) }
++            }
++            BookListUiAction.OnSaveGoalClick -> saveGoal()
+         }
+     }
+     private fun observeBooks() {
+@@ -20,8 +31,20 @@ class BookListViewModel(private val repository: BookRepository) :
+         streamJob = launchGuarded(onError = ::emitError) {
+             repository.getBooksStream().collect { books -> updateState { copy(items = books, isLoading = false) } }
+         }
++        if (goalJob?.isActive == true) return
++        goalJob = launchGuarded(onError = ::emitError) {
++            repository.getReadingGoalStream().collect { goal -> updateState { copy(readingGoal = goal) } }
++        }
+     }
+     private fun markFinished(id: Long) { launchGuarded(onError = ::emitError) { repository.markFinished(id) } }
++    private fun saveGoal() {
++        val target = currentState.goalDraft.toIntOrNull()
++        if (target == null || target <= 0) {
++            updateState { copy(goalError = "Enter a goal of 1 or more books") }
++            return
++        }
++        launchGuarded(onError = ::emitError) { repository.setReadingGoal(target) }
++    }
+     fun createBook(title: String, author: String, pages: Int) {
+         launchGuarded(onError = ::emitError) { repository.addBook(title, author, pages) }
+     }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/BookListViewModelTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/BookListViewModelTest.kt
+new file mode 100644
+index 0000000..782e559
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/BookListViewModelTest.kt
+@@ -0,0 +1,80 @@
++package com.example.feature.notes.readinglog
++
++import androidx.lifecycle.SavedStateHandle
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.presentation.list.BookListUiAction
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertNull
++import kotlin.test.assertTrue
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class BookListViewModelTest {
++    private val scheduler = TestCoroutineScheduler()
++
++    @BeforeTest fun setUp() { Dispatchers.setMain(StandardTestDispatcher(scheduler)) }
++    @AfterTest fun tearDown() { Dispatchers.resetMain() }
++
++    @Test fun `cold load shows books and saved goal`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply {
++            seedBooks(listOf(Book(1, "Dune", "Herbert", 412, true), Book(2, "Emma", "Austen", 300, false)))
++            seedGoal(12)
++        }
++        val viewModel = bookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertEquals(2, viewModel.state.value.items.size)
++        assertEquals(12, viewModel.state.value.readingGoal)
++    }
++
++    @Test fun `goal unset stays null`() = runTest(scheduler) {
++        val viewModel = bookListViewModel(FakeBookRepository())
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertNull(viewModel.state.value.readingGoal)
++        assertTrue(viewModel.state.value.items.isEmpty())
++    }
++
++    @Test fun `save persists goal`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        val viewModel = bookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        viewModel.onAction(BookListUiAction.OnGoalDraftChanged("20"))
++        viewModel.onAction(BookListUiAction.OnSaveGoalClick)
++        advanceUntilIdle()
++        assertEquals(20, fake.lastSavedGoal)
++        assertEquals(20, viewModel.state.value.readingGoal)
++    }
++
++    @Test fun `invalid goal sets error and never writes`() = runTest(scheduler) {
++        val fake = FakeBookRepository()
++        val viewModel = bookListViewModel(fake)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        viewModel.onAction(BookListUiAction.OnGoalDraftChanged("zero"))
++        viewModel.onAction(BookListUiAction.OnSaveGoalClick)
++        advanceUntilIdle()
++        assertEquals(0, fake.saveGoalCalls)
++        assertEquals("Enter a goal of 1 or more books", viewModel.state.value.goalError)
++    }
++
++    @Test fun `process death restores goal draft`() = runTest(scheduler) {
++        val handle = SavedStateHandle().apply { this["goalDraft"] = "15" }
++        val viewModel = bookListViewModel(FakeBookRepository(), handle = handle)
++        assertEquals("15", viewModel.state.value.goalDraft)
++        viewModel.onAction(BookListUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertEquals("15", viewModel.state.value.goalDraft)
++    }
++}
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/FakeBookRepository.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/FakeBookRepository.kt
+new file mode 100644
+index 0000000..af25914
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/FakeBookRepository.kt
+@@ -0,0 +1,52 @@
++package com.example.feature.notes.readinglog
++
++import androidx.lifecycle.SavedStateHandle
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.update
++
++class FakeBookRepository : BookRepository {
++    private val booksBacking = MutableStateFlow<List<Book>>(emptyList())
++    private val goalBacking = MutableStateFlow<Int?>(null)
++    var lastSavedGoal: Int? = null
++    var saveGoalCalls: Int = 0
++
++    fun seedBooks(items: List<Book>) {
++        booksBacking.value = items
++    }
++
++    fun seedGoal(target: Int?) {
++        goalBacking.value = target
++    }
++
++    override fun getBooksStream(): Flow<List<Book>> = booksBacking
++
++    override suspend fun addBook(title: String, author: String, pages: Int): Long {
++        val id = (booksBacking.value.maxOfOrNull { it.id } ?: 0L) + 1L
++        booksBacking.update { it + Book(id, title, author, pages, false) }
++        return id
++    }
++
++    override suspend fun markFinished(id: Long) {
++        booksBacking.update { list -> list.map { if (it.id == id) it.copy(isFinished = true) else it } }
++    }
++
++    override fun getReadingGoalStream(): Flow<Int?> = goalBacking
++
++    override suspend fun setReadingGoal(target: Int) {
++        saveGoalCalls += 1
++        lastSavedGoal = target
++        goalBacking.value = target
++    }
++}
++
++fun bookListViewModel(
++    fake: FakeBookRepository,
++    handle: SavedStateHandle = SavedStateHandle(),
++): com.example.feature.notes.readinglog.presentation.list.BookListViewModel =
++    com.example.feature.notes.readinglog.presentation.list.BookListViewModel(
++        repository = fake,
++        savedStateHandle = handle,
++    )

@@ -1,0 +1,5 @@
+Updated book detail to match the book list’s Route/Screen split, `BaseViewModel`, lifecycle-aware state collection, and Koin ViewModel setup. The ID-based lookup and loading/title display remain the same; load failures now use the project’s inline error and retry flow.
+
+The Compose guards passed (11/11), and the `feature:notes` common metadata and JVM compilation succeeded. I didn’t run tests.
+
+Changed files: [BookDetailRoute.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt), [BookDetailScreen.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt), [BookDetailViewModel.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt), and [BookDetailContract.kt](<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt).

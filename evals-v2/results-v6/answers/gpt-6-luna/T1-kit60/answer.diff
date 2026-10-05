@@ -1,0 +1,186 @@
+diff --git a/feature/notes/src/commonMain/composeResources/values/strings.xml b/feature/notes/src/commonMain/composeResources/values/strings.xml
+index ca8938c..9d2c4a5 100644
+--- a/feature/notes/src/commonMain/composeResources/values/strings.xml
++++ b/feature/notes/src/commonMain/composeResources/values/strings.xml
+@@ -10,4 +10,6 @@
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="note_title">Note title</string>
++    <string name="loading">Loading...</string>
++    <string name="total_pages_read">Total pages read: %1$d</string>
+ </resources>
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+index 6c4a0b5..0684ba8 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+@@ -1,7 +1,19 @@
+ package com.example.feature.notes.readinglog.presentation.stats
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
+-data class ReadingStatsUiState(val totalPages: Int = 0, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface ReadingStatsUiAction : UiAction { data object OnScreenStarted : ReadingStatsUiAction }
++import com.example.core.mvi.UiState
++
++data class ReadingStatsUiState(
++    val totalPages: Int = 0,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++) : UiState
++
++sealed interface ReadingStatsUiAction : UiAction {
++    data object OnScreenStarted : ReadingStatsUiAction
++    data class OnRetryClick(val error: AppError) : ReadingStatsUiAction
++}
++
+ sealed interface ReadingStatsUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+new file mode 100644
+index 0000000..84a92a9
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+@@ -0,0 +1,21 @@
++package com.example.feature.notes.readinglog.presentation.stats
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.designsystem.error.HandleAppErrors
++
++@Composable
++fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
++    LifecycleStartEffect(Unit) {
++        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    HandleAppErrors(viewModel.errors)
++    ReadingStatsScreen(
++        state = state,
++        onRetry = { error -> viewModel.onAction(ReadingStatsUiAction.OnRetryClick(error)) },
++    )
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+index c709141..7575fa1 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+@@ -1,19 +1,32 @@
+ package com.example.feature.notes.readinglog.presentation.stats
++
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.material3.Button
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++import com.example.core.error.AppError
++import org.jetbrains.compose.resources.stringResource
++import notes.feature.notes.generated.resources.Res
++import notes.feature.notes.generated.resources.error_message
++import notes.feature.notes.generated.resources.loading
++import notes.feature.notes.generated.resources.retry
++import notes.feature.notes.generated.resources.total_pages_read
++
+ @Composable
+-fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
+-    LifecycleStartEffect(Unit) {
+-        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun ReadingStatsScreen(
++    state: ReadingStatsUiState,
++    onRetry: (AppError) -> Unit,
++) {
+     Column {
+-        if (state.isLoading) { Text("Loading...") }
+-        Text("Total pages read: ${state.totalPages}")
++        if (state.isLoading) {
++            Text(stringResource(Res.string.loading))
++        }
++        Text(stringResource(Res.string.total_pages_read, state.totalPages))
++        state.error?.let { error ->
++            Text(stringResource(Res.string.error_message))
++            Button(onClick = { onRetry(error) }) {
++                Text(stringResource(Res.string.retry))
++            }
++        }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+index 415ab49..9b4320b 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+@@ -1,26 +1,49 @@
+ package com.example.feature.notes.readinglog.presentation.stats
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.error.AppError
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class ReadingStatsViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(ReadingStatsUiState())
+-    fun onAction(action: ReadingStatsUiAction) {
+-        if (action is ReadingStatsUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val pages = books.filter { it.isFinished }.sumOf { it.pages }
+-                    state.value = state.value.copy(totalPages = pages, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class ReadingStatsViewModel(private val repository: BookRepository) :
++    BaseViewModel<ReadingStatsUiAction, ReadingStatsUiState, ReadingStatsUiEffect>(ReadingStatsUiState()) {
++
++    private var loadJob: Job? = null
++    private var hasStarted = false
++
++    override fun onAction(action: ReadingStatsUiAction) {
++        when (action) {
++            ReadingStatsUiAction.OnScreenStarted -> load()
++            is ReadingStatsUiAction.OnRetryClick -> retry(action.error)
++        }
++    }
++
++    private fun load() {
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { error ->
++                if (hasStarted) {
++                    emitError(error)
++                } else {
++                    updateState { copy(error = error) }
+                 }
+-            }
++            },
++            onStart = { updateState { copy(isLoading = !hasStarted, error = null) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val books = repository.getBooksStream().first()
++            val pages = books.filter { it.isFinished }.sumOf { it.pages }
++            updateState { copy(totalPages = pages, error = null) }
++            hasStarted = true
+         }
+     }
++
++    private fun retry(error: AppError) {
++        if (currentState.error != error) return
++        updateState { copy(error = null) }
++        load()
++    }
+ }
