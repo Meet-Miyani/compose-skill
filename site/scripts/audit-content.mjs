@@ -77,6 +77,8 @@ const EVIDENCE = [
   'evals-v2/results-v6/VERDICT.md',
   'evals-v2/results-v6/score-output.txt',
   'evals-v2/results-v6/kit-tokens.txt',
+  'evals-v2/results-v6/ADDONS.md',
+  'evals-v2/results-v6/score-output-addons.txt',
 ];
 const missingEvidence = EVIDENCE.filter((f) => !existsSync(join(REPO_ROOT, f)));
 if (missingEvidence.length) {

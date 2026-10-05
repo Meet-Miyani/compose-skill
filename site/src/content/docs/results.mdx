@@ -42,6 +42,24 @@ All pre-registered rules held, and no model scored below its own no-kit result, 
 
 Evidence: [`VERDICT.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/VERDICT.md), [`score-output.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/score-output.txt) and [`kit-tokens.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/kit-tokens.txt).
 
+## Add-ons: cheap DeepSeek models
+
+The same 6 tasks and 3 arms on two cheap models through OpenCode (36 runs, graded blind by Claude and GPT, both must pass). Reported separately; they did not decide the release.
+
+| Model | No kit | v6.0 kit | v6.1 kit | v6.1 − no kit | Plan cost, 18 runs |
+|---|---:|---:|---:|---:|---:|
+| DeepSeek V4.1 Flash | 32 (82.1%) | 35 (89.7%) | **38 (97.4%)** | +6 (+15.4 pts) | $0.65 |
+| DeepSeek V4 Pro | 29 (74.4%) | 30 (76.9%) | **34 (87.2%)** | +5 (+12.8 pts) | $2.12 |
+
+- Both score highest with v6.1, and neither is below its no-kit result with either kit.
+- The biggest single gain: DeepSeek V4 Pro on the "books by author" feature, 1/6 without the kit, 6/6 with v6.1.
+- No over-scoping on conform tasks and no over-flagged reviews in any arm. v6.1 did not help Pro's yearly-goal
+  feature (5/6 without the kit, 4/6 with it), which is within noise.
+- The add-ons had Claude and GPT as graders, while the panel's Claude and GPT answers had Gemini as one grader, so
+  compare across the two tables with care.
+
+Details: [`ADDONS.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/ADDONS.md) (run record: two provider content-filter blocks, one disk-full discard, five hidden-test adaptations)
+
 ## Held-out v5 (the earlier test)
 
 This is the earlier test, the one v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each task ran three times: with no kit, with a short generic "senior engineer" prompt, and with the kit. That's 120 runs. Two models from the other vendors graded every answer blind, and an item only counts if both of them pass it. The rules were written down before the tasks existed, and the grades were frozen before anything was scored.

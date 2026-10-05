@@ -209,6 +209,26 @@ All pre-registered rules held, and no model scored below its own no-kit result, 
 Details: [VERDICT.md](evals-v2/results-v6/VERDICT.md) · [score output](evals-v2/results-v6/score-output.txt) ·
 [kit tokens](evals-v2/results-v6/kit-tokens.txt)
 
+### Add-ons: cheap DeepSeek models
+
+The same 6 tasks and 3 arms on two cheap models through OpenCode (36 runs, graded blind by Claude and GPT, both must
+pass). Reported separately; they did not decide the release.
+
+| Model | No kit | v6.0 kit | v6.1 kit | v6.1 − no kit | Plan cost, 18 runs |
+|---|---:|---:|---:|---:|---:|
+| DeepSeek V4.1 Flash | 32 (82.1%) | 35 (89.7%) | **38 (97.4%)** | +6 (+15.4 pts) | $0.65 |
+| DeepSeek V4 Pro | 29 (74.4%) | 30 (76.9%) | **34 (87.2%)** | +5 (+12.8 pts) | $2.12 |
+
+- Both score highest with v6.1, and neither is below its no-kit result with either kit.
+- The biggest single gain: DeepSeek V4 Pro on the "books by author" feature, 1/6 without the kit, 6/6 with v6.1.
+- No over-scoping on conform tasks and no over-flagged reviews in any arm. v6.1 did not help Pro's yearly-goal
+  feature (5/6 without the kit, 4/6 with it), which is within noise.
+- The add-ons had Claude and GPT as graders, while the panel's Claude and GPT answers had Gemini as one grader, so
+  compare across the two tables with care.
+
+Details: [ADDONS.md](evals-v2/results-v6/ADDONS.md) (run record: two provider content-filter blocks, one disk-full
+discard, five hidden-test adaptations)
+
 ## Results: held-out v5
 
 This is the earlier test, the one v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside
@@ -292,8 +312,8 @@ Checks on the kit itself:
 - [x] **v6.0.0-preview.1:** 7 skills, entry tree, 4 install channels *(released 2026-10-01)*
 - [x] **v6.1.0, stable, now "Latest":** the v6.1 fixes passed every pre-registered rule, and no model scored below its
   no-kit result. Conform over-scoping fixed (no-new-UI item 2/10 → 8/10) *(released 2026-10-05, [results](#results-v61))*
-- [ ] **Cheap-model add-ons:** the same tasks on DeepSeek V4.1 Flash (running), then DeepSeek V4 Pro if plan quota
-  allows. MiniMax M3 was dropped; Kimi K3, GLM 5.3 and Qwen 3.8 Max are not planned
+- [x] **Cheap-model add-ons:** DeepSeek V4.1 Flash 32 → 38 and DeepSeek V4 Pro 29 → 34 of 39 with v6.1
+  *(2026-10-05, [results](#add-ons-cheap-deepseek-models))*. MiniMax M3 was dropped; Kimi K3, GLM 5.3 and Qwen 3.8 Max are not planned
 - [ ] **Journey page** on the site: the full test history
 - [x] **Project site:** [compose.avinya.dev](https://compose.avinya.dev) *(live 2026-10-02)*
 - [ ] *Maybe:* a kit CLI for project tooling (new project, add feature, run guards), if users ask for it
