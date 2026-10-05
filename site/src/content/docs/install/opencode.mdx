@@ -28,17 +28,17 @@ npx skills add Meet-Miyani/compose-skill --skill '*' -a opencode -g
 
 ## gh skill
 
-Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent opencode`: without it, a non-interactive run installs for GitHub Copilot.
+Needs GitHub CLI 2.90+. `--pin v6.1.0` fixes the version; without it, `gh skill` takes the latest stable release, which is currently v6.1.0. Pass `--agent opencode`: without it, a non-interactive run installs for GitHub Copilot.
 
 ```sh
 # This project only
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent opencode --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent opencode --scope project
 done
 
 # Globally
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent opencode --scope user
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent opencode --scope user
 done
 ```
 

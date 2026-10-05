@@ -74,6 +74,9 @@ const EVIDENCE = [
   'evals-v2/results-v5/erratum-sensitivity.txt',
   'evals-v2/method/preregistration-v5.md',
   'evals-v2/heldout-v5/tasks.md',
+  'evals-v2/results-v6/VERDICT.md',
+  'evals-v2/results-v6/score-output.txt',
+  'evals-v2/results-v6/kit-tokens.txt',
 ];
 const missingEvidence = EVIDENCE.filter((f) => !existsSync(join(REPO_ROOT, f)));
 if (missingEvidence.length) {

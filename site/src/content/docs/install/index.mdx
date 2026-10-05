@@ -44,11 +44,11 @@ The global folder for each agent:
 
 ## gh skill
 
-Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+Needs GitHub CLI 2.90+. `--pin v6.1.0` fixes the version; without it, `gh skill` takes the latest stable release, which is currently v6.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
 
 ```sh
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent claude-code --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent claude-code --scope project
 done
 ```
 

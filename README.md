@@ -6,14 +6,14 @@
 write better Jetpack Compose and Compose Multiplatform code.**<br>
 One consistent house style, measured on five models in real agent CLIs.
 
-[![Release](https://img.shields.io/github/v/release/Meet-Miyani/compose-skill?include_prereleases&label=release&color=2a78d6)](https://github.com/Meet-Miyani/compose-skill/releases)
+[![Release](https://img.shields.io/github/v/release/Meet-Miyani/compose-skill?label=release&color=2a78d6)](https://github.com/Meet-Miyani/compose-skill/releases)
 [![CI](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/Meet-Miyani/compose-skill?color=52514e)](LICENSE)
 [![Website](https://img.shields.io/badge/website-compose.avinya.dev-ee3a20)](https://compose.avinya.dev)
 [![Skills](https://img.shields.io/badge/skills-7-2a78d6)](#whats-inside)
 [![Held-out test](https://img.shields.io/badge/held--out%20test-120%20agentic%20runs-2a78d6)](#results-held-out-v5)
 [![Guard tests](https://img.shields.io/badge/guard%20tests-90%20passing-0ca30c)](tests/skills)
-[![v6.1 A/B](https://img.shields.io/badge/v6.1%20A%2FB-in%20progress-eda100)](#roadmap)
+[![v6.1 A/B](https://img.shields.io/badge/v6.1%20A%2FB-stable-0ca30c)](#results-v61)
 
 **Works with** Claude Code · Codex · Cursor · OpenCode · Copilot · Gemini CLI · Antigravity
 
@@ -23,9 +23,9 @@ One consistent house style, measured on five models in real agent CLIs.
 
 <table>
 <tr>
-<td align="center" width="25%"><h2>+25.6</h2>points for<br><b>Gemini 3.8 Flash</b><br>with the kit</td>
-<td align="center" width="25%"><h2>+18.6</h2>points for<br><b>Sonnet 5.5</b><br>with the kit</td>
-<td align="center" width="25%"><h2>120</h2>agentic runs<br>on 8 never-seen tasks</td>
+<td align="center" width="25%"><h2>+25.6</h2>points for<br><b>Gemini 3.8 Flash</b><br>with the kit (v5 test)</td>
+<td align="center" width="25%"><h2>+18.6</h2>points for<br><b>Sonnet 5.5</b><br>with the kit (v5 test)</td>
+<td align="center" width="25%"><h2>120</h2>agentic runs<br>on 8 never-seen tasks (v5 test)</td>
 <td align="center" width="25%"><h2>2</h2>blind graders from other vendors<br>must agree on every item</td>
 </tr>
 </table>
@@ -110,12 +110,12 @@ Swap `claude-code` for your agent: `codex`, `cursor`, `opencode`, `github-copilo
 
 ### gh skill
 
-Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old
-v5.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+Needs GitHub CLI 2.90+. `--pin v6.1.0` fixes the version; without it, `gh skill` takes the latest stable release, which
+is currently v6.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
 
 ```sh
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent claude-code --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent claude-code --scope project
 done
 ```
 
@@ -165,9 +165,53 @@ your agent's skills directory, then install with any option above. The old CLI's
 bash <skills dir>/compose-architecture/scripts/install-guards.sh <project>
 ```
 
+## Results: v6.1
+
+The v6.1 test: 5 models × 6 new tasks × 3 arms (no kit, v6.0 kit, v6.1 kit) = 90 agentic runs in the real CLIs. Each
+answer was graded blind by the two vendors other than its own, and an item passes only when both graders pass it.
+
+Items passed of 39 (27 `[eng]` items written by the independent task author, 12 `[kit]` items written by the
+moderator):
+
+| Model | No kit | v6.0 kit | v6.1 kit | v6.1 − no kit |
+|---|---:|---:|---:|---:|
+| Sonnet 5.5 | 31 (79.5%) | 35 (89.7%) | 34 (87.2%) | +3 (+7.7 pts) |
+| GPT-6-Luna | 28 (71.8%) | 35 (89.7%) | **37 (94.9%)** | **+9 (+23.1 pts)** |
+| GPT-6-Sol | 30 (76.9%) | 34 (87.2%) | 34 (87.2%) | +4 (+10.3 pts) |
+| Gemini 3.8 Flash | 22 (56.4%) | 33 (84.6%) | 34 (87.2%) | **+12 (+30.8 pts)** |
+| Muse Spark 1.3 | 27 (69.2%) | 27 (69.2%) | 29 (74.4%) | +2 (+5.1 pts) |
+
+By task type, all five models together (both graders agree):
+
+| Tasks | No kit | v6.0 kit | v6.1 kit |
+|---|---:|---:|---:|
+| Conform (2 tasks, 60 items) | 73.3% | 75.0% | **80.0%** |
+| Review (2 tasks, 75 items) | 78.7% | 94.7% | 94.7% |
+| New feature (2 tasks, 60 items) | 58.3% | 80.0% | 81.7% |
+
+All pre-registered rules held, and no model scored below its own no-kit result, so v6.1.0 is the stable release.
+
+- **Conform over-scoping is mostly fixed.** The "no new UI controls, screens or features" item passed in 2 of 10
+  conform cells with v6.0 and 8 of 10 with v6.1 (no kit: 6). v6.0 added retry buttons and error screens while
+  conforming; v6.1 mostly stopped.
+- **Reviews: no difference between the kits.** Both lift reviews well above no kit, and neither called a "fine" item
+  blocking. The v5 over-flagging did not show up on these tasks, so that is no difference, not a fix.
+- **Muse Spark 1.3 barely benefits** (+2 over no kit) and still over-scoped T1: v6.1 added a Retry button, and it
+  scored 6/6 on T1 without the kit and 3/6 with v6.1.
+- **Context:** 5 of 10 v6.1 new-feature runs went over the 20k design budget (v6.0: 3 of 10), up to about 30k for
+  GPT-6-Sol. Sonnet and Gemini 3.8 Flash stayed under 20k on every new-feature run with v6.1.
+- **Grading flaw, disclosed.** The hidden behaviour test passed 3/3 in 29 of 30 conform cells, but the grader packets
+  did not name it or show its result, so both graders passed that item in only 11 of 30 cells, in every arm alike. A
+  sensitivity check that sets the item to the mechanical result leaves every rule and the stable criterion unchanged.
+- **Limits:** one generation per cell and 6 tasks, so per-model differences of about 3 items or fewer are noise. Read
+  v6.1 − v6.0 as "no regression" (Sonnet is −1), not as a ranking.
+
+Details: [VERDICT.md](evals-v2/results-v6/VERDICT.md) · [score output](evals-v2/results-v6/score-output.txt) ·
+[kit tokens](evals-v2/results-v6/kit-tokens.txt)
+
 ## Results: held-out v5
 
-This is the test v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside
+This is the earlier test, the one v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside
 their own agent CLIs. Each task ran three times: with no kit, with a short generic "senior engineer" prompt, and with
 the kit. That's 120 runs. Two models from the other vendors graded every answer blind, and an item only counts if
 both of them pass it. The rules were written down before the tasks existed, and the grades were frozen before
@@ -193,7 +237,7 @@ By task type, all five panel models together (both graders agree):
 | New features (3 tasks) | 43.5% | 47.1% | **70.6%** | The biggest win: where data lives, navigation results, background work |
 | Bug fixes (2) | 80.0% | 88.6% | 82.9% | Every setup fixed the bugs; the kit adds little here |
 | Reviews (2) | 72.9% | 64.3% | **84.3%** | These two tasks had flawed setups, see the erratum below |
-| "Match our conventions" (1) | 68.0% | 60.0% | 44.0% | Worse with the kit: models restructured too much. This is the main v6.1 fix |
+| "Match our conventions" (1) | 68.0% | 60.0% | 44.0% | Worse with the kit: models restructured too much. v6.1 mostly fixed this |
 
 Computed from the frozen grades by [`v5-by-task-type.py`](evals-v2/method/tools/v5-by-task-type.py).
 
@@ -235,7 +279,7 @@ Tasks and base app: [evals-v2/heldout-v5](evals-v2/heldout-v5/)
 | v3 | Workout log | 8 single-shot scenarios, 2 graders | Muse Spark 1.3: 54% → 91% with the kit; DeepSeek V4.1 Flash: 57% → 77% *(earlier candidate)* |
 | v4 | Plant care | 12 scenarios | Fed the redesign into 7 skills with an entry tree (results not published) |
 | **v5** | **Workout log** | **8 agentic tasks, 150 runs incl. add-ons** | **The results above: release evidence for v6.0** |
-| v6 | Reading log | 6 agentic tasks, 90 runs | In progress: v6.0 vs v6.1 vs no kit (see [roadmap](#roadmap)) |
+| **v6** | **Reading log** | **6 agentic tasks, 90 runs** | **v6.0 vs v6.1 vs no kit: v6.1 released as stable ([results](#results-v61))** |
 
 Checks on the kit itself:
 - **Guard precision on a real app:** run read-only on a ~1,600-file production KMP codebase, the guard scripts went
@@ -246,27 +290,24 @@ Checks on the kit itself:
 ## Roadmap
 
 - [x] **v6.0.0-preview.1:** 7 skills, entry tree, 4 install channels *(released 2026-10-01)*
-- [ ] **v6.1 A/B, in progress:** v6.0 vs the v6.1 fixes vs no kit, 5 models × 6 new tasks = 90 runs. The fixes
-  target conform over-restructuring, over-strict reviews and over-reading.
-  - 84/90 runs done and blind grading under way (as of Oct 2)
-  - verdict expected around **Oct 5**, once the last grader's plan quota resets
-  - **v6.1.0-preview.2** ships only if the pre-registered rules hold: no model worse, conform improves, reviews
-    over-flag no more
-- [ ] **Cheap-model benchmark:** the same tasks on DeepSeek V4.1 Flash, DeepSeek V4 Pro and MiniMax M3, then Kimi K3,
-  GLM and Qwen if plan quota allows
-- [ ] **Promote v6 to "Latest"** on GitHub once v6.1 is confirmed (until then `gh skill` needs `--pin`)
-- [x] **Project site:** [compose.avinya.dev](https://compose.avinya.dev) *(live 2026-10-02)*; the full test history comes next
+- [x] **v6.1.0, stable, now "Latest":** the v6.1 fixes passed every pre-registered rule, and no model scored below its
+  no-kit result. Conform over-scoping fixed (no-new-UI item 2/10 → 8/10) *(released 2026-10-05, [results](#results-v61))*
+- [ ] **Cheap-model add-ons:** the same tasks on DeepSeek V4.1 Flash (running), then DeepSeek V4 Pro if plan quota
+  allows. MiniMax M3 was dropped; Kimi K3, GLM 5.3 and Qwen 3.8 Max are not planned
+- [ ] **Journey page** on the site: the full test history
+- [x] **Project site:** [compose.avinya.dev](https://compose.avinya.dev) *(live 2026-10-02)*
 - [ ] *Maybe:* a kit CLI for project tooling (new project, add feature, run guards), if users ask for it
 
-After v6 and the cheap-model benchmark, new benchmark rounds start only for a concrete reason: a reported problem, a
-major new model, or a large change to the kit.
+After the cheap-model add-ons, new benchmark rounds start only for a concrete reason: a reported problem, a major new
+model, or a large change to the kit.
 
-## Known issues in v6.0
+## Known issues in v6.1
 
-- On "make this match our conventions" tasks, the kit can lead models to restructure too much *(v6.1 fix under test)*.
-- Reviews sometimes call fine code blocking *(v6.1 fix under test)*.
-- GPT-6-Luna scored lower on engineering items with the kit in v5.
-- New features can exceed 20k kit tokens when a model reads past the entry tree.
+- Muse Spark 1.3 gains little from the kit (+2 items) and can still over-scope "make this match our conventions" tasks.
+- New features can exceed 20k kit tokens when a model reads past the entry tree (5 of 10 v6.1 new-feature runs).
+- The v6 conform grading did not show graders the hidden-test result; the sensitivity check leaves the outcome
+  unchanged, and future packets will state it.
+- One kit-shaped base project, so behaviour on a coherent non-kit project is not tested.
 - Installing only some of the skills isn't supported yet; skills cross-reference each other, so install all 7.
 
 ## Feedback
