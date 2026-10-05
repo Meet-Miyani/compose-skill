@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Author tap in BookListScreen dispatches OnAuthorClick -> OpenAuthorBooks effect -> App pushes AuthorBooksKey; VM observes getBooksByAuthorStream(author) backed by DAO WHERE author = :author"},
+    "2": {"pass": true, "why": "Back button sends NavigateBack effect, Route calls onBack which pops the back stack; NavDisplay onBack also pops"},
+    "3": {"pass": true, "why": "DAO query filters only by author (no isFinished filter); screen renders finished and unfinished items; test asserts both Tolkien books"},
+    "4": {"pass": true, "why": "checks_exit=0 and BUILD SUCCESSFUL in the check output"},
+    "5": {"pass": true, "why": "AuthorBooksKey added to the sealed ReadingLogNavKey (registered via subclassesOfSealed), entry<AuthorBooksKey> in App, own AuthorBooksViewModel and AuthorBooksUiState contract (a redundant AuthorKey duplicate is also added but does not negate this)"},
+    "6": {"pass": true, "why": "Filtering is done by the Room query in BookDao via the repository; no composable filters"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Author tap dispatches OnAuthorClick -> OpenAuthor effect -> App pushes AuthorBooksKey; VM collects getBooksByAuthorStream backed by DAO WHERE author = :author"},
+    "2": {"pass": true, "why": "Back button -> OnBackClick -> NavigateBack effect -> App removes last back-stack entry; NavDisplay onBack also pops"},
+    "3": {"pass": true, "why": "DAO query filters only by author; screen lists all items with finished status; test seeds a finished and unfinished book by Author A and asserts both shown"},
+    "4": {"pass": true, "why": "checks_exit=0 and BUILD SUCCESSFUL in the check output"},
+    "5": {"pass": true, "why": "AuthorBooksKey added to the sealed ReadingLogNavKey hierarchy, entry<AuthorBooksKey> registered in App, own AuthorBooksViewModel and AuthorBooksUiState/Action/Effect contract"},
+    "6": {"pass": true, "why": "Filtering is done in the Room DAO query exposed through the repository; composables only render state.items"}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Empty diff; only proposed approaches and asked to proceed, nothing implemented"},
+    "2": {"pass": false, "why": "Empty diff; no author view or back navigation exists"},
+    "3": {"pass": false, "why": "Empty diff; no author view was built"},
+    "4": {"pass": true, "why": "No changes made and checks_exit=0 with BUILD SUCCESSFUL, so existing tests still pass"},
+    "5": {"pass": false, "why": "Empty diff; no key, ViewModel or UiState was added"},
+    "6": {"pass": false, "why": "Empty diff; no author filtering implemented anywhere"}
+  }
+}

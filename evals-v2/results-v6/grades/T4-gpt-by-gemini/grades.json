@@ -1,0 +1,206 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope and that jobs outlive the ViewModel"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that the broad catch silently discards failures with no error in state"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies independent jobs and that an earlier search can overwrite newer results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates blocking, worth doing later, and fine as is sections"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes ViewModel-owned work and cancelling prior searches"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope and that work can outlive the ViewModel"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch drops failures leaving no results or error signal"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies uncancelled jobs where an earlier search overwrites newer results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates blocking, later improvements, and fine as is sections"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes using ViewModel scope and cancelling the previous query"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope and that jobs continue after ViewModel is cleared"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch leaves UI with no error indication"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies that an earlier result can overwrite a newer one"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": false,
+      "why": "Fails to separate later improvements and lacks a fine as is section"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes ViewModel scoped coroutine and cancelling prior searches"
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope and that searches can outlive the ViewModel"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies discarded exceptions leave stale results with no error"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies independent searches where an older query overwrites newer results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": false,
+      "why": "Hallucinates passing checks in the fine as is section, contradicting the evidence"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes cancelling the previous job and using the ViewModel's guarded job"
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope and that work continues after ViewModel is cleared"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies swallowed failures leaving outdated results and no error"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies independent coroutines where an earlier read overwrites current results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": false,
+      "why": "Hallucinates passing checks in the fine as is section, contradicting the evidence"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes ViewModel scope and cancelling prior searches via code example"
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope leak keeping ViewModel alive and updating state after navigation"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch leaves prior results with no error indication"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies concurrent coroutines where older searches overwrite newer results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call case-insensitive match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not separate blocking from later improvements or state what is fine as it is"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes cancelling the previous search and using viewModelScope"
+    }
+  }
+}

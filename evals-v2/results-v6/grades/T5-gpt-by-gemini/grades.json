@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel and UI prevent saving non-positive goals." },
+    "3": { "pass": true, "why": "The UI counts books that were finished in the current year." },
+    "4": { "pass": true, "why": "The checks log indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": false, "why": "New user-facing text uses hardcoded strings instead of string resources." }
+  },
+  "B": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel ignores non-positive goals and the UI filters input." },
+    "3": { "pass": true, "why": "The DAO query filters completed books by the current year." },
+    "4": { "pass": true, "why": "The checks output indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": false, "why": "No validation message reaches the screen through state." }
+  },
+  "C": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel enforces positive targets before saving." },
+    "3": { "pass": true, "why": "The DAO counts finished books for the current year." },
+    "4": { "pass": true, "why": "The checks log indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": false, "why": "New user-facing text uses hardcoded strings and no validation message reaches the UI via state." }
+  },
+  "D": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel restricts the goal range and the UI enforces constraints." },
+    "3": { "pass": true, "why": "The DAO filters finished books by the current year." },
+    "4": { "pass": true, "why": "The checks output indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": false, "why": "No validation message reaches the screen through state." }
+  },
+  "E": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel prevents saving invalid goals and triggers an error state." },
+    "3": { "pass": true, "why": "The DAO counts finished books for the specified year." },
+    "4": { "pass": true, "why": "The checks log indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": true, "why": "Validation triggers an error state that displays a string resource message." }
+  },
+  "F": {
+    "1": { "pass": true, "why": "The goal is saved in the Room database." },
+    "2": { "pass": true, "why": "The ViewModel prevents saving invalid goals and triggers an error state." },
+    "3": { "pass": true, "why": "The UI counts books whose finished year matches the current year." },
+    "4": { "pass": true, "why": "The checks log indicates tests still pass." },
+    "5": { "pass": true, "why": "The goal is managed by the repository and provided via UiState." },
+    "6": { "pass": true, "why": "Validation triggers an error state that displays a string resource message." }
+  }
+}

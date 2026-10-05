@@ -1,0 +1,80 @@
+{
+  "A": {
+    "1": {
+      "pass": false,
+      "why": "Message claims a failed load just shows 0 pages, but diff adds HandleAppErrors which shows the error."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks_exit=0 log indicates that all existing tests still pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only related code in the stats feature and strings.xml was modified."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added HandleAppErrors, which is a new UI control for displaying errors."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel extends BaseViewModel, uses read-only state and launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen was split into Route and Screen, collecting state lifecycle-aware."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Message admits preventing a second load on repeated screen starts, changing the behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks_exit=0 log indicates that all existing tests still pass."
+    },
+    "3": {
+      "pass": false,
+      "why": "Rewrote unrelated file ReadingStatsKey.kt to remove an unused import."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI controls, screens, or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel extends BaseViewModel, uses read-only state and launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen was split into Route and Screen, collecting state lifecycle-aware."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "Message claims nothing on screen shows the error, but diff adds HandleAppErrors which displays it."
+    },
+    "2": {
+      "pass": true,
+      "why": "The checks_exit=0 log indicates that all existing tests still pass."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only related code in the stats feature and strings.xml was modified."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added HandleAppErrors, which is a new UI control for displaying errors."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel extends BaseViewModel, uses read-only state and launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen was split into Route and Screen, collecting state lifecycle-aware."
+    }
+  }
+}

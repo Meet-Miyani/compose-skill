@@ -1,0 +1,104 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope outlives the ViewModel and writes to a dead ViewModel"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch swallows failures and shows stale or empty results"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies uncanceled independent jobs can arrive out of order and overwrite results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call the case-insensitive title match blocking (says it is fine as is)"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates findings into Blocking, Worth doing later, and Fine as is"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes launchGuarded on ViewModel scope and canceling previous job"
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Identifies GlobalScope leak but does not explicitly mention writing to state after cleared"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch swallows failures and shows stale or empty results"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies uncanceled independent coroutines causing race conditions and overwrites"
+    },
+    "4": {
+      "pass": true,
+      "why": "Mentions initial query under 'Should fix', not as blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call the case-insensitive title match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": false,
+      "why": "Does not say what is fine as it is"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes launchGuarded and canceling the previous searchJob"
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies GlobalScope outlives the ViewModel and calls updateState on a cleared ViewModel"
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies empty catch swallows failures and leaves empty unchanged results"
+    },
+    "3": {
+      "pass": true,
+      "why": "Identifies uncanceled independent jobs can finish out of order and overwrite results"
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the initial search query blocking"
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not call the case-insensitive title match blocking"
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits"
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates findings into Blocking, Worth doing later, and Fine as is"
+    },
+    "8": {
+      "pass": true,
+      "why": "Proposes launchGuarded and canceling the previous searchJob"
+    }
+  }
+}

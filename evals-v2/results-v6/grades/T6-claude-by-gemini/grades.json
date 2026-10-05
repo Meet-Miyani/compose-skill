@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": { "pass": true, "why": "The AuthorBooksViewModel filters by author using the DAO query." },
+    "2": { "pass": true, "why": "The back button correctly triggers NavigateBack effect which removes the last item from backStack." },
+    "3": { "pass": true, "why": "The query SELECT * FROM books WHERE author = :author returns all books without filtering by isFinished." },
+    "4": { "pass": true, "why": "The check results show checks_exit=0, meaning tests pass." },
+    "5": { "pass": true, "why": "AuthorBooksKey is added to ReadingLogNavKey and handled in App.kt with its own ViewModel and UiState." },
+    "6": { "pass": true, "why": "The author filter is implemented as a SQL query in the DAO (data layer)." }
+  },
+  "B": {
+    "1": { "pass": true, "why": "Tapping the author name navigates to AuthorBooksKey which queries books by that author." },
+    "2": { "pass": true, "why": "The back button navigates back by popping the backStack." },
+    "3": { "pass": true, "why": "The DAO query gets all books for the author, regardless of finished status." },
+    "4": { "pass": true, "why": "checks_exit=0 confirms the tests still pass." },
+    "5": { "pass": true, "why": "It uses AuthorBooksKey and registers it in App.kt with its own ViewModel and UiState." },
+    "6": { "pass": true, "why": "Filtering is done in the Room database query." }
+  },
+  "C": {
+    "1": { "pass": true, "why": "Tapping the author button navigates to AuthorBooksKey and displays only that author's books." },
+    "2": { "pass": true, "why": "The back button sends NavigateBack effect to pop the back stack." },
+    "3": { "pass": true, "why": "The database query fetches all books for the author and doesn't filter by finished status." },
+    "4": { "pass": true, "why": "checks_exit=0 shows that the tests pass." },
+    "5": { "pass": true, "why": "The route is registered with AuthorBooksKey, AuthorBooksViewModel, and AuthorBooksUiState." },
+    "6": { "pass": true, "why": "The filtering is handled by the getBooksByAuthorStream query in the data layer." }
+  }
+}

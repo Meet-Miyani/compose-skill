@@ -1,0 +1,80 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The goal is saved using Preferences DataStore and persists across app restarts."
+    },
+    "2": {
+      "pass": true,
+      "why": "Invalid inputs are blocked from saving by the validation logic in parseReadingGoal."
+    },
+    "3": {
+      "pass": true,
+      "why": "Books are stamped with finishedAtEpochMillis and queried by the current calendar year."
+    },
+    "4": {
+      "pass": true,
+      "why": "The check results show exit code 0, meaning existing tests still pass."
+    },
+    "5": {
+      "pass": true,
+      "why": "The goal is managed by ReadingGoalRepository and exposed through BookListUiState."
+    },
+    "6": {
+      "pass": false,
+      "why": "The validation message is hardcoded in the composable and does not reach the screen through the ViewModel's state."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "The goal is saved in a new reading_goals table in the Room database, surviving restarts."
+    },
+    "2": {
+      "pass": true,
+      "why": "Input is filtered to digits and the save button is disabled for invalid goals."
+    },
+    "3": {
+      "pass": true,
+      "why": "Books are stamped with finishedAt (including old books via migration) and queried by current year."
+    },
+    "4": {
+      "pass": true,
+      "why": "The check results show exit code 0, meaning existing tests still pass."
+    },
+    "5": {
+      "pass": true,
+      "why": "The goal is stored via the Room Dao, accessed through DefaultBookRepository, and exposed via UiState."
+    },
+    "6": {
+      "pass": false,
+      "why": "There is no validation message presented to the user or reaching the screen through the state."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The goal is saved using Preferences DataStore and survives app restarts."
+    },
+    "2": {
+      "pass": true,
+      "why": "The UI only provides step buttons bounded to a valid minimum, making it impossible to save an invalid goal."
+    },
+    "3": {
+      "pass": true,
+      "why": "Books are stamped with finishedAt and queried for the current calendar year."
+    },
+    "4": {
+      "pass": true,
+      "why": "The check results show exit code 0, meaning existing tests still pass."
+    },
+    "5": {
+      "pass": true,
+      "why": "The goal is managed by ReadingGoalDataSource/Repository and reaches the screen through UiState."
+    },
+    "6": {
+      "pass": false,
+      "why": "There is no validation message presented to the user or reaching the screen through the state."
+    }
+  }
+}

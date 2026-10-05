@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The ViewModel successfully filters the book list by the selected author."
+    },
+    "2": {
+      "pass": true,
+      "why": "Uses a new navigation destination, so system back naturally returns to the previous list."
+    },
+    "3": {
+      "pass": true,
+      "why": "The AuthorBooksScreen displays all books passed to it regardless of finished status."
+    },
+    "4": {
+      "pass": false,
+      "why": "The message falsely claims JVM tests passed, but the check results show they were not executed."
+    },
+    "5": {
+      "pass": true,
+      "why": "Adds AuthorBooksKey, AuthorBooksRoute, AuthorBooksViewModel, and AuthorBooksUiState."
+    },
+    "6": {
+      "pass": true,
+      "why": "Filtering happens in AuthorBooksViewModel, not in the composable."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Selecting an author successfully filters the visible books to only that author."
+    },
+    "2": {
+      "pass": false,
+      "why": "Does not use a new navigation destination, so the back button exits instead of returning to the list."
+    },
+    "3": {
+      "pass": true,
+      "why": "Lists both finished and unfinished books for the author."
+    },
+    "4": {
+      "pass": true,
+      "why": "Check results confirm that existing JVM tests were run and passed."
+    },
+    "5": {
+      "pass": false,
+      "why": "Does not add a new navigation destination or its own ViewModel and UiState contract."
+    },
+    "6": {
+      "pass": false,
+      "why": "Filtering by author happens directly inside the BookListScreen composable."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The author view queries only the selected author's books from the database."
+    },
+    "2": {
+      "pass": true,
+      "why": "Registers a new navigation destination, allowing the back action to return to the list."
+    },
+    "3": {
+      "pass": true,
+      "why": "Displays all books for the author, including unfinished ones."
+    },
+    "4": {
+      "pass": false,
+      "why": "The message falsely claims JVM tests passed, but the check results show they were not run."
+    },
+    "5": {
+      "pass": true,
+      "why": "Creates AuthorBooksKey, AuthorBooksViewModel, and AuthorBooksUiState."
+    },
+    "6": {
+      "pass": true,
+      "why": "Filtering happens in the data layer using a Room query."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The new screen queries and displays only the selected author's books."
+    },
+    "2": {
+      "pass": true,
+      "why": "Uses a new navigation destination, so the system back action returns to the list."
+    },
+    "3": {
+      "pass": true,
+      "why": "The screen lists all books for the author, showing their finished status."
+    },
+    "4": {
+      "pass": true,
+      "why": "Check results confirm that JVM tests were run and passed successfully."
+    },
+    "5": {
+      "pass": true,
+      "why": "Adds AuthorBooksKey, AuthorBooksRoute, AuthorBooksViewModel, and AuthorBooksUiState."
+    },
+    "6": {
+      "pass": true,
+      "why": "Filtering is implemented via a SQLite query in the data layer."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "The view correctly filters the books to only show the selected author."
+    },
+    "2": {
+      "pass": true,
+      "why": "Pushes a new destination to the backstack, and the back action pops it."
+    },
+    "3": {
+      "pass": true,
+      "why": "Displays all matching books, both finished and unfinished."
+    },
+    "4": {
+      "pass": false,
+      "why": "The message falsely claims JVM tests passed, but the check results show they were not executed."
+    },
+    "5": {
+      "pass": false,
+      "why": "Reuses BookListRoute and BookListViewModel instead of creating its own."
+    },
+    "6": {
+      "pass": false,
+      "why": "Filtering is performed within the BookListScreen composable."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The ViewModel filters the stream to only include the requested author's books."
+    },
+    "2": {
+      "pass": true,
+      "why": "Uses a new navigation destination, enabling system back to return to the list."
+    },
+    "3": {
+      "pass": true,
+      "why": "Lists all books for the author regardless of finished status."
+    },
+    "4": {
+      "pass": true,
+      "why": "Check results confirm that existing JVM tests ran and passed."
+    },
+    "5": {
+      "pass": true,
+      "why": "Creates AuthorBooksKey, AuthorBooksRoute, AuthorBooksViewModel, and AuthorBooksUiState."
+    },
+    "6": {
+      "pass": true,
+      "why": "Filtering happens in the ViewModel, not in the composable."
+    }
+  }
+}

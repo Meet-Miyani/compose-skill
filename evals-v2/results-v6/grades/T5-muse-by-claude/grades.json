@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Goal stored in a new Room reading_goal table (v3 with AutoMigration 2->3), read via a Flow on start"},
+    "2": {"pass": true, "why": "saveGoal uses toIntOrNull and rejects null or <=0 before calling the repository; a test covers non-numeric input"},
+    "3": {"pass": true, "why": "Progress text and bar count items with isFinished against the goal"},
+    "4": {"pass": true, "why": "checks_exit=0 and the build succeeded; no existing tests were changed"},
+    "5": {"pass": true, "why": "BookRepository/DefaultBookRepository plus a DAO hold the goal; the VM collects it into UiState.readingGoal; the composable only reads state"},
+    "6": {"pass": false, "why": "Validation is in the VM and goalError goes through state, but the message and all new UI text are hardcoded literals, not string resources"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Goal saved in a Room reading_goal table (v3 auto-migration) through ReadingGoalRepository and observed on start"},
+    "2": {"pass": true, "why": "saveGoal returns early on non-numeric or <=0 input, and the repository also requires target > 0"},
+    "3": {"pass": true, "why": "finishedCount counts items with isFinished; progress = finished/goal"},
+    "4": {"pass": true, "why": "checks_exit=0 and the build succeeded"},
+    "5": {"pass": true, "why": "ReadingGoalRepository interface plus a Room-backed implementation; the VM combines it into UiState.yearlyGoal; the composable never touches storage"},
+    "6": {"pass": false, "why": "Invalid input is dropped silently with no message in state, and the new UI strings are hardcoded literals"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Goal stored in a Room reading_goal table (v3 auto-migration) through BookRepository and combined into the stream on start"},
+    "2": {"pass": true, "why": "The VM returns early on non-numeric or <=0 input, the button is disabled when the draft is invalid, and tests cover 'zero' and '0'"},
+    "3": {"pass": true, "why": "The VM sets finishedCount = books.count { isFinished }, and the screen shows finished of goal"},
+    "4": {"pass": true, "why": "checks_exit=0 and the build succeeded"},
+    "5": {"pass": true, "why": "Goal goes through BookRepository/DAO, the VM puts it in UiState.yearlyGoal, and the composable only reads state"},
+    "6": {"pass": false, "why": "The validity check and the 'Enter a number above 0' hint are computed inside the composable, not in VM state; new text is hardcoded, not string resources"}
+  }
+}

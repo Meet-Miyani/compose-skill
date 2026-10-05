@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Author taps navigate to a screen fed by a repository query restricted to the selected author."},
+    "2": {"pass": true, "why": "The author screen's Back action emits NavigateBack and its route removes the top back-stack entry."},
+    "3": {"pass": true, "why": "The author query selects all books for that author without filtering on isFinished, and the screen renders every returned item."},
+    "4": {"pass": true, "why": "The supplied checks report a successful build with the JVM tests completed."},
+    "5": {"pass": true, "why": "The diff adds a serializable reading-log author key, a registered navigation entry, and dedicated ViewModel and UiState types."},
+    "6": {"pass": true, "why": "The Room DAO filters by author and the ViewModel consumes that filtered repository stream."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Author taps push a key carrying the selected author, whose ViewModel loads only matching books."},
+    "2": {"pass": true, "why": "The author screen dispatches Back through the ViewModel and App removes the top back-stack entry."},
+    "3": {"pass": true, "why": "The author query has no finished-status condition and the screen lists every returned book."},
+    "4": {"pass": true, "why": "The supplied checks report a successful build with the JVM tests completed."},
+    "5": {"pass": true, "why": "The diff adds a serializable reading-log author key, a registered destination, and dedicated ViewModel and UiState types."},
+    "6": {"pass": true, "why": "The Room DAO applies the author condition before the results reach the composable."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "The diff is empty, so no author-tap behavior was implemented."},
+    "2": {"pass": false, "why": "The diff is empty, so no author-view Back behavior was implemented."},
+    "3": {"pass": false, "why": "The diff is empty, so no author view lists finished or unfinished books."},
+    "4": {"pass": true, "why": "The supplied checks report a successful build with the JVM tests completed."},
+    "5": {"pass": false, "why": "The diff is empty; the proposed destination, key, ViewModel, and UiState were not added."},
+    "6": {"pass": false, "why": "The diff is empty; the proposed author filtering was not implemented."}
+  }
+}

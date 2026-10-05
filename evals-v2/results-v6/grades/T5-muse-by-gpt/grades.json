@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The goal is upserted into a Room table and read through a DAO flow after launch."},
+    "2": {"pass": true, "why": "The ViewModel rejects null or nonpositive parsed integers before calling the repository."},
+    "3": {"pass": true, "why": "The progress display counts books whose isFinished flag is true."},
+    "4": {"pass": true, "why": "The checks report exit 0 and a successful build; the final message reports passing JVM tests."},
+    "5": {"pass": true, "why": "Room and BookRepository store the goal, which reaches the composable through ViewModel UiState."},
+    "6": {"pass": false, "why": "The ViewModel sends a validation error through state, but the error and other new UI text are hardcoded rather than string resources."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The goal is stored in a Room table with an auto-migration and read through a DAO flow."},
+    "2": {"pass": true, "why": "The ViewModel returns without saving when parsing fails or the value is nonpositive."},
+    "3": {"pass": true, "why": "UiState derives finishedCount by counting books with isFinished true."},
+    "4": {"pass": true, "why": "The checks report exit 0 and a successful build; the final message reports passing JVM tests."},
+    "5": {"pass": true, "why": "A Room-backed goal repository supplies the ViewModel, which exposes the goal in UiState to the screen."},
+    "6": {"pass": false, "why": "The ViewModel has no validation message in UiState, and new screen text is hardcoded instead of string resources."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The goal is upserted into a Room table and observed through a repository flow."},
+    "2": {"pass": true, "why": "The ViewModel rejects nonnumeric and nonpositive drafts before saving."},
+    "3": {"pass": true, "why": "The ViewModel counts books with isFinished true and exposes finishedCount to the screen."},
+    "4": {"pass": true, "why": "The checks report exit 0 and a successful build; the final message reports passing JVM tests."},
+    "5": {"pass": true, "why": "Room and BookRepository handle storage, and the goal reaches the screen through ViewModel UiState."},
+    "6": {"pass": false, "why": "Validation feedback is computed in the composable rather than carried in ViewModel state, and new text is hardcoded."}
+  }
+}
