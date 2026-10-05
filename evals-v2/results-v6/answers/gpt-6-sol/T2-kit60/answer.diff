@@ -1,0 +1,354 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index 6586176..658347f 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -15,6 +15,7 @@ import com.example.feature.notes.navigation.NotesListKey
+ import com.example.feature.notes.readinglog.navigation.BookListKey
+ import com.example.feature.notes.readinglog.navigation.BookDetailKey
+ import com.example.feature.notes.readinglog.presentation.detail.BookDetailRoute
++import com.example.feature.notes.readinglog.presentation.detail.BookDetailParams
+ import com.example.feature.notes.readinglog.navigation.readingLogNavSerializers
+ import kotlinx.serialization.modules.plus
+ import com.example.feature.notes.readinglog.presentation.list.BookListRoute
+@@ -53,7 +54,10 @@ fun App() {
+                 onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                 entryProvider = entryProvider {
+                     entry<BookDetailKey> { key ->
+-                        BookDetailRoute(viewModel = koinViewModel(), bookId = key.bookId)
++                        BookDetailRoute(
++                            viewModel = koinViewModel(parameters = { parametersOf(BookDetailParams(key.bookId)) }),
++                            bookId = key.bookId,
++                        )
+                     }
+ 
+                     entry<BookListKey> {
+diff --git a/feature/notes/src/commonMain/composeResources/values/strings.xml b/feature/notes/src/commonMain/composeResources/values/strings.xml
+index ca8938c..c806aad 100644
+--- a/feature/notes/src/commonMain/composeResources/values/strings.xml
++++ b/feature/notes/src/commonMain/composeResources/values/strings.xml
+@@ -7,6 +7,7 @@
+     <string name="retry">Retry</string>
+     <string name="back">Back</string>
+     <string name="missing_note">This note no longer exists.</string>
++    <string name="missing_book">This book no longer exists.</string>
+     <string name="refreshing">Refreshing…</string>
+     <string name="save">Save</string>
+     <string name="note_title">Note title</string>
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+index e4a7003..05ba3ba 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailContract.kt
+@@ -1,8 +1,21 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.AppError
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
+ import com.example.feature.notes.readinglog.domain.model.Book
+-data class BookDetailUiState(val book: Book? = null, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface BookDetailUiAction : UiAction { data class OnScreenStarted(val id: Long) : BookDetailUiAction }
++
++data class BookDetailUiState(
++    val book: Book? = null,
++    val isLoading: Boolean = false,
++    val error: AppError? = null,
++    val isMissing: Boolean = false,
++) : UiState
++
++sealed interface BookDetailUiAction : UiAction {
++    data object OnScreenStarted : BookDetailUiAction
++    data class OnRetryClick(val error: AppError) : BookDetailUiAction
++}
++
+ sealed interface BookDetailUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+new file mode 100644
+index 0000000..7d6802a
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailRoute.kt
+@@ -0,0 +1,23 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++import com.example.designsystem.error.HandleAppErrors
++
++@Composable
++fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
++    LifecycleStartEffect(bookId) {
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    HandleAppErrors(viewModel.errors)
++    BookDetailScreen(
++        state = state,
++        onRetry = {
++            viewModel.onAction(BookDetailUiAction.OnRetryClick(state.error ?: return@BookDetailScreen))
++        },
++    )
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index 09a492f..f91f5cb 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -1,21 +1,28 @@
+ package com.example.feature.notes.readinglog.presentation.detail
++
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.material3.Button
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++import notes.feature.notes.generated.resources.Res
++import notes.feature.notes.generated.resources.error_message
++import notes.feature.notes.generated.resources.missing_book
++import notes.feature.notes.generated.resources.retry
++import org.jetbrains.compose.resources.stringResource
++
+ @Composable
+-fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+-    LifecycleStartEffect(bookId) {
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun BookDetailScreen(state: BookDetailUiState, onRetry: () -> Unit) {
+     Column {
+-        if (state.isLoading) { Text("Loading...") }
+-        state.book?.let {
+-            Text(it.title)
++        if (state.isLoading) {
++            Text("Loading...")
++        }
++        state.book?.let { book -> Text(book.title) }
++        if (state.error != null && state.book == null) {
++            Text(stringResource(Res.string.error_message))
++            Button(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
++        }
++        if (state.isMissing) {
++            Text(stringResource(Res.string.missing_book))
+         }
+     }
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index 50f860b..c1ba94f 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,43 @@
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.Job
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
++import org.koin.core.annotation.InjectedParam
++import org.koin.core.annotation.KoinViewModel
++
++data class BookDetailParams(val bookId: Long)
++
++@KoinViewModel
++class BookDetailViewModel(
++    private val repository: BookRepository,
++    @InjectedParam private val params: BookDetailParams,
++) : BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(BookDetailUiState()) {
++    private var loadJob: Job? = null
++
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            BookDetailUiAction.OnScreenStarted -> load()
++            is BookDetailUiAction.OnRetryClick -> {
++                updateState { copy(error = null) }
++                load()
+             }
+         }
+     }
++
++    private fun load() {
++        if (loadJob?.isActive == true) return
++        loadJob = launchGuarded(
++            onError = { error ->
++                if (currentState.book == null) updateState { copy(error = error) }
++                else emitError(error)
++            },
++            onStart = { updateState { copy(isLoading = true) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val book = repository.getBooksStream().first().find { it.id == params.bookId }
++            updateState { copy(book = book, isMissing = book == null, error = null) }
++        }
++    }
+ }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt
+new file mode 100644
+index 0000000..2231f25
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModelTest.kt
+@@ -0,0 +1,142 @@
++package com.example.feature.notes.readinglog.presentation.detail
++
++import com.example.core.error.AppError
++import com.example.core.error.NetworkException
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import kotlinx.coroutines.CompletableDeferred
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.flow
++import kotlinx.coroutines.flow.toList
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.UnconfinedTestDispatcher
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++import kotlin.test.assertNotNull
++import kotlin.test.assertNull
++import kotlin.test.assertTrue
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class BookDetailViewModelTest {
++    private val scheduler = TestCoroutineScheduler()
++    private val mainDispatcher = StandardTestDispatcher(scheduler)
++
++    @BeforeTest
++    fun setUp() {
++        Dispatchers.setMain(mainDispatcher)
++    }
++
++    @AfterTest
++    fun tearDown() {
++        Dispatchers.resetMain()
++    }
++
++    private class FakeBookRepository : BookRepository {
++        val books = MutableStateFlow<List<Book>>(emptyList())
++        var gate: CompletableDeferred<Unit>? = null
++        var failure: Throwable? = null
++        var calls = 0
++
++        override fun getBooksStream(): Flow<List<Book>> = flow {
++            calls++
++            gate?.await()
++            failure?.let { throw it }
++            emit(books.value)
++        }
++
++        override suspend fun addBook(title: String, author: String, pages: Int): Long = error("unused")
++        override suspend fun markFinished(id: Long) = error("unused")
++    }
++
++    private fun book(id: Long = 1L, title: String = "Title") =
++        Book(id = id, title = title, author = "Author", pages = 100, isFinished = false)
++
++    private fun viewModel(fake: FakeBookRepository, id: Long = 1L) =
++        BookDetailViewModel(fake, BookDetailParams(id))
++
++    @Test
++    fun `cold load shows matching book and loading transition`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply {
++            books.value = listOf(book(1L), book(2L, "Other"))
++            gate = CompletableDeferred()
++        }
++        val vm = viewModel(fake)
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertTrue(vm.state.value.isLoading)
++        assertNull(vm.state.value.book)
++
++        fake.gate!!.complete(Unit)
++        advanceUntilIdle()
++        assertEquals("Title", vm.state.value.book?.title)
++        assertFalse(vm.state.value.isLoading)
++        assertFalse(vm.state.value.isMissing)
++    }
++
++    @Test
++    fun `missing id stays a business state`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply { books.value = listOf(book(2L)) }
++        val vm = viewModel(fake)
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertTrue(vm.state.value.isMissing)
++        assertNull(vm.state.value.error)
++    }
++
++    @Test
++    fun `cold error can retry`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply { failure = NetworkException.Connection() }
++        val vm = viewModel(fake)
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        val error = assertNotNull(vm.state.value.error)
++        assertFalse(vm.state.value.isLoading)
++
++        fake.failure = null
++        fake.books.value = listOf(book())
++        vm.onAction(BookDetailUiAction.OnRetryClick(error))
++        advanceUntilIdle()
++        assertNull(vm.state.value.error)
++        assertEquals("Title", vm.state.value.book?.title)
++    }
++
++    @Test
++    fun `refresh failure keeps the title and reports popup error`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply { books.value = listOf(book()) }
++        val vm = viewModel(fake)
++        val errors = mutableListOf<AppError>()
++        backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { vm.errors.toList(errors) }
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        fake.failure = NetworkException.Connection()
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertEquals("Title", vm.state.value.book?.title)
++        assertFalse(vm.state.value.isLoading)
++        assertEquals(1, errors.size)
++    }
++
++    @Test
++    fun `overlap loads once and restored destination refetches by id`() = runTest(scheduler) {
++        val fake = FakeBookRepository().apply { books.value = listOf(book(2L, "Restored")) }
++        val vm = viewModel(fake, id = 2L)
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        vm.onAction(BookDetailUiAction.OnScreenStarted)
++        advanceUntilIdle()
++        assertEquals(1, fake.calls)
++        assertEquals("Restored", vm.state.value.book?.title)
++    }
++}

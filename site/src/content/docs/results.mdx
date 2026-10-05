@@ -1,17 +1,50 @@
 ---
-title: 'Compose skill results: held-out v5 test on five models'
-description: 'Held-out v5 results for the Compose skill: five models, 8 never-seen tasks, 120 agentic runs, two blind cross-vendor graders, verdicts and the erratum.'
+title: 'Compose skill results: v6.1 and held-out v5'
+description: 'Compose skill results: v6.1 on five models (90 runs) and the earlier held-out v5 test (120 runs), two blind cross-vendor graders, limits and the erratum.'
 sidebar:
   label: Results
 ---
 
 import ThemedChart from '../../components/ThemedChart.astro';
 
-This is the test v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each task ran three times: with no kit, with a short generic "senior engineer" prompt, and with the kit. That's 120 runs. Two models from the other vendors graded every answer blind, and an item only counts if both of them pass it. The rules were written down before the tasks existed, and the grades were frozen before anything was scored.
+v6.1.0 is the stable release. This page has the v6.1 results first, then the earlier held-out v5 test that v6.0.0-preview.1 shipped on.
 
-:::note[v6.1 is being tested now]
-The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit) is in progress, with a verdict expected around Oct 5, 2026. No v6.1 numbers are published yet. Everything on this page is the held-out v5 test.
-:::
+## v6.1 results
+
+The v6.1 test: 5 models × 6 new tasks × 3 arms (no kit, v6.0 kit, v6.1 kit) = 90 agentic runs in the real CLIs. Each answer was graded blind by the two vendors other than its own, and an item passes only when both graders pass it.
+
+Items passed of 39 (27 `[eng]` items written by the independent task author, 12 `[kit]` items written by the moderator):
+
+| Model | No kit | v6.0 kit | v6.1 kit | v6.1 − no kit |
+|---|---:|---:|---:|---:|
+| Sonnet 5.5 | 31 (79.5%) | 35 (89.7%) | 34 (87.2%) | +3 (+7.7 pts) |
+| GPT-6-Luna | 28 (71.8%) | 35 (89.7%) | **37 (94.9%)** | **+9 (+23.1 pts)** |
+| GPT-6-Sol | 30 (76.9%) | 34 (87.2%) | 34 (87.2%) | +4 (+10.3 pts) |
+| Gemini 3.8 Flash | 22 (56.4%) | 33 (84.6%) | 34 (87.2%) | **+12 (+30.8 pts)** |
+| Muse Spark 1.3 | 27 (69.2%) | 27 (69.2%) | 29 (74.4%) | +2 (+5.1 pts) |
+
+By task type, all five models together (both graders agree):
+
+| Tasks | No kit | v6.0 kit | v6.1 kit |
+|---|---:|---:|---:|
+| Conform (2 tasks, 60 items) | 73.3% | 75.0% | **80.0%** |
+| Review (2 tasks, 75 items) | 78.7% | 94.7% | 94.7% |
+| New feature (2 tasks, 60 items) | 58.3% | 80.0% | 81.7% |
+
+All pre-registered rules held, and no model scored below its own no-kit result, so v6.1.0 is the stable release.
+
+- **Conform over-scoping is mostly fixed.** The "no new UI controls, screens or features" item passed in 2 of 10 conform cells with v6.0 and 8 of 10 with v6.1 (no kit: 6). v6.0 added retry buttons and error screens while conforming; v6.1 mostly stopped.
+- **Reviews: no difference between the kits.** Both lift reviews well above no kit, and neither called a "fine" item blocking. The v5 over-flagging did not show up on these tasks, so that is no difference, not a fix.
+- **Muse Spark 1.3 barely benefits** (+2 over no kit) and still over-scoped T1: v6.1 added a Retry button, and it scored 6/6 on T1 without the kit and 3/6 with v6.1.
+- **Context:** 5 of 10 v6.1 new-feature runs went over the 20k design budget (v6.0: 3 of 10), up to about 30k for GPT-6-Sol. Sonnet and Gemini 3.8 Flash stayed under 20k on every new-feature run with v6.1.
+- **Grading flaw, disclosed.** The hidden behaviour test passed 3/3 in 29 of 30 conform cells, but the grader packets did not name it or show its result, so both graders passed that item in only 11 of 30 cells, in every arm alike. A sensitivity check that sets the item to the mechanical result leaves every rule and the stable criterion unchanged.
+- **Limits:** one generation per cell and 6 tasks, so per-model differences of about 3 items or fewer are noise. Read v6.1 − v6.0 as "no regression" (Sonnet is −1), not as a ranking.
+
+Evidence: [`VERDICT.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/VERDICT.md), [`score-output.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/score-output.txt) and [`kit-tokens.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v6/kit-tokens.txt).
+
+## Held-out v5 (the earlier test)
+
+This is the earlier test, the one v6.0.0-preview.1 shipped on. Five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each task ran three times: with no kit, with a short generic "senior engineer" prompt, and with the kit. That's 120 runs. Two models from the other vendors graded every answer blind, and an item only counts if both of them pass it. The rules were written down before the tasks existed, and the grades were frozen before anything was scored.
 
 <div class="kit-figure">
 <figure class="chart-block">
@@ -25,7 +58,7 @@ The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit) is in progress, with a verdict e
 </figure>
 </div>
 
-## Scores by model
+## v5 scores by model
 
 % of rubric items passed, both graders agree.
 
@@ -43,7 +76,7 @@ The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit) is in progress, with a verdict e
 
 Muse Spark 1.3 ran through OpenCode as an add-on, outside the pre-registered five-model panel, and is reported separately.
 
-## By task type
+## v5 by task type
 
 All five panel models together (both graders agree):
 
@@ -52,7 +85,7 @@ All five panel models together (both graders agree):
 | New features (3 tasks) | 43.5% | 47.1% | **70.6%** | The biggest win: where data lives, navigation results, background work |
 | Bug fixes (2) | 80.0% | 88.6% | 82.9% | Every setup fixed the bugs; the kit adds little here |
 | Reviews (2) | 72.9% | 64.3% | **84.3%** | These two tasks had flawed setups, see the erratum below |
-| "Match our conventions" (1) | 68.0% | 60.0% | 44.0% | Worse with the kit: models restructured too much. This is the main v6.1 fix |
+| "Match our conventions" (1) | 68.0% | 60.0% | 44.0% | Worse with the kit: models restructured too much. v6.1 mostly fixed this |
 
 Computed from the frozen grades by [`v5-by-task-type.py`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/method/tools/v5-by-task-type.py).
 
@@ -70,7 +103,7 @@ The model label: all v5 Claude cells ran `claude-sonnet-5-5` (Sonnet 5.5) and `c
 
 Full details: [VERDICT.md, Erratum](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/VERDICT.md#erratum-2026-10-01) and [`erratum-sensitivity.txt`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/erratum-sensitivity.txt).
 
-## Kit context per task
+## v5 kit context per task
 
 <div class="kit-figure">
 <figure class="chart-block">
@@ -94,7 +127,7 @@ Full details: [VERDICT.md, Erratum](https://github.com/Meet-Miyani/compose-skill
 
 Every panel model opened `compose` first on every task. Kit context is an upper bound (the full size of every kit file opened). Details: [kit-tokens.txt](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/kit-tokens.txt).
 
-## Limits
+## v5 limits
 
 - One generation per cell and 8 tasks, so per-model differences under ~8 points are noise.
 - One kit-shaped base project, so behaviour on a coherent non-kit project is not tested.
@@ -103,7 +136,7 @@ Every panel model opened `compose` first on every task. Kit context is an upper 
 
 ## Evidence
 
-Everything above comes from files in the repository:
+Everything above comes from files in the repository (v6.1 evidence is linked in its section; v5 evidence below):
 
 - [`evals-v2/results-v5/VERDICT.md`](https://github.com/Meet-Miyani/compose-skill/blob/main/evals-v2/results-v5/VERDICT.md): scores, pre-registered rules, limits, erratum
 - [`evals-v2/results-v5/`](https://github.com/Meet-Miyani/compose-skill/tree/main/evals-v2/results-v5): frozen grades, score output, kit tokens, run metadata

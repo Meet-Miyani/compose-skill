@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Blocking 1: onError = { } leaves totalPages = 0 with no message, user sees a wrong total."},
+    "2": {"pass": true, "why": "Blocking 2: endless stream with no job guard, a second Load starts a second collector and both write totalPages."},
+    "3": {"pass": true, "why": "Dispatcher hop listed only under 'Worth doing later'."},
+    "4": {"pass": true, "why": "Missing return type on calculatePages is not raised as blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has separate Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": true, "why": "Proposes an isActive-guarded collectJob, citing BookListViewModel's streamJob."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocking 1: onError = { } shows totalPages = 0 with no message or retry and loses the failure."},
+    "2": {"pass": false, "why": "Never identifies stacked collectors from repeated Load; the guard only appears silently in the code, and 'overlapping-Load' appears only as a test row."},
+    "3": {"pass": true, "why": "Thread hop is mentioned only under 'Worth doing later'."},
+    "4": {"pass": true, "why": "Missing return type is not raised as blocking."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Has separate Blocking, Worth doing later and Fine as is sections."},
+    "7": {"pass": false, "why": "The guard is in the code, but the review never names the stacked-collector problem or proposes the guard as its fix."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking 2: onError = { } silently drops Network/StorageException and the state has no error field to show it."},
+    "2": {"pass": true, "why": "Blocking 3: every Load launches a new infinite collect with no overlap guard."},
+    "3": {"pass": false, "why": "Lists the hardcoded withContext(Dispatchers.Default) as Blocking item 5."},
+    "4": {"pass": true, "why": "Return type comes up only as part of the dispatcher fix, never as a blocking issue of its own."},
+    "5": {"pass": true, "why": "Diff is empty."},
+    "6": {"pass": true, "why": "Separates What's good, Blocking and Nits sections."},
+    "7": {"pass": true, "why": "Proposes a streamJob?.isActive guard like BookListViewModel."}
+  }
+}

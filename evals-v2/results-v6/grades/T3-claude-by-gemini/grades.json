@@ -1,0 +1,92 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the empty onError handler drops failures and makes a failed read look like 0 pages read."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that each Load action adds another collector on the same stream without checking for an active job."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the remark about withContext under 'Worth doing later', correctly not calling it blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention the missing return type on calculatePages, so does not call it blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff block is empty, indicating no code edits were made."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates findings into 'Blocking' and 'Worth doing later' and explicitly lists what is 'Fine as is'."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping a statsJob and returning early while active, matching BookListViewModel."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that the empty onError swallows storage failures, leaving the user unable to tell a failure from 0 pages."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that each Load starts a new collector and that collectors pile up."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the remark about the dispatcher hop under 'Worth doing later', correctly not calling it blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention the missing return type on calculatePages, so does not call it blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff block is empty, indicating no code edits were made."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates findings into 'Blocking' and 'Worth doing later' and explicitly lists what is 'Fine as is'."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping the Job and returning early while active, matching BookListViewModel."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Identifies that errors are swallowed by onError = {}, leaving stats at 0 with no indication."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that every Load action starts another collector, causing collectors to pile up."
+    },
+    "3": {
+      "pass": true,
+      "why": "Places the remark about withContext under 'Should fix' (described as cleanup), correctly not calling it blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not mention the missing return type on calculatePages, so does not call it blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "The diff block is empty, indicating no code edits were made."
+    },
+    "6": {
+      "pass": false,
+      "why": "Separates must-fix from should-fix, but fails to include what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes adding a streamJob and returning early when active, referencing BookListViewModel."
+    }
+  }
+}

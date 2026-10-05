@@ -1,0 +1,50 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Hidden test ran unadapted against the original API and checks_exit=0."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "Only the four book detail files changed."},
+    "4": {"pass": true, "why": "Screen still shows only the loading text and title; nothing new added."},
+    "5": {"pass": true, "why": "Extends BaseViewModel, updates state via updateState, and loads through launchGuarded with onError; the try/catch is gone."},
+    "6": {"pass": true, "why": "New BookDetailRoute uses collectAsStateWithLifecycle and passes state to a stateless BookDetailScreen."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Hidden test passed after the permitted calls-only adaptation (checks_exit=0)."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "The App.kt change only wires the new injected params; no unrelated rewrites."},
+    "4": {"pass": true, "why": "No new UI controls or features; the screen renders only loading and title."},
+    "5": {"pass": false, "why": "onError = {} silently drops failures and the error field was removed, so failures are not handled."},
+    "6": {"pass": true, "why": "Route/Screen split, with lifecycle-aware collectAsStateWithLifecycle in the Route."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Hidden test passed after the permitted calls-only adaptation (checks_exit=0)."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "Changes stay within book detail, its App.kt wiring and one string resource."},
+    "4": {"pass": false, "why": "Adds a Retry button, an OnRetryClick action, an error message and a new missing-book state and text."},
+    "5": {"pass": true, "why": "BaseViewModel with updateState; failures go through launchGuarded onError and emitError; no try/catch."},
+    "6": {"pass": true, "why": "Route collects with collectAsStateWithLifecycle and renders a separate BookDetailScreen."}
+  },
+  "D": {
+    "1": {"pass": true, "why": "Hidden test ran unadapted and checks_exit=0."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "Only the book detail files changed."},
+    "4": {"pass": false, "why": "Adds a Retry button, an OnRetryClick action and visible error text to the screen."},
+    "5": {"pass": true, "why": "BaseViewModel; failures handled via launchGuarded onError (state or emitError); no try/catch."},
+    "6": {"pass": true, "why": "Route uses collectAsStateWithLifecycle and delegates to a stateless Screen."}
+  },
+  "E": {
+    "1": {"pass": true, "why": "Hidden test ran unadapted and checks_exit=0."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "Only book detail files changed, plus a new test file for it."},
+    "4": {"pass": true, "why": "UI unchanged: loading text and title only."},
+    "5": {"pass": true, "why": "BaseViewModel with updateState and launchGuarded onError that sets the error; no try/catch."},
+    "6": {"pass": true, "why": "New Route uses collectAsStateWithLifecycle and passes state to BookDetailScreen."}
+  },
+  "F": {
+    "1": {"pass": true, "why": "Hidden test passed after the permitted calls-only adaptation (checks_exit=0)."},
+    "2": {"pass": true, "why": "The jvmTest run in checks succeeded (checks_exit=0)."},
+    "3": {"pass": true, "why": "The App.kt edit only wires the injected params; the rest is book detail."},
+    "4": {"pass": true, "why": "Screen unchanged apart from formatting; the HandleAppErrors hook is a convention, not a new control."},
+    "5": {"pass": true, "why": "BaseViewModel, updateState, and launchGuarded onError storing the AppError; no try/catch."},
+    "6": {"pass": true, "why": "Route uses collectAsStateWithLifecycle and renders a stateless BookDetailScreen."}
+  }
+}

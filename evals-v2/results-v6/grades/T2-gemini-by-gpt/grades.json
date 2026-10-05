@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and the new active-job guard skips starts the original ViewModel would load."},
+    "2": {"pass": true, "why": "The reported Gradle check completed successfully, including :feature:notes:jvmTest."},
+    "3": {"pass": true, "why": "The diff changes only book detail production files and adds a related ViewModel test."},
+    "4": {"pass": false, "why": "The route now handles emitted errors with HandleAppErrors, adding error UI absent from the original screen."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, updates its exposed state through updateState, and uses launchGuarded for failures."},
+    "6": {"pass": true, "why": "The diff separates BookDetailRoute from BookDetailScreen and collects state with collectAsStateWithLifecycle."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and the new active-job guard skips starts the original ViewModel would load."},
+    "2": {"pass": true, "why": "The reported Gradle check completed successfully, including :feature:notes:jvmTest."},
+    "3": {"pass": true, "why": "The diff changes only book detail production files and adds a related ViewModel test."},
+    "4": {"pass": false, "why": "The route now displays emitted errors through HandleAppErrors, adding error UI absent from the original screen."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses updateState, and routes failures through launchGuarded and emitError."},
+    "6": {"pass": true, "why": "The diff separates BookDetailRoute from BookDetailScreen and collects state with collectAsStateWithLifecycle."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and the new active-job guard skips starts the original ViewModel would load."},
+    "2": {"pass": true, "why": "The reported Gradle check completed successfully, including :feature:notes:jvmTest."},
+    "3": {"pass": true, "why": "The diff is confined to the book detail contract, route, screen, and ViewModel."},
+    "4": {"pass": true, "why": "The diff adds no controls, destination, navigation, persistence, or functional feature; the error handler receives no emitted errors."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses updateState, and handles failures in launchGuarded's onError callback."},
+    "6": {"pass": true, "why": "The diff separates BookDetailRoute from BookDetailScreen and collects state with collectAsStateWithLifecycle."}
+  }
+}

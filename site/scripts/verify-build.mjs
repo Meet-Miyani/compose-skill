@@ -82,7 +82,7 @@ for (const file of ['llms.txt', 'llms-full.txt', 'llms-small.txt']) {
 }
 const llms = await readFile(path.join(DIST, 'llms.txt'), 'utf8');
 check(llms.includes(REPO), 'llms.txt links the repository');
-check(llms.includes('v6.0.0-preview.1'), 'llms.txt states the current release');
+check(llms.includes('v6.1.0'), 'llms.txt states the current release');
 
 console.log('per-page SEO');
 const pages = await listHtmlPages(DIST);

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "No changes implement tapping an author or showing their books."},
+    "2": {"pass": false, "why": "No author screen or Back behavior was implemented."},
+    "3": {"pass": false, "why": "No author view or book listing was implemented."},
+    "4": {"pass": false, "why": "The check shows an assemble build, not a test run."},
+    "5": {"pass": false, "why": "The diff is empty, with no destination, ViewModel, or UiState."},
+    "6": {"pass": false, "why": "The diff is empty, with no author filtering."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Authors are displayed as text; selecting one requires typing in a filter field."},
+    "2": {"pass": false, "why": "Filtering stays on the book list and adds no Back navigation."},
+    "3": {"pass": true, "why": "The full book stream is filtered by author without excluding finished books."},
+    "4": {"pass": false, "why": "The check output shows an assemble build, not the claimed JVM test run."},
+    "5": {"pass": false, "why": "The author filter remains in BookList; no separate destination or contract exists."},
+    "6": {"pass": false, "why": "Author filtering is implemented in BookListUiState, outside the ViewModel and data layer."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Authors are displayed as text; selecting one requires typing in a filter field."},
+    "2": {"pass": false, "why": "Filtering stays on the book list and adds no Back navigation."},
+    "3": {"pass": true, "why": "The author query selects all matching books without a finished-status restriction."},
+    "4": {"pass": false, "why": "The check output shows an assemble build, not the claimed JVM test run."},
+    "5": {"pass": false, "why": "The author filter remains in BookList; no separate destination or contract exists."},
+    "6": {"pass": true, "why": "The ViewModel selects a repository stream backed by an author-filtered DAO query."}
+  }
+}

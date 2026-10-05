@@ -1,0 +1,298 @@
+diff --git a/composeApp/src/commonMain/kotlin/com/example/app/App.kt b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+index f802190..9ad66c3 100644
+--- a/composeApp/src/commonMain/kotlin/com/example/app/App.kt
++++ b/composeApp/src/commonMain/kotlin/com/example/app/App.kt
+@@ -12,10 +12,12 @@ import androidx.navigation3.ui.NavDisplay
+ import androidx.savedstate.serialization.SavedStateConfiguration
+ import com.example.feature.notes.navigation.NotesDetailKey
+ import com.example.feature.notes.navigation.NotesListKey
++import com.example.feature.notes.readinglog.navigation.AuthorBooksKey
+ import com.example.feature.notes.readinglog.navigation.BookListKey
+ import com.example.feature.notes.readinglog.navigation.readingLogNavSerializers
+ import kotlinx.serialization.modules.plus
+ import com.example.feature.notes.readinglog.presentation.list.BookListRoute
++import com.example.feature.notes.readinglog.presentation.list.BookListUiEffect
+ import com.example.feature.notes.navigation.notesNavSerializers
+ import com.example.feature.notes.presentation.list.NotesListRoute
+ import com.example.feature.notes.presentation.list.NotesListUiEffect
+@@ -51,7 +53,22 @@ fun App() {
+                 onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
+                 entryProvider = entryProvider {
+                     entry<BookListKey> {
+-                        BookListRoute(viewModel = koinViewModel(), onEffect = { })
++                        BookListRoute(
++                            viewModel = koinViewModel(),
++                            onEffect = { effect ->
++                                if (effect is BookListUiEffect.OpenAuthor) {
++                                    backStack.add(AuthorBooksKey(effect.author))
++                                }
++                            },
++                        )
++                    }
++                    entry<AuthorBooksKey> { key ->
++                        BookListRoute(
++                            viewModel = koinViewModel(),
++                            author = key.author,
++                            onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
++                            onEffect = { },
++                        )
+                     }
+ 
+                     entry<NotesListKey> {
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/BookListKey.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/BookListKey.kt
+index 3c7af20..751eefa 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/BookListKey.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/navigation/BookListKey.kt
+@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.polymorphic
+ import kotlinx.serialization.modules.subclassesOfSealed
+ @Serializable sealed interface ReadingLogNavKey : NavKey
+ @Serializable data object BookListKey : ReadingLogNavKey
++@Serializable data class AuthorBooksKey(val author: String) : ReadingLogNavKey
+ @OptIn(ExperimentalSerializationApi::class)
+ val readingLogNavSerializers = SerializersModule {
+     polymorphic(NavKey::class) {
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+index 372e1f3..af26abf 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListContract.kt
+@@ -6,9 +6,10 @@ import com.example.feature.notes.readinglog.domain.model.Book
+ data class BookListUiState(val items: List<Book> = emptyList(), val isLoading: Boolean = false) : UiState
+ sealed interface BookListUiAction : UiAction {
+     data object OnScreenStarted : BookListUiAction
+-    data object OnAddClick : BookListUiAction
++    data class OnSaveBookClick(val title: String, val author: String, val pages: Int) : BookListUiAction
++    data class OnAuthorClick(val author: String) : BookListUiAction
+     data class OnMarkFinishedClick(val id: Long) : BookListUiAction
+ }
+ sealed interface BookListUiEffect : UiEffect {
+-    data object OpenAddSheet : BookListUiEffect
++    data class OpenAuthor(val author: String) : BookListUiEffect
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+index 38da481..e0ef8f6 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt
+@@ -6,22 +6,27 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import com.example.core.mvi.CollectEffect
+ import com.example.designsystem.error.HandleAppErrors
+ @Composable
+-fun BookListRoute(viewModel: BookListViewModel, onEffect: suspend (BookListUiEffect) -> Unit) {
++fun BookListRoute(
++    viewModel: BookListViewModel,
++    onEffect: suspend (BookListUiEffect) -> Unit,
++    author: String? = null,
++    onBack: () -> Unit = {},
++) {
+     LifecycleStartEffect(Unit) {
+         viewModel.onAction(BookListUiAction.OnScreenStarted)
+         onStopOrDispose {}
+     }
+     val state by viewModel.state.collectAsStateWithLifecycle()
+     HandleAppErrors(viewModel.errors)
+-    CollectEffect(viewModel.effect) { effect ->
+-        when (effect) {
+-            BookListUiEffect.OpenAddSheet -> viewModel.createBook("New Book", "Author", 100)
+-            else -> onEffect(effect)
+-        }
+-    }
++    CollectEffect(viewModel.effect) { effect -> onEffect(effect) }
+     BookListScreen(
+         state = state,
+-        onAdd = { viewModel.onAction(BookListUiAction.OnAddClick) },
+-        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) }
++        author = author,
++        onBack = onBack,
++        onAddBook = { title, bookAuthor, pages ->
++            viewModel.onAction(BookListUiAction.OnSaveBookClick(title, bookAuthor, pages))
++        },
++        onAuthorClick = { viewModel.onAction(BookListUiAction.OnAuthorClick(it)) },
++        onMarkFinished = { viewModel.onAction(BookListUiAction.OnMarkFinishedClick(it)) },
+     )
+ }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+index 6b50bac..8f248be 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListScreen.kt
+@@ -1,18 +1,87 @@
+ package com.example.feature.notes.readinglog.presentation.list
++
++import androidx.compose.foundation.layout.Arrangement
+ import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material3.Button
++import androidx.compose.material3.OutlinedButton
++import androidx.compose.material3.OutlinedTextField
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.saveable.rememberSaveable
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++import com.example.feature.notes.readinglog.domain.model.Book
++
++internal fun booksByAuthor(books: List<Book>, author: String): List<Book> = books.filter {
++    it.author.trim().equals(author.trim(), ignoreCase = true)
++}
++
+ @Composable
+-fun BookListScreen(state: BookListUiState, onAdd: () -> Unit, onMarkFinished: (Long) -> Unit) {
+-    Column {
+-        Button(onClick = onAdd) { Text("Add Book") }
+-        LazyColumn {
+-            items(state.items, key = { it.id }) { book ->
+-                Text("${book.title} by ${book.author} (${book.pages} pages) - Finished: ${book.isFinished}")
+-                if (!book.isFinished) { Button(onClick = { onMarkFinished(book.id) }) { Text("Mark Finished") } }
++fun BookListScreen(
++    state: BookListUiState,
++    author: String? = null,
++    onBack: () -> Unit = {},
++    onAddBook: (String, String, Int) -> Unit,
++    onAuthorClick: (String) -> Unit,
++    onMarkFinished: (Long) -> Unit,
++) {
++    var addingBook by rememberSaveable { mutableStateOf(false) }
++    var title by rememberSaveable { mutableStateOf("") }
++    var bookAuthor by rememberSaveable { mutableStateOf("") }
++    var pages by rememberSaveable { mutableStateOf("") }
++    val displayedBooks = if (author == null) state.items else booksByAuthor(state.items, author)
++
++    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
++        if (author == null) {
++            Text("Books")
++            if (addingBook) {
++                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Title") })
++                OutlinedTextField(value = bookAuthor, onValueChange = { bookAuthor = it }, label = { Text("Author") })
++                OutlinedTextField(value = pages, onValueChange = { pages = it }, label = { Text("Pages") })
++                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
++                    Button(
++                        enabled = title.isNotBlank() && bookAuthor.isNotBlank() && (pages.toIntOrNull() ?: 0) > 0,
++                        onClick = {
++                            onAddBook(title.trim(), bookAuthor.trim(), pages.toInt())
++                            title = ""
++                            bookAuthor = ""
++                            pages = ""
++                            addingBook = false
++                        },
++                    ) { Text("Save Book") }
++                    OutlinedButton(onClick = { addingBook = false }) { Text("Cancel") }
++                }
++            } else {
++                Button(onClick = { addingBook = true }) { Text("Add Book") }
++            }
++        } else {
++            OutlinedButton(onClick = onBack) { Text("Back") }
++            Text("Books by $author")
++        }
++
++        if (displayedBooks.isEmpty() && !state.isLoading) {
++            Text(if (author == null) "No books yet" else "No books by $author")
++        }
++        LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
++            items(displayedBooks, key = { it.id }) { book ->
++                Column(modifier = Modifier.fillMaxWidth()) {
++                    Text("${book.title} (${book.pages} pages)")
++                    if (author == null) {
++                        OutlinedButton(onClick = { onAuthorClick(book.author) }) { Text(book.author) }
++                    }
++                    Text(if (book.isFinished) "Finished" else "Not finished")
++                    if (!book.isFinished) {
++                        Button(onClick = { onMarkFinished(book.id) }) { Text("Mark Finished") }
++                    }
++                }
+             }
+         }
+     }
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+index 2c463f7..3303d3f 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListViewModel.kt
+@@ -10,7 +10,8 @@ class BookListViewModel(private val repository: BookRepository) :
+     override fun onAction(action: BookListUiAction) {
+         when (action) {
+             BookListUiAction.OnScreenStarted -> observeBooks()
+-            BookListUiAction.OnAddClick -> sendEffect(BookListUiEffect.OpenAddSheet)
++            is BookListUiAction.OnSaveBookClick -> createBook(action.title, action.author, action.pages)
++            is BookListUiAction.OnAuthorClick -> sendEffect(BookListUiEffect.OpenAuthor(action.author))
+             is BookListUiAction.OnMarkFinishedClick -> markFinished(action.id)
+         }
+     }
+@@ -22,7 +23,7 @@ class BookListViewModel(private val repository: BookRepository) :
+         }
+     }
+     private fun markFinished(id: Long) { launchGuarded(onError = ::emitError) { repository.markFinished(id) } }
+-    fun createBook(title: String, author: String, pages: Int) {
++    private fun createBook(title: String, author: String, pages: Int) {
+         launchGuarded(onError = ::emitError) { repository.addBook(title, author, pages) }
+     }
+ }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/AuthorBooksTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/AuthorBooksTest.kt
+new file mode 100644
+index 0000000..ebbe3fa
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/AuthorBooksTest.kt
+@@ -0,0 +1,59 @@
++package com.example.feature.notes.readinglog
++
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import com.example.feature.notes.readinglog.presentation.list.BookListUiAction
++import com.example.feature.notes.readinglog.presentation.list.BookListUiEffect
++import com.example.feature.notes.readinglog.presentation.list.BookListViewModel
++import com.example.feature.notes.readinglog.presentation.list.booksByAuthor
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.toList
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.UnconfinedTestDispatcher
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class AuthorBooksTest {
++    private val scheduler = TestCoroutineScheduler()
++
++    @BeforeTest fun setUp() { Dispatchers.setMain(StandardTestDispatcher(scheduler)) }
++    @AfterTest fun tearDown() { Dispatchers.resetMain() }
++
++    @Test fun `author view includes every matching book regardless of case and surrounding spaces`() {
++        val books = listOf(
++            Book(1, "First", "Le Guin", 200, false),
++            Book(2, "Second", " le guin ", 300, true),
++            Book(3, "Other", "Another Writer", 100, false),
++        )
++        assertEquals(listOf(1L, 2L), booksByAuthor(books, "Le Guin").map { it.id })
++    }
++
++    @Test fun `tapping an author opens their book view`() = runTest(scheduler) {
++        val viewModel = BookListViewModel(FakeBookRepository())
++        val effects = mutableListOf<BookListUiEffect>()
++        backgroundScope.launch(UnconfinedTestDispatcher(scheduler)) { viewModel.effect.toList(effects) }
++
++        viewModel.onAction(BookListUiAction.OnAuthorClick("Le Guin"))
++        advanceUntilIdle()
++
++        assertEquals(BookListUiEffect.OpenAuthor("Le Guin"), effects.single())
++    }
++
++    private class FakeBookRepository : BookRepository {
++        override fun getBooksStream(): Flow<List<Book>> = MutableStateFlow(emptyList())
++        override suspend fun addBook(title: String, author: String, pages: Int): Long = 1L
++        override suspend fun markFinished(id: Long) = Unit
++    }
++}

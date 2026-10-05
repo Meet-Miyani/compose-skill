@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The author button passes its name through navigation to a DAO query restricted by author."},
+    "2": {"pass": true, "why": "The author screen's Back action emits NavigateBack, which removes the destination from the back stack."},
+    "3": {"pass": true, "why": "The query selects all books for the author without filtering on isFinished, and the screen lists the returned items."},
+    "4": {"pass": false, "why": "The check log shows a successful Android build but no test task or test results."},
+    "5": {"pass": true, "why": "AuthorBooksKey is a reading-log navigation key with its own registered entry, ViewModel, and UiState."},
+    "6": {"pass": true, "why": "The author restriction is in the DAO query consumed by the ViewModel, not in the composable."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Tapping the author button opens a destination whose DAO query selects only rows with that author."},
+    "2": {"pass": true, "why": "The author screen's Back button emits NavigateBack and App removes the top back-stack entry."},
+    "3": {"pass": true, "why": "The author query has no finished-status condition, and the screen lists every returned book."},
+    "4": {"pass": true, "why": "The check log includes a successful :feature:notes:jvmTest task."},
+    "5": {"pass": true, "why": "AuthorBooksKey is registered as a destination with a separate AuthorBooksViewModel and AuthorBooksUiState."},
+    "6": {"pass": true, "why": "Filtering occurs in the DAO's WHERE author query rather than the composable."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The author button navigates with the selected name, and the DAO query restricts books to that author."},
+    "2": {"pass": true, "why": "The author screen's Back action emits NavigateBack, handled by removing the top destination."},
+    "3": {"pass": true, "why": "The query selects all rows for the author regardless of isFinished, and the screen lists the items."},
+    "4": {"pass": false, "why": "The check log shows a successful Android build but no test task or test results."},
+    "5": {"pass": true, "why": "AuthorBooksKey has a registered destination and a dedicated ViewModel and UiState contract."},
+    "6": {"pass": true, "why": "The author filter is implemented by the DAO query, outside the composable."}
+  }
+}

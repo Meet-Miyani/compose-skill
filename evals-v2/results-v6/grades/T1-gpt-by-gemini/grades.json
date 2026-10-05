@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": false,
+      "why": "Changed error state type and added retry behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "Checks passed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added a Retry button and error popup handling."
+    },
+    "5": {
+      "pass": true,
+      "why": "Properly uses guarded launch and BaseViewModel."
+    },
+    "6": {
+      "pass": true,
+      "why": "Splits Route and Screen correctly."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Maintains original logic and state transitions."
+    },
+    "2": {
+      "pass": true,
+      "why": "Checks passed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "UI controls are unchanged."
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses manual flow catch instead of relying on guarded launch."
+    },
+    "6": {
+      "pass": true,
+      "why": "Splits Route and Screen correctly."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "Removed the error field from the UI state."
+    },
+    "2": {
+      "pass": false,
+      "why": "Broke compilation in App.kt."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "UI controls are unchanged."
+    },
+    "5": {
+      "pass": true,
+      "why": "Properly uses guarded launch and BaseViewModel."
+    },
+    "6": {
+      "pass": true,
+      "why": "Splits Route and Screen correctly."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": false,
+      "why": "Changed error state type to AppError."
+    },
+    "2": {
+      "pass": true,
+      "why": "Checks passed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "UI controls are unchanged."
+    },
+    "5": {
+      "pass": false,
+      "why": "Uses a manual try-catch block inside the guarded launch."
+    },
+    "6": {
+      "pass": true,
+      "why": "Splits Route and Screen correctly."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": false,
+      "why": "Changed error state type and added retry behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "Checks passed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added a Retry button."
+    },
+    "5": {
+      "pass": true,
+      "why": "Properly uses guarded launch and BaseViewModel."
+    },
+    "6": {
+      "pass": true,
+      "why": "Splits Route and Screen correctly."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "Maintains original logic and error state type."
+    },
+    "2": {
+      "pass": true,
+      "why": "Checks passed."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "UI controls are unchanged."
+    },
+    "5": {
+      "pass": true,
+      "why": "Properly uses guarded launch and BaseViewModel."
+    },
+    "6": {
+      "pass": false,
+      "why": "Did not extract a stateless Screen composable."
+    }
+  }
+}

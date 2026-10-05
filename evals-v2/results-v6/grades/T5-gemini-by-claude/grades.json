@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Goal stored in a new Room reading_goals table (DB v3, AutoMigration 2->3), observed on screen start, so it survives restart."},
+    "2": {"pass": true, "why": "ViewModel setGoal returns early on non-numeric (toIntOrNull null) or <= 0 input; the button is also disabled."},
+    "3": {"pass": true, "why": "Progress uses state.items.count { it.isFinished } against the target."},
+    "4": {"pass": true, "why": "checks_exit=0 and BUILD SUCCESSFUL."},
+    "5": {"pass": true, "why": "Goal goes through BookDao -> DefaultBookRepository -> BookListViewModel -> BookListUiState.yearlyGoal; the composable only renders state and sends actions."},
+    "6": {"pass": false, "why": "The ViewModel silently drops invalid input with no error message in state, and all new UI text is hardcoded rather than string resources."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Empty diff: only proposed approaches, nothing implemented."},
+    "2": {"pass": false, "why": "Empty diff: no validation implemented."},
+    "3": {"pass": false, "why": "Empty diff: no progress display implemented."},
+    "4": {"pass": true, "why": "No changes were made; checks_exit=0 and BUILD SUCCESSFUL."},
+    "5": {"pass": false, "why": "Empty diff: no repository or UiState goal exists."},
+    "6": {"pass": false, "why": "Empty diff: no validation or string resources."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Goal is upserted into a new Room reading_goals table (DB v3, AutoMigration 2->3) and observed via a repository stream."},
+    "2": {"pass": true, "why": "ViewModel setGoal returns early when toIntOrNull is null or the target is <= 0."},
+    "3": {"pass": true, "why": "Progress is finishedCount = items.count { it.isFinished } divided by the goal."},
+    "4": {"pass": true, "why": "checks_exit=0 and BUILD SUCCESSFUL."},
+    "5": {"pass": true, "why": "Goal flows Room DAO -> DefaultBookRepository -> ViewModel -> BookListUiState.yearlyGoal; the composable reads only state."},
+    "6": {"pass": false, "why": "Invalid input is dropped silently with no message in state, and new UI text is hardcoded rather than string resources."}
+  }
+}

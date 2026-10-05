@@ -1,0 +1,3 @@
+Updated reading stats to use the project’s `BaseViewModel` and guarded load pattern, and made state collection lifecycle-aware. It still takes the first books emission and sums pages for finished books; the UI is unchanged.
+
+Verification passed: common metadata and JVM compilation, JVM tests, all 11 ComposeKit guards, and `git diff --check`. The existing `error` state remains internal to the feature and is still not displayed by the screen.

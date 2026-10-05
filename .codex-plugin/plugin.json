@@ -1,6 +1,6 @@
 {
   "name": "compose-kit",
-  "version": "6.0.0-preview.1",
+  "version": "6.1.0",
   "description": "Compose skill for AI coding agents: seven skills for Jetpack Compose and Compose Multiplatform (MVI, Koin, Navigation 3, Ktor, Room)",
   "skills": "./skills/",
   "homepage": "https://compose.avinya.dev",

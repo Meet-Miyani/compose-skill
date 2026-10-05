@@ -1,0 +1,80 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Hidden behaviour test passes and behaviour is unchanged."
+    },
+    "2": {
+      "pass": true,
+      "why": "Existing tests pass as shown by checks_exit=0."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only related code in the book detail feature was modified."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI, screens, navigation, or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel contract and uses launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen uses Route wrapper and collects state lifecycle-aware."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Added overlapping load guard which changes original behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "Existing tests pass as shown by checks_exit=0."
+    },
+    "3": {
+      "pass": true,
+      "why": "Only related code in the book detail feature was modified."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI, screens, navigation, or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel contract and uses launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen uses Route wrapper and collects state lifecycle-aware."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": false,
+      "why": "ViewModel API change broke hidden test compilation, and load guard changes behaviour."
+    },
+    "2": {
+      "pass": true,
+      "why": "Existing tests pass (after hidden test adaptation)."
+    },
+    "3": {
+      "pass": false,
+      "why": "Rewrote App.kt which is the app composition root, not the requested feature."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI, screens, navigation, or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "ViewModel follows BaseViewModel contract and uses launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Screen uses Route wrapper and collects state lifecycle-aware."
+    }
+  }
+}

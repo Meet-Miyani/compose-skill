@@ -1,0 +1,202 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+index 6c4a0b5..b5b8885 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsContract.kt
+@@ -1,7 +1,13 @@
+ package com.example.feature.notes.readinglog.presentation.stats
++
+ import com.example.core.mvi.UiAction
+-import com.example.core.mvi.UiState
+ import com.example.core.mvi.UiEffect
++import com.example.core.mvi.UiState
++
+ data class ReadingStatsUiState(val totalPages: Int = 0, val isLoading: Boolean = false, val error: String? = null) : UiState
+-sealed interface ReadingStatsUiAction : UiAction { data object OnScreenStarted : ReadingStatsUiAction }
++
++sealed interface ReadingStatsUiAction : UiAction {
++    data object OnScreenStarted : ReadingStatsUiAction
++}
++
+ sealed interface ReadingStatsUiEffect : UiEffect
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+new file mode 100644
+index 0000000..b6761f5
+--- /dev/null
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsRoute.kt
+@@ -0,0 +1,16 @@
++package com.example.feature.notes.readinglog.presentation.stats
++
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.lifecycle.compose.LifecycleStartEffect
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
++
++@Composable
++fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
++    LifecycleStartEffect(Unit) {
++        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
++        onStopOrDispose {}
++    }
++    val state by viewModel.state.collectAsStateWithLifecycle()
++    ReadingStatsScreen(state)
++}
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+index c709141..a893da0 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsScreen.kt
+@@ -2,16 +2,9 @@ package com.example.feature.notes.readinglog.presentation.stats
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
+-import androidx.compose.runtime.getValue
+-import androidx.lifecycle.compose.LifecycleStartEffect
++
+ @Composable
+-fun ReadingStatsRoute(viewModel: ReadingStatsViewModel) {
+-    LifecycleStartEffect(Unit) {
+-        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
+-        onStopOrDispose {}
+-    }
+-    val state by viewModel.state.collectAsState()
++fun ReadingStatsScreen(state: ReadingStatsUiState) {
+     Column {
+         if (state.isLoading) { Text("Loading...") }
+         Text("Total pages read: ${state.totalPages}")
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+index 415ab49..68df60b 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModel.kt
+@@ -1,25 +1,32 @@
+ package com.example.feature.notes.readinglog.presentation.stats
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
+-import kotlinx.coroutines.flow.first
+-@Factory
+-class ReadingStatsViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(ReadingStatsUiState())
+-    fun onAction(action: ReadingStatsUiAction) {
+-        if (action is ReadingStatsUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val pages = books.filter { it.isFinished }.sumOf { it.pages }
+-                    state.value = state.value.copy(totalPages = pages, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
++import kotlinx.coroutines.flow.catch
++import kotlinx.coroutines.flow.firstOrNull
++import org.koin.core.annotation.KoinViewModel
++
++@KoinViewModel
++class ReadingStatsViewModel(private val repository: BookRepository) :
++    BaseViewModel<ReadingStatsUiAction, ReadingStatsUiState, ReadingStatsUiEffect>(ReadingStatsUiState()) {
++
++    override fun onAction(action: ReadingStatsUiAction) {
++        when (action) {
++            ReadingStatsUiAction.OnScreenStarted -> loadStats()
++        }
++    }
++
++    private fun loadStats() {
++        updateState { copy(isLoading = true) }
++        launchGuarded(
++            onError = { error -> updateState { copy(error = error.serverMessage ?: error.type.name) } },
++            onComplete = { updateState { copy(isLoading = false) } },
++        ) {
++            val books = repository.getBooksStream()
++                .catch { error -> updateState { copy(error = error.message) } }
++                .firstOrNull()
++            if (books != null) {
++                val pages = books.filter { it.isFinished }.sumOf { it.pages }
++                updateState { copy(totalPages = pages) }
+             }
+         }
+     }
+diff --git a/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModelTest.kt b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModelTest.kt
+new file mode 100644
+index 0000000..6fda77e
+--- /dev/null
++++ b/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/stats/ReadingStatsViewModelTest.kt
+@@ -0,0 +1,74 @@
++package com.example.feature.notes.readinglog.presentation.stats
++
++import com.example.feature.notes.readinglog.domain.model.Book
++import com.example.feature.notes.readinglog.domain.repository.BookRepository
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.ExperimentalCoroutinesApi
++import kotlinx.coroutines.flow.Flow
++import kotlinx.coroutines.flow.MutableStateFlow
++import kotlinx.coroutines.flow.flow
++import kotlinx.coroutines.test.StandardTestDispatcher
++import kotlinx.coroutines.test.TestCoroutineScheduler
++import kotlinx.coroutines.test.advanceUntilIdle
++import kotlinx.coroutines.test.resetMain
++import kotlinx.coroutines.test.runTest
++import kotlinx.coroutines.test.setMain
++import kotlin.test.AfterTest
++import kotlin.test.BeforeTest
++import kotlin.test.Test
++import kotlin.test.assertEquals
++import kotlin.test.assertFalse
++import kotlin.test.assertTrue
++
++@OptIn(ExperimentalCoroutinesApi::class)
++class ReadingStatsViewModelTest {
++    private val scheduler = TestCoroutineScheduler()
++
++    @BeforeTest fun setUp() { Dispatchers.setMain(StandardTestDispatcher(scheduler)) }
++    @AfterTest fun tearDown() { Dispatchers.resetMain() }
++
++    @Test fun `counts only finished books from first emission`() = runTest(scheduler) {
++        val repository = FakeBookRepository(
++            listOf(
++                Book(1, "Finished", "Author", 120, true),
++                Book(2, "In progress", "Author", 80, false),
++                Book(3, "Also finished", "Author", 30, true),
++            ),
++        )
++        val viewModel = ReadingStatsViewModel(repository)
++
++        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
++        assertTrue(viewModel.state.value.isLoading)
++        advanceUntilIdle()
++        assertEquals(150, viewModel.state.value.totalPages)
++        assertFalse(viewModel.state.value.isLoading)
++
++        repository.books.value = listOf(Book(4, "Later", "Author", 500, true))
++        advanceUntilIdle()
++        assertEquals(150, viewModel.state.value.totalPages)
++    }
++
++    @Test fun `keeps the repository failure message in state`() = runTest(scheduler) {
++        val repository = object : BookRepository {
++            override fun getBooksStream(): Flow<List<Book>> = flow { throw IllegalStateException("read failed") }
++            override suspend fun addBook(title: String, author: String, pages: Int): Long = error("Unused")
++            override suspend fun markFinished(id: Long) = error("Unused")
++        }
++        val viewModel = ReadingStatsViewModel(repository)
++
++        viewModel.onAction(ReadingStatsUiAction.OnScreenStarted)
++        advanceUntilIdle()
++
++        assertEquals("read failed", viewModel.state.value.error)
++        assertEquals(0, viewModel.state.value.totalPages)
++        assertFalse(viewModel.state.value.isLoading)
++    }
++
++    private class FakeBookRepository(initialBooks: List<Book>) : BookRepository {
++        val books = MutableStateFlow(initialBooks)
++
++        override fun getBooksStream(): Flow<List<Book>> = books
++        override suspend fun addBook(title: String, author: String, pages: Int): Long = error("Unused")
++        override suspend fun markFinished(id: Long) = error("Unused")
++    }
++}

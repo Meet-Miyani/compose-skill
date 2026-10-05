@@ -35,17 +35,17 @@ npx skills add Meet-Miyani/compose-skill --skill '*' -a antigravity
 
 ## gh skill
 
-Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+Needs GitHub CLI 2.90+. `--pin v6.1.0` fixes the version; without it, `gh skill` takes the latest stable release, which is currently v6.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
 
 ```sh
 # Gemini CLI, this project only (use --scope user to install globally)
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent gemini-cli --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent gemini-cli --scope project
 done
 
 # Antigravity, this project only (use --scope user to install globally)
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent antigravity --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.0 --agent antigravity --scope project
 done
 ```
 

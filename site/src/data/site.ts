@@ -15,7 +15,7 @@ export const blob = (path: string) => `${repoUrl}/blob/main/${path}`;
 /** Tree URL for a folder on `main`. */
 export const tree = (path: string) => `${repoUrl}/tree/main/${path}`;
 
-export const version = 'v6.0.0-preview.1';
+export const version = 'v6.1.0';
 export const license = 'MIT';
 
 export const authorName = 'Meet Miyani';
@@ -27,9 +27,9 @@ export const quickInstall = "npx skills add Meet-Miyani/compose-skill --skill '*
 
 /** The four headline numbers from the top of README.md. */
 export const headline = [
-  { value: '+25.6', label: 'points for Gemini 3.8 Flash with the kit' },
-  { value: '+18.6', label: 'points for Sonnet 5.5 with the kit' },
-  { value: '120', label: 'agentic runs on 8 never-seen tasks' },
+  { value: '+25.6', label: 'points for Gemini 3.8 Flash with the kit (v5 test)' },
+  { value: '+18.6', label: 'points for Sonnet 5.5 with the kit (v5 test)' },
+  { value: '120', label: 'agentic runs on 8 never-seen tasks (v5 test)' },
   { value: '2', label: 'blind graders from other vendors must agree on every item' },
 ] as const;
 

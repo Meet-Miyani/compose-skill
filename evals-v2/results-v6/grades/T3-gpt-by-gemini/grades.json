@@ -1,0 +1,182 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Mentions that discarding errors leaves a failed load looking like a valid total of zero."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that repeated starts leave duplicate collectors running for the ViewModel's lifetime."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking, later improvements, and says what is fine as is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping and checking the collection job."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Mentions that discarding errors leaves totalPages at 0 as though no pages were read."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that repeated dispatches leave multiple active subscriptions until cleared."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not include a section stating what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping the returned Job and skipping Load while active."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "Mentions that hiding failures leaves the total at 0, looking like a valid result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that repeated dispatches can leave multiple collectors active."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking, later improvements, and says what is fine as is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes guarding against overlapping loads."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Mentions that discarding errors leaves totalPages at 0, making it look like a valid total."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that the action starts another long-lived collector each time it is dispatched."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking, later improvements, and says what is fine as is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes a job guard to prevent overlapping loads."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Mentions that failures can leave the UI at the default total of zero without an error path."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that repeated actions leave duplicate collectors running until cleared."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": true,
+      "why": "Separates blocking, later improvements, and says what is fine as is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping and reusing an active collection job."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": false,
+      "why": "Notes errors are discarded but misses that this leaves totalPages at 0 looking like a valid result."
+    },
+    "2": {
+      "pass": true,
+      "why": "Identifies that each collector remains active, accumulating on repeated starts."
+    },
+    "3": {
+      "pass": true,
+      "why": "Does not call the dispatcher usage blocking."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not call the missing explicit return type blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Diff is empty, making no code edits."
+    },
+    "6": {
+      "pass": false,
+      "why": "Does not state what is fine as it is."
+    },
+    "7": {
+      "pass": true,
+      "why": "Proposes keeping the job and skipping loading while active."
+    }
+  }
+}

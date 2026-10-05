@@ -1,0 +1,206 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "Says GlobalScope jobs continue after the ViewModel is cleared."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch discards failures; UI gets no indication search failed."
+    },
+    "3": {
+      "pass": true,
+      "why": "Earlier query's result can overwrite the newer one."
+    },
+    "4": {
+      "pass": true,
+      "why": "Does not raise the initial empty query."
+    },
+    "5": {
+      "pass": true,
+      "why": "Does not raise case-insensitive matching."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": false,
+      "why": "Only High/Medium findings; no later-improvements section and nothing said to be fine as is."
+    },
+    "8": {
+      "pass": true,
+      "why": "Use the ViewModel's scoped coroutine support and cancel or supersede prior searches."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": true,
+      "why": "Work can outlive the ViewModel via GlobalScope."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch silently drops failures with no error signal."
+    },
+    "3": {
+      "pass": true,
+      "why": "Uncancelled jobs; slower earlier search can overwrite newer results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Initial empty query not raised."
+    },
+    "5": {
+      "pass": true,
+      "why": "Case-insensitive filtering is listed as fine as is."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Has Blocking, Worth doing later, and Fine as is sections."
+    },
+    "8": {
+      "pass": true,
+      "why": "Use the ViewModel scope and cancel or switch to the latest query."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "GlobalScope searches can outlive the ViewModel."
+    },
+    "2": {
+      "pass": true,
+      "why": "Discarding every exception leaves stale results with no error."
+    },
+    "3": {
+      "pass": true,
+      "why": "Search for 'a' finishing after 'ab' overwrites the newer results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Initial empty query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Case-insensitive match not called blocking; kept in the fix."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty; the corrected file appears only in the message."
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates Blocking, Worth doing later, and Fine as is."
+    },
+    "8": {
+      "pass": true,
+      "why": "Fix uses launchGuarded with searchJob?.cancel() before each new search."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "Jobs outlive the ViewModel."
+    },
+    "2": {
+      "pass": true,
+      "why": "Broad catch silently discards failures; failures should go to UI state."
+    },
+    "3": {
+      "pass": true,
+      "why": "Earlier search finishing last overwrites newer query's results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Initial empty query not raised."
+    },
+    "5": {
+      "pass": true,
+      "why": "Case-insensitive title filter is listed as fine as is."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates Blocking, Worth doing later, and Fine as is."
+    },
+    "8": {
+      "pass": true,
+      "why": "ViewModel-owned cancellable work via launchGuarded that cancels or supersedes prior searches."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": true,
+      "why": "Work continues after the ViewModel is cleared."
+    },
+    "2": {
+      "pass": true,
+      "why": "Swallowed failures leave empty or outdated results with no error."
+    },
+    "3": {
+      "pass": true,
+      "why": "Earlier read finishing last overwrites current query's results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Initial empty query not called blocking."
+    },
+    "5": {
+      "pass": true,
+      "why": "Case-insensitive match not called blocking."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty; code appears only in the message."
+    },
+    "7": {
+      "pass": true,
+      "why": "Separates Blocking, Worth doing later, and Fine as is."
+    },
+    "8": {
+      "pass": true,
+      "why": "Fix uses launchGuarded with searchJob?.cancel() on each query change."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "GlobalScope work is not cancelled and updates state after navigation."
+    },
+    "2": {
+      "pass": true,
+      "why": "Empty catch leaves prior results with no indication of failure."
+    },
+    "3": {
+      "pass": true,
+      "why": "Search for 'a' completing after 'ab' displays stale results."
+    },
+    "4": {
+      "pass": true,
+      "why": "Initial empty query not raised."
+    },
+    "5": {
+      "pass": true,
+      "why": "Case-insensitive match not raised."
+    },
+    "6": {
+      "pass": true,
+      "why": "Diff is empty."
+    },
+    "7": {
+      "pass": false,
+      "why": "Lists P1/P2 issues only; no later-improvements section and nothing said to be fine as is."
+    },
+    "8": {
+      "pass": true,
+      "why": "Use viewModelScope/launchGuarded and cancel the previous search or use flatMapLatest."
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Critical #1: GlobalScope coroutines outlive the ViewModel and keep running orphaned work after navigation."},
+    "2": {"pass": true, "why": "Critical #3: empty catch drops all exceptions; repository failures fail silently with no user feedback."},
+    "3": {"pass": true, "why": "Critical #2: uncancelled launches let the 'a' search finish after 'ab' and overwrite results with stale data."},
+    "4": {"pass": true, "why": "Only remarks that a cleared query matches all books (non-blocking 'Important'); never calls the initial \"\" query blocking."},
+    "5": {"pass": true, "why": "ignoreCase matching is not flagged as an issue; it is kept in the refactor."},
+    "6": {"pass": true, "why": "Project diff is empty."},
+    "7": {"pass": true, "why": "Splits Critical (must fix) from Important/Minor items and lists Strengths as what is fine."},
+    "8": {"pass": true, "why": "Proposes launchGuarded on viewModelScope with searchJob?.cancel() before each new search, shown in the refactor."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Blocking #1: GlobalScope leaks coroutines when the ViewModel clears."},
+    "2": {"pass": true, "why": "Blocking #1: empty catch silently swallows exceptions and conceals repository failures."},
+    "3": {"pass": true, "why": "Blocking #2: an earlier slow query can complete after a newer one and overwrite with stale results."},
+    "4": {"pass": true, "why": "Does not raise the initial empty query at all."},
+    "5": {"pass": true, "why": "Lists case-insensitive filtering under 'Fine as is'."},
+    "6": {"pass": true, "why": "Project diff is empty."},
+    "7": {"pass": true, "why": "Has separate Blocking, Worth doing later and Fine as is sections."},
+    "8": {"pass": true, "why": "Proposes launchGuarded (ViewModel scope) with the previous searchJob cancelled on each query change."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Blocking #2: GlobalScope detaches coroutines from the ViewModel lifecycle, leaking work after it is destroyed."},
+    "2": {"pass": true, "why": "Blocking #2: bare catch swallows all errors and hides repository failures from the UI."},
+    "3": {"pass": true, "why": "Blocking #1: uncancelled earlier search can finish later and overwrite results with stale data."},
+    "4": {"pass": true, "why": "Does not raise the initial empty query at all."},
+    "5": {"pass": true, "why": "ignoreCase matching is not flagged; kept in the corrected file."},
+    "6": {"pass": true, "why": "Project diff is empty."},
+    "7": {"pass": true, "why": "Has separate Blocking, Worth Doing Later and Fine as Is sections."},
+    "8": {"pass": true, "why": "Proposes launchGuarded on viewModelScope with the stored Job cancelled before each new search."}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with the same inputs and expected values."},
+    "2": {"pass": true, "why": "The check log shows :feature:notes:jvmTest and the build succeeded."},
+    "3": {"pass": false, "why": "The diff rewrites existing book list, insert, and mark-finished repository paths unrelated to detail."},
+    "4": {"pass": false, "why": "The diff adds Retry and Back buttons, a back navigation effect, and new error and missing-book UI."},
+    "5": {"pass": true, "why": "BookDetailViewModel extends BaseViewModel, exposes base state, and uses launchGuarded with onError."},
+    "6": {"pass": true, "why": "A separate Route uses collectAsStateWithLifecycle and delegates rendering to BookDetailScreen."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with unchanged inputs and expected values."},
+    "2": {"pass": true, "why": "The check log shows :feature:notes:jvmTest and the build succeeded."},
+    "3": {"pass": true, "why": "The diff changes only the book detail contract, ViewModel, Route, Screen, and its app entry."},
+    "4": {"pass": true, "why": "The Screen retains the existing loading and title UI, with no new controls or navigation behavior."},
+    "5": {"pass": true, "why": "BookDetailViewModel extends BaseViewModel, exposes base state, and uses launchGuarded with onError."},
+    "6": {"pass": true, "why": "A separate Route uses collectAsStateWithLifecycle and delegates rendering to BookDetailScreen."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The adapted hidden behavior test passed with the same inputs and expected values."},
+    "2": {"pass": true, "why": "The check log shows :feature:notes:jvmTest and the build succeeded."},
+    "3": {"pass": true, "why": "The added DAO and repository lookup serves book detail; existing unrelated methods are untouched."},
+    "4": {"pass": false, "why": "The diff adds Retry and Back buttons, a back navigation effect, and new error and missing-book UI."},
+    "5": {"pass": true, "why": "BookDetailViewModel extends BaseViewModel, exposes base state, and uses launchGuarded with onError."},
+    "6": {"pass": true, "why": "A separate Route uses collectAsStateWithLifecycle and delegates rendering to BookDetailScreen."}
+  }
+}

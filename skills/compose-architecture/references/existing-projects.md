@@ -10,7 +10,7 @@ Load when: deciding whether an existing project's conventions or kit defaults ap
     - Yes: follow that pattern for this change, with no waiver. *Prevents:* a mixed feature and surprise migration.
     - No: use the kit for new code and name the incoherence. *Prevents:* adding another competing pattern silently.
 - Did the user ask to conform existing code?
-  - Yes: run the guards, fix blocking items and agreed deviations, and keep behaviour intact. See `../../compose-feature/references/review-mode.md`. *Prevents:* a style pass becoming a rewrite.
+  - Yes: 1. Restructure only: keep behaviour, visible UI, navigation, persistence and public APIs exactly as they are; 2. do not add screens, controls, wiring, saved state or features the existing code lacks; list them as follow-ups in the answer; 3. when changing a constructor or signature, update every caller and test in the same change; 4. run the existing tests before and after; both runs must pass; 5. run the guards. See `../../compose-feature/references/review-mode.md` for severity. *Prevents:* a style pass becoming a rewrite.
 - Not covered here → use judgement and state the assumption.
 
 ## Policy

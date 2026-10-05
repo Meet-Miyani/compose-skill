@@ -1,0 +1,73 @@
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+index a4feaa4..f87bec2 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailScreen.kt
+@@ -2,7 +2,7 @@ package com.example.feature.notes.readinglog.presentation.detail
+ import androidx.compose.foundation.layout.Column
+ import androidx.compose.material3.Text
+ import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.collectAsState
++import androidx.lifecycle.compose.collectAsStateWithLifecycle
+ import androidx.compose.runtime.getValue
+ import androidx.lifecycle.compose.LifecycleStartEffect
+ @Composable
+@@ -11,7 +11,7 @@ fun BookDetailRoute(viewModel: BookDetailViewModel, bookId: Long) {
+         viewModel.onAction(BookDetailUiAction.OnScreenStarted(bookId))
+         onStopOrDispose {}
+     }
+-    val state by viewModel.state.collectAsState()
++    val state by viewModel.state.collectAsStateWithLifecycle()
+     Column {
+         if (state.isLoading) { Text("Loading...") }
+         state.book?.let {
+diff --git a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+index fe644f9..ed4435c 100644
+--- a/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
++++ b/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/detail/BookDetailViewModel.kt
+@@ -1,26 +1,26 @@
+ package com.example.feature.notes.readinglog.presentation.detail
+-import androidx.lifecycle.ViewModel
+-import androidx.lifecycle.viewModelScope
++import com.example.core.mvi.BaseViewModel
+ import com.example.feature.notes.readinglog.domain.repository.BookRepository
+-import kotlinx.coroutines.flow.MutableStateFlow
+-import kotlinx.coroutines.launch
+-import org.koin.core.annotation.Factory
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.flow.first
+-@Factory
+-class BookDetailViewModel(private val repository: BookRepository) : ViewModel() {
+-    val state = MutableStateFlow(BookDetailUiState())
+-    fun onAction(action: BookDetailUiAction) {
+-        if (action is BookDetailUiAction.OnScreenStarted) {
+-            state.value = state.value.copy(isLoading = true)
+-            viewModelScope.launch {
+-                try {
+-                    val books = repository.getBooksStream().first()
+-                    val book = books.find { it.id == action.id }
+-                    state.value = state.value.copy(book = book, isLoading = false)
+-                } catch (e: Exception) {
+-                    state.value = state.value.copy(error = e.message, isLoading = false)
+-                }
+-            }
++import kotlinx.coroutines.withContext
++import org.koin.core.annotation.KoinViewModel
++@KoinViewModel
++class BookDetailViewModel(
++    private val repository: BookRepository,
++    private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
++) : BaseViewModel<BookDetailUiAction, BookDetailUiState, BookDetailUiEffect>(BookDetailUiState()) {
++    override fun onAction(action: BookDetailUiAction) {
++        when (action) {
++            is BookDetailUiAction.OnScreenStarted -> load(action.id)
++        }
++    }
++    private fun load(id: Long) {
++        updateState { copy(isLoading = true) }
++        launchGuarded(onError = { updateState { copy(isLoading = false, error = it.type.name) } }) {
++            val book = withContext(ioDispatcher) { repository.getBooksStream().first().find { it.id == id } }
++            updateState { copy(book = book, isLoading = false) }
+         }
+     }
+ }

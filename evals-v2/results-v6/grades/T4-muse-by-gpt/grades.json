@@ -1,0 +1,32 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies GlobalScope work continuing after the screen is cleared and writing state."},
+    "2": {"pass": false, "why": "Identifies silent failure but does not say results retain the prior empty or previous-query value."},
+    "3": {"pass": true, "why": "Says rapid keystrokes start unguarded searches and proposes cancellation so only the latest query writes."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates Blocking, Worth doing later, and Fine as is findings."},
+    "8": {"pass": true, "why": "Proposes a ViewModel-scoped launch and cancels the previous search job."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Identifies GlobalScope outliving ViewModel.onCleared and recommends ViewModel scope."},
+    "2": {"pass": false, "why": "Identifies swallowed failures but does not state that results retain an empty or previous-query value."},
+    "3": {"pass": true, "why": "Explains that an older search can finish last and overwrite newer results without cancellation."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Does not call case-insensitive title matching blocking."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": false, "why": "Separates blockers and nits but never says what is fine as it is."},
+    "8": {"pass": true, "why": "Proposes launchGuarded in ViewModel scope with prior searchJob cancellation."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Identifies GlobalScope work outliving the screen and writing state after clearing."},
+    "2": {"pass": true, "why": "Says the empty catch leaves a stale or empty list with no message or retry."},
+    "3": {"pass": true, "why": "Says parallel searches allow an older query to finish last and overwrite newer results."},
+    "4": {"pass": true, "why": "Does not call the initial empty query blocking."},
+    "5": {"pass": true, "why": "Calls case-insensitive title matching fine as is."},
+    "6": {"pass": true, "why": "The project diff is empty."},
+    "7": {"pass": true, "why": "Separates Blocking, Worth doing later, and Fine as is findings."},
+    "8": {"pass": true, "why": "Proposes ViewModel-scoped launchGuarded and cancels the previous search job."}
+  }
+}

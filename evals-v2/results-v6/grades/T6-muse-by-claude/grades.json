@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Empty diff; agent only asked clarifying questions, nothing implemented."},
+    "2": {"pass": false, "why": "Empty diff; no author view or navigation exists."},
+    "3": {"pass": false, "why": "Empty diff; no author view lists any books."},
+    "4": {"pass": true, "why": "No code changed and checks_exit=0 with BUILD SUCCESSFUL."},
+    "5": {"pass": false, "why": "No destination, key, ViewModel or UiState added."},
+    "6": {"pass": false, "why": "No author filtering implemented anywhere."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "Uses a typed 'Filter by author' text field on the list; tapping an author does nothing new."},
+    "2": {"pass": false, "why": "No separate author view; filter is in place on BookList, so there is no Back-to-list flow."},
+    "3": {"pass": true, "why": "filteredItems filters only on author contains, keeping finished and unfinished books alike."},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL; new tests added, no existing code paths broken."},
+    "5": {"pass": false, "why": "No new destination, NavKey, ViewModel or UiState; message itself defers AuthorBooksKey to a follow-up."},
+    "6": {"pass": true, "why": "Filter logic is a derived property on BookListUiState updated via the ViewModel action and unit-tested, not written inside the composable."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Uses a text field filter on the list; no tap-on-author interaction added."},
+    "2": {"pass": false, "why": "No separate author view; filtering is in place, so no Back-to-list navigation."},
+    "3": {"pass": true, "why": "DAO query matches on author only (no isFinished condition), so finished and unfinished books both appear."},
+    "4": {"pass": true, "why": "checks_exit=0, BUILD SUCCESSFUL."},
+    "5": {"pass": false, "why": "No new navigation key, destination, ViewModel or UiState; reuses BookList."},
+    "6": {"pass": true, "why": "Filtering done in the data layer via BookDao LIKE query, selected by the ViewModel."}
+  }
+}

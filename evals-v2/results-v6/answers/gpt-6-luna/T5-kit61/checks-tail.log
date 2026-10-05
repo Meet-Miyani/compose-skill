@@ -1,0 +1,60 @@
+> Task :feature:notes:jvmTest UP-TO-DATE
+> Task :core:error:bundleAndroidMainClassesToCompileJar
+> Task :androidApp:parseDebugLocalResources FROM-CACHE
+> Task :androidApp:generateDebugRFile FROM-CACHE
+> Task :core:mvi:compileAndroidMain FROM-CACHE
+> Task :core:mvi:processAndroidMainJavaRes
+> Task :core:designsystem:compileAndroidMain FROM-CACHE
+> Task :core:mvi:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:stripDebugDebugSymbols
+> Task :core:designsystem:bundleAndroidMainClassesToCompileJar
+> Task :core:mvi:bundleAndroidMainClassesToCompileJar
+> Task :core:designsystem:processAndroidMainJavaRes
+> Task :core:designsystem:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:processDebugResources FROM-CACHE
+> Task :composeApp:compileKotlinJvm
+> Task :composeApp:compileJvmMainJava NO-SOURCE
+> Task :composeApp:jvmMainClasses
+> Task :composeApp:jvmJar
+> Task :composeApp:compileTestKotlinJvm NO-SOURCE
+> Task :composeApp:compileJvmTestJava NO-SOURCE
+> Task :composeApp:jvmTestClasses
+> Task :composeApp:jvmTest NO-SOURCE
+> Task :feature:notes:kspAndroidMain
+> Task :feature:notes:copyRoomSchemas NO-SOURCE
+
+> Task :feature:notes:compileAndroidMain
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: file://<project>/feature/notes/build/generated/ksp/android/androidMain/kotlin/com/example/feature/notes/data/local/NotesDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt:17:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/readinglog/presentation/list/BookListRoute.kt:19:13 'when' is exhaustive so 'else' is redundant here.
+
+> Task :feature:notes:processAndroidMainJavaRes
+> Task :feature:notes:bundleAndroidMainClassesToCompileJar
+> Task :feature:notes:bundleLibRuntimeToDirAndroidMain
+> Task :composeApp:compileAndroidMain
+> Task :composeApp:processAndroidMainJavaRes
+> Task :composeApp:bundleAndroidMainClassesToCompileJar
+> Task :composeApp:bundleLibRuntimeToDirAndroidMain
+> Task :androidApp:compileDebugKotlin FROM-CACHE
+> Task :androidApp:compileDebugJavaWithJavac NO-SOURCE
+> Task :androidApp:processDebugJavaRes
+> Task :androidApp:dexBuilderDebug FROM-CACHE
+> Task :androidApp:mergeProjectDexDebug FROM-CACHE
+> Task :androidApp:mergeDebugJavaResource
+> Task :androidApp:mergeLibDexDebug
+> Task :androidApp:packageDebug
+> Task :androidApp:assembleDebug
+> Task :androidApp:createDebugApkListingFileRedirect
+
+[Incubating] Problems report is available at: file://<project>/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13s
+180 actionable tasks: 101 executed, 46 from cache, 33 up-to-date
+Configuration cache entry stored.

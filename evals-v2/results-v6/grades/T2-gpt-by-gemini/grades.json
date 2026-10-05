@@ -1,0 +1,158 @@
+{
+  "A": {
+    "1": {
+      "pass": true,
+      "why": "The hidden test passed and behavior remains unchanged."
+    },
+    "2": {
+      "pass": true,
+      "why": "The existing tests passed successfully."
+    },
+    "3": {
+      "pass": true,
+      "why": "No unrelated code was rewritten."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI controls, screens, or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "Uses BaseViewModel and handles failures correctly through launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  },
+  "B": {
+    "1": {
+      "pass": false,
+      "why": "Behavior changed because the error state was removed entirely."
+    },
+    "2": {
+      "pass": true,
+      "why": "The existing tests passed successfully."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes to App.kt are related to the feature's navigation setup."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI controls or features were added."
+    },
+    "5": {
+      "pass": false,
+      "why": "Failures are swallowed with an empty onError block rather than handled."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  },
+  "C": {
+    "1": {
+      "pass": true,
+      "why": "The hidden test passed successfully."
+    },
+    "2": {
+      "pass": true,
+      "why": "The existing tests passed successfully."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes made are related to the feature."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added a new retry button and empty state UI controls."
+    },
+    "5": {
+      "pass": true,
+      "why": "Uses BaseViewModel and handles failures correctly through launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  },
+  "D": {
+    "1": {
+      "pass": true,
+      "why": "The hidden test passed successfully."
+    },
+    "2": {
+      "pass": true,
+      "why": "The existing tests passed successfully."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes made are related to the feature."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added a new retry button UI control."
+    },
+    "5": {
+      "pass": true,
+      "why": "Uses BaseViewModel and handles failures correctly."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  },
+  "E": {
+    "1": {
+      "pass": false,
+      "why": "The diff has syntax errors and missing dependency injection, so it would crash and fail the test."
+    },
+    "2": {
+      "pass": false,
+      "why": "The agent's claim that tests passed is unsupported since the diff contains invalid Kotlin code."
+    },
+    "3": {
+      "pass": true,
+      "why": "The added test file is related to the feature."
+    },
+    "4": {
+      "pass": true,
+      "why": "No new UI controls or features were added."
+    },
+    "5": {
+      "pass": true,
+      "why": "Uses BaseViewModel and handles failures through launchGuarded."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  },
+  "F": {
+    "1": {
+      "pass": true,
+      "why": "The hidden test passed successfully."
+    },
+    "2": {
+      "pass": true,
+      "why": "The existing tests passed successfully."
+    },
+    "3": {
+      "pass": true,
+      "why": "Changes made are related to the feature."
+    },
+    "4": {
+      "pass": false,
+      "why": "Added HandleAppErrors which introduces a new UI side-effect control."
+    },
+    "5": {
+      "pass": true,
+      "why": "Uses BaseViewModel and handles failures correctly."
+    },
+    "6": {
+      "pass": true,
+      "why": "Properly splits Route/Screen and collects state lifecycle-aware."
+    }
+  }
+}

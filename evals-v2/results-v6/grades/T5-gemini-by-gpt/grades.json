@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "The goal is upserted into a Room table and loaded through a repository stream on screen start."},
+    "2": {"pass": true, "why": "The ViewModel returns for non-numeric or non-positive input before calling the repository."},
+    "3": {"pass": true, "why": "The screen counts books with isFinished and uses that count for goal progress."},
+    "4": {"pass": true, "why": "The packet reports successful checks, including an up-to-date JVM test task and a claimed successful check run."},
+    "5": {"pass": true, "why": "Room and the repository store the goal; the ViewModel exposes it in UiState for the composable."},
+    "6": {"pass": false, "why": "Validation rejects bad input in the ViewModel, but no validation message enters state and new UI text is hardcoded."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "The diff is empty; persistence is only proposed in the final message."},
+    "2": {"pass": false, "why": "The diff is empty and shows no goal validation."},
+    "3": {"pass": false, "why": "The diff is empty and shows no finished-book progress calculation."},
+    "4": {"pass": false, "why": "The shown successful build does not show a completed test task or test result."},
+    "5": {"pass": false, "why": "The diff is empty; the proposed repository and UiState flow were not implemented."},
+    "6": {"pass": false, "why": "The diff is empty and shows no ViewModel validation, state message, or string resources."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "The goal is upserted in a Room table and observed again from the repository on screen start."},
+    "2": {"pass": true, "why": "The ViewModel returns for non-numeric or non-positive input before saving."},
+    "3": {"pass": true, "why": "The screen counts all books with isFinished for its progress display."},
+    "4": {"pass": true, "why": "The packet includes a successful allTests run with JVM and iOS simulator test tasks."},
+    "5": {"pass": true, "why": "Room and the repository store the goal; the ViewModel passes it to the screen through UiState."},
+    "6": {"pass": false, "why": "The ViewModel rejects invalid input silently, and new screen text is hardcoded rather than string resources."}
+  }
+}

@@ -35,6 +35,7 @@ You build one slice end to end and you refuse to ship it unfinished. The `compos
 > **Iron law: name the gap, never invent or stub.** An unverified helper is named as an open gap, never called. No `TODO`, stub, or no-op body reaches done. Delete it and restart from the template.
 
 Rules 1–7 below are **non-negotiables**. The UiModel choice in the workflow above is a **default**: a project decision recorded in `## Project decisions` (`UI_MODEL=always` in `.composekit.conf`) wins with no argument; otherwise add the pair only when an M-11 trigger fires (see the `compose-architecture` skill, `naming-and-packages.md`).
+These rules govern code you write. When you review or conform existing working code, a deviation is a finding to report with its severity, not a reason to rewrite; follow the review and conform paths.
 
 1. **Build only from verified project material.** Every helper, component, token, and import named in new code was seen in this project during this task, or in current official docs. A plausible name is not a verified one. *Prevents:* invented APIs that compile nowhere.
 2. **No placeholder reaches done.** No `TODO`, `FIXME`, stub, or noted-but-unfixed defect remains in changed files. The placeholder grep over changed files is empty before done. Template `SEAM` comments are implemented, not shipped. *Prevents:* sprints that end with fiction marked done.
@@ -148,7 +149,7 @@ Load only the references this task needs. One level deep.
 - Also read [mvi-contract.md](../compose-architecture/references/mvi-contract.md) for a new destination only when the scaffold template does not already cover it.
 - Also read [navigation.md](../compose-architecture/references/navigation.md) when wiring a destination only when the scaffold template does not already cover it.
 - Also read [state-ownership.md](../compose-architecture/references/state-ownership.md) when changing existing state.
-- Also read [error-handling.md](../compose-architecture/references/error-handling.md) for failure paths.
+- Also read [error-handling.md](../compose-architecture/references/error-handling.md) only when changing failure paths.
 
 - [testing.md](references/testing.md) — ViewModel test convention, fakes, the state matrix rows.
 - [ui-testing.md](references/ui-testing.md) — Compose UI test rules: finders, assertions, sync, lazy lists, restoration, KMP runners.

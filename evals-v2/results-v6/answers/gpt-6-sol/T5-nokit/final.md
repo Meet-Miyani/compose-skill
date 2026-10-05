@@ -1,0 +1,3 @@
+You can now set and edit a yearly reading goal in the reading log. The goal is saved between launches, and the screen shows how many books you’ve finished that year with a progress bar.
+
+Books marked finished before yearly tracking was added have no completion year, so they aren’t counted; the screen explains this. JVM tests passed, including a database reopen check, and the Android and iOS targets compiled.

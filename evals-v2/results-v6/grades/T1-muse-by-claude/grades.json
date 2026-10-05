@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "checks_exit=0 and :feature:notes:jvmTest BUILD SUCCESSFUL; finished-pages sum unchanged"},
+    "2": {"pass": true, "why": "checks_exit=0; existing jvmTest suite passes"},
+    "3": {"pass": true, "why": "diff touches only the four reading-stats presentation files"},
+    "4": {"pass": false, "why": "adds a new Retry button, OnRetryClick action and a new error screen the feature did not have"},
+    "5": {"pass": true, "why": "extends BaseViewModel, uses updateState and launchGuarded(onError=...), no try/catch or public MutableStateFlow"},
+    "6": {"pass": true, "why": "new ReadingStatsRoute owns lifecycle and collectAsStateWithLifecycle; ReadingStatsScreen is stateless"}
+  },
+  "B": {
+    "1": {"pass": true, "why": "checks_exit=0; same first()+filter/sumOf logic and same displayed strings"},
+    "2": {"pass": true, "why": "checks_exit=0; jvmTest passes"},
+    "3": {"pass": true, "why": "only the reading-stats contract, VM, screen and new route are changed"},
+    "4": {"pass": true, "why": "no new controls or features; only a Modifier parameter and structural split"},
+    "5": {"pass": true, "why": "BaseViewModel with updateState and launchGuarded(onError=::emitError), no manual try/catch"},
+    "6": {"pass": true, "why": "Route with LifecycleStartEffect, collectAsStateWithLifecycle, CollectEffect, HandleAppErrors; stateless Screen"}
+  },
+  "C": {
+    "1": {"pass": true, "why": "checks_exit=0 and jvmTest passes; same finished-pages sum and same total text via string resource"},
+    "2": {"pass": true, "why": "checks_exit=0; jvmTest passes"},
+    "3": {"pass": true, "why": "edits limited to reading-stats files, its nav key and one added string; no unrelated code rewritten"},
+    "4": {"pass": false, "why": "adds a new Retry button, OnRetryClick action and error screen not present before"},
+    "5": {"pass": true, "why": "extends BaseViewModel, launchGuarded with onError updating state, no try/catch or exposed mutable state"},
+    "6": {"pass": true, "why": "Route owns lifecycle and collectAsStateWithLifecycle; Screen is stateless"}
+  }
+}

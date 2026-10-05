@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and exception handling changes."},
+    "2": {"pass": true, "why": "The check log shows feature notes JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is confined to reading stats and its string resources."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation, persistence, or new feature."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses its state updates, and loads through launchGuarded."},
+    "6": {"pass": true, "why": "A separate Route collects state with collectAsStateWithLifecycle and passes it to Screen."}
+  },
+  "B": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and repeated-start and exception behavior change."},
+    "2": {"pass": true, "why": "The check log shows feature notes JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "Changes cover reading stats, its resources and tests, plus an unused import in its navigation key."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation, persistence, or new feature."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses its state updates, and handles errors through launchGuarded."},
+    "6": {"pass": true, "why": "A separate Route collects state with collectAsStateWithLifecycle and passes it to Screen."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "No hidden behaviour test result is shown, and exception handling changes."},
+    "2": {"pass": true, "why": "The check log shows feature notes JVM tests completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is confined to reading stats and its string resources."},
+    "4": {"pass": true, "why": "The diff adds no controls, screens, navigation, persistence, or new feature."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses its state updates, and handles errors through launchGuarded."},
+    "6": {"pass": true, "why": "A separate Route collects state with collectAsStateWithLifecycle and passes it to Screen."}
+  }
+}

@@ -1,0 +1,60 @@
+
+> Task :feature:notes:compileKotlinJvm
+w: [Koin] compile-safety validation skipped — no Koin entry point in this compilation.
+w: file://<project>/feature/notes/build/generated/ksp/jvm/jvmMain/kotlin/com/example/feature/notes/data/local/NotesDatabaseConstructor.kt:5:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+w: file://<project>/feature/notes/src/commonMain/kotlin/com/example/feature/notes/data/local/NotesDatabase.kt:17:10 'expect'/'actual' classes (including interfaces, objects, annotations, enums, and 'actual' typealiases) are in Beta. Consider using the '-Xexpect-actual-classes' flag to suppress this warning. Also see: https://youtrack.jetbrains.com/issue/KT-61573
+
+> Task :feature:notes:compileJvmMainJava NO-SOURCE
+> Task :feature:notes:jvmMainClasses
+> Task :feature:notes:jvmJar
+> Task :feature:notes:kspTestKotlinJvm
+> Task :feature:notes:copyRoomSchemas NO-SOURCE
+> Task :feature:notes:jvmTestProcessResources
+> Task :feature:notes:processJvmTestResources SKIPPED
+
+> Task :feature:notes:compileTestKotlinJvm FAILED
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:56:45 No value passed for parameter 'params'.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:57:19 Inapplicable candidate(s): fun onAction(action: BookDetailUiAction): Unit
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:57:47 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:57:47 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:57:47 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> DeepRecursiveFunction<T, R>.invoke(value: T): R
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:64:45 No value passed for parameter 'params'.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:65:19 Inapplicable candidate(s): fun onAction(action: BookDetailUiAction): Unit
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:65:47 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:65:47 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:65:47 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> DeepRecursiveFunction<T, R>.invoke(value: T): R
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:72:45 No value passed for parameter 'params'.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:73:19 Inapplicable candidate(s): fun onAction(action: BookDetailUiAction): Unit
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:73:47 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:73:47 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file://<project>/feature/notes/src/commonTest/kotlin/com/example/feature/notes/readinglog/presentation/detail/HiddenT2Test.kt:73:47 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> DeepRecursiveFunction<T, R>.invoke(value: T): R
+
+> Task :composeApp:compileKotlinJvm
+
+[Incubating] Problems report is available at: file://<project>/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':feature:notes:compileTestKotlinJvm' (registered by plugin 'composekit.kmp.library').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 10s
+60 actionable tasks: 37 executed, 23 up-to-date
+Configuration cache entry stored.

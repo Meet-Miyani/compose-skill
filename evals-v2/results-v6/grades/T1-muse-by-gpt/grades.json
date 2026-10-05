@@ -1,0 +1,26 @@
+{
+  "A": {
+    "1": {"pass": false, "why": "Collecting the stream and replacing the loading and error UI changes behavior; no hidden test result is shown."},
+    "2": {"pass": true, "why": "The check output shows :feature:notes:jvmTest completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff changes only reading stats contract, ViewModel, Route, and Screen files."},
+    "4": {"pass": false, "why": "The Screen adds a Retry button and the contract adds a retry action."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, updates its state through updateState, and uses launchGuarded for errors."},
+    "6": {"pass": true, "why": "A separate Route uses collectAsStateWithLifecycle and passes state to a stateless Screen."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "The diff retains first-emission loading, the finished-page sum, and the existing loading and total text; checks succeed."},
+    "2": {"pass": true, "why": "The check output shows :feature:notes:jvmTest completed with BUILD SUCCESSFUL."},
+    "3": {"pass": true, "why": "The diff is confined to reading stats contract, ViewModel, Route, and Screen files."},
+    "4": {"pass": true, "why": "The diff adds no control, screen, navigation, persistence, or feature."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses updateState and launchGuarded, and has no manual try/catch."},
+    "6": {"pass": true, "why": "The separate Route collects state with collectAsStateWithLifecycle and renders a stateless Screen."}
+  },
+  "C": {
+    "1": {"pass": false, "why": "Collecting later stream emissions and changing loading and error rendering changes behavior; no hidden test result is shown."},
+    "2": {"pass": true, "why": "The check output shows :feature:notes:jvmTest completed with BUILD SUCCESSFUL."},
+    "3": {"pass": false, "why": "The diff also rewrites ReadingStatsKey formatting and documentation, unrelated to the stats presentation change."},
+    "4": {"pass": false, "why": "The Screen adds a Retry button and the contract adds a retry action."},
+    "5": {"pass": true, "why": "The ViewModel extends BaseViewModel, uses updateState and launchGuarded, and has no manual try/catch."},
+    "6": {"pass": true, "why": "The separate Route collects state with collectAsStateWithLifecycle and passes it to a stateless Screen."}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "A": {
+    "1": {"pass": true, "why": "Identifies the empty error handler and explains that a failed read appears as zero pages without an error in state."},
+    "2": {"pass": true, "why": "Says repeated Load actions add collectors with no active-job check."},
+    "3": {"pass": true, "why": "Places the dispatcher suggestion among later improvements, not blocking findings."},
+    "4": {"pass": true, "why": "Does not treat the helper's implicit return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty."},
+    "6": {"pass": true, "why": "Separates blocking, later improvements, and a Fine as is section."},
+    "7": {"pass": true, "why": "Proposes an active statsJob guard like BookListViewModel.observeBooks."}
+  },
+  "B": {
+    "1": {"pass": true, "why": "Explains that the empty handler hides a storage failure and leaves totalPages at its zero default with no error state."},
+    "2": {"pass": true, "why": "Says every Load adds an unguarded stream collector that can pile up."},
+    "3": {"pass": true, "why": "Discusses the dispatcher hop only under Worth doing later."},
+    "4": {"pass": true, "why": "Does not treat the helper's implicit return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty; the corrected file appears only in the message."},
+    "6": {"pass": true, "why": "Uses distinct Blocking, Worth doing later, and Fine as is sections."},
+    "7": {"pass": true, "why": "Proposes keeping a Job and returning while it is active, as the book list does."}
+  },
+  "C": {
+    "1": {"pass": true, "why": "Identifies the empty error handler and says a storage failure leaves zero stats with no indication, recommending error state."},
+    "2": {"pass": true, "why": "Says each Load starts another collector that recomputes and writes the same state."},
+    "3": {"pass": true, "why": "Lists the dispatcher hop under Should fix rather than Must fix."},
+    "4": {"pass": true, "why": "Does not treat the helper's implicit return type as blocking."},
+    "5": {"pass": true, "why": "The project diff is empty; the suggested code appears only in the message."},
+    "6": {"pass": true, "why": "Separates Must fix, Should fix, and Nits, and explicitly says unfinished integration is fine if more commits are coming."},
+    "7": {"pass": true, "why": "Proposes a streamJob active guard modeled on BookListViewModel.observeBooks."}
+  }
+}

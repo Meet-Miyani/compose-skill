@@ -1,0 +1,33 @@
+--- HiddenT2Test.kt (original)
++++ HiddenT2Test.kt (adapted)
+@@ -53,24 +53,24 @@
+ 
+     @Test fun `loads the requested book among several`() = runTest(scheduler) {
+         val repo = FakeBooks().apply { seed(shelf) }
+-        val viewModel = BookDetailViewModel(repo)
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(42L))
++        val viewModel = BookDetailViewModel(repo, BookDetailParams(42L))
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted)
+         advanceUntilIdle()
+         assertEquals(shelf[1], awaitValue({ viewModel.state.value.book }, shelf[1]))
+     }
+ 
+     @Test fun `loads a different requested book`() = runTest(scheduler) {
+         val repo = FakeBooks().apply { seed(shelf) }
+-        val viewModel = BookDetailViewModel(repo)
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(7L))
++        val viewModel = BookDetailViewModel(repo, BookDetailParams(7L))
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted)
+         advanceUntilIdle()
+         assertEquals(shelf[2], awaitValue({ viewModel.state.value.book }, shelf[2]))
+     }
+ 
+     @Test fun `unknown id shows no book`() = runTest(scheduler) {
+         val repo = FakeBooks().apply { seed(shelf) }
+-        val viewModel = BookDetailViewModel(repo)
+-        viewModel.onAction(BookDetailUiAction.OnScreenStarted(99L))
++        val viewModel = BookDetailViewModel(repo, BookDetailParams(99L))
++        viewModel.onAction(BookDetailUiAction.OnScreenStarted)
+         advanceUntilIdle()
+         assertNull(viewModel.state.value.book)
+     }
