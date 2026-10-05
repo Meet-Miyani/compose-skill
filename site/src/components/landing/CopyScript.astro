@@ -1,0 +1,41 @@
+---
+/**
+ * Progressive enhancement for the landing page's copy buttons.
+ *
+ * Every `button[data-copy]` ships with `hidden`: without script (or without the
+ * async clipboard API) it would be a control that does nothing, and DESIGN.md's
+ * rule is that such controls do not exist in the markup. This script reveals
+ * each button, copies its `data-copy` text on click, swaps the icon to a check
+ * for 1.6 s (the motion spec's "Copied" move), and announces the copy through
+ * a polite live region.
+ */
+---
+
+<span class="sr-only" aria-live="polite" data-copy-status></span>
+
+<script>
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+  const timers = new WeakMap<HTMLElement, number>();
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-copy]')) {
+    if (!navigator.clipboard?.writeText) continue;
+    button.hidden = false;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? '');
+      } catch {
+        return;
+      }
+      button.dataset.copied = '';
+      if (status) status.textContent = 'Copied to the clipboard';
+      window.clearTimeout(timers.get(button));
+      timers.set(
+        button,
+        window.setTimeout(() => {
+          delete button.dataset.copied;
+          if (status) status.textContent = '';
+        }, 1600)
+      );
+    });
+  }
+</script>

@@ -1,0 +1,57 @@
+---
+title: Compose skill for GitHub Copilot
+description: 'Install the Compose skill for GitHub Copilot with npx skills or gh skill: seven agent skills for Jetpack Compose and Compose Multiplatform code.'
+sidebar:
+  label: GitHub Copilot
+---
+
+Compose Kit is a set of seven agent skills for Jetpack Compose and Compose Multiplatform that GitHub Copilot can load. Install all seven: `compose` is the entry point, and it hands each task to the other six.
+
+Agent id: `github-copilot`.
+
+| Scope | Where the skills go |
+|---|---|
+| This project | `.agents/skills/` |
+| Global, every project | `~/.copilot/skills/` |
+
+## npx skills
+
+Needs Node 22.20+.
+
+```sh
+# This project only (run it in the repo root), into .agents/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a github-copilot
+
+# Globally, for every project, into ~/.copilot/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a github-copilot -g
+```
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. `--agent github-copilot` is also what a non-interactive run picks when `--agent` is left out, but pass it anyway so the command says what it does.
+
+```sh
+# This project only
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent github-copilot --scope project
+done
+
+# Globally
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent github-copilot --scope user
+done
+```
+
+## Point Copilot at it
+
+Add this line to the project's `AGENTS.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first.
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from `.agents/skills/` or `~/.copilot/skills/`, then install with any option above. The old CLI's `update` can't fetch v6.
+
+See also: [all install options](/install/), [what each skill owns](/skills/).

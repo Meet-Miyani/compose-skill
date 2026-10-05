@@ -1,0 +1,57 @@
+---
+title: Compose skill for OpenCode
+description: 'Install the Compose skill for OpenCode with npx skills or gh skill: seven agent skills for Jetpack Compose and Compose Multiplatform, per project or global.'
+sidebar:
+  label: OpenCode
+---
+
+Compose Kit is a set of seven agent skills for Jetpack Compose and Compose Multiplatform that OpenCode loads through its own `skill` tool. Install all seven: `compose` is the entry point, and it hands each task to the other six. In the held-out v5 test, OpenCode ran Muse Spark 1.3 as an add-on outside the main panel, with the kit in `.agents/skills/` plus `AGENTS.md`; it showed no lift ([results](/results/)).
+
+Agent id: `opencode`.
+
+| Scope | Where the skills go |
+|---|---|
+| This project | `.agents/skills/` |
+| Global, every project | `~/.config/opencode/skills/` |
+
+## npx skills
+
+Needs Node 22.20+.
+
+```sh
+# This project only (run it in the repo root), into .agents/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a opencode
+
+# Globally, for every project, into ~/.config/opencode/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a opencode -g
+```
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent opencode`: without it, a non-interactive run installs for GitHub Copilot.
+
+```sh
+# This project only
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent opencode --scope project
+done
+
+# Globally
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent opencode --scope user
+done
+```
+
+## Point OpenCode at it
+
+Add this line to the project's `AGENTS.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first.
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from `.agents/skills/` or `~/.config/opencode/skills/`, then install with any option above. The old CLI's `update` can't fetch v6.
+
+See also: [all install options](/install/), [what each skill owns](/skills/).

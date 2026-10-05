@@ -1,0 +1,80 @@
+---
+/**
+ * Starlight `Header` override, registered in astro.config.mjs.
+ *
+ * One component, two arrangements (tokens.css, "chrome"):
+ *   - landing page — wordmark and the four section links on the left, search
+ *     and a "Star on GitHub" button on the right, all on the page's column;
+ *   - docs pages — search beside the wordmark, the links and GitHub as quiet
+ *     text on the right.
+ *
+ * DOM order is the reading order in both: wordmark, links, search, GitHub,
+ * theme. The docs arrangement only moves search visually, with `order`.
+ *
+ * `.right-group` is hidden below 50rem, where Starlight's own mobile menu
+ * carries the theme switch.
+ */
+import config from 'virtual:starlight/user-config';
+import Search from 'virtual:starlight/components/Search';
+import SiteTitle from 'virtual:starlight/components/SiteTitle';
+import ThemeSelect from 'virtual:starlight/components/ThemeSelect';
+import { repoUrl } from '../data/site';
+
+const shouldRenderSearch =
+  config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
+
+const links = [
+  { label: 'Install', href: '/install/' },
+  { label: 'Skills', href: '/skills/' },
+  { label: 'Results', href: '/results/' },
+  { label: 'Roadmap', href: '/roadmap/' },
+];
+const current = Astro.url.pathname;
+---
+
+<div class="kit-header">
+  <SiteTitle />
+  <nav class="kit-header__nav" aria-label="Primary">
+    {
+      links.map((link) => (
+        <a href={link.href} aria-current={current.startsWith(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+  <div class="kit-header__search print:hidden">{shouldRenderSearch && <Search />}</div>
+  {
+    /* Phone width, landing page only: the page links in a disclosure. Docs
+       pages already have Starlight's menu button, which holds the sidebar. */
+  }
+  <details class="kit-header__menu print:hidden">
+    <summary aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16M4 16h16"></path></svg>
+    </summary>
+    <nav class="kit-header__menu-panel" aria-label="Menu">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+      <a href={repoUrl}>Star on GitHub</a>
+    </nav>
+  </details>
+  <div class="right-group print:hidden">
+    <a class="kit-header__github" href={repoUrl}>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        ><path
+          d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"
+        ></path></svg
+      >
+      Star on GitHub
+    </a>
+    <ThemeSelect />
+  </div>
+</div>

@@ -1,0 +1,16 @@
+---
+/**
+ * The README's "How it works" flowchart, pre-rendered from
+ * src/diagrams/routing.mmd by `npm run diagrams` and inlined here so
+ * src/styles/mermaid.css can re-tint it for the dark theme.
+ */
+import svg from '../diagrams/routing.svg?raw';
+---
+
+<figure class="kit-figure kit-figure--diagram">
+  <Fragment set:html={svg} />
+  <figcaption>
+    Routing, from the README: the <code>compose</code> entry tree classifies the task, finds the areas it touches,
+    and loads one reference file per affected area.
+  </figcaption>
+</figure>

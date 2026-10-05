@@ -4,11 +4,16 @@ Candidate `skills-v2/` at `5cf2763`. 5 models × 8 tasks × 3 arms = 120 agentic
 graded blind by the two vendors other than its own; an item passes only when both graders pass it. Rules are in
 `evals-v2/method/preregistration-v5.md` ("Plan step 9"). Full table: `score-output.txt`.
 
+> **Erratum (2026-10-01):** the two review tasks, T6 and T7, had flaws the moderator missed when sealing them.
+> T6 rubric item 3 was wrong, and both setups labelled their planted items in code comments. No pre-registered rule
+> outcome changes. The T6 "review proportionality" finding below is withdrawn, and Opus's +9.3 lift depends on the
+> review tasks. Details at the end ("Erratum").
+
 ## Scores (both graders agree; % of rubric items)
 
 | Model | No kit | Generic prompt | Kit | Kit − no kit | `[eng]` no kit → kit | `[kit]` no kit → kit |
 |---|---|---|---|---|---|---|
-| Sonnet 5 | 55.8 | 60.5 | **74.4** | **+18.6** | 66.7 → 77.8 | 37.5 → 68.8 |
+| Sonnet 5.5 | 55.8 | 60.5 | **74.4** | **+18.6** | 66.7 → 77.8 | 37.5 → 68.8 |
 | Opus | 65.1 | 62.8 | **74.4** | **+9.3** | 77.8 → 77.8 | 43.8 → 68.8 |
 | GPT-6-Luna | 65.1 | 60.5 | 67.4 | +2.3 | **77.8 → 66.7** | 43.8 → 68.8 |
 | GPT-6-Sol | 72.1 | 74.4 | 76.7 | +4.6 | 85.2 → 81.5 | 50.0 → 68.8 |
@@ -32,7 +37,7 @@ waiting to lock`). Re-run cleanly with `--no-daemon` on 2026-10-01, all three bu
 Graders saw those failed checks, so Sol's frozen kit score is, if anything, slightly understated (T8 #2 "existing
 tests pass"). No grade was changed, and no verdict depends on these three.
 
-**Outcome (pre-registered):** rules 1-3 hold for 4 of 5 models. **Release as a preview, naming Sonnet 5, Opus,
+**Outcome (pre-registered):** rules 1-3 hold for 4 of 5 models. **Release as a preview, naming Sonnet 5.5, Opus,
 GPT-6-Sol and Gemini 3.8 Flash; not GPT-6-Luna.**
 
 Claims allowed by rules 4-5:
@@ -49,8 +54,9 @@ Claims allowed by rules 4-5:
   lives, navigation results, work lifetime).
 - **Hurts: T8 "conform to conventions"** (Luna −3, Opus −2, Sol −2, Muse −1). With the kit, models restructure too
   much: behaviour changed, tests broken, unrelated code rewritten.
-- **Hurts: T6 review proportionality** (Sonnet, Sol and Flash lost "does not call X blocking"). The kit's rules
-  still leak into review severity (V4-F4 persists).
+- ~~**Hurts: T6 review proportionality** (Sonnet, Sol and Flash lost "does not call X blocking"). The kit's rules
+  still leak into review severity (V4-F4 persists).~~ **Withdrawn (see Erratum):** most of this came from T6 item 3,
+  which was invalid. What remains is one model losing T6 item 4 (the hardcoded time format).
 - **Muse (add-on):** no lift; it lost 4 `[eng]` items (T1 path storage, T2 picker, T8 behaviour) and gained 1.
   Tuning-bias caveat V4-Q1 does not apply in Muse's favour here.
 
@@ -69,7 +75,7 @@ Upper bound: the full size of every kit file opened.
 | Model | Max per task | Tasks over 20k | Loaded `compose` first |
 |---|---|---|---|
 | Opus | 9.9k | 0/8 | 8/8 |
-| Sonnet 5 | 14.0k | 0/8 | 8/8 |
+| Sonnet 5.5 | 14.0k | 0/8 | 8/8 |
 | GPT-6-Luna | 18.3k | 0/8 | 8/8 |
 | GPT-6-Sol | 26.4k | 3/8 (T1-T3, new features) | 8/8 |
 | Gemini 3.8 Flash | 26.5k | 2/8 (T1-T2, new features) | 8/8 |
@@ -77,3 +83,50 @@ Upper bound: the full size of every kit file opened.
 
 Every panel model entered through the `compose` tree on every task. Reviews and bug fixes stayed at 1-13k. New
 features exceed 20k for the models that read beyond the tree (Sol, Flash); Claude models stay well under.
+
+## Erratum (2026-10-01)
+
+Found after release, while preparing the v6 tasks. The moderator should have caught all three when sealing the
+tasks.
+
+1. **T6 rubric item 3 was wrong.** It said "does not call the use of a custom coroutine scope blocking", but the
+   planted code calls `GlobalScope.launch` from a click handler. That is not a custom scope, and mainstream Kotlin
+   guidance discourages `GlobalScope` (work that outlives its screen). So a review that called it blocking was
+   defensible, and the item was not a valid "fine" item. Panel results on it: no kit 4/5, generic 0/5, kit 1/5.
+2. **The T6 and T7 setups labelled their planted items in code comments:**
+   - T6: `// Real defect: touch target too small`, `// Real defect: doesn't handle denial, just assumes true`,
+     `// Suspicious hardcoded time format`, `// Suspicious use of GlobalScope`
+   - T7: `// Real defect: swallowed exception`, `// Real defect: slow old response can overwrite newer one ...`,
+     `// Suspicious empty init block`, `// Suspicious logging`
+
+   Every arm saw the same comments, so they favour no arm. But the "finds the defect" items were near ceiling
+   everywhere (14-15 of 15 panel cells per item), so they measured little, and the "Suspicious" labels primed every
+   arm to flag the fine items.
+3. **Minor: the T8 prompt said "MVI conventions",** naming the house pattern for every arm.
+
+**Effect** (frozen grades, same both-graders-agree rule; `erratum-sensitivity.txt`, reproduced by
+`method/tools/v5-sensitivity.py`; lifts are computed before rounding):
+
+| Model | Lift as published | Without T6 item 3 | Without T6 and T7 | `[eng]` change without T6 item 3 |
+|---|---|---|---|---|
+| Sonnet 5.5 | +18.6 | +21.4 | +17.2 | +15.4 |
+| Opus | +9.3 | +9.5 | **+3.4** | 0.0 |
+| GPT-6-Luna | +2.3 | +2.4 | **−3.4** | **−11.5** |
+| GPT-6-Sol | +4.7 | +7.1 | +3.4 | 0.0 |
+| Gemini 3.8 Flash | +25.6 | +28.6 | +41.4 | +34.6 |
+| *Muse (add-on)* | +2.3 | +2.4 | −6.9 | −11.5 |
+
+- **Without T6 item 3** (the correction): every pre-registered rule outcome and every claim is unchanged.
+- **Without T6 and T7** (a sensitivity check, not a correction): it also removes real house-style wins on the
+  review tasks. Sonnet and Flash keep claimable lifts. **Opus's lift drops below 8 points**, so the +9.3 depends on
+  the review tasks. Luna, already excluded, would also fail rule 1. With 8 tasks, differences under ~8 points
+  were already called noise (Limits).
+
+**Model label (corrected 2026-10-01):** the v5 Claude model was published as "Sonnet 5". The run logs show that
+all 24 of its cells ran `claude-sonnet-5-5` (Sonnet 5.5), and all 24 Opus cells ran `claude-opus-5-5`. The `sonnet`
+alias already resolved to Sonnet 5.5 when v5 ran; the pre-registration's note that it meant Sonnet 5 was out of date.
+Only the label changes; every number stands.
+
+**Changes for v6:** the task gate now also lints for labelling comments, and the moderator checks every rubric item
+against the planted code before sealing. Both are pre-registered with the v6 test.
+

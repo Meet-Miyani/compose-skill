@@ -169,3 +169,9 @@ the four models.** Claimable lifts (≥8): Sonnet +18.6, Opus +9.3, Flash +25.6.
 ≥8): Sonnet and Flash only. The kit helps most on the feature tasks (the round-7 choice trees) and hurts on
 conforming existing code and on review proportionality. Three kit-arm check failures were harness artifacts
 (Codex sandbox daemon locks), confirmed by clean re-runs; no verdict depends on them. **Step 9 closed.**
+
+**Correction (2026-10-01, after the results):** the run logs show that all 24 v5 panel cells for the Claude model
+ran `claude-sonnet-5-5` (Sonnet 5.5), and all 24 Opus cells ran `claude-opus-5-5`. By the time v5 ran, the
+`sonnet` alias resolved to Sonnet 5.5. So "Sonnet 5" in the panel line and in the summary above should read
+Sonnet 5.5. The earlier pilot rows are left as written.
+

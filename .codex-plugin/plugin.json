@@ -1,6 +1,21 @@
 {
   "name": "compose-kit",
   "version": "6.0.0-preview.1",
-  "description": "Seven skills for Jetpack Compose and Compose Multiplatform",
-  "skills": "./skills/"
+  "description": "Compose skill for AI coding agents: seven skills for Jetpack Compose and Compose Multiplatform (MVI, Koin, Navigation 3, Ktor, Room)",
+  "skills": "./skills/",
+  "homepage": "https://compose.avinya.dev",
+  "repository": "https://github.com/Meet-Miyani/compose-skill",
+  "license": "MIT",
+  "keywords": [
+    "compose-skill",
+    "jetpack-compose",
+    "compose-multiplatform",
+    "kotlin-multiplatform",
+    "kmp",
+    "android",
+    "agent-skills",
+    "mvi",
+    "koin",
+    "navigation-3"
+  ]
 }

@@ -1,0 +1,102 @@
+---
+title: Install the Compose skill for any AI coding agent
+description: 'Install Compose Kit, the Compose skill for AI coding agents, with npx skills, gh skill, or the Claude Code and Codex plugins: per project or globally.'
+sidebar:
+  label: Install overview
+---
+
+Install all seven skills. `compose` is the entry point, and it hands each task to the other six.
+
+Every option below can install for **one project** (lives in the repo, so your team gets it too) or **globally** (for you, in every project on your machine).
+
+Want the exact commands for one agent? Pick it: [Claude Code](/install/claude-code/), [Codex](/install/codex/), [Cursor](/install/cursor/), [GitHub Copilot](/install/github-copilot/), [Gemini CLI and Antigravity](/install/gemini-cli-and-antigravity/), [OpenCode](/install/opencode/).
+
+## npx skills
+
+Needs Node 22.20+. Works with Claude Code, Codex, Cursor, OpenCode, Copilot, Gemini CLI, Antigravity and 70+ other agents.
+
+```sh
+# This project only (run it in the repo root)
+npx skills add Meet-Miyani/compose-skill --skill '*' -a claude-code
+
+# Globally, for every project
+npx skills add Meet-Miyani/compose-skill --skill '*' -a claude-code -g
+```
+
+Swap `claude-code` for your agent: `codex`, `cursor`, `opencode`, `github-copilot`, `gemini-cli`, `antigravity`. Repeat `-a` to install for several at once. Leave it out and you get an interactive picker.
+
+| Agent | This project | Global |
+|---|---|---|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Codex, Cursor, OpenCode, Copilot, Gemini CLI, Antigravity | `.agents/skills/` | the agent's own folder, e.g. `~/.codex/skills/` |
+
+The global folder for each agent:
+
+| Agent | Agent id | Global |
+|---|---|---|
+| [Claude Code](/install/claude-code/) | `claude-code` | `~/.claude/skills/` |
+| [Codex](/install/codex/) | `codex` | `~/.codex/skills/` |
+| [Cursor](/install/cursor/) | `cursor` | `~/.cursor/skills/` |
+| [GitHub Copilot](/install/github-copilot/) | `github-copilot` | `~/.copilot/skills/` |
+| [Gemini CLI](/install/gemini-cli-and-antigravity/) | `gemini-cli` | `~/.gemini/skills/` |
+| [Antigravity](/install/gemini-cli-and-antigravity/) | `antigravity` | `~/.gemini/antigravity/skills/` |
+| [OpenCode](/install/opencode/) | `opencode` | `~/.config/opencode/skills/` |
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+
+```sh
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent claude-code --scope project
+done
+```
+
+Use `--scope user` to install globally. Agent IDs: `claude-code`, `codex`, `cursor`, `opencode`, `gemini-cli`, `antigravity`, `github-copilot`.
+
+## Claude Code plugin
+
+```text
+/plugin marketplace add Meet-Miyani/compose-skill
+/plugin install compose-kit@compose-kit
+```
+
+From a terminal, the same with a scope: `user` (the default, every project), `project` (shared through the repo) or `local` (this project, just you).
+
+```sh
+claude plugin marketplace add Meet-Miyani/compose-skill
+claude plugin install compose-kit@compose-kit --scope project
+```
+
+## Codex plugin
+
+```sh
+codex plugin marketplace add Meet-Miyani/compose-skill
+codex plugin add compose-kit@compose-kit
+```
+
+Codex plugins install for your user, so they're available in every project.
+
+## Then point your agent at it
+
+Add this line to the project's `AGENTS.md` or `CLAUDE.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first.
+
+## Upgrading from v5.x
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from your agent's skills directory, then install with any option above. The old CLI's `update` can't fetch v6.
+
+## Optional: guard scripts in CI
+
+Install the guard scripts into a project to catch drift in CI:
+
+```sh
+bash <skills dir>/compose-architecture/scripts/install-guards.sh <project>
+```
+
+Installing only some of the skills isn't supported yet; skills cross-reference each other, so install all 7.

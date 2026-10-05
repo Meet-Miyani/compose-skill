@@ -1,12 +1,14 @@
 {
   "name": "compose-kit",
-  "description": "Jetpack Compose and Compose Multiplatform agent skills",
-  "owner": { "name": "Meet Miyani" },
+  "description": "Compose skill for AI coding agents: Jetpack Compose and Compose Multiplatform agent skills",
+  "owner": {
+    "name": "Meet Miyani"
+  },
   "plugins": [
     {
       "name": "compose-kit",
       "source": "./",
-      "description": "Seven skills for Jetpack Compose and Compose Multiplatform"
+      "description": "Compose skill for AI coding agents: seven skills for Jetpack Compose and Compose Multiplatform (MVI, Koin, Navigation 3, Ktor, Room)"
     }
   ]
 }

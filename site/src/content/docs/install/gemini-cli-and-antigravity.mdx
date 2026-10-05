@@ -1,0 +1,64 @@
+---
+title: Compose skill for Gemini CLI and Antigravity
+description: 'Install the Compose skill for Gemini CLI and Google Antigravity with npx skills or gh skill: agent skills for Jetpack Compose and Compose Multiplatform.'
+sidebar:
+  label: Gemini CLI and Antigravity
+---
+
+Compose Kit is a set of seven agent skills for Jetpack Compose and Compose Multiplatform. Gemini CLI and Antigravity are two separate install targets with their own agent ids; install for one or both. Install all seven skills: `compose` is the entry point, and it hands each task to the other six.
+
+In the held-out v5 test, Antigravity ran Gemini 3.8 Flash, the model with the largest lift: 51.2% without the kit, 76.7% with it (+25.6). See the [results](/results/).
+
+| Agent | Agent id | This project | Global |
+|---|---|---|---|
+| Gemini CLI | `gemini-cli` | `.agents/skills/` | `~/.gemini/skills/` |
+| Antigravity | `antigravity` | `.agents/skills/` | `~/.gemini/antigravity/skills/` |
+
+## npx skills
+
+Needs Node 22.20+. Repeat `-a` to install for both at once.
+
+```sh
+# This project only (run it in the repo root), into .agents/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a gemini-cli -a antigravity
+
+# Globally, for every project, into ~/.gemini/skills/ and ~/.gemini/antigravity/skills/
+npx skills add Meet-Miyani/compose-skill --skill '*' -a gemini-cli -a antigravity -g
+```
+
+Only one of them? Keep just that `-a`:
+
+```sh
+npx skills add Meet-Miyani/compose-skill --skill '*' -a gemini-cli
+npx skills add Meet-Miyani/compose-skill --skill '*' -a antigravity
+```
+
+## gh skill
+
+Needs GitHub CLI 2.90+. Pass `--pin`: without it, `gh skill` takes the latest *stable* release, which is still the old v5.1.0. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+
+```sh
+# Gemini CLI, this project only (use --scope user to install globally)
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent gemini-cli --scope project
+done
+
+# Antigravity, this project only (use --scope user to install globally)
+for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
+  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.0.0-preview.1 --agent antigravity --scope project
+done
+```
+
+## Point the agent at it
+
+Add this line to the project's `AGENTS.md`:
+
+```text
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+```
+
+The skills also trigger on their own; the line just makes sure the entry tree loads first. For the v5 test, the Antigravity setup was `.agents/skills/` plus this line in `AGENTS.md` and `GEMINI.md`.
+
+**Coming from the old single `compose` skill (v5.x or the `composekit` CLI)?** Delete the old `compose` folder from your agent's skills directory, then install with any option above. The old CLI's `update` can't fetch v6.
+
+See also: [all install options](/install/), [what each skill owns](/skills/).

@@ -1,0 +1,29 @@
+---
+/**
+ * Starlight `Footer` override, registered in astro.config.mjs.
+ *
+ * Docs pages keep Starlight's footer (edit link, last updated, pagination)
+ * plus the Avinya studio line. The landing page draws its own footer as the
+ * last section of the page.
+ *
+ * Motion.astro (the site's one motion script) is mounted here because this
+ * component renders on every page, the landing page included.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+import StudioLine from './StudioLine.astro';
+import Motion from './Motion.astro';
+
+const isLanding = Boolean(Astro.locals.starlightRoute.entry.data.hero);
+---
+
+<Motion />
+{
+  !isLanding && (
+    <>
+      <Default />
+      <div class="kit-docs-footer">
+        <StudioLine />
+      </div>
+    </>
+  )
+}

@@ -1,0 +1,95 @@
+---
+/**
+ * The site's motion, as one small script. Calm and one-shot, after the
+ * avinya.dev "precision instrument" rule: 150-600 ms, ease-out, no bounce,
+ * no parallax, no loops. Every rule lives in tokens.css under "motion".
+ *
+ * Progressive enhancement only. Nothing is hidden in the HTML: the script
+ * arms an effect (puts the element in its start state) only when motion is
+ * allowed and IntersectionObserver exists, and only for elements that are not
+ * yet on screen, so nothing visible blinks out. Under
+ * `prefers-reduced-motion: reduce` it does nothing at all, and the page is
+ * its final state from the first paint.
+ *
+ *   - scroll reveal: landing sections, cards and docs figures fade up once;
+ *   - count-up: the four headline numbers count from 0 once when visible. The
+ *     real number stays in the HTML (and in place, invisible, for sizing); a
+ *     tabular-nums overlay shows the count, so nothing changes width;
+ *   - lift chart: connectors draw from the no-kit dot to the with-kit dot, then
+ *     the with-kit dots and the lift labels fade in, once.
+ */
+---
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduce && 'IntersectionObserver' in window) {
+    const below = (el: Element) => el.getBoundingClientRect().top > window.innerHeight * 0.92;
+
+    const once = (targets: Element[], onEnter: (el: Element) => void, threshold = 0.15) => {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            io.unobserve(entry.target);
+            onEnter(entry.target);
+          }
+        },
+        { threshold, rootMargin: '0px 0px -6% 0px' }
+      );
+      targets.forEach((t) => io.observe(t));
+    };
+
+    // Scroll reveal. Children of a grid get a stagger index.
+    const reveal = [
+      ...document.querySelectorAll(
+        '.landing-section__head, .landing-figure, .landing-skills li, .landing-cta, .landing-footer, .kit-figure'
+      ),
+      ...document.querySelectorAll('.landing-grid > li'),
+    ].filter(below);
+    for (const el of reveal) {
+      const parent = el.parentElement;
+      if (parent?.classList.contains('landing-grid') || parent?.classList.contains('landing-skills')) {
+        (el as HTMLElement).style.setProperty('--i', String([...parent.children].indexOf(el) % 6));
+      }
+      el.classList.add('kit-reveal');
+    }
+    once(reveal, (el) => el.classList.add('is-in'));
+
+    // Lift chart: armed only if it starts off screen.
+    const charts = [...document.querySelectorAll('.kit-chart-anim')].filter(below);
+    charts.forEach((c) => c.classList.add('is-armed'));
+    once(charts, (el) => el.classList.add('is-in'), 0.35);
+
+    // Count-up. Formats like "+25.6", "120", "2".
+    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+    const countUp = (el: Element) => {
+      const span = el as HTMLElement;
+      const final = span.textContent?.trim() ?? '';
+      const m = final.match(/^([+-]?)(\d+)(?:\.(\d+))?$/);
+      if (!m) return;
+      const [, sign, whole, frac = ''] = m;
+      const target = Number(`${whole}.${frac || '0'}`);
+      if (target < 10) return; // a single digit has nothing to count through
+      const live = document.createElement('span');
+      live.className = 'landing-count__live';
+      live.setAttribute('aria-hidden', 'true');
+      span.after(live);
+      span.parentElement?.classList.add('is-counting');
+      const start = performance.now();
+      const duration = 600;
+      const frame = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        live.textContent = sign + (target * ease(t)).toFixed(frac.length);
+        if (t < 1) requestAnimationFrame(frame);
+        else {
+          live.remove();
+          span.parentElement?.classList.remove('is-counting');
+        }
+      };
+      live.textContent = sign + (0).toFixed(frac.length);
+      requestAnimationFrame(frame);
+    };
+    once([...document.querySelectorAll('[data-count]')], countUp, 0.6);
+  }
+</script>
