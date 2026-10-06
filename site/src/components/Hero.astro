@@ -11,7 +11,7 @@
  *     README;
  *   - the copy buttons ship `hidden` and CopyScript reveals them.
  */
-import { agents, headline, license, quickInstall, repoUrl, skills, version } from '../data/site';
+import { achieved, agents, headline, license, quickInstall, repoSlug, repoUrl, skills, version } from '../data/site';
 import CopyScript from './landing/CopyScript.astro';
 import ThemedChart from './ThemedChart.astro';
 import AgentWindow from './AgentWindow.astro';
@@ -23,6 +23,13 @@ const { title = data.title, tagline } = data.hero || {};
 
 const githubIcon =
   'M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21';
+
+// Bodies in site.ts may link to a page of this site with a markdown link whose target starts with a slash.
+const achievedHtml = (body: string) => body.replace(/\[([^\]]+)\]\((\/[^)]*)\)/g, '<a href="$2">$1</a>');
+
+// Star history image (third-party, loaded lazily; the site sets no CSP).
+const starHistory = `https://api.star-history.com/svg?repos=${repoSlug}&type=Date`;
+const starHistoryPage = `https://star-history.com/#${repoSlug}&Date`;
 
 const why = [
   {
@@ -46,7 +53,7 @@ const why = [
 const next = [
   { href: '/install/', label: 'Install', body: 'Project or global, for every agent and channel.' },
   { href: '/skills/', label: 'Skills', body: 'What each of the seven skills owns, and how routing works.' },
-  { href: '/results/', label: 'Results', body: 'v6.1 and held-out v5: five models, task types, limits, erratum.' },
+  { href: '/results/', label: 'Results', body: 'v6.1 on seven models, task types, the earlier held-out v5 test, limits, erratum.' },
   { href: '/how-we-test/', label: 'How we test', body: 'Sealed tasks, real agent CLIs, blind cross-vendor grading.' },
   { href: '/roadmap/', label: 'Roadmap', body: 'v6.1 released, the cheap-model add-ons, known issues.' },
 ];
@@ -63,7 +70,7 @@ const next = [
       {tagline && <p class="landing-hero__pitch" set:html={tagline} />}
       <p class="landing-hero__sub">
         Compose Kit is seven agent skills for Jetpack Compose and Compose Multiplatform. One consistent house style,
-        measured on five models in real agent CLIs.
+        measured on seven models in real agent CLIs.
       </p>
 
       <div class="landing-install">
@@ -95,7 +102,7 @@ const next = [
     </div>
   </section>
 
-  <section class="landing-stats" aria-label="Held-out v5 in numbers">
+  <section class="landing-stats" aria-label="v6 test in numbers">
     <dl>
       {
         headline.map((item) => (
@@ -111,30 +118,49 @@ const next = [
   <section class="landing-section" aria-labelledby="landing-chart-title">
     <div class="landing-section__head">
       <p class="landing-eyebrow">01 · Evidence</p>
-      <h2 id="landing-chart-title">With the kit vs without</h2>
+      <h2 id="landing-chart-title">With the v6.1 kit vs without</h2>
       <p class="landing-section__lede">
-        Held-out v5: five models got 8 tasks they had never seen, in a fresh app, inside their own agent CLIs. Each
-        task ran with no kit, with a short generic prompt, and with the kit: 120 runs, graded blind by two models from
-        the other vendors. The v6.1 results are on the <a href="/results/">results page</a>.
+        The v6 test: 5 panel models plus two cheap add-on models got 6 new tasks, in the real agent CLIs, with no kit,
+        the v6.0 kit and the v6.1 kit: 90 + 36 runs, graded blind, and an item passes only when both graders pass it.
+        Task types, limits and the earlier held-out v5 test are on the <a href="/results/">results page</a>.
       </p>
     </div>
     <div class="landing-figure">
       <figure class="chart-block">
         <ThemedChart
-          name="v5-kit-lift"
-          alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)."
+          name="v6-models"
+          alt="v6 test: rubric score without the kit, with the v6.0 kit and with the v6.1 kit, as percent of 39 items, for seven models, sorted by lift. Gemini 3.8 Flash 56.4%, 84.6%, 87.2% (+30.8). GPT-6-Luna 71.8%, 89.7%, 94.9% (+23.1). DeepSeek V4.1 Flash 82.1%, 89.7%, 97.4% (+15.4). DeepSeek V4 Pro 74.4%, 76.9%, 87.2% (+12.8). GPT-6-Sol 76.9%, 87.2%, 87.2% (+10.3). Sonnet 5.5 79.5%, 89.7%, 87.2% (+7.7). Muse Spark 1.3 69.2%, 69.2%, 74.4% (+5.1). The two DeepSeek models are add-ons graded by Claude and GPT, so compare across groups with care."
         />
         <figcaption>
-          Opus 5.5's +9.3 depends on two review tasks that had flawed setups (+3.4 without them). The Claude model was
-          Sonnet 5.5. <a href="/results/#erratum">Read the erratum</a> or <a href="/results/">the full results</a>.
+          The two DeepSeek models are add-ons, graded by Claude and GPT, while the panel's Claude and GPT answers also
+          had Gemini as a grader: compare across the two groups with care. <a href="/results/">The full results</a>,
+          including the <a href="/results/#erratum">held-out v5 erratum</a>.
         </figcaption>
       </figure>
     </div>
   </section>
 
+  <section class="landing-section" aria-labelledby="landing-achieved-title">
+    <div class="landing-section__head">
+      <p class="landing-eyebrow">02 · Progress</p>
+      <h2 id="landing-achieved-title">What we achieved</h2>
+      <p class="landing-section__lede">Facts only, from the first held-out test to the cheap-model add-ons.</p>
+    </div>
+    <ul class="landing-skills landing-achieved">
+      {
+        achieved.map((item) => (
+          <li>
+            <code>{item.label}</code>
+            <span set:html={achievedHtml(item.body)} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
   <section class="landing-section" aria-labelledby="landing-why-title">
     <div class="landing-section__head">
-      <p class="landing-eyebrow">02 · Why</p>
+      <p class="landing-eyebrow">03 · Why</p>
       <h2 id="landing-why-title">Compose that compiles, then drifts</h2>
       <p class="landing-section__lede">
         AI agents write Compose that compiles and then drifts: state ends up in the wrong place, every screen gets
@@ -157,7 +183,7 @@ const next = [
 
   <section class="landing-section" aria-labelledby="landing-agents-title">
     <div class="landing-section__head">
-      <p class="landing-eyebrow">03 · Install</p>
+      <p class="landing-eyebrow">04 · Install</p>
       <h2 id="landing-agents-title">A Compose skill for your agent</h2>
       <p class="landing-section__lede">
         Install all seven skills, for one project or globally. Each page has the exact commands and paths for that
@@ -184,7 +210,7 @@ const next = [
 
   <section class="landing-section" aria-labelledby="landing-skills-title">
     <div class="landing-section__head">
-      <p class="landing-eyebrow">04 · Inside</p>
+      <p class="landing-eyebrow">05 · Inside</p>
       <h2 id="landing-skills-title">Seven skills, one entry tree</h2>
       <p class="landing-section__lede">
         <code>compose</code> is the entry point, and it hands each task to the other six.{' '}
@@ -205,11 +231,12 @@ const next = [
 
   <section class="landing-section" aria-labelledby="landing-next-title">
     <div class="landing-section__head">
-      <p class="landing-eyebrow">05 · Status</p>
+      <p class="landing-eyebrow">06 · Status</p>
       <h2 id="landing-next-title">Where it stands</h2>
       <p class="landing-section__lede">
         v6.1.0 is released as the stable version (2026-10-05). The v6.1 A/B (v6.0 vs the v6.1 fixes vs no kit, on new
-        tasks) passed every pre-registered rule. Next: cheap-model add-ons, then the journey page.
+        tasks) passed every pre-registered rule, and the cheap-model add-ons (DeepSeek V4.1 Flash and V4 Pro) are
+        done. Next: the journey page.
       </p>
     </div>
     <ul class="landing-grid landing-grid--5">
@@ -239,6 +266,28 @@ const next = [
       </a>
       <a class="landing-button" href="/install/claude-code/"><span>Compose skill for Claude Code</span></a>
     </div>
+    <a class="landing-star" href={starHistoryPage}>
+      <img
+        class="landing-star__light"
+        src={starHistory}
+        alt={`Star history of ${repoSlug}`}
+        width="600"
+        height="400"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+      <img
+        class="landing-star__dark"
+        src={`${starHistory}&theme=dark`}
+        alt=""
+        width="600"
+        height="400"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+    </a>
   </section>
 
   <footer class="landing-footer">

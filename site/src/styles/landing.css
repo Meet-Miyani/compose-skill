@@ -5,8 +5,9 @@
  * one accent colour, no gradients and no drop shadows. Every colour, face and
  * radius is a --kit-* token from tokens.css.
  *
- * Page order: hero → numbers → 01 evidence (chart) → 02 why → 03 install →
- * 04 inside → 05 status → closing call to action → footer.
+ * Page order: hero → numbers → 01 evidence (chart) → 02 progress → 03 why →
+ * 04 install → 05 inside → 06 status → closing call to action (with the star
+ * history) → footer.
  */
 
 :root {
@@ -466,6 +467,13 @@
   color: var(--kit-ink-2);
 }
 
+.landing-achieved span a {
+  color: var(--kit-accent-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
 /* ----------------------------------------------------- closing and footer */
 
 .landing-cta {
@@ -484,6 +492,36 @@
   max-width: 40rem;
   margin: 0;
   color: var(--kit-ink-2);
+}
+
+/* Star history: a third-party SVG, shown in the theme that is current. The
+   light drawing is the default; tokens.css's data-theme rules swap it. */
+.landing-star {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 0.5rem;
+  border-radius: var(--kit-radius-lg);
+}
+
+.landing-star img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--kit-radius-lg);
+}
+
+.landing-star__dark {
+  display: none !important;
+}
+
+:root:not([data-theme='light']) .landing-star__light {
+  display: none !important;
+}
+
+:root:not([data-theme='light']) .landing-star__dark {
+  display: block !important;
 }
 
 .landing-footer {

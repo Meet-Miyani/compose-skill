@@ -5,8 +5,8 @@
  * shows the one that matches the current theme (`data-theme`, which follows
  * the toggle as well as the system preference).
  *
- * Inline, not <img>, so the lift chart can animate (src/components/Motion.astro):
- * at build time its connector lines, with-kit dots and lift labels get a class
+ * Inline, not <img>, so the lift charts can animate (src/components/Motion.astro):
+ * at build time their connector lines, with-kit dots and lift labels get a class
  * and a row index. Only attributes are added; no coordinate, colour or label
  * is touched, so the drawing and its data are exactly the repository's.
  */
@@ -14,9 +14,13 @@ import liftLight from '../charts/v5-kit-lift-light.svg?raw';
 import liftDark from '../charts/v5-kit-lift-dark.svg?raw';
 import contextLight from '../charts/v5-kit-context-light.svg?raw';
 import contextDark from '../charts/v5-kit-context-dark.svg?raw';
+import modelsLight from '../charts/v6-models-light.svg?raw';
+import modelsDark from '../charts/v6-models-dark.svg?raw';
+import taskTypesLight from '../charts/v6-task-types-light.svg?raw';
+import taskTypesDark from '../charts/v6-task-types-dark.svg?raw';
 
 interface Props {
-  name: 'v5-kit-lift' | 'v5-kit-context';
+  name: 'v5-kit-lift' | 'v5-kit-context' | 'v6-models' | 'v6-task-types';
   alt: string;
 }
 const { name, alt } = Astro.props;
@@ -24,6 +28,8 @@ const { name, alt } = Astro.props;
 const sources = {
   'v5-kit-lift': { light: liftLight, dark: liftDark },
   'v5-kit-context': { light: contextLight, dark: contextDark },
+  'v6-models': { light: modelsLight, dark: modelsDark },
+  'v6-task-types': { light: taskTypesLight, dark: taskTypesDark },
 };
 
 const escapeAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
@@ -53,6 +59,16 @@ function prepare(svg: string): string {
     let liftRow = 0;
     out = out.replace(/<text x="732" y="(?!78")[^"]+"/g, (m) => `<text class="chart-lift" style="--row:${liftRow++}" ${m.slice('<text '.length)}`);
   }
+  if (name === 'v6-models') {
+    // The generator already marks the connectors, with-kit dots and lift
+    // labels with the same classes; only the row index is added here.
+    const rows = new Map<string, number>();
+    out = out.replace(/class="(chart-connector|chart-kit-dot|chart-lift)"/g, (_m, cls) => {
+      const r = rows.get(cls) ?? 0;
+      rows.set(cls, r + 1);
+      return `class="${cls}" style="--row:${r}"`;
+    });
+  }
   return out;
 }
 
@@ -60,7 +76,7 @@ const light = prepare(sources[name].light);
 const dark = prepare(sources[name].dark);
 ---
 
-<div class:list={['themed-chart', name === 'v5-kit-lift' && 'kit-chart-anim']} data-chart={name}>
+<div class:list={['themed-chart', (name === 'v5-kit-lift' || name === 'v6-models') && 'kit-chart-anim']} data-chart={name}>
   <div class="themed-chart__light" set:html={light} />
   <div class="themed-chart__dark" set:html={dark} />
 </div>

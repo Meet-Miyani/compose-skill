@@ -181,6 +181,7 @@ export default defineConfig({
             '## Evidence',
             '',
             'v6.1 (5 models, 6 new tasks, 3 arms: no kit, v6.0 kit, v6.1 kit; 90 agentic runs; both graders must pass an item): items passed of 39, no kit / v6.0 / v6.1: Sonnet 5.5 31/35/34, GPT-6-Luna 28/35/37, GPT-6-Sol 30/34/34, Gemini 3.8 Flash 22/33/34, Muse Spark 1.3 27/27/29. All pre-registered rules held, so v6.1.0 is the stable release. Source of truth: evals-v2/results-v6/VERDICT.md in the repository.',
+            'v6 add-ons, reported separately (DeepSeek models through OpenCode, 36 agentic runs, graded by Claude and GPT, so compare with the panel with care): items passed of 39, no kit / v6.0 / v6.1: DeepSeek V4.1 Flash 32/35/38, DeepSeek V4 Pro 29/30/34. Source of truth: evals-v2/results-v6/ADDONS.md in the repository.',
             '',
             'Earlier test, held-out v5: 5 models, 8 never-seen tasks, 3 arms (no kit, generic prompt, kit), 120 agentic runs, graded blind by two models from other vendors; an item passes only when both pass it.',
             'Kit minus no kit: Gemini 3.8 Flash +25.6, Sonnet 5.5 +18.6, Opus 5.5 +9.3, GPT-6-Sol +4.6, GPT-6-Luna +2.3.',
