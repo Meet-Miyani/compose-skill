@@ -4,14 +4,14 @@
 
 **A Compose skill for AI coding agents: seven agent skills that make Claude Code, Codex, Cursor, Copilot and Gemini
 write better Jetpack Compose and Compose Multiplatform code.**<br>
-One consistent house style, measured on five models in real agent CLIs.
+One consistent house style, measured on seven models in real agent CLIs.
 
 [![Release](https://img.shields.io/github/v/release/Meet-Miyani/compose-skill?label=release&color=2a78d6)](https://github.com/Meet-Miyani/compose-skill/releases)
 [![CI](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/Meet-Miyani/compose-skill/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/Meet-Miyani/compose-skill?color=52514e)](LICENSE)
 [![Website](https://img.shields.io/badge/website-compose.avinya.dev-ee3a20)](https://compose.avinya.dev)
 [![Skills](https://img.shields.io/badge/skills-7-2a78d6)](#whats-inside)
-[![Held-out test](https://img.shields.io/badge/held--out%20test-120%20agentic%20runs-2a78d6)](#results-held-out-v5)
+[![v6 test](https://img.shields.io/badge/v6%20test-90%20%2B%2036%20agentic%20runs-2a78d6)](#results-v61)
 [![Guard tests](https://img.shields.io/badge/guard%20tests-90%20passing-0ca30c)](tests/skills)
 [![v6.1 A/B](https://img.shields.io/badge/v6.1%20A%2FB-stable-0ca30c)](#results-v61)
 
@@ -23,19 +23,35 @@ One consistent house style, measured on five models in real agent CLIs.
 
 <table>
 <tr>
-<td align="center" width="25%"><h2>+25.6</h2>points for<br><b>Gemini 3.8 Flash</b><br>with the kit (v5 test)</td>
-<td align="center" width="25%"><h2>+18.6</h2>points for<br><b>Sonnet 5.5</b><br>with the kit (v5 test)</td>
-<td align="center" width="25%"><h2>120</h2>agentic runs<br>on 8 never-seen tasks (v5 test)</td>
-<td align="center" width="25%"><h2>2</h2>blind graders from other vendors<br>must agree on every item</td>
+<td align="center" width="25%"><h2>+30.8</h2>points for<br><b>Gemini 3.8 Flash</b><br>with the v6.1 kit (v6 test)</td>
+<td align="center" width="25%"><h2>+23.1</h2>points for<br><b>GPT-6-Luna</b><br>with the v6.1 kit (v6 test)</td>
+<td align="center" width="25%"><h2>97.4%</h2>of rubric items for<br><b>DeepSeek V4.1 Flash</b><br>with v6.1 (cheap add-on model)</td>
+<td align="center" width="25%"><h2>90 + 36</h2>agentic runs (panel + add-ons);<br>2 blind graders must agree on every item</td>
 </tr>
 </table>
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/v5-kit-lift-dark.svg">
-    <img alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)." src="docs/assets/v5-kit-lift-light.svg" width="760">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/v6-models-dark.svg">
+    <img alt="v6 test: rubric score without the kit, with the v6.0 kit and with the v6.1 kit, as percent of 39 items, for seven models, sorted by lift. Gemini 3.8 Flash 56.4%, 84.6%, 87.2% (+30.8). GPT-6-Luna 71.8%, 89.7%, 94.9% (+23.1). DeepSeek V4.1 Flash 82.1%, 89.7%, 97.4% (+15.4). DeepSeek V4 Pro 74.4%, 76.9%, 87.2% (+12.8). GPT-6-Sol 76.9%, 87.2%, 87.2% (+10.3). Sonnet 5.5 79.5%, 89.7%, 87.2% (+7.7). Muse Spark 1.3 69.2%, 69.2%, 74.4% (+5.1). The two DeepSeek models are add-ons graded by Claude and GPT, so compare across groups with care." src="docs/assets/v6-models-light.svg" width="760">
   </picture>
 </p>
+
+## What we achieved
+
+- **Held-out v5 (120 agentic runs):** the kit lifted Gemini 3.8 Flash by +25.6 points and Sonnet 5.5 by +18.6, and
+  the test found a real flaw: on a "match our conventions" task, models restructured too much with the kit
+  ([results](#results-held-out-v5)).
+- **v6.0.0-preview.1 (2026-10-01):** seven skills, one entry tree, four install channels.
+- **Website live (2026-10-02):** [compose.avinya.dev](https://compose.avinya.dev), with install guides per agent and a
+  build check that every number on it appears in the evidence files.
+- **v6 A/B (90 agentic runs):** v6.0 vs the v6.1 fixes vs no kit. The "no new UI controls, screens or features" item
+  on conform tasks went from 2 of 10 cells (v6.0) to 8 of 10 (v6.1), and every pre-registered rule held
+  ([results](#results-v61)).
+- **v6.1.0 stable (2026-10-05):** no model scored below its own no-kit result, so it is released as stable and is the
+  GitHub "Latest" release.
+- **Cheap models (36 add-on runs):** DeepSeek V4.1 Flash went from 82.1% to 97.4% of items with v6.1, and DeepSeek
+  V4 Pro from 74.4% to 87.2% ([results](#add-ons-cheap-deepseek-models)).
 
 ## Why
 
@@ -189,6 +205,13 @@ By task type, all five models together (both graders agree):
 | Review (2 tasks, 75 items) | 78.7% | 94.7% | 94.7% |
 | New feature (2 tasks, 60 items) | 58.3% | 80.0% | 81.7% |
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/v6-task-types-dark.svg">
+    <img alt="v6 test by task type, five panel models together, percent of rubric items passed without the kit, with v6.0 and with v6.1. Conform 73.3%, 75.0%, 80.0%. Review 78.7%, 94.7%, 94.7%. New feature 58.3%, 80.0%, 81.7%." src="docs/assets/v6-task-types-light.svg" width="760">
+  </picture>
+</p>
+
 All pre-registered rules held, and no model scored below its own no-kit result, so v6.1.0 is the stable release.
 
 - **Conform over-scoping is mostly fixed.** The "no new UI controls, screens or features" item passed in 2 of 10
@@ -249,6 +272,13 @@ anything was scored.
 - **House-style items** rose for every model, from 37-50% without the kit to 56-69% with it.
 - **On engineering-only items,** Sonnet (+11.1) and Flash (+40.8) beat the generic prompt by 8+ points; for Opus,
   Sol and Luna a short generic prompt does about as well.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/v5-kit-lift-dark.svg">
+    <img alt="Held-out v5: rubric score with and without the kit. Gemini 3.8 Flash 51.2% to 76.7% (+25.6), Sonnet 5.5 55.8% to 74.4% (+18.6), Opus 5.5 65.1% to 74.4% (+9.3), GPT-6-Sol 72.1% to 76.7% (+4.6), GPT-6-Luna 65.1% to 67.4% (+2.3)." src="docs/assets/v5-kit-lift-light.svg" width="760">
+  </picture>
+</p>
 
 By task type, all five panel models together (both graders agree):
 
@@ -334,6 +364,15 @@ model, or a large change to the kit.
 
 Found a problem, or want a model benchmarked? [Open an issue](https://github.com/Meet-Miyani/compose-skill/issues).
 A reported problem is exactly what kicks off the next test round.
+
+## Star history
+
+<a href="https://star-history.com/#Meet-Miyani/compose-skill&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Meet-Miyani/compose-skill&type=Date&theme=dark">
+    <img alt="Star history of Meet-Miyani/compose-skill" src="https://api.star-history.com/svg?repos=Meet-Miyani/compose-skill&type=Date" width="600">
+  </picture>
+</a>
 
 ## License
 
