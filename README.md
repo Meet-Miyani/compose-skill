@@ -124,16 +124,21 @@ Swap `claude-code` for your agent: `codex`, `cursor`, `opencode`, `github-copilo
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex, Cursor, OpenCode, Copilot, Gemini CLI, Antigravity | `.agents/skills/` | the agent's own folder, e.g. `~/.codex/skills/` |
 
+Update later with `npx skills update`.
+
 ### gh skill
 
-Needs GitHub CLI 2.90+. `--pin v6.1.1` fixes the version; without it, `gh skill` takes the latest stable release, which
-is currently v6.1.1. Pass `--agent` too: without it, a non-interactive run installs for GitHub Copilot.
+Needs GitHub CLI 2.90+. It installs the latest stable release. Pass `--agent` too: without it, a non-interactive run
+installs for GitHub Copilot.
 
 ```sh
 for s in compose compose-architecture compose-feature compose-ui compose-data compose-project compose-platform; do
-  gh skill install Meet-Miyani/compose-skill "$s" --pin v6.1.1 --agent claude-code --scope project
+  gh skill install Meet-Miyani/compose-skill "$s" --agent claude-code --scope project
 done
 ```
+
+Update later with `gh skill update --all`. Installed with `--pin` before? Run `gh skill update --unpin --all` once:
+`gh skill update` skips pinned skills.
 
 Use `--scope user` to install globally. Agent IDs: `claude-code`, `codex`, `cursor`, `opencode`, `gemini-cli`,
 `antigravity`, `github-copilot`.
