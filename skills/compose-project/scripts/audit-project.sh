@@ -96,7 +96,19 @@ else
   echo ".composekit.conf: MISSING (run install-guards.sh)"
 fi
 if [ -x "$ROOT/scripts/composekit/run-checks.sh" ]; then
-  echo "scripts/composekit/run-checks.sh: installed"
+  # Guards installed before lib/composekit-conf.sh ran .composekit.conf
+  # as shell code; flag them so the project re-installs.
+  outdated=0
+  [ -f "$ROOT/scripts/composekit/lib/composekit-conf.sh" ] || outdated=1
+  for f in "$ROOT"/scripts/composekit/check-*.sh; do
+    [ -f "$f" ] || continue
+    grep -qF '. "$ROOT/.composekit.conf"' "$f" && outdated=1
+  done
+  if [ $outdated -eq 1 ]; then
+    echo "scripts/composekit/run-checks.sh: installed, OUTDATED (runs .composekit.conf as shell code; re-run install-guards.sh)"
+  else
+    echo "scripts/composekit/run-checks.sh: installed"
+  fi
 else
   echo "scripts/composekit/run-checks.sh: MISSING (run install-guards.sh)"
 fi
