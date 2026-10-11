@@ -304,14 +304,141 @@ case "$out" in
         pass=$((pass + 1)) ;;
 esac
 
+# composekit_load_conf: every accepted line form parses; every unusable
+# line warns on stderr and keeps the caller's value.
+LOADER="$SCRIPTS_DIR/lib/composekit-conf.sh"
+SHOW='set -u; FEATURE_DIRS=d; CORE_DIRS=d; DATA_DIRS=d; COMPOSITION_ROOT=d; LOCALE_DIRS=d; BASE_PACKAGE=d; UI_MODEL=d; DESIGN_SYSTEM_DIRS=kept; . "$1"; composekit_load_conf "$2"; printf "[%s]" "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$LOCALE_DIRS" "$BASE_PACKAGE" "$UI_MODEL" "$DESIGN_SYSTEM_DIRS"'
+conf_case() {
+    label="$1"; expected="$2"; conf="$3"
+    out="$(bash -c "$SHOW" _ "$LOADER" "$conf" 2>"$conf.err")"
+    if [ "$out" = "$expected" ]; then
+        echo "PASS: $label"
+        pass=$((pass + 1))
+    else
+        echo "FAIL: $label: got '$out', expected '$expected'"
+        sed 's/^/    /' "$conf.err"
+        fail=$((fail + 1))
+    fi
+}
+mkdir -p "$SCRATCH/confparse"
+{
+    printf '%s\n' '# comment' '' \
+        'FEATURE_DIRS="feature modules/feature"  # trailing' \
+        "CORE_DIRS='core'" \
+        '  DATA_DIRS=data   # trailing' \
+        'export COMPOSITION_ROOT="composeApp"' \
+        'BASE_PACKAGE="com.acme.app"'
+    printf 'LOCALE_DIRS="a b"\r\n'
+    printf 'UI_MODEL=always'
+} > "$SCRATCH/confparse/good.conf"
+conf_case "composekit_load_conf parses every accepted line form" \
+    '[feature modules/feature][core][data][composeApp][a b][com.acme.app][always][kept]' \
+    "$SCRATCH/confparse/good.conf"
+if [ -s "$SCRATCH/confparse/good.conf.err" ]; then
+    echo "FAIL: a valid conf printed warnings"
+    sed 's/^/    /' "$SCRATCH/confparse/good.conf.err"
+    fail=$((fail + 1))
+fi
+printf '%s\n' \
+    'FEATURE_DIRS+=" more"' \
+    'BASE_PACKAGE="x/PAYLOAD/w /tmp/f"' \
+    'BASE_PACKAGE=$(id)' \
+    'CORE_DIRS="../up"' \
+    'CORE_DIRS="/abs"' \
+    'DATA_DIRS="a/../b"' \
+    'DATA_DIRS="*"' \
+    'COMPOSITION_ROOT="app"x' \
+    'LOCALE_DIRS="first' \
+    '  second"' \
+    'UI_MODEL=maybe' \
+    'UNKNOWN_KEY="x"' > "$SCRATCH/confparse/bad.conf"
+conf_case "composekit_load_conf rejects unusable lines and keeps defaults" \
+    '[d][d][d][d][d][d][d][kept]' "$SCRATCH/confparse/bad.conf"
+warns="$(grep -c '^warning: ' "$SCRATCH/confparse/bad.conf.err")"
+if [ "$warns" -eq 12 ]; then
+    echo "PASS: composekit_load_conf warns once per unusable line"
+    pass=$((pass + 1))
+else
+    echo "FAIL: expected 12 warnings, got $warns"
+    sed 's/^/    /' "$SCRATCH/confparse/bad.conf.err"
+    fail=$((fail + 1))
+fi
+
+# .composekit.conf is data: no line of it may run as shell code in any
+# check, and every check still runs (run-checks.sh runs them all).
+mkdir -p "$SCRATCH/evil"
+MARK="$SCRATCH/evil-marker"
+printf '%s\n' \
+    "FEATURE_DIRS=\"feature\"; touch \"$MARK\"" \
+    "CORE_DIRS=\$(touch \"$MARK\")" \
+    "DATA_DIRS=\`touch \"$MARK\"\`" \
+    "touch \"$MARK\"" > "$SCRATCH/evil/.composekit.conf"
+out="$(bash "$SCRIPTS_DIR/run-checks.sh" "$SCRATCH/evil" 2>&1)"
+rows="$(printf '%s\n' "$out" | grep -c -E '^check-[a-z-]+ +(PASS|FAIL|WARN)')"
+if [ -e "$MARK" ]; then
+    echo "FAIL: .composekit.conf ran shell code"
+    fail=$((fail + 1))
+elif [ "$rows" -ne 11 ] || printf '%s\n' "$out" | grep -q 'missing lib'; then
+    echo "FAIL: run-checks.sh did not run all 11 checks on the evil conf ($rows rows)"
+    printf '%s\n' "$out" | sed 's/^/    /'
+    fail=$((fail + 1))
+else
+    echo "PASS: .composekit.conf is read as data, never executed; all 11 checks ran"
+    pass=$((pass + 1))
+fi
+
+# A conf value must never become part of a sed program: a crafted
+# BASE_PACKAGE once made check-layering write a file through sed's `w`.
+SEDW="$SCRATCH/sedw"
+mkdir -p "$SEDW/proj/feature/a/src" "$SEDW/"'w\.feature\.\([A-Za-z0-9_][A-Za-z0-9_]*\).*/\1'
+printf 'BASE_PACKAGE="x/PAYLOAD/w %s/w"\n' "$SEDW" > "$SEDW/proj/.composekit.conf"
+printf 'import x/PAYLOAD/w %s/w.feature.b\n' "$SEDW" > "$SEDW/proj/feature/a/src/A.kt"
+bash "$SCRIPTS_DIR/check-layering.sh" "$SEDW/proj" >/dev/null 2>&1
+if [ -n "$(find "$SEDW" -type f -name p -print)" ]; then
+    echo "FAIL: a crafted BASE_PACKAGE wrote a file through check-layering"
+    fail=$((fail + 1))
+else
+    echo "PASS: a crafted BASE_PACKAGE cannot write files through check-layering"
+    pass=$((pass + 1))
+fi
+
+# Conf values reach the checks: a feature-on-feature edge under a
+# non-default feature dir is caught only when the conf names that dir.
+CONFDIR="$SCRATCH/conf-applied"
+mkdir -p "$CONFDIR/modules/feature/a"
+printf '%s\n' 'implementation(project(":modules:feature:b"))' > "$CONFDIR/modules/feature/a/build.gradle.kts"
+expect_pass "check-layering ignores modules/feature with the default FEATURE_DIRS" bash "$SCRIPTS_DIR/check-layering.sh" "$CONFDIR"
+printf '%s\n' 'FEATURE_DIRS="modules/feature"' > "$CONFDIR/.composekit.conf"
+expect_fail "check-layering applies FEATURE_DIRS from the conf" "depends on another feature" bash "$SCRIPTS_DIR/check-layering.sh" "$CONFDIR"
+
+# A check copied without lib/composekit-conf.sh stops instead of
+# silently running with the defaults.
+mkdir -p "$SCRATCH/nolib"
+cp "$SCRIPTS_DIR/check-layering.sh" "$SCRATCH/nolib/"
+expect_fail "a check without lib/composekit-conf.sh exits with an error" "missing lib/composekit-conf.sh" bash "$SCRATCH/nolib/check-layering.sh" "$GOOD"
+
+# new-feature.sh reads UI_MODEL in the same line forms as the loader.
+for form in "UI_MODEL='always'" 'UI_MODEL=always  # owner decision' 'export UI_MODEL="always"'; do
+    printf '%s\n' "$form" > "$SCRATCH/uiconf/.composekit.conf"
+    out="$(bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$SCRATCH/uiconf" --dry-run 2>&1)"
+    case "$out" in
+        *UiMapper.kt*)
+            echo "PASS: new-feature.sh reads $form"
+            pass=$((pass + 1)) ;;
+        *)
+            echo "FAIL: new-feature.sh did not read $form"
+            fail=$((fail + 1)) ;;
+    esac
+done
+
 # install-guards.sh installs scripts plus a fresh conf into a project.
 mkdir -p "$SCRATCH/installed"
 expect_pass "install-guards.sh installs into a project dir" bash "$SCRIPTS_DIR/install-guards.sh" "$SCRATCH/installed"
-if [ -f "$SCRATCH/installed/scripts/composekit/run-checks.sh" ] && [ -f "$SCRATCH/installed/.composekit.conf" ] && [ -f "$SCRATCH/installed/scripts/composekit/lib/composekit-skip.sh" ]; then
-    echo "PASS: installed tree holds run-checks.sh, .composekit.conf and lib/composekit-skip.sh"
+if [ -f "$SCRATCH/installed/scripts/composekit/run-checks.sh" ] && [ -f "$SCRATCH/installed/.composekit.conf" ] && [ -f "$SCRATCH/installed/scripts/composekit/lib/composekit-skip.sh" ] && [ -f "$SCRATCH/installed/scripts/composekit/lib/composekit-conf.sh" ]; then
+    echo "PASS: installed tree holds run-checks.sh, .composekit.conf, lib/composekit-skip.sh and lib/composekit-conf.sh"
     pass=$((pass + 1))
 else
-    echo "FAIL: installed tree is missing run-checks.sh, .composekit.conf or lib/composekit-skip.sh"
+    echo "FAIL: installed tree is missing run-checks.sh, .composekit.conf, lib/composekit-skip.sh or lib/composekit-conf.sh"
     fail=$((fail + 1))
 fi
 

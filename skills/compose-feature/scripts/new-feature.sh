@@ -81,7 +81,7 @@ printf '%s' "$package" | grep -Eq '^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$' \
 if [ "$uimodel" = "auto" ]; then
     uiconf=""
     if [ -f "$root/.composekit.conf" ]; then
-        uiconf="$(grep -E '^[[:space:]]*UI_MODEL=' "$root/.composekit.conf" 2>/dev/null | tail -n 1 | cut -d= -f2 | tr -d ' "')"
+        uiconf="$(grep -E '^[[:space:]]*(export[[:space:]]+)?UI_MODEL=' "$root/.composekit.conf" 2>/dev/null | tail -n 1 | cut -d= -f2 | sed -e 's/[[:space:]]#.*$//' | tr -d " \"'\r")"
     fi
     if [ "$uiconf" = "always" ]; then uimodel="yes"; else uimodel="no"; fi
 fi

@@ -6,6 +6,9 @@
 # list of project-relative directories, except where noted.
 #
 # Lines starting with `#` are ignored. Quote values that contain spaces.
+# The guards read this file as data and never execute it: only KEY=value
+# lines for the keys below are read; `$`, backticks and other shell
+# syntax are taken literally.
 
 # Directories holding `:feature:*` modules (arch rule 1: no feature
 # depends on another feature).
