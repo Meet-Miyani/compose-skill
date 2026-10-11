@@ -811,7 +811,7 @@
   visibility: hidden;
 }
 
-/* Animated: lines fade up one by one; the bar grows 43.5% → 70.6%. */
+/* Animated: lines fade up one by one; the bar grows 58.3% → 81.7%. */
 .agent:not([data-static]) .agent__line {
   opacity: 0;
   transform: translateY(4px);

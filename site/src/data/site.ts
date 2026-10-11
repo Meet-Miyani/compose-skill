@@ -87,7 +87,8 @@ export const skills = [
 ] as const;
 
 /**
- * README "By task type", new features (3 tasks), all five panel models, both
- * graders agree. The only numbers the hero's agent window shows.
+ * README v6 "By task type", new features (T5-T6, 60 items), all five panel
+ * models, no kit vs v6.1, both graders agree. The only numbers the hero's
+ * agent window shows.
  */
-export const newFeatureScore = { without: 43.5, with: 70.6 } as const;
+export const newFeatureScore = { without: 58.3, with: 81.7 } as const;

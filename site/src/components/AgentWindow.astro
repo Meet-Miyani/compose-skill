@@ -1,16 +1,17 @@
 ---
 /**
- * The hero's "agent window": one v5-style task, answered without the kit and
- * with it. Live HTML/CSS plus the small inline script below; no video, no
+ * The hero's "agent window": v6 task T6, answered without the kit and with
+ * it. Live HTML/CSS plus the small inline script below; no video, no
  * libraries.
  *
- * The only numbers it shows are the two README "By task type" averages for
- * new-feature tasks (43.5% without the kit, 70.6% with it). The lines are an
- * illustration of what the v5 rubric for that kind of task checks.
+ * The only numbers it shows are the two README v6 "By task type" averages for
+ * new-feature tasks (58.3% without the kit, 81.7% with v6.1). The lines are an
+ * illustration of what the T6 rubric checks, worded after the graders' notes
+ * on the no-kit and v6.1 answers.
  *
  * States:
  *   - HTML as shipped (no script, reduced motion, print): phase B rendered in
- *     full with the static 43.5% → 70.6% comparison; the two segment buttons
+ *     full with the static 58.3% → 81.7% comparison; the two segment buttons
  *     still switch phases, without motion.
  *   - Motion allowed: the script clears `data-static` before first paint and
  *     plays A (~5 s) then B (~6 s) in a loop. It pauses while the window is
@@ -22,31 +23,31 @@
  */
 import { newFeatureScore } from '../data/site';
 
-const prompt = 'Add a photo to each workout entry, saved on the device.';
+const prompt = 'I want to be able to see all books by a specific author in one place.';
 const withoutKit = [
-  'writes the photo file straight from the composable',
-  'keeps the picker result in a global variable',
-  'no error state, no test',
+  'filters the book list in place, inside the composable',
+  'no screen of its own: reuses the list ViewModel',
+  'Back leaves the app instead of returning to the list',
 ];
 const withKit = [
   { text: 'compose → task: new feature · areas: feature, data', route: true },
   { text: 'reads only the reference files it needs', route: true },
-  { text: 'storage in the data layer, off the main thread' },
-  { text: 'picker is its own destination, result returned without globals' },
-  { text: 'ViewModel + UiState contract, failures shown to the user' },
+  { text: 'author view is its own destination and nav key' },
+  { text: 'own ViewModel + UiState; Back returns to the list' },
+  { text: 'books filtered by a data-layer query, not the UI' },
 ];
 const { without, with: withScore } = newFeatureScore;
 ---
 
 <div class="agent" data-agent data-static data-phase="b">
   <p class="sr-only">
-    Illustration of a v5 task, "{prompt}" Without the kit, an agent writes the photo file straight from the
-    composable, keeps the picker result in a global variable, and adds no error state or test. With Compose Kit,
-    the compose entry tree routes it as a new feature touching the feature and data areas and reads only the
-    reference files it needs; storage goes in the data layer off the main thread, the picker is its own
-    destination that returns its result without globals, and a ViewModel with a UiState contract shows failures
-    to the user. On v5 new-feature tasks, the measured average across 5 models was {without}% without the kit
-    and {withScore}% with it.
+    Illustration of a v6 task, "{prompt}" Without the kit, an agent filters the book list in place inside the
+    composable, reuses the list ViewModel instead of giving the author view its own, and Back leaves the app
+    instead of returning to the list. With Compose Kit, the compose entry tree routes it as a new feature
+    touching the feature and data areas and reads only the reference files it needs; the author view is its own
+    navigation destination with a key registered like the others, it has its own ViewModel and UiState
+    contract, Back returns to the list, and the books are filtered by a data-layer query. On v6 new-feature
+    tasks, the measured average across 5 models was {without}% without the kit and {withScore}% with v6.1.
   </p>
 
   <div class="agent__segments" role="group" aria-label="Show the agent without or with Compose Kit">
@@ -57,7 +58,7 @@ const { without, with: withScore } = newFeatureScore;
   <div class="agent__window" aria-hidden="true">
     <div class="agent__bar">
       <span class="agent__dots"><span></span><span></span><span></span></span>
-      <span class="agent__title">claude — workout-app</span>
+      <span class="agent__title">claude — reading-log</span>
     </div>
     <div class="agent__body">
       <section class="agent__phase" data-phase="a">
@@ -71,7 +72,7 @@ const { without, with: withScore } = newFeatureScore;
           ))
         }
         <div class="agent__line agent__result">
-          <span class="agent__result-label">New features, v5 rubric: {without}%</span>
+          <span class="agent__result-label">New features, v6 test: {without}%</span>
           <span class="agent__track"><span class="agent__fill" style={`--to:${without / 100}`}></span></span>
         </div>
       </section>
@@ -88,7 +89,7 @@ const { without, with: withScore } = newFeatureScore;
         }
         <div class="agent__line agent__result agent__result--kit">
           <span class="agent__result-label">
-            New features, v5 rubric:{' '}
+            New features, v6 test:{' '}
             <span class="agent__score">
               <span class="agent__score-static">{without}% → {withScore}%</span>
               <span class="agent__score-from">{without}%</span>
@@ -106,8 +107,8 @@ const { without, with: withScore } = newFeatureScore;
   </div>
 
   <p class="agent__caption">
-    Illustration of a <a href="/results/">v5</a> task. Scores are the measured averages for new-feature tasks
-    across 5 models.
+    Illustration of a <a href="/results/">v6</a> task. Scores are the measured averages for new-feature tasks
+    across 5 models, without the kit and with v6.1.
   </p>
 </div>
 
