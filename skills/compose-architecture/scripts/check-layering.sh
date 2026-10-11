@@ -23,7 +23,7 @@ if [ ! -f "$SCRIPT_DIR/lib/composekit-conf.sh" ]; then
   exit 2
 fi
 . "$SCRIPT_DIR/lib/composekit-conf.sh"
-composekit_load_conf "$ROOT/.composekit.conf"
+composekit_load_conf "$ROOT/.composekit.conf" || exit 2
 
 if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
   . "$SCRIPT_DIR/lib/composekit-skip.sh"
