@@ -442,6 +442,31 @@ else
     fail=$((fail + 1))
 fi
 
+# audit-project.sh flags installed guards that predate the conf loader
+# (a check still sourcing .composekit.conf, or no lib/composekit-conf.sh).
+AUDIT="$REPO_ROOT/skills/compose-project/scripts/audit-project.sh"
+audit_case() {
+    label="$1"; want="$2"
+    out="$(bash "$AUDIT" "$SCRATCH/installed" 2>&1)"
+    case "$out" in
+        *"run-checks.sh: installed, OUTDATED"*) got="outdated" ;;
+        *"run-checks.sh: installed"*) got="current" ;;
+        *) got="missing" ;;
+    esac
+    if [ "$got" = "$want" ]; then
+        echo "PASS: $label"
+        pass=$((pass + 1))
+    else
+        echo "FAIL: $label (audit says $got, expected $want)"
+        fail=$((fail + 1))
+    fi
+}
+audit_case "audit-project.sh reports fresh guards as installed" current
+printf '%s\n' '#!/usr/bin/env bash' 'if [ -f "$ROOT/.composekit.conf" ]; then' '  . "$ROOT/.composekit.conf"' 'fi' > "$SCRATCH/installed/scripts/composekit/check-old.sh"
+audit_case "audit-project.sh flags a guard that sources .composekit.conf" outdated
+rm -f "$SCRATCH/installed/scripts/composekit/check-old.sh" "$SCRATCH/installed/scripts/composekit/lib/composekit-conf.sh"
+audit_case "audit-project.sh flags guards without lib/composekit-conf.sh" outdated
+
 rm -rf "$SCRATCH"
 
 echo ""

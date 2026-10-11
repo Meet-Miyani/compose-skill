@@ -10,7 +10,9 @@ Run the skill's read-only audit before writing any plan:
 skills/compose-project/scripts/audit-project.sh <project-root>
 ```
 
-The script prints four sections: the module list, the dependency edges between modules, the missing convention plugins (per-module target or SDK blocks that `build-logic/` should own), and the guard status (installed, WARN, blocking, or absent). Review all four before classifying. *Prevents:* a plan written from memory that misses the real coupling.
+The script prints four sections: the module list, the dependency edges between modules, the missing convention plugins (per-module target or SDK blocks that `build-logic/` should own), and the guard status (installed, outdated, WARN, blocking, or absent). Review all four before classifying. *Prevents:* a plan written from memory that misses the real coupling.
+
+Check a project you did not set up with the kit's own `compose-architecture` `scripts/run-checks.sh <project-root>`, not the project's `scripts/composekit/` copy: that copy is the project's code, and an outdated one runs `.composekit.conf` as shell code. *Prevents:* auditing a repo by executing scripts it controls.
 
 1. **(non-negotiable) Run the skill's `scripts/audit-project.sh` and review its full output before planning.** The audit is read-only evidence; planning without it repeats the guesses the audit exists to replace. *Prevents:* migration plans that miss hidden feature-to-feature edges.
 2. **(non-negotiable) Write every gap-report finding as finding, evidence `file:line`, case, incremental step.** One row per finding, for example: notes editor ViewModel hand-rolls `try/catch`, evidence `feature/notes/.../NoteEditorViewModel.kt:88`, case 2, step "leave in place; kit contract applies to new features only". A finding without a `file:line` is a rumor, not a gap. *Prevents:* unactionable gap reports nobody can verify (SKILL.md rule 5).
