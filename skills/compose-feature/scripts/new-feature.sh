@@ -81,7 +81,15 @@ printf '%s' "$package" | grep -Eq '^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$' \
 if [ "$uimodel" = "auto" ]; then
     uiconf=""
     if [ -f "$root/.composekit.conf" ]; then
-        uiconf="$(grep -E '^[[:space:]]*(export[[:space:]]+)?UI_MODEL=' "$root/.composekit.conf" 2>/dev/null | tail -n 1 | cut -d= -f2 | sed -e 's/[[:space:]]#.*$//' | tr -d " \"'\r")"
+        # The last valid UI_MODEL line wins, as in the guards' conf loader;
+        # an invalid one warns and is skipped.
+        while IFS= read -r v; do
+            case "$v" in
+                ''|always|when-needed) uiconf="$v" ;;
+                *) printf 'warning: .composekit.conf: UI_MODEL=%s is not always, when-needed or empty; line ignored\n' "$v" \
+                       | LC_ALL=C tr -d '\000-\011\013-\037\177-\377' >&2 ;;
+            esac
+        done < <(grep -E '^[[:space:]]*(export[[:space:]]+)?UI_MODEL=' "$root/.composekit.conf" 2>/dev/null | cut -d= -f2 | sed -e 's/[[:space:]]#.*$//' | tr -d " \"'\r")
     fi
     if [ "$uiconf" = "always" ]; then uimodel="yes"; else uimodel="no"; fi
 fi

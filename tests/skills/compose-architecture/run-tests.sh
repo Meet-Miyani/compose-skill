@@ -304,10 +304,11 @@ case "$out" in
         pass=$((pass + 1)) ;;
 esac
 
-# composekit_load_conf: every accepted line form parses; every unusable
-# line warns on stderr and keeps the caller's value.
+# composekit_load_conf: every accepted line form parses and returns 0;
+# every unusable line warns on stderr, keeps the caller's value, and
+# makes the loader return 2 ({status} at the end of the output).
 LOADER="$SCRIPTS_DIR/lib/composekit-conf.sh"
-SHOW='set -u; FEATURE_DIRS=d; CORE_DIRS=d; DATA_DIRS=d; COMPOSITION_ROOT=d; LOCALE_DIRS=d; BASE_PACKAGE=d; UI_MODEL=d; DESIGN_SYSTEM_DIRS=kept; . "$1"; composekit_load_conf "$2"; printf "[%s]" "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$LOCALE_DIRS" "$BASE_PACKAGE" "$UI_MODEL" "$DESIGN_SYSTEM_DIRS"'
+SHOW='set -u; FEATURE_DIRS=d; CORE_DIRS=d; DATA_DIRS=d; COMPOSITION_ROOT=d; LOCALE_DIRS=d; BASE_PACKAGE=d; UI_MODEL=d; DESIGN_SYSTEM_DIRS=kept; . "$1"; composekit_load_conf "$2"; st=$?; printf "[%s]" "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$LOCALE_DIRS" "$BASE_PACKAGE" "$UI_MODEL" "$DESIGN_SYSTEM_DIRS"; printf "{%s}" "$st"'
 conf_case() {
     label="$1"; expected="$2"; conf="$3"
     out="$(bash -c "$SHOW" _ "$LOADER" "$conf" 2>"$conf.err")"
@@ -332,11 +333,21 @@ mkdir -p "$SCRATCH/confparse"
     printf 'UI_MODEL=always'
 } > "$SCRATCH/confparse/good.conf"
 conf_case "composekit_load_conf parses every accepted line form" \
-    '[feature modules/feature][core][data][composeApp][a b][com.acme.app][always][kept]' \
+    '[feature modules/feature][core][data][composeApp][a b][com.acme.app][always][kept]{0}' \
     "$SCRATCH/confparse/good.conf"
 if [ -s "$SCRATCH/confparse/good.conf.err" ]; then
     echo "FAIL: a valid conf printed warnings"
     sed 's/^/    /' "$SCRATCH/confparse/good.conf.err"
+    fail=$((fail + 1))
+fi
+# A UTF-8 byte-order mark on line 1 is stripped; an empty UI_MODEL is the
+# default, not an error.
+printf '\357\273\277FEATURE_DIRS="feature"\nUI_MODEL=\n' > "$SCRATCH/confparse/bom.conf"
+conf_case "composekit_load_conf strips a BOM and accepts an empty UI_MODEL" \
+    '[feature][d][d][d][d][d][][kept]{0}' "$SCRATCH/confparse/bom.conf"
+if [ -s "$SCRATCH/confparse/bom.conf.err" ]; then
+    echo "FAIL: a BOM or an empty UI_MODEL printed warnings"
+    sed 's/^/    /' "$SCRATCH/confparse/bom.conf.err"
     fail=$((fail + 1))
 fi
 printf '%s\n' \
@@ -351,21 +362,36 @@ printf '%s\n' \
     'LOCALE_DIRS="first' \
     '  second"' \
     'UI_MODEL=maybe' \
-    'UNKNOWN_KEY="x"' > "$SCRATCH/confparse/bad.conf"
-conf_case "composekit_load_conf rejects unusable lines and keeps defaults" \
-    '[d][d][d][d][d][d][d][kept]' "$SCRATCH/confparse/bad.conf"
+    'UNKNOWN_KEY="x"' \
+    'BASE_PACKAGE="com.example."' \
+    'BASE_PACKAGE=..' \
+    'BASE_PACKAGE=com..example' \
+    'BASE_PACKAGE=1abc' \
+    'BASE_PACKAGE=com.1x' > "$SCRATCH/confparse/bad.conf"
+printf 'FEATURE_DIRS="feature\tmodules/feature"\n' >> "$SCRATCH/confparse/bad.conf"
+printf 'X\033]52;c;aGk\007\033[2J=1\n' >> "$SCRATCH/confparse/bad.conf"
+conf_case "composekit_load_conf rejects unusable lines, keeps defaults and returns 2" \
+    '[d][d][d][d][d][d][d][kept]{2}' "$SCRATCH/confparse/bad.conf"
 warns="$(grep -c '^warning: ' "$SCRATCH/confparse/bad.conf.err")"
-if [ "$warns" -eq 12 ]; then
+if [ "$warns" -eq 19 ]; then
     echo "PASS: composekit_load_conf warns once per unusable line"
     pass=$((pass + 1))
 else
-    echo "FAIL: expected 12 warnings, got $warns"
+    echo "FAIL: expected 19 warnings, got $warns"
     sed 's/^/    /' "$SCRATCH/confparse/bad.conf.err"
     fail=$((fail + 1))
 fi
+if LC_ALL=C grep -q "$(printf '[\033\007]')" "$SCRATCH/confparse/bad.conf.err"; then
+    echo "FAIL: composekit_load_conf echoed control bytes from the conf"
+    fail=$((fail + 1))
+else
+    echo "PASS: composekit_load_conf strips control bytes from its warnings"
+    pass=$((pass + 1))
+fi
 
 # .composekit.conf is data: no line of it may run as shell code in any
-# check, and every check still runs (run-checks.sh runs them all).
+# check, every check still reports (run-checks.sh runs them all), and
+# the unusable lines fail the run.
 mkdir -p "$SCRATCH/evil"
 MARK="$SCRATCH/evil-marker"
 printf '%s\n' \
@@ -373,19 +399,29 @@ printf '%s\n' \
     "CORE_DIRS=\$(touch \"$MARK\")" \
     "DATA_DIRS=\`touch \"$MARK\"\`" \
     "touch \"$MARK\"" > "$SCRATCH/evil/.composekit.conf"
-out="$(bash "$SCRIPTS_DIR/run-checks.sh" "$SCRATCH/evil" 2>&1)"
+out="$(bash "$SCRIPTS_DIR/run-checks.sh" "$SCRATCH/evil" 2>&1)"; st=$?
 rows="$(printf '%s\n' "$out" | grep -c -E '^check-[a-z-]+ +(PASS|FAIL|WARN)')"
 if [ -e "$MARK" ]; then
     echo "FAIL: .composekit.conf ran shell code"
     fail=$((fail + 1))
-elif [ "$rows" -ne 11 ] || printf '%s\n' "$out" | grep -q 'missing lib'; then
-    echo "FAIL: run-checks.sh did not run all 11 checks on the evil conf ($rows rows)"
+elif [ "$rows" -ne 11 ] || [ "$st" -eq 0 ] || printf '%s\n' "$out" | grep -q 'missing lib'; then
+    echo "FAIL: run-checks.sh did not report all 11 checks and fail on the evil conf ($rows rows, exit $st)"
     printf '%s\n' "$out" | sed 's/^/    /'
     fail=$((fail + 1))
 else
-    echo "PASS: .composekit.conf is read as data, never executed; all 11 checks ran"
+    echo "PASS: .composekit.conf is read as data, never executed; all 11 checks reported and the run failed"
     pass=$((pass + 1))
 fi
+
+# A conf line the loader cannot use fails the run instead of leaving the
+# checks on defaults: a FEATURE_DIRS split over two lines (valid when
+# the conf was sourced) must not turn a cross-feature import green.
+SPLIT="$SCRATCH/split-conf"
+mkdir -p "$SPLIT/modules/feature/a/src" "$SPLIT/modules/feature/b/src"
+printf '%s\n' 'import com.example.feature.b.BThing' 'class A' > "$SPLIT/modules/feature/a/src/A.kt"
+printf '%s\n' 'FEATURE_DIRS="feature' '  modules/feature"' > "$SPLIT/.composekit.conf"
+expect_fail "check-layering exits on a FEATURE_DIRS split over lines" "unusable line" bash "$SCRIPTS_DIR/check-layering.sh" "$SPLIT"
+expect_fail "run-checks.sh fails when a conf line is unusable" "unterminated quote in FEATURE_DIRS" bash "$SCRIPTS_DIR/run-checks.sh" "$SPLIT"
 
 # A conf value must never become part of a sed program: a crafted
 # BASE_PACKAGE once made check-layering write a file through sed's `w`.
@@ -430,6 +466,18 @@ for form in "UI_MODEL='always'" 'UI_MODEL=always  # owner decision' 'export UI_M
             fail=$((fail + 1)) ;;
     esac
 done
+# Like the loader, the last valid UI_MODEL wins and an invalid one warns.
+printf '%s\n' 'UI_MODEL=always' 'UI_MODEL=Always' > "$SCRATCH/uiconf/.composekit.conf"
+out="$(bash "$NEW_FEATURE" --name Tags --item Tag --package com.example.feature.tags --root "$SCRATCH/uiconf" --dry-run 2>&1)"
+case "$out" in
+    *UiMapper.kt*"UI_MODEL=Always"*|*"UI_MODEL=Always"*UiMapper.kt*)
+        echo "PASS: new-feature.sh keeps the last valid UI_MODEL and warns on an invalid one"
+        pass=$((pass + 1)) ;;
+    *)
+        echo "FAIL: new-feature.sh did not keep UI_MODEL=always over an invalid later line"
+        printf '%s\n' "$out" | sed 's/^/    /'
+        fail=$((fail + 1)) ;;
+esac
 
 # install-guards.sh installs scripts plus a fresh conf into a project.
 mkdir -p "$SCRATCH/installed"

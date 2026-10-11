@@ -55,7 +55,7 @@ if [ ! -f "$SCRIPT_DIR/lib/composekit-conf.sh" ]; then
   exit 2
 fi
 . "$SCRIPT_DIR/lib/composekit-conf.sh"
-composekit_load_conf "$ROOT/.composekit.conf"
+composekit_load_conf "$ROOT/.composekit.conf" || exit 2
 : "$FEATURE_DIRS" "$CORE_DIRS" "$DATA_DIRS" "$COMPOSITION_ROOT" "$DESIGN_SYSTEM_MODULE" "$LOCALE_DIRS" "$BASE_PACKAGE"
 
 if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
