@@ -20,11 +20,14 @@ case "$ROOT" in
   */) ROOT="${ROOT%/}" ;;
 esac
 
-if [ -f "$ROOT/.composekit.conf" ]; then
-  . "$ROOT/.composekit.conf"
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ ! -f "$SCRIPT_DIR/lib/composekit-conf.sh" ]; then
+  echo "error: missing lib/composekit-conf.sh next to $(basename "$0"); re-run install-guards.sh" >&2
+  exit 2
+fi
+. "$SCRIPT_DIR/lib/composekit-conf.sh"
+composekit_load_conf "$ROOT/.composekit.conf"
+
 if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
   . "$SCRIPT_DIR/lib/composekit-skip.sh"
 fi

@@ -17,11 +17,14 @@ DESIGN_SYSTEM_MODULE="core/designsystem"
 DESIGN_SYSTEM_DIRS=""
 LOCALE_DIRS=""
 BASE_PACKAGE="com.example"
-if [ -f "$ROOT/.composekit.conf" ]; then
-  . "$ROOT/.composekit.conf"
-fi
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ ! -f "$SCRIPT_DIR/lib/composekit-conf.sh" ]; then
+  echo "error: missing lib/composekit-conf.sh next to $(basename "$0"); re-run install-guards.sh" >&2
+  exit 2
+fi
+. "$SCRIPT_DIR/lib/composekit-conf.sh"
+composekit_load_conf "$ROOT/.composekit.conf"
+
 if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
   . "$SCRIPT_DIR/lib/composekit-skip.sh"
 fi
@@ -124,7 +127,13 @@ check_import_dirs() {
       composekit_skip_path "$rel" && continue
       tail="${rel#$d/}"; ownseg="${tail%%/*}"
       if [ "$scope" = "feature" ]; then
-        seg="$(printf '%s\n' "$content" | sed -n -e "s/^import $BASE_ESC\\.feature\\.\\([A-Za-z0-9_][A-Za-z0-9_]*\\).*/\\1/p")"
+        # Plain string match, never a sed program built from conf values.
+        seg=""
+        case "$content" in
+          "import $BASE_PACKAGE.feature."*)
+            seg="${content#"import $BASE_PACKAGE.feature."}"
+            seg="${seg%%[!A-Za-z0-9_]*}" ;;
+        esac
         [ -n "$seg" ] || continue
         [ "$seg" != "$ownseg" ] || continue
         report "$rel" "$lineno" "feature $d/$ownseg depends on another feature: $imp"
