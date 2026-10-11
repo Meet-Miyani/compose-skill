@@ -175,7 +175,7 @@ export default defineConfig({
             '- Repository: https://github.com/Meet-Miyani/compose-skill',
             '- Current release: v6.1.1 (2026-10-11), a guard-script security fix on top of v6.1.0 (stable, released 2026-10-05). The v6.1 A/B test passed every pre-registered rule; the results are on /results/.',
             '- Skills: `compose` (the entry decision tree, about 1.3k tokens), `compose-architecture`, `compose-feature`, `compose-ui`, `compose-data`, `compose-project`, `compose-platform`. Install all seven; they cross-reference each other.',
-            '- Install: `npx skills add Meet-Miyani/compose-skill --skill \'*\' -a <agent-id>` (add `-g` for global), `gh skill install` with `--pin v6.1.1`, the Claude Code plugin `compose-kit@compose-kit`, or the Codex plugin `compose-kit@compose-kit`.',
+            '- Install: `npx skills add Meet-Miyani/compose-skill --skill \'*\' -a <agent-id>` (add `-g` for global), `gh skill install` (latest release; update with `gh skill update --all`), the Claude Code plugin `compose-kit@compose-kit`, or the Codex plugin `compose-kit@compose-kit`.',
             '- License: MIT',
             '',
             '## Evidence',
