@@ -158,6 +158,9 @@ claude plugin marketplace add Meet-Miyani/compose-skill
 claude plugin install compose-kit@compose-kit --scope project
 ```
 
+Update later from a terminal: `claude plugin marketplace update compose-kit`, then
+`claude plugin update compose-kit@compose-kit`, then restart Claude Code.
+
 ### Codex plugin
 
 ```sh
@@ -166,6 +169,8 @@ codex plugin add compose-kit@compose-kit
 ```
 
 Codex plugins install for your user, so they're available in every project.
+
+Update later with `codex plugin marketplace upgrade`: it refreshes the marketplace and the installed plugin.
 
 ### Then point your agent at it
 
