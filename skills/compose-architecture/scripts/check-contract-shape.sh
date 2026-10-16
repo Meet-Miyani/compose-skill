@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Check every *Contract.kt holds exactly UiState, UiAction and UiEffect
 # (arch rule 4: three top-level declarations; UiModels and mappers live
-# in presentation/<destination>/model/ and mapper/).
+# in presentation/<destination>/model/ and mapper/). Annotations on the
+# declaration's own line (`@Immutable data class …`) are skipped.
 #
 # macOS bash 3.2 and Linux safe: no assoc arrays, mapfile, read -d,
 # [[ =~ ]] or sed -i. No network; no writes. Usage: script <project-root>
@@ -38,8 +39,8 @@ else
   HAVE_RG=0
 fi
 
-DECL_RE='^((public|internal|private) )?(class |data class |sealed interface |sealed class |interface |object |data object |enum class |typealias |const val |val |fun )'
-STRIP_RE='s/^((public|internal|private) )?(class |data class |sealed interface |sealed class |interface |object |data object |enum class |typealias |const val |val |fun )//'
+DECL_RE='^(@[A-Za-z_][A-Za-z0-9_.:]*(\([^)]*\))? +)*((public|internal|private) )?(class |data class |sealed interface |sealed class |interface |object |data object |enum class |typealias |const val |val |fun )'
+STRIP_RE='s/^(@[A-Za-z_][A-Za-z0-9_.:]*(\([^)]*\))? +)*((public|internal|private) )?(class |data class |sealed interface |sealed class |interface |object |data object |enum class |typealias |const val |val |fun )//'
 
 status=0
 

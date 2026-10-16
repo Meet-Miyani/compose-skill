@@ -139,10 +139,49 @@ expect_fail "check-layering converts camelCase accessors" "feature/note-detail" 
 printf '%s\n' 'implementation(projects.data.notes)' > "$LAYERS/core/model/build.gradle.kts"
 expect_fail "check-layering catches core to data" "depends on data" bash "$SCRIPTS_DIR/check-layering.sh" "$LAYERS"
 check check-contract-shape "exactly"
+# Annotations on the same line as a declaration count that declaration once.
+CS="$SCRATCH/contract-shape/feature/a/src/commonMain/kotlin/com/example/a/presentation/a"
+mkdir -p "$CS"
+printf '%s\n' "package com.example.a.presentation.a" "@Immutable data class AUiState(val n: Int = 0) : UiState" "sealed interface AUiAction : UiAction" "sealed interface AUiEffect : UiEffect" > "$CS/AContract.kt"
+expect_pass "check-contract-shape accepts an annotated one-line UiState" bash "$SCRIPTS_DIR/check-contract-shape.sh" "$SCRATCH/contract-shape"
+printf '%s\n' "@Serializable enum class Step { Edit, Confirm }" >> "$CS/AContract.kt"
+expect_fail "check-contract-shape counts an annotated one-line extra declaration" "found 4" bash "$SCRIPTS_DIR/check-contract-shape.sh" "$SCRATCH/contract-shape"
 check check-packages "five feature packages"
 check check-data-boundary "must be internal"
 check check-error-handling "without onError"
 check check-file-level-state "top-level var"
+# Rule 13 covers every file- and object-level mutable form in any main
+# source set; class members, locals and test source sets stay clean.
+FLS="$SCRATCH/file-level-state"
+fls_write() {
+    path="$1"; shift
+    rm -rf "$FLS"; mkdir -p "$FLS/$(dirname "$path")"
+    printf '%s\n' "package com.example.a" "$@" > "$FLS/$path"
+}
+FLS_DATA="feature/a/src/commonMain/kotlin/com/example/a/data/Holder.kt"
+fls_bad() {
+    label="$1"; name="$2"; shift 2
+    fls_write "$FLS_DATA" "$@"
+    expect_fail "check-file-level-state catches $label" ": $name" bash "$SCRIPTS_DIR/check-file-level-state.sh" "$FLS"
+}
+fls_clean() {
+    label="$1"; path="$2"; shift 2
+    fls_write "$path" "$@"
+    expect_pass "check-file-level-state ignores $label" bash "$SCRIPTS_DIR/check-file-level-state.sh" "$FLS"
+}
+fls_bad "lateinit var" picked "private lateinit var picked: String"
+fls_bad "annotated var on one line" flag "@Volatile var flag = false"
+fls_bad "top-level var outside navigation/presentation" cache "var cache: List<Int> = emptyList()"
+fls_bad "top-level MutableSharedFlow val" resultBus "private val resultBus = MutableSharedFlow<Long>()"
+fls_bad "typed top-level mutableStateOf val" picked "val picked: MutableState<Long?> = mutableStateOf(null)"
+fls_bad "var in an object" last "object PickerResults {" "    var last: Long? = null" "}"
+fls_bad "mutable val in an object" results "internal object PickerResults {" "    val results = MutableStateFlow<Long?>(null)" "}"
+fls_bad "var in an object after a raw string" last "object Queries {" "    val sql = \"\"\"" "        SELECT { var fake = 1 }" "\"\"\".trimIndent()" "    /*" "var commented = 1" "    */" "    var last: Long? = null" "}"
+fls_bad "lateinit var in a companion object" instance "class App {" "    companion object {" "        lateinit var instance: App" "    }" "}"
+fls_clean "class members, locals and constructor vars" "$FLS_DATA" "class Repo(private var seed: Int) {" "    private var count = 0" "    private val items = mutableListOf<Int>()" "    fun f() { var x = 1 }" "}"
+fls_clean "vals, functions and nested classes in an object" "$FLS_DATA" "object TagsModule {" "    const val NAME = \"tags\"" "    val ids = listOf(1)" "    fun build() {" "        var local = 0" "    }" "    data class Bar(" "        var x: Int," "    )" "}" "data object TagsKey : NavKey" "val listener = object : Listener {" "    var calls = 0" "}"
+fls_clean "extension properties without a backing field" "$FLS_DATA" "var Note.label: String" "    get() = title" "    set(value) { title = value }" "var <T> Box<T>.item: T get() = value set(v) { value = v }"
+fls_clean "test source sets" "feature/a/src/commonTest/kotlin/com/example/a/Fakes.kt" "private var clock = 0L"
 check check-nav-keys "directly"
 # Placeholders root-only mode covers the tracked diff plus untracked files
 # inside a work tree. The fixtures live in the repo tree, so the bad tree
