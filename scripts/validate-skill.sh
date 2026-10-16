@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT/skills/compose"
+SKILL_PATH=""
 
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║  Agent Skill Scanner v4                                         ║
@@ -24,7 +24,8 @@ cd "$ROOT/skills/compose"
 # ╚══════════════════════════════════════════════════════════════════╝
 #
 # Usage:
-#   ./scripts/validate-skill.sh              # full scan
+#   ./scripts/validate-skill.sh              # full scan of skills/compose
+#   ./scripts/validate-skill.sh skills/compose-ui   # scan another skill
 #   ./scripts/validate-skill.sh --help       # show usage
 #
 # Environment:
@@ -44,7 +45,7 @@ NO_COLOR="${NO_COLOR:-0}"
 OUTPUT_MODE="terminal"
 QUICK_MODE=false
 SKILL_FILE="SKILL.md"
-SKILL_DIR="$(basename "$(pwd)")"
+SKILL_DIR=""
 
 FINDINGS_FILE=$(mktemp)
 trap 'rm -f "$FINDINGS_FILE"' EXIT
@@ -2065,7 +2066,8 @@ show_help() {
   echo "  Computes a quality score (0-100) across 5 dimensions."
   echo ""
   echo "  $(_bold "Usage:")"
-  echo "    ./scripts/validate-skill.sh                Run full scan (terminal)"
+  echo "    ./scripts/validate-skill.sh                Run full scan of skills/compose (terminal)"
+  echo "    ./scripts/validate-skill.sh <skill-dir>    Scan another skill, e.g. skills/compose-ui"
   echo "    ./scripts/validate-skill.sh --json        Output as JSON"
   echo "    ./scripts/validate-skill.sh --md          Output as Markdown report"
   echo "    ./scripts/validate-skill.sh --score-only  Print score and grade only"
@@ -2145,10 +2147,18 @@ main() {
       --md|--markdown) OUTPUT_MODE="markdown"; NO_COLOR=1 ;;
       --score-only|--score) OUTPUT_MODE="score-only" ;;
       --quick) QUICK_MODE=true ;;
-      *) echo "Unknown flag: $1"; echo "Run with --help for usage."; exit 2 ;;
+      -*) echo "Unknown flag: $1"; echo "Run with --help for usage."; exit 2 ;;
+      *)
+        if [ -n "$SKILL_PATH" ]; then echo "Only one skill path per run."; exit 2; fi
+        SKILL_PATH="$1" ;;
     esac
     shift
   done
+
+  if ! cd "${SKILL_PATH:-$ROOT/skills/compose}" 2>/dev/null; then
+    echo "Not a directory: $SKILL_PATH"; exit 2
+  fi
+  SKILL_DIR="$(basename "$(pwd)")"
 
   if ! _suppress_terminal; then
     echo ""

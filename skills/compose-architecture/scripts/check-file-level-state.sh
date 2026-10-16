@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
-# check-file-level-state.sh — arch rule 13: no file-level mutable state.
+# check-file-level-state.sh — arch rule 13: no file-level or module-level
+# mutable state.
 #
 # Results travel through a repository write or the nav key, never through
-# a file-level `var`: it leaks the setter, is null after process death,
-# is shared across panes and is not thread-safe.
+# file-level mutable state: it leaks the setter, is null after process
+# death, is shared across panes and is not thread-safe.
 #
-# Any line starting at column 0 matching `var` (optionally prefixed by
-# private/internal/public) in a navigation/ or presentation/ file is a
-# violation. Indented `var` (class members, locals) and top-level `val`
-# are clean — the `^` anchor handles that.
+# Violations in any main source set (test source sets are skipped):
+# - a column-0 `var`, with any annotations or modifiers (`lateinit`,
+#   `@Volatile`, visibility, `actual`) before it;
+# - a column-0 `val` initialised with a mutable holder (MutableStateFlow,
+#   MutableSharedFlow, mutableStateOf, mutable collections, Channel);
+# - either form as a direct member of an `object` or `companion object`.
+# Class members, locals, constructor parameters and anonymous `object :`
+# expressions are clean. Object bodies are tracked by counting braces and
+# parentheses outside strings and comments.
 #
 # Runs on macOS bash 3.2 and Linux (no assoc arrays, mapfile, read -d, [[ =~ ]], sed -i, GNU grep).
 # No network; no writes anywhere.
@@ -49,14 +55,72 @@ if [ -f "$SCRIPT_DIR/lib/composekit-skip.sh" ]; then
   . "$SCRIPT_DIR/lib/composekit-skip.sh"
 fi
 
-if command -v rg >/dev/null 2>&1; then
-  HAVE_RG=1
-else
-  HAVE_RG=0
-fi
-
-PATTERN='^((private|internal|public)[[:space:]]+)?var[[:space:]]'
-AWK_PROG='{ pos = index($0, ":"); lineno = substr($0, 1, pos - 1); content = substr($0, pos + 1); sub(/^(private|internal|public)[ \t]+/, "", content); sub(/^var[ \t]+/, "", content); name = content; sub(/[^A-Za-z0-9_].*$/, "", name); printf "%s:%s: top-level var in navigation/presentation file: %s\n", rel, lineno, name }'
+# One pass per file. `clean` is the line with block comments, raw strings,
+# string and char literals and line comments removed; `top` means the line
+# starts at column 0. `depth` counts braces and parentheses inside an
+# object body, so depth 1 holds the object's direct members.
+AWK_PROG='
+function decl(s) {
+  while (sub(/^@[A-Za-z_][A-Za-z0-9_.:]*(\([^)]*\))?[ \t]*/, "", s) || sub(/^(private|internal|public|protected|actual|expect|lateinit|override|open|final|const)[ \t]+/, "", s)) {}
+  return s
+}
+function kind(d) {
+  # `var Type.name` / `var <T> Type<T>.name` is an extension property: no backing field.
+  if (d ~ /^var[ \t]+(<|[A-Za-z_][A-Za-z0-9_]*(<[^>]*>)?\??\.)/) return ""
+  if (d ~ /^var[ \t]/) return "var"
+  if (d ~ /^val[ \t]/ && d ~ /=[ \t]*(MutableStateFlow|MutableSharedFlow|mutableStateOf|mutableIntStateOf|mutableLongStateOf|mutableFloatStateOf|mutableDoubleStateOf|mutableStateListOf|mutableStateMapOf|mutableListOf|mutableMapOf|mutableSetOf|arrayListOf|hashMapOf|hashSetOf|linkedMapOf|linkedSetOf|Channel)[ \t]*[<(]/) return "mutable val"
+  return ""
+}
+function report(label, d,   n) {
+  n = d; sub(/^va[lr][ \t]+/, "", n); sub(/[^A-Za-z0-9_].*$/, "", n)
+  printf "%s:%d: %s: %s (arch rule 13)\n", rel, FNR, label, n
+}
+function count(s, re) { return gsub(re, "", s) }
+{
+  line = $0
+  cont = in_block || in_raw
+  if (in_block) {
+    p = index(line, "*/"); if (p == 0) next
+    line = substr(line, p + 2); in_block = 0
+  }
+  if (in_raw) {
+    p = index(line, "\"\"\""); if (p == 0) next
+    line = substr(line, p + 3); in_raw = 0
+  }
+  top = (!cont && line ~ /^[^ \t]/)
+  clean = line
+  while (match(clean, /"""/)) {
+    rest = substr(clean, RSTART + 3); q = index(rest, "\"\"\"")
+    if (q == 0) { clean = substr(clean, 1, RSTART - 1); in_raw = 1; break }
+    clean = substr(clean, 1, RSTART - 1) "\"\"" substr(rest, q + 3)
+  }
+  gsub(/"([^"\\]|\\.)*"/, "\"\"", clean)
+  gsub(/'\''([^'\''\\]|\\.)*'\''/, "'\'''\''", clean)
+  gsub(/\/\*([^*]|\*+[^*\/])*\*+\//, "", clean)
+  p = index(clean, "/*")
+  if (p > 0) { clean = substr(clean, 1, p - 1); in_block = 1 }
+  sub(/\/\/.*$/, "", clean)
+  body = clean; sub(/^[ \t]+/, "", body)
+  if (body == "") next
+  d = decl(body)
+  if (top) in_obj = 0
+  if (in_obj) {
+    if (depth == 1 && (k = kind(d)) != "") report(k " in object", d)
+    depth += count(clean, "[{(]") - count(clean, "[})]")
+    if (depth <= 0) in_obj = 0
+    next
+  }
+  if (top && (k = kind(d)) != "") report("top-level " k, d)
+  if (d ~ /^(data[ \t]+)?object[ \t]+[A-Za-z_]/ || d ~ /^companion[ \t]+object([ \t{:]|$)/) {
+    p = index(d, "{")
+    if (p > 0) {
+      member = substr(d, p + 1); sub(/^[ \t]+/, "", member); member = decl(member)
+      if ((k = kind(member)) != "") report(k " in object", member)
+    }
+    depth = count(clean, "[{(]") - count(clean, "[})]")
+    if (depth > 0) in_obj = 1
+  }
+}'
 
 listing="$(find "$ROOT" -path '*/.git/*' -prune -o -type f -name '*.kt' -print | sort)"
 violations=""
@@ -68,15 +132,10 @@ for kt in $listing; do
   [ -n "$kt" ] || continue
   krel="${kt#$ROOT/}"
   composekit_skip_path "$krel" && continue
-  case "/${kt#$ROOT/}/" in
-    */navigation/*|*/presentation/*) ;;
-    *) continue ;;
+  case "/$krel/" in
+    */src/test/*|*/src/*Test/*) continue ;;
   esac
-  if [ "$HAVE_RG" -eq 1 ]; then
-    hits="$(rg -n --no-filename -e "$PATTERN" "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$AWK_PROG")"
-  else
-    hits="$(grep -n -E -e "$PATTERN" "$kt" 2>/dev/null | awk -v rel="${kt#$ROOT/}" "$AWK_PROG")"
-  fi
+  hits="$(awk -v rel="$krel" "$AWK_PROG" "$kt")"
   if [ -n "$hits" ]; then
     violations="$violations$hits
 "

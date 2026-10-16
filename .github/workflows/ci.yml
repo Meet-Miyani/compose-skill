@@ -22,3 +22,16 @@ jobs:
 
       - name: Validate plugin manifests
         run: python3 scripts/validate-plugin-manifests.py
+
+      - name: Validate skills
+        # Plain logs, no annotations: the known warnings (no per-skill README,
+        # sourced lib files) are by design. Errors still fail the step.
+        env:
+          CI: "false"
+          NO_COLOR: "1"
+        run: |
+          status=0
+          for skill in skills/*/; do
+            ./scripts/validate-skill.sh "$skill" || status=1
+          done
+          exit $status

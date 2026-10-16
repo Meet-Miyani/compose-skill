@@ -1,20 +1,22 @@
 ---
-description: Token-optimized writing standards for skill reference files. Apply when creating or editing reference .md files in the references/ directory.
-globs: references/*.md
+description: Token-optimized writing standards for skill reference files. Apply when creating or editing reference .md files in a skill's references/ directory.
+globs: skills/**/references/*.md
 alwaysApply: false
 ---
 
 # Reference File Writing Standards
 
-Every reference file must be token-efficient. Agents already know standard APIs — provide patterns, pitfalls, and project-specific rules, not tutorials.
+Every reference file must be token-efficient. Agents already know standard APIs — provide the kit's rules, pitfalls, and project-specific decisions, not tutorials.
 
 ## File Structure
 
 1. **Line 1: `# Title`** — concise topic name
-2. **Line 2-3: One-liner scope** — what this file covers and when to use it, not a marketing paragraph
-3. **Cross-links** — point to related canonical files (e.g., "For shared architecture concepts, see [architecture.md](architecture.md)")
-4. **`References:` block** (optional) — external URLs for provenance; keep, they're cheap
-5. **No Table of Contents** — agents navigate by headings, not TOC lists
+2. **Next line: `Load when: …`** (or `Load this when …`) — the task that needs this file, in one line
+3. **Optional `## Choose`** — a short yes/no decision tree when the file covers a real choice
+4. **Rule sections** — numbered rules: bold rule, one-line reason, `*Prevents:*` the failure it stops; tag `(non-negotiable)` or `(default)` where it matters
+5. **`## Red flags`** (when real rationalizations exist) — `| Thought | Reality |` table, first-person thought → rebuttal citing the rule number
+6. **`## Verification`** — checkbox gates, each a command or a yes/no condition
+7. **No long Table of Contents** — agents navigate by headings; a file well past 100 lines may open with a 5–10 line contents list
 
 ## Writing Rules
 
@@ -22,97 +24,72 @@ Every reference file must be token-efficient. Agents already know standard APIs 
 |---|---|---|
 | Tables over prose | `\| Issue \| Fix \|` table | Multi-paragraph explanations |
 | Rules over explanations | State the rule directly | Explain "why" unless non-obvious |
-| Examples over descriptions | One BAD/GOOD code pair | Three paragraphs describing the concept |
+| Examples over descriptions | One WRONG/RIGHT code pair | Three paragraphs describing the concept |
 | No tutorial content | Show the pattern/pitfall | Explain what `StateFlow` or `PagingSource` is |
-| One-liner intros | "SQLite persistence via Room (KMP-ready since 2.7.0)" | "Room is a powerful persistence library that provides an abstraction layer over SQLite..." |
+| Third-party APIs as gotchas | One line naming the API + "verify against current docs" | Setup walkthroughs, pinned versions |
 | Trim filler words | Direct statements | "It is important to note that...", "In order to...", "You should consider..." |
 
 ## DRY Cross-Referencing
 
-Each concept has ONE canonical home. Other files link to it instead of duplicating.
+Each rule has ONE canonical home. Other files point to it instead of duplicating; a pointer into another skill names that skill.
 
 | Concept | Canonical home | Other files do |
 |---|---|---|
-| MVI ViewModel collection pattern | `architecture.md` § Reactive Data Collection | 5-8 line domain stub + cross-link |
-| State modeling (forms, calculators) | `architecture.md` § State Modeling | Cross-link |
-| Effect delivery (Channel vs SharedFlow) | `architecture.md` § Effect Delivery | Cross-link |
-| Generic test setup (runTest, Turbine) | `testing.md` | Domain-specific test factory + cross-link |
-| Koin module patterns | `koin.md` | 1-2 line binding example + cross-link |
-| Hilt module patterns | `hilt.md` | 1-2 line binding example + cross-link |
-| Nav 3 + DI wiring | `navigation-3-di.md` | Condensed example + cross-link |
+| MVI contract, `BaseViewModel`, effects, collection at the Route | `compose-architecture/references/mvi-contract.md` | One-line rule + pointer |
+| State ownership, drafts, `SavedStateHandle` | `compose-architecture/references/state-ownership.md` | Pointer |
+| Failure types, `launchGuarded`, UI error tiers | `compose-architecture/references/error-handling.md` | Pointer |
+| Flows, scopes, dispatchers | `compose-architecture/references/coroutines-flow.md` | Pointer |
+| Koin modules, lifetimes, ViewModel params | `compose-architecture/references/dependency-injection.md` | 1–2 line binding example + pointer |
+| Navigation 3 keys, back stack, results | `compose-architecture/references/navigation.md` | Pointer |
+| Existing Hilt / MVVM / Navigation 2 projects | `compose-architecture/references/existing-projects.md` | Pointer |
+| ViewModel test setup, fakes, test dispatchers | `compose-feature/references/testing.md` | Domain-specific fake + pointer |
 
 ## Section Templates
 
-### MVI Integration (in data-layer files)
-
-Keep to ~5-8 lines: state the domain-specific mapping rule + cross-link.
+### Rule
 
 ```markdown
-## MVI Integration
-
-Map entities to domain models at the repository boundary. Never pass raw [DataType] to the UI.
-
-For the ViewModel collection pattern, see [architecture.md](architecture.md) — Reactive Data Collection.
+3. (non-negotiable) **Transport failures propagate to `launchGuarded`; no repository `catch` swallows them.** The ViewModel's `onError` picks the tier. *Prevents:* stale data with no message and no retry.
 ```
 
-### DI Integration (in data-layer files)
-
-1-2 line binding examples + link.
+### Red flags
 
 ```markdown
-## DI Integration
+## Red flags
 
-Always provide [Type] as a **singleton**.
-
-\`\`\`kotlin
-// Koin: single<Type> { createType(get()) }
-// Hilt: @Provides @Singleton fun provideType(...): Type = ...
-\`\`\`
-
-For full module patterns, see [koin.md](koin.md) or [hilt.md](hilt.md).
-```
-
-### Anti-Patterns (table format)
-
-```markdown
-## Anti-Patterns
-
-| Anti-pattern | Why it is harmful | Better replacement |
-|---|---|---|
-| [pattern] | [consequence] | [fix] |
-```
-
-### Performance / Critical Rules (table format)
-
-```markdown
-## Critical Rules
-
-| Rule | Why |
+| Thought | Reality |
 |---|---|
-| [rule] | [brief rationale] |
+| "I'll swallow the timeout so the UI stays calm." | No. Rule 3: the ViewModel's `onError` decides the tier. |
+```
+
+### Verification
+
+```markdown
+## Verification
+
+- [ ] `rg -n "catch \(" <feature-root>/data` shows no catch that drops a transport failure: yes or no.
 ```
 
 ## Code Examples
 
-- Use BAD/GOOD pairs — show the mistake and the fix side by side
+- Use WRONG/RIGHT pairs — show the mistake and the fix side by side
 - No redundant comments like `// Import the module` — only explain non-obvious intent
 - Keep examples minimal: show the pattern, not a full app
-- Use `<latest>` for dependency versions with a comment: `// search: "library latest version"`
+- No pinned dependency versions; say where to verify (`gradle/libs.versions.toml`, official release notes)
 
 ## Token Budget
 
-- Target: **under 3,500 tokens** per reference file (hard max: 4,000)
+- Target: **under 3,000 tokens** per reference file (hard max: 4,500)
 - Estimate: characters / 4
-- If a file grows past 3,500 tokens, split into base + advanced (e.g., `animations.md` + `animations-advanced.md`)
+- If a file grows past the target, split it by topic into two references, each with its own `Load when` line
 
 ## Checklist for New Reference Files
 
-- [ ] One-liner scope, no marketing intro
-- [ ] No Table of Contents
+- [ ] `# Title` plus a one-line `Load when`
+- [ ] Numbered rules with `*Prevents:*`; no tutorial content
 - [ ] Tables instead of multi-paragraph prose
-- [ ] BAD/GOOD code examples for key pitfalls
-- [ ] Anti-patterns table at the end
-- [ ] Cross-links to canonical homes (no duplicated patterns)
-- [ ] MVI/DI/Testing sections use stubs + cross-links
-- [ ] Under 3,500 tokens
-- [ ] Linked from `SKILL.md` (both trigger list and reference catalog)
+- [ ] WRONG/RIGHT code examples for key pitfalls
+- [ ] `## Verification` checklist; `## Red flags` where real rationalizations exist
+- [ ] Pointers to canonical homes (no duplicated rules)
+- [ ] Under 3,000 tokens
+- [ ] Listed in the owning `SKILL.md` `## Reference lookup` with when to load it

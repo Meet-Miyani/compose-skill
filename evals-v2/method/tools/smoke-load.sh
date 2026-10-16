@@ -6,7 +6,11 @@
 set -u
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 W=$REPO/evals-v2/method/work/smoke8
-TOOL=$1; TASK=$2
+TOOL="${1:-}"; TASK="${2:-}"
+if [ -z "$TOOL" ] || [ -z "$TASK" ]; then
+  echo "usage: smoke-load.sh <claude|codex|agy> <S1|S2|S3>" >&2
+  exit 2
+fi
 OUT=$W/runs/$TOOL-$TASK
 rm -rf "$OUT"; mkdir -p "$OUT"
 git clone -q "$W/base" "$OUT/project"
