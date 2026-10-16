@@ -48,8 +48,8 @@ One consistent house style, measured on seven models in real agent CLIs.
 - **v6 A/B (90 agentic runs):** v6.0 vs the v6.1 fixes vs no kit. The "no new UI controls, screens or features" item
   on conform tasks went from 2 of 10 cells (v6.0) to 8 of 10 (v6.1), and every pre-registered rule held
   ([results](#results-v61)).
-- **v6.1.0 stable (2026-10-05):** no model scored below its own no-kit result, so it is released as stable. v6.1.1
-  (2026-10-11), the GitHub "Latest" release, keeps that skill guidance and fixes a guard-script security issue.
+- **v6.1.0 stable (2026-10-05):** no model scored below its own no-kit result, so it is released as stable. v6.1.2
+  (2026-10-16), the GitHub "Latest" release, keeps that skill guidance; v6.1.1 and v6.1.2 fix the guard scripts.
 - **Cheap models (36 add-on runs):** DeepSeek V4.1 Flash went from 82.1% to 97.4% of items with v6.1, and DeepSeek
   V4 Pro from 74.4% to 87.2% ([results](#add-ons-cheap-deepseek-models)).
 
@@ -352,8 +352,11 @@ Checks on the kit itself:
 - [x] **v6.0.0-preview.1:** 7 skills, entry tree, 4 install channels *(released 2026-10-01)*
 - [x] **v6.1.0, stable:** the v6.1 fixes passed every pre-registered rule, and no model scored below its
   no-kit result. Conform over-scoping fixed (no-new-UI item 2/10 → 8/10) *(released 2026-10-05, [results](#results-v61))*
-- [x] **v6.1.1, now "Latest":** security fix for the guard scripts: `.composekit.conf` is read as data, never run as
+- [x] **v6.1.1:** security fix for the guard scripts: `.composekit.conf` is read as data, never run as
   shell code, and a config line the guards cannot use fails the run *(released 2026-10-11)*
+- [x] **v6.1.2, now "Latest":** guard fixes: `check-file-level-state` finds `lateinit` and annotated `var`s, mutable
+  top-level `val`s and mutable `object` members in every source set; `check-contract-shape` reads same-line
+  annotations *(released 2026-10-16)*
 - [x] **Cheap-model add-ons:** DeepSeek V4.1 Flash 32 → 38 and DeepSeek V4 Pro 29 → 34 of 39 with v6.1
   *(2026-10-05, [results](#add-ons-cheap-deepseek-models))*. MiniMax M3 was dropped; Kimi K3, GLM 5.3 and Qwen 3.8 Max are not planned
 - [ ] **Journey page** on the site: the full test history

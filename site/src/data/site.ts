@@ -16,7 +16,7 @@ export const blob = (path: string) => `${repoUrl}/blob/main/${path}`;
 /** Tree URL for a folder on `main`. */
 export const tree = (path: string) => `${repoUrl}/tree/main/${path}`;
 
-export const version = 'v6.1.1';
+export const version = 'v6.1.2';
 export const license = 'MIT';
 
 export const authorName = 'Meet Miyani';
@@ -51,7 +51,7 @@ export const achieved = [
   },
   {
     label: '2026-10-05',
-    body: 'v6.1.0 stable: no model scored below its own no-kit result, so it is released as stable. v6.1.1 (2026-10-11) keeps that guidance and fixes a guard-script security issue.',
+    body: 'v6.1.0 stable: no model scored below its own no-kit result, so it is released as stable. v6.1.1 (2026-10-11) and v6.1.2 (2026-10-16) keep that guidance and fix the guard scripts.',
   },
   {
     label: 'Cheap models',
