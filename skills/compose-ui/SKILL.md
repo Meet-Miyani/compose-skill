@@ -3,7 +3,7 @@ name: compose-ui
 description: >-
   Writes and reviews composables for Compose and CMP: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable code, recomposition, stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme, colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI, error tiers, or module graph (compose-architecture), ViewModel or data work (compose-feature, compose-data), Gradle or module work (compose-project), or expect/actual splits (compose-platform).
 metadata:
-  last-reviewed: 2026-09-25
+  last-reviewed: 2026-10-22
 ---
 
 # Compose UI
@@ -37,7 +37,7 @@ You reason about scope, not vibes. "Wrapping it in `remember`" and "adding `@Imm
 
 > **Iron law: read depth decides cost.** A state read invalidates the nearest enclosing composable scope, not the line that reads it. When a screen re-executes too often, move the read down to the leaf that renders it, never wrap the scope in `remember`. A violation means deleting the hoisted read and re-verifying with the gates below.
 
-Rules 1–3 and 5–11 are **non-negotiables**. Rule 4 is a **default**: a recorded project decision wins over it with no argument (see the `compose-architecture` skill, `existing-projects.md` item 5).
+Rules 1–3 and 5–12 are **non-negotiables**. Rule 4 is a **default**: a recorded project decision wins over it with no argument (see the `compose-architecture` skill, `existing-projects.md` item 5).
 These rules govern code you write. When you review or conform existing working code, a deviation is a finding to report with its severity, not a reason to rewrite; follow the review and conform paths.
 
 1. **Only the Route touches the ViewModel. The Screen is stateless (state in, callbacks out). Leaves take sub-state plus specific callbacks, never `onAction`.** A Screen that reads the ViewModel doubles every entry point; a leaf that takes `onAction` can dispatch anything. *Prevents:* entry-point duplication and unreviewable leaves.
@@ -49,8 +49,9 @@ These rules govern code you write. When you review or conform existing working c
 7. **Never clear or hide existing content during a refresh.** Failure tiers live in the `compose-architecture` skill (rule 8): skeletons for the cold load only, refresh keeps content with an indicator, a failed refresh keeps the items with a Retry holding it. *Prevents:* wiped content and trapped screens.
 8. **Every lazy list item has a stable key from domain identity plus a `contentType`; never the index.** Keep item scope light: hoist parsing and formatting out of item scope. *Prevents:* scrambled row state and per-tick parsing.
 9. **Every user-facing string is a resource, present in every locale. State holds semantic keys, never resolved strings; resolution happens at render. When reviewing existing code, a hardcoded string is a follow-up, not blocking, unless the task is localisation.** *Prevents:* untranslated UI and locale drift the guard catches.
-10. **Branch panes on the received size class and apply WindowInsets exactly once per screen.** Panes mount through the Navigation 3 scene strategy so Back, deep link, and restore reach them; the detail leaf never reads window size. Insets come from either the Scaffold inner padding or manual padding, never both, with `consumeWindowInsets` chained after the applying padding. *Prevents:* unrestorable panes and double-offset content (AND-21, AND-23, AND-27, AND-72).
+10. **Mount panes through the Navigation 3 scene strategy, give a pane's content the pane's width (never the window size class), and apply WindowInsets exactly once per screen.** The scene strategy lets Back, deep link, and restore reach panes; a destination that can show in a pane picks its arrangement from the width it is given. Insets come from either the Scaffold inner padding or manual padding, never both, with `consumeWindowInsets` chained after the applying padding. *Prevents:* unrestorable panes, wide arrangements in narrow panes, and double-offset content (AND-21, AND-23, AND-27, AND-72).
 11. **Code in `commonMain` never imports `java.*`, `android.*`, `LocalContext`, or `R`; inject dispatchers and use `Dispatchers.Default` as the shared default.** A `java.time.Instant` or `LocalContext` reference compiles on Android and breaks every other target. Time is `kotlin.time.Instant`; strings are CMP `Res` accessors. `Dispatchers.IO` exists on Kotlin/Native since coroutines 1.7.0 but is unavailable when the module also targets JS/Wasm. *Prevents:* shared code that compiles on only some targets.
+12. **Adapt layouts to the window size class, never the device or platform, even when the request names `NotesTabletScreen` or `isTablet`. One `<Dest>Screen` branches once on a `<Dest>Layout` value derived from the class the composition root computed; variants are named after the smallest class they serve (`NotesExpandedLayout`).** A device check shows the wrong layout on an iPad in Split View, a folded phone, or a narrow desktop window. *Prevents:* device branches and `*TabletScreen` copies that drift apart.
 
 ## Workflow
 
@@ -91,6 +92,8 @@ These rules govern code you write. When you review or conform existing working c
 | "I'll put this string inline; translation comes later." | No. Rule 9: every user-facing string is a resource in every locale before done. |
 | "I'll use `java.time` / `LocalContext` here; it works on my device." | No. Rule 11: `commonMain` uses `kotlin.time.Instant` and CMP `Res`. Never `java.*`, `android.*`, `LocalContext`, or `R`. |
 | "I'll default this dispatcher to `Dispatchers.IO`; it is only shared code." | Rule 11: inject it and default to `Dispatchers.Default` in `commonMain`, which may also target JS/Wasm. |
+| "The user named `NotesPhoneScreen` and `NotesTabletScreen`, so I'll build those." | No. Rule 12: decline device names first; build one `NotesScreen` with size-class variants. |
+| "I'll keep `isTablet`; it is a width check now." | No. Rule 12: name the value after the layout (`NotesLayout.Expanded`), never the device. |
 
 ## Verification
 
@@ -101,6 +104,7 @@ These rules govern code you write. When you review or conform existing working c
 - [ ] `rg -n "Color\(0x" --glob '*.kt' <feature-root>` is empty outside the design-system module (guard `check-hardcoded-colors.sh`).
 - [ ] Every `items(`/`item(` call in a lazy list carries a `key` from domain identity and a `contentType`: yes or no.
 - [ ] Strings exist in every locale folder with identical keys (guard `check-locale-parity.sh`).
+- [ ] `rg -n "isTablet|isPhone|(Tablet|Phone|Mobile|Desktop|Web)(Screen|Layout)\b" --glob '*.kt' <feature-root>` is empty.
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
 
 ## Reference lookup
@@ -122,5 +126,6 @@ Load only the references this task needs. One level deep.
 - [images.md](references/images.md) — Coil 3 setup and API choice, placeholders, caching, CMP placement.
 - [keyboard-and-focus.md](references/keyboard-and-focus.md) — focus on arrival, IME actions, dismiss rules.
 - [modifiers.md](references/modifiers.md) — modifier order, custom `Modifier.Node`, lambda (deferred-read) modifiers.
-- [adaptive-and-insets.md](references/adaptive-and-insets.md) — window size classes, panes, edge-to-edge and insets exactly once.
+- [adaptive-layouts.md](references/adaptive-layouts.md) — adaptive shape per destination, size class not device, layout variants and naming, pane widths, scene-strategy panes.
+- [edge-to-edge-and-insets.md](references/edge-to-edge-and-insets.md) — edge-to-edge, insets exactly once, keyboard and IME.
 - [performance-diagnostics.md](references/performance-diagnostics.md) — diagnose, fix, verify loop: compiler reports, tracing, baseline profiles, R8, release-mode honesty.

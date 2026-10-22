@@ -26,6 +26,7 @@ fact MIT (techniques only, no content taken). Flagged for the moderator; no acti
 | Kotlin/KMP-App-Template | https://github.com/Kotlin/KMP-App-Template | Apache-2.0 |
 | JetBrains/compose-multiplatform (examples/) | https://github.com/JetBrains/compose-multiplatform | Apache-2.0 |
 | Kotlin/kotlin-agent-skills | https://github.com/Kotlin/kotlin-agent-skills | Apache-2.0 |
+| Android Developers documentation and androidx source | https://developer.android.com/ , https://android.googlesource.com/platform/frameworks/support | CC BY 2.5 (docs content), Apache-2.0 (code) |
 
 ## Checked, not absorbed (no content taken; see EXTERNAL_LEDGER.md G8)
 
@@ -33,6 +34,7 @@ fact MIT (techniques only, no content taken). Flagged for the moderator; no acti
 |---|---|---|
 | JetBrains/skills | https://github.com/JetBrains/skills | No license file observed in the clone; deferral pointers only, no text copied |
 | maxrave-dev/kotlin-footguns | https://github.com/maxrave-dev/kotlin-footguns | GPL-3.0; topic checklist only, no text copied; landed rules re-derived from official docs |
+| Apple Human Interface Guidelines (Layout) | https://developer.apple.com/design/human-interface-guidelines/layout | Apple terms; cited as evidence only, no text copied |
 
 ## Style sources (techniques only, in STYLE_NOTES.md; no content taken)
 

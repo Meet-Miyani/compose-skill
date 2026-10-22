@@ -37,6 +37,7 @@ description: >-
 Read the area's SKILL.md only for the task's main area; for every other area, read only its one reference.
 
 - UI → `../compose-ui/references/ux-states.md`; if this is the task's main area, also `../compose-ui/SKILL.md`.
+- Adaptive layout (tablet, foldable, desktop or browser window, window size) → `../compose-ui/references/adaptive-layouts.md`; if this is the task's main area, also `../compose-ui/SKILL.md`.
 - State and lifetime → `../compose-architecture/references/state-ownership.md`; if this is the task's main area, also `../compose-architecture/SKILL.md`.
 - Errors → `../compose-architecture/references/error-handling.md`; if this is the task's main area, also `../compose-architecture/SKILL.md`.
 - Navigation → `../compose-architecture/references/navigation.md`; if this is the task's main area, also `../compose-architecture/SKILL.md`.

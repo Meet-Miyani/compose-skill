@@ -49,6 +49,7 @@ One file holds one public type. The file name equals that type. A file with seve
 | Nav key | Purpose plus `Key` | `NoteListKey`, `NoteDetailKey(noteId: Long)` |
 | Destination content | Purpose plus `Screen` or `Sheet` | `NoteListScreen`, `NoteDetailSheet` |
 | Destination wrapper | Purpose plus `Route`, Koin-free, takes the ViewModel | `NoteDetailRoute` |
+| Size-class layout variant | `<Dest><SizeClass>Layout` inside the one Screen, never a device name (the `compose-ui` skill, rule 12) | `NotesExpandedLayout` |
 
 Never use an `Impl` suffix or an `I` prefix (§2.2). Never add `Util` to a feature file or package name (§2.2).
 
