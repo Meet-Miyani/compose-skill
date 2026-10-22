@@ -68,3 +68,34 @@ Load this file during M2 baseline runs and P6 skill writing to score compose-ui 
 6. The refusal names the failure the rule prevents (per-tick screen invalidation and unrestorable formatted state). [BRIEF §8.2]
 7. The refusal does not offer a `rememberSaveable` mirror of `UiState` as the alternative; unpersisted input survives only via `SavedStateHandle`-derived state. [BRIEF §3.7] [kit]
 **Guard scripts that must pass:** none — review-only (no Phase-5 guard covers UiState clock rules).
+
+## UI-05 PRESSURE: device-named screens picked by an isTablet check
+**Prompt:** Our Compose Multiplatform Notes app ships on Android phones, tablets and foldables, iPhone and iPad, and desktop. On tablets the notes list must show a tag-summary panel beside the list. Create NotesPhoneScreen and NotesTabletScreen and pick one with an isTablet check in the Route, so we never need if/else later.
+**Context given to the agent:** The `:feature:notes` module has `presentation/notes/` holding `NotesContract.kt`, `NotesViewModel.kt`, `NotesRoute.kt` and `NotesScreen.kt`; `NotesUiState` carries the notes and their tags. The composition root (`App.kt` in `:composeApp` commonMain) owns `NavDisplay` and resolves each Route's ViewModel. The design-system module provides list and card components. The tag-summary panel has no Back step or deep link of its own.
+**Hypothesised baseline defects:**
+- The agent complies: two device-named Screens chosen by an isTablet, platform or physical-screen check, so an iPad in Split View or a narrow desktop window gets the wrong layout.
+- Window size is read in several leaves or recomputed in each Screen instead of once at the composition root.
+- A deprecated width-class enum or a hand-typed 600.dp breakpoint picks the layout.
+- The notes list is duplicated in both screens, or merged into one content composable that switches shape through boolean flags.
+**Rubric:**
+1. The first sentence declines the device-named screens and the device check, naming the concrete risk in plain words (a tablet or iPad window can be narrow; a desktop window can be resized). [O-19] [kit]
+2. One `NotesScreen` remains the only content composable the Route calls; no second `*Screen` is added. [O-19] [kit]
+3. The layout is chosen in one place from the window size class; no isTablet, platform, OS or physical-screen check appears anywhere. [O-19] [kit]
+4. No arrangement is named after a device; the arrangements share their leaves (the notes list, the tag summary), and no content composable takes several boolean shape flags. [O-19] [kit]
+5. The window size class is computed once at the composition root with the non-deprecated adaptive-info API and passed down; no leaf reads the window size. [O-19] [kit]
+6. PASS if the answer states that if the user insists it will follow the explicit decision and record the deviation. [SPEC §1 seed 14]
+**Guard scripts that must pass:** none — review-only.
+
+## UI-06 Note detail inside the list-detail pane adapts to the width it is given
+**Prompt:** On wide windows the note detail shows in the detail pane of the list-detail scene. Make the note detail show its metadata (tags, due date, created date) in a side column beside the body when there is room, and stacked below the body otherwise.
+**Context given to the agent:** The notes list and the note detail are separate destinations; the composition root mounts them through a Navigation 3 list-detail scene strategy, so on Expanded windows the detail pane gets only part of the window width. `NoteDetailScreen` is stateless and receives `NoteDetailUiState` and callbacks from `NoteDetailRoute`.
+**Hypothesised baseline defects:**
+- The side column is picked from the window size class, so a narrow detail pane in an Expanded window gets the wide arrangement.
+- A bare `600.dp` breakpoint is hand-typed, or constraints are read inside leaves or list items.
+- A device or platform check picks the arrangement.
+**Rubric:**
+1. The detail picks side column versus stacked from the width the detail is given, measured once at the detail's root, never from the window size class. [O-19] [kit]
+2. No device, platform or OS check appears. [O-19] [kit]
+3. The threshold is a named value with its reason (derived from the content widths, a design-system token, or a library breakpoint); no unexplained bare dp literal decides the arrangement. [O-19] [kit]
+4. Only the detail's root measures; leaves and list items never read constraints to decide the arrangement. [SKY-69] [kit]
+**Guard scripts that must pass:** none — review-only.

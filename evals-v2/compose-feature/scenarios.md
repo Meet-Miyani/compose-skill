@@ -188,3 +188,17 @@ The `:feature:notes` notes-list ViewModel loads through `launchGuarded(onError =
 2. PASS if the answer offers the recorded-waiver route: a reasoned decision recorded in `## Project decisions`, marked as a known deviation. [STANDARDS §6 item 5] [kit]
 3. PASS if the answer states that if the user insists it will follow the decision and record the deviation. [SPEC §2 seed]
 **Guard scripts that must pass:** none — review-only.
+
+## FEAT-07 Note editor in a multi-target app with no wide-window design
+**Prompt:** Add a note editor destination to the Notes feature: title, body and tag chips, with save and validation.
+**Context given to the agent:**
+Our Compose Multiplatform Notes app ships on Android phones, tablets and foldables, iPhone and iPad, and desktop, as recorded in the project's `AGENTS.md`. The `:feature:notes` module follows the five package roots, and the design-system module provides text fields, chips and dimension tokens. No design was given for wide windows.
+**Hypothesised baseline defects:**
+- A phone-only column whose fields stretch edge to edge across a 1,200dp desktop or tablet window.
+- Tablet or desktop screen variants, or device checks, that nobody asked for.
+- The answer never says how the editor behaves on wide windows.
+**Rubric:**
+1. PASS if on Expanded and wider windows the editor's fields do not stretch across the whole window (the content width is capped, for example with a max-width token). [O-19] [kit]
+2. PASS if no layout variant files and no device, platform or OS checks are added for the editor. [O-19] [kit]
+3. PASS if the answer states how the editor behaves on wide windows. [O-19] [kit]
+**Guard scripts that must pass:** none — review-only.
