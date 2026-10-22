@@ -17,8 +17,8 @@ Contents:
 
 ## Choose
 
-- Does the request or design show a different arrangement on wider windows?
-  - No → **Reflow**: one layout whose content width is always capped (`widthIn(max = …)`): use the design-system max-width token, or a named constant in the feature when no token is visible, listed as a follow-up. Never skip the cap. Lists become adaptive grids (Layout-choice decisions below).
+- Does the request text or a provided design show a different arrangement on wider windows? Recorded targets or window classes are not a design.
+  - No → **Reflow**: one layout whose content width is always capped, cap before fill (`Modifier.widthIn(max = …).fillMaxWidth()`): use the design-system max-width token, or a named constant in the feature when no token is visible, listed as a follow-up. Never skip the cap. Offer any wider arrangement you would add as a follow-up. Lists become adaptive grids (Layout-choice decisions below).
   - Yes → Does the second area need its own Back step or deep link?
     - Yes → **Multi-pane**: two destinations hosted by a scene strategy (rule 11). Each keeps one Screen.
     - No → **Layout variants** (rules 2–5).
@@ -90,6 +90,7 @@ else { ListDetailPaneSplit(modifier, content = body) }
 ## Gotchas
 
 - Compute the class with the V2 adaptive-info function (`currentWindowAdaptiveInfoV2()`); the older `currentWindowAdaptiveInfo()` is deprecated and ignores the Large and Extra-large widths, and the `WindowWidthSizeClass` enum is deprecated. The CMP artifact group is `org.jetbrains.compose.material3.adaptive`. Confirm the names in the current docs and the version in `libs.versions.toml`.
+- `fillMaxWidth()` before `widthIn(max = …)` fixes the minimum width to the full window, so the cap has no effect and the fields stretch; put the cap first.
 - A landscape phone is wide but Compact in height; when a variant needs vertical room, the selector also checks the height breakpoint.
 - A media-query integration flag is set once in the Application; without it queries never fire. (AND-78)
 - Read window width and height through the derived media-query form so rapid resizes ride derived state instead of recomposing per pixel. (AND-79)
@@ -99,6 +100,7 @@ else { ListDetailPaneSplit(modifier, content = body) }
 
 | Thought | Reality |
 |---|---|
+| "The app ships on tablets and desktop, so I'll give the editor an Expanded layout with a side panel." | No. Choose: only the request text or a provided design adds a wider arrangement; recorded targets only make the cap necessary. Build Reflow and offer the side panel as a follow-up. |
 | "The user named `NotesTabletScreen`, so the rename is in scope." | No. Rule 1: decline device names even when requested; build one `NotesScreen` with size-class variants and say why first. |
 | "I'll keep the name `isTablet`; its meaning is width now." | No. Rule 1: a device name invites a device check. Name the value after the layout (`NotesLayout.Expanded`). |
 | "I can't verify the adaptive API, so `BoxWithConstraints` in the Route with `600.dp` will do." | No. Rules 2 and 5: the root computes the class (Gotchas name the call to confirm) and the breakpoint is the library constant. |

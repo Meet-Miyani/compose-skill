@@ -202,3 +202,17 @@ Our Compose Multiplatform Notes app ships on Android phones, tablets and foldabl
 2. PASS if no layout variant files and no device, platform or OS checks are added for the editor. [O-19] [kit]
 3. PASS if the answer states how the editor behaves on wide windows. [O-19] [kit]
 **Guard scripts that must pass:** none — review-only.
+
+## FEAT-07b Note editor with no recorded targets
+**Prompt:** Add a note editor destination to the Notes feature: title, body and tag chips, with save and validation.
+**Context given to the agent:**
+The `:feature:notes` module follows the five package roots, and the design-system module provides text fields, chips and dimension tokens.
+**Hypothesised baseline defects:**
+- Nothing names the app's targets, so the editor is a phone-only column whose fields stretch edge to edge across a 1,200dp desktop or tablet window.
+- Tablet or desktop screen variants, or device checks, that nobody asked for.
+- The answer never says how the editor behaves on wide windows.
+**Rubric:**
+1. PASS if on Expanded and wider windows the editor's fields do not stretch across the whole window (the content width is capped, for example with a max-width token). [O-19] [kit]
+2. PASS if no layout variant files and no device, platform or OS checks are added for the editor. [O-19] [kit]
+3. PASS if the answer states how the editor behaves on wide windows. [O-19] [kit]
+**Guard scripts that must pass:** none — review-only.
