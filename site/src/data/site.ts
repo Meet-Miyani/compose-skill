@@ -16,7 +16,7 @@ export const blob = (path: string) => `${repoUrl}/blob/main/${path}`;
 /** Tree URL for a folder on `main`. */
 export const tree = (path: string) => `${repoUrl}/tree/main/${path}`;
 
-export const version = 'v6.1.2';
+export const version = 'v6.2.0';
 export const license = 'MIT';
 
 export const authorName = 'Meet Miyani';
@@ -51,7 +51,7 @@ export const achieved = [
   },
   {
     label: '2026-10-05',
-    body: 'v6.1.0 stable: no model scored below its own no-kit result, so it is released as stable. v6.1.1 (2026-10-11) and v6.1.2 (2026-10-16) keep that guidance and fix the guard scripts.',
+    body: 'v6.1.0 stable: no model scored below its own no-kit result, so it is released as stable. v6.1.1 (2026-10-11) fixes a guard-script security issue; v6.2.0 (2026-10-23) adds adaptive-layout guidance and more guard fixes.',
   },
   {
     label: 'Cheap models',
@@ -80,7 +80,7 @@ export const skills = [
   { name: 'compose', owns: 'The entry decision tree (~1.3k tokens): task kind → affected area → exact reference files' },
   { name: 'compose-architecture', owns: 'Module graph, MVI/BaseViewModel contract, error tiers, state ownership, naming, Koin DI, Navigation 3, coroutines' },
   { name: 'compose-feature', owns: 'A screen or feature slice end to end: contract, ViewModel, UI, navigation, DI and tests; review mode' },
-  { name: 'compose-ui', owns: 'Composables: Route/Screen split, stability, loading/empty/error states, lists, animation, accessibility, resources' },
+  { name: 'compose-ui', owns: 'Composables: Route/Screen split, stability, loading/empty/error states, lists, animation, accessibility, resources, adaptive layouts' },
   { name: 'compose-data', owns: 'Repositories, Ktor, Room, DataStore, Paging 3, offline-first, data-layer tests' },
   { name: 'compose-project', owns: 'New projects, adopting the kit, modules, convention plugins, version catalog, CI and agent hooks' },
   { name: 'compose-platform', owns: 'commonMain vs expect/actual, iOS/Swift interop, desktop and web targets, platform lifecycle' },
