@@ -12,6 +12,8 @@ A CMP app is a shared `:composeApp` KMP module holding all shared code, plus a t
 
 An Android-only app is an `:app` module plus `:core:*`, `:data:*`, and `:feature:*` modules, with no KMP targets and no `iosApp`.
 
+(default) **Record in `## Project decisions` the targets the app ships and the window size classes every screen must work in, Compact through Expanded by default.** Desktop and web windows resize, iPad multitasking and Android multi-window give Compact windows on large screens, and Android 16 ignores orientation and resizability locks for apps that target it on screens whose smallest width is 600dp or more. *Prevents:* features planned as one phone column whose fields stretch across a wide window.
+
 ## Kit module skeleton
 
 Lay out the skeleton from `templates/project/` in bootstrap order: root settings, root build file, `gradle.properties`, `gradle/libs.versions.toml`, `gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`, and `gradle/wrapper/gradle-wrapper.properties` (the exact stable Gradle pin; AGP 9 needs Gradle 9.1 or newer), `.gitignore`, `build-logic/`, then `:core:mvi` and `:core:error` copied from the `compose-architecture` templates, then `:core:designsystem` (including `templates/designsystem/error/HandleAppErrors.kt`), then `:feature:notes`, then the composition root from `templates/composition/` plus `templates/modules/composeApp.build.gradle.kts` and `templates/modules/androidApp.build.gradle.kts` (CMP app) or `templates/modules/app.build.gradle.kts` (Android-only app). On CMP, copy `templates/modules/AndroidManifest.xml` to `androidApp/src/main/` (`com.android.application` never synthesizes one), and copy `templates/composition/MainViewController.kt` to `composeApp/src/iosMain/kotlin/<pkg>/`. The `iosApp` Xcode project is created from the official KMP wizard or template and calls `MainViewController()`; it is never a Gradle module. A `:data:<domain>` module is created only when a second feature needs the same data (see `dependency-rules.md` rule 6); its build file template is `templates/modules/data.build.gradle.kts`. Pure model classes with no platform dependency live in a platform-free library module, never inside a feature. The Notes app (notes list, note detail, note editor, tags) plus a Catalog list is the example domain throughout.
@@ -51,7 +53,7 @@ The composition templates include `MainApplication.kt`; copy it beside `MainActi
 
 ## Project decisions section
 
-Create one `## Project decisions` section in the project's agent instructions file (`AGENTS.md`/`CLAUDE.md`) during bootstrap (M-12). Record each default or conditional the project pins (for example `UI_MODEL=always`) and each waived non-negotiable with its reason. A preference said once in chat applies to the task at hand; the agent offers to record it. Machine-readable switches the scripts need live in `.composekit.conf`, not in prose.
+Create one `## Project decisions` section in the project's agent instructions file (`AGENTS.md`/`CLAUDE.md`) during bootstrap (M-12). Record each default or conditional the project pins (for example `UI_MODEL=always`) and each waived non-negotiable with its reason. Targets and window size classes take one line, for example `Targets: Android phones and tablets, iPhone and iPad, desktop. Every screen works in Compact through Expanded windows.` A preference said once in chat applies to the task at hand; the agent offers to record it. Machine-readable switches the scripts need live in `.composekit.conf`, not in prose.
 
 ## First feature and verification
 
