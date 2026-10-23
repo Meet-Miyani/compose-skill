@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - "v*"
+  # Attach the assets to an existing tag's release, for a run that failed or
+  # a release made before this workflow could attach them.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag, such as v6.2.0
+        required: true
 
 permissions:
   contents: write
@@ -11,30 +18,36 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: refs/tags/${{ env.TAG }}
           fetch-depth: 0
 
       - name: Package skills bundle
-        run: bash scripts/package-skills.sh "${GITHUB_REF_NAME}"
+        run: bash scripts/package-skills.sh "${TAG}"
 
       - name: Generate checksum
         run: |
           cd dist
-          sha256sum "compose-kit-skills_${GITHUB_REF_NAME}.tar.gz" > checksums.txt
+          sha256sum "compose-kit-skills_${TAG}.tar.gz" > checksums.txt
 
-      - name: Create release
+      - name: Create release or attach assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          assets=("dist/compose-kit-skills_${TAG}.tar.gz" dist/checksums.txt)
           release_flags=()
-          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+          if [[ "${TAG}" == *-* ]]; then
             release_flags+=(--prerelease)
           fi
-          gh release create "${GITHUB_REF_NAME}" \
-            "dist/compose-kit-skills_${GITHUB_REF_NAME}.tar.gz" \
-            dist/checksums.txt \
-            --generate-notes "${release_flags[@]}"
+          # A release made by hand keeps its notes and gets the assets. That
+          # includes one created while this job ran, which fails the create.
+          if gh release view "${TAG}" >/dev/null 2>&1 ||
+             ! gh release create "${TAG}" "${assets[@]}" --generate-notes "${release_flags[@]}"; then
+            gh release upload "${TAG}" "${assets[@]}" --clobber
+          fi

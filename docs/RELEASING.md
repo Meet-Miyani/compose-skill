@@ -6,6 +6,8 @@
 3. Run the architecture tests, validate the Claude marketplace, parse the plugin JSON files, build the Claude plugin
    folder (`bash scripts/build-plugin.sh <empty-dir>`), and package the skills bundle.
 4. Publish a `v<version>` tag through the normal review process. The release workflow attaches the skills tarball and checksum; a tag containing `-` creates a pre-release.
+   A release created by hand with written notes keeps them, and the workflow only attaches the assets. To attach them
+   to an existing tag again, run `gh workflow run release.yml -f tag=v<version>`.
    For a stable tag, the publish-claude-plugin workflow also rebuilds the `claude-plugin` branch (step 5).
 
 ## Anthropic's plugin directory
