@@ -1,0 +1,115 @@
+# Version catalog template. Every version lives here exactly once
+# (SKILL.md rule 7); module build files resolve through libs.* accessors.
+# Every pin below was verified against its current release page at
+# template-write time; re-verify each pin against that page at bootstrap
+# time and bump what moved (see version-catalog.md).
+# Coordinates below are verified against the official JetBrains
+# KMP-App-Template catalog and the current Koin docs; confirm them
+# against those pages for the versions you pin (see version-catalog.md).
+[versions]
+# ---- Build ----
+# AGP 9 or newer: shared modules use the Android-KMP library plugin and a
+# separate androidApp shell; needs Gradle 9.1 or newer, pinned exactly in
+# gradle/wrapper/gradle-wrapper.properties.
+agp = "9.1.1"
+kotlin = "2.4.10"
+# Current stable per https://github.com/JetBrains/compose-multiplatform/releases
+# (1.12.1, 2026-09-22; bundles JetBrains lifecycle 2.11.0).
+compose-multiplatform = "1.12.1"
+# material3 does not publish in lockstep with the CMP umbrella version:
+# runtime/foundation/ui reach 1.12.1 but material3 tops out below it, so it
+# carries its own pin. Verify at
+# https://repo1.maven.org/maven2/org/jetbrains/compose/material3/material3/maven-metadata.xml
+compose-material3 = "1.9.0"
+# Koin compiler plugin needs Kotlin 2.3.20+; its plugin artifact is
+# versioned separately from koin-core. 1.2.1 is the first release verified
+# against Kotlin 2.4.10; 1.0.0 crashes on Kotlin 2.4.x. Verify at
+# https://plugins.gradle.org/m2/io/insert-koin/compiler/plugin/io.insert-koin.compiler.plugin.gradle.plugin/maven-metadata.xml
+koin = "4.2.2"
+koin-plugin = "1.2.1"
+
+# ---- AndroidX / JetBrains ----
+androidx-activity = "1.13.0"
+# Stable JetBrains lifecycle line per the CMP 1.12.1 release notes
+# (https://github.com/JetBrains/compose-multiplatform/releases):
+# org.jetbrains.androidx.lifecycle:lifecycle-*:2.11.0. No pre-release
+# default: AndroidX lifecycle 2.11.0 is stable, so the catalog pins stable.
+androidx-lifecycle = "2.11.0"
+
+# ---- Networking ----
+ktor = "3.5.1"
+
+# ---- Coroutines ----
+kotlinx-coroutines = "1.11.0"
+
+# ---- Serialization ----
+# The feature NavKey hierarchy uses subclassesOfSealed, which needs
+# kotlinx.serialization 1.10.0 or newer. Verify at
+# https://github.com/Kotlin/kotlinx.serialization/blob/master/CHANGELOG.md
+kotlinx-serialization = "1.11.0"
+
+# ---- Navigation ----
+# CMP 1.12.1 pairs JetBrains navigation3 1.1.2 (stable; its 1.2.0 is only
+# beta01, so no pre-release pin). Verify at
+# https://github.com/JetBrains/compose-multiplatform/releases (1.12.1
+# components table: org.jetbrains.androidx.navigation3:navigation3-*:1.1.2).
+# Google's navigation3-runtime artifact is multiplatform, so runtime stays
+# on the Google group. Google's navigation3-ui artifact is Android and JVM
+# only, so CMP takes the UI from the JetBrains fork (same packages and
+# imports, iOS/desktop variants included). The fork's own module metadata
+# (navigation3-ui-1.1.2.module) builds against Google runtime 1.1.7, so
+# runtime pins 1.1.7, not 1.1.2. Verify the fork at
+# https://repo1.maven.org/maven2/org/jetbrains/androidx/navigation3/navigation3-ui/maven-metadata.xml
+androidx-navigation3-runtime = "1.1.7"
+androidx-navigation3-ui = "1.1.2"
+
+# Comment rule: compileSdk and the Compose, lifecycle, and navigation3
+# pins are checked together. Those artifacts declare an AGP consumer
+# constraint of compileSdk 37 or newer; bumping one pin means re-checking
+# the others against the same constraint.
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel-savedstate = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtimeCompose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "androidx-navigation3-runtime" }
+androidx-navigation3-ui = { group = "org.jetbrains.androidx.navigation3", name = "navigation3-ui", version.ref = "androidx-navigation3-ui" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
+compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
+koin-core-viewmodel = { module = "io.insert-koin:koin-core-viewmodel", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+# compileOnly for build-logic: extension classes the convention plugins
+# configure (coordinates per Now in Android's build-logic).
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compilerPlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+android-gradleApi = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
+# In-repo convention plugins carry no version.
+composekit-kmp-library = { id = "composekit.kmp.library" }
+composekit-kmp-compose = { id = "composekit.kmp.compose" }
+composekit-kmp-feature = { id = "composekit.kmp.feature" }
+composekit-koin = { id = "composekit.koin" }
