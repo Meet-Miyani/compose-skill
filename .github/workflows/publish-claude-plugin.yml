@@ -1,0 +1,80 @@
+name: publish claude plugin
+
+# Anthropic's plugin directory follows the claude-plugin branch, not main:
+# main also carries evals, tests and the site, which the directory would
+# scan and install. Each stable release rebuilds the branch with
+# scripts/build-plugin.sh and adds one commit, so the directory picks up
+# the released skills and nothing else. Run it by hand from main to
+# republish listing changes (README, icon) for the current release.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claude-plugin-branch
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    # Pre-release tags such as v6.3.0-rc.1 stay off the directory.
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the source is the latest stable release
+        run: |
+          latest="$(git tag --list 'v[0-9]*' --sort=-v:refname | grep -v -- '-' | head -n 1)"
+          version="$(python3 -c 'import json; print(json.load(open(".claude-plugin/plugin.json"))["version"])')"
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_NAME" != "$latest" ]; then
+            echo "::error::$GITHUB_REF_NAME is not the latest stable tag ($latest); the branch only moves forward"
+            exit 1
+          fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ] && [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::Run this workflow from main"
+            exit 1
+          fi
+          if [ "v$version" != "$latest" ]; then
+            echo "::error::plugin.json version $version does not match the latest stable tag $latest"
+            exit 1
+          fi
+          if ! git diff --quiet "$latest" HEAD -- skills/; then
+            echo "::error::skills/ has changed since $latest; release a new version instead"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build the plugin folder
+        run: bash scripts/build-plugin.sh "$RUNNER_TEMP/claude-plugin"
+
+      - name: Commit to the claude-plugin branch
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          # Commit the built folder as the branch's whole tree, on top of the
+          # current tip; the first run starts the branch with no parent.
+          git fetch --no-tags origin '+refs/heads/claude-plugin:refs/remotes/origin/claude-plugin' 2>/dev/null || true
+          parent="$(git rev-parse -q --verify refs/remotes/origin/claude-plugin || true)"
+          export GIT_INDEX_FILE="$RUNNER_TEMP/claude-plugin.index"
+          git --work-tree="$RUNNER_TEMP/claude-plugin" add --all
+          tree="$(git write-tree)"
+          if [ -n "$parent" ] && [ "$(git rev-parse "$parent^{tree}")" = "$tree" ]; then
+            echo "claude-plugin already holds this build"
+            exit 0
+          fi
+          commit="$(git commit-tree "$tree" ${parent:+-p "$parent"} -m "compose-kit $VERSION from ${GITHUB_SHA::7}")"
+          git push origin "$commit:refs/heads/claude-plugin"
+          echo "claude-plugin -> $commit (compose-kit $VERSION)"
