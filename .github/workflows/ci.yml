@@ -23,6 +23,9 @@ jobs:
       - name: Validate plugin manifests
         run: python3 scripts/validate-plugin-manifests.py
 
+      - name: Build the Claude plugin folder
+        run: bash scripts/build-plugin.sh "$RUNNER_TEMP/claude-plugin"
+
       - name: Validate skills
         # Plain logs, no annotations: the known warnings (no per-skill README,
         # sourced lib files) are by design. Errors still fail the step.

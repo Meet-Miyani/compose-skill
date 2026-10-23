@@ -29,6 +29,7 @@ codex_source = codex_marketplace["plugins"][0]["source"]["path"]
 assert (ROOT / claude_source).is_dir()
 assert (ROOT / codex_source).is_dir()
 assert (ROOT / codex_plugin["skills"]).is_dir()
+assert (ROOT / claude_plugin["icon"]).is_file()
 
 skills = sorted((ROOT / "skills").iterdir())
 assert len(skills) == 7
