@@ -829,6 +829,23 @@ Pages fetched 2026-10-22; androidx source read on `androidx-main`. Driven by dev
 | SMP-76 | NiaApp.kt 93, 148, 163, 258, 270; ForYouScreen.kt 167 (main 2982e63) | One Screen per destination; adaptation through the navigation-suite scaffold, the list-detail scene strategy and adaptive grids; no per-device screen files | DECISION | compose-ui/references/adaptive-layouts.md#size-class-not-device | https://github.com/android/nowinandroid (Apache-2.0) · ✓ landed |
 | CMP-110 | compose-adaptive-layouts | CMP reads the class in common code through the `org.jetbrains.compose.material3.adaptive` artifacts and the V2 adaptive-info function | GOTCHA | compose-ui/references/adaptive-layouts.md#gotchas | https://kotlinlang.org/docs/multiplatform/compose-adaptive-layouts.html (Apache-2.0 docs) · ✓ landed |
 
+## G10 — run and see, agent tooling (owner direction O-20, 2026-11-08)
+
+Pages fetched 2026-11-08; commands run on a kit-shaped CMP project with Android CLI 1.1.16717390 on an emulator and on an iOS simulator. Not eval-tested (O-18).
+
+| ID | Lines | Item | Class | Destination | Evidence |
+|---|---|---|---|---|---|
+| RUN-01 | agent-mode; ai-for-development "Kotlin-specific acceptance criteria" | Agents can now run and inspect an app, so a visible change is reported as seen or as `not run` | RULE | compose-feature/references/run-and-see.md#rules | https://developer.android.com/studio/gemini/agent-mode (CC BY 2.5), https://kotlinlang.org/docs/ai-for-development.html (Apache-2.0 docs) · ✓ landed |
+| RUN-02 | owner decision M-2 (kit is self-sufficient) | The check uses tools already present; installing one needs the user's yes | RULE | compose-feature/references/run-and-see.md#rules | Kit decision · ✓ landed |
+| RUN-03 | local test: a phone was attached during the emulator run | An install can replace a real app and its data, so use an emulator and pass the serial | RULE | compose-feature/references/run-and-see.md#rules | https://developer.android.com/tools/agents/android-cli/commands/run (CC BY 2.5) · ✓ landed |
+| RUN-04 | local test: emulator showed a system dialog over the app | Open the destination, capture, read the tree, drive the changed flow; a system dialog is not a result | RULE | compose-feature/references/run-and-see.md#rules | Local run, 2026-11-08 · ✓ landed |
+| RUN-05 | compose-hot-reload page; existing desktop-and-web rule 13 | One run proves one target | RULE | compose-feature/references/run-and-see.md#rules | https://kotlinlang.org/docs/multiplatform/compose-hot-reload.html (Apache-2.0 docs) · ✓ landed |
+| RUN-06 | commands/run, layout, screen, input; `android <command> --help` | Android run, tree, capture and input commands with an adb fallback | GOTCHA | compose-feature/references/run-and-see.md#android | https://developer.android.com/tools/agents/android-cli (CC BY 2.5) and local run · ✓ landed |
+| RUN-07 | local test: `android preview list` on `:feature:notes`, `:core:designsystem` | `android preview` needs the application or library plugin, so it fails on shared KMP modules | GOTCHA | compose-feature/references/run-and-see.md#android | Local run with Android CLI 1.1.16717390 · ✓ landed |
+| RUN-08 | README "MCP server for AI agents"; compose-hot-reload page | Desktop route is the experimental `hotMcpServer` task and its tools | GOTCHA | compose-feature/references/run-and-see.md#desktop; compose-platform/references/desktop-and-web.md#hot-reload | https://github.com/JetBrains/compose-hot-reload#mcp-server-for-ai-agents (Apache-2.0) · ✓ landed |
+| RUN-09 | `xcrun simctl help`; local boot and screenshot | iOS route is `xcodebuild` plus `simctl`, which cannot tap | GOTCHA | compose-feature/references/run-and-see.md#ios | Local run with Xcode 27.2 · ✓ landed |
+| KLIB-01 | integrations/mcp/README.md, Endpoint | An already configured klibs.io MCP server finds KMP libraries and latest versions; Maven Central still decides | GOTCHA | compose-project/references/version-catalog.md#gotchas | https://github.com/JetBrains/klibs-io/blob/master/integrations/mcp/README.md · ✓ landed |
+
 ## Findings
 
 ### Top 25 items the kit must absorb

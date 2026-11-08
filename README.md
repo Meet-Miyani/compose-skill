@@ -15,7 +15,7 @@ One consistent house style, measured on seven models in real agent CLIs.
 [![Guard tests](https://img.shields.io/badge/guard%20tests-90%20passing-0ca30c)](tests/skills)
 [![v6.1 A/B](https://img.shields.io/badge/v6.1%20A%2FB-stable-0ca30c)](#results-v61)
 
-**Works with** Claude Code · Codex · Cursor · OpenCode · Copilot · Gemini CLI · Antigravity
+**Works with** Claude Code · Codex · Cursor · OpenCode · Copilot · Gemini CLI · Antigravity · Android Studio
 
 **Website:** [compose.avinya.dev](https://compose.avinya.dev) · [Install guides per agent](https://compose.avinya.dev/install/) · [Results](https://compose.avinya.dev/results/)
 
@@ -124,6 +124,9 @@ Swap `claude-code` for your agent: `codex`, `cursor`, `opencode`, `github-copilo
 |---|---|---|
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex, Cursor, OpenCode, Copilot, Gemini CLI, Antigravity | `.agents/skills/` | the agent's own folder, e.g. `~/.codex/skills/` |
+
+Android Studio (Quail 1 or newer) reads [`.agents/skills/`](https://developer.android.com/studio/gemini/skills) at the
+project root or in your home directory, so the project install for any agent in the second row covers it.
 
 Update later with `npx skills update`.
 

@@ -9,6 +9,7 @@ description: >-
 ## Every task
 
 - Verify before claiming done: run the checks named by the task path and report their result.
+- Changed what a user sees: run it and look, per `../compose-feature/references/run-and-see.md`, or say it was not run.
 - Make the smallest correct change; keep what works.
 - Explain the result in plain engineering reasons.
 - Build from the context you have; state assumptions.
