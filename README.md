@@ -49,8 +49,9 @@ One consistent house style, measured on seven models in real agent CLIs.
   on conform tasks went from 2 of 10 cells (v6.0) to 8 of 10 (v6.1), and every pre-registered rule held
   ([results](#results-v61)).
 - **v6.1.0 stable (2026-10-05):** no model scored below its own no-kit result, so it is released as stable. v6.1.1
-  (2026-10-11) fixes a guard-script security issue. v6.2.0 (2026-10-23), the GitHub "Latest" release, adds
-  adaptive-layout guidance (screens follow the window size class, never the device) and more guard fixes.
+  (2026-10-11) fixes a guard-script security issue. v6.2.0 (2026-10-23) adds
+  adaptive-layout guidance (screens follow the window size class, never the device) and more guard fixes. v6.3.0
+  (2026-11-08), the GitHub "Latest" release, asks agents to run a visible change and look at it before calling it done.
 - **Cheap models (36 add-on runs):** DeepSeek V4.1 Flash went from 82.1% to 97.4% of items with v6.1, and DeepSeek
   V4 Pro from 74.4% to 87.2% ([results](#add-ons-cheap-deepseek-models)).
 
@@ -74,7 +75,7 @@ the agent one house style plus the reasoning behind it, and only loads the parts
 |---|---|
 | **`compose`** | The entry decision tree (~1.3k tokens): task kind → affected area → exact reference files |
 | `compose-architecture` | Module graph, MVI/`BaseViewModel` contract, error tiers, state ownership, naming, Koin DI, Navigation 3, coroutines |
-| `compose-feature` | A screen or feature slice end to end: contract, ViewModel, UI, navigation, DI and tests; review mode |
+| `compose-feature` | A screen or feature slice end to end: contract, ViewModel, UI, navigation, DI and tests; run and see; review mode |
 | `compose-ui` | Composables: Route/Screen split, stability, loading/empty/error states, lists, animation, accessibility, resources, adaptive layouts |
 | `compose-data` | Repositories, Ktor, Room, DataStore, Paging 3, offline-first, data-layer tests |
 | `compose-project` | New projects, adopting the kit, modules, convention plugins, version catalog, CI and agent hooks |
@@ -359,10 +360,13 @@ Checks on the kit itself:
 - [x] **v6.1.1:** security fix for the guard scripts: `.composekit.conf` is read as data, never run as
   shell code, and a config line the guards cannot use fails the run *(released 2026-10-11)*
 - [x] **v6.1.2 (not published):** guard fixes prepared 2026-10-16 but never tagged; they ship in v6.2.0
-- [x] **v6.2.0, now "Latest":** adaptive layouts: one Screen per destination, layout variants picked by window size
+- [x] **v6.2.0:** adaptive layouts: one Screen per destination, layout variants picked by window size
   class (never by device), pane content sized by its own width, and the app's targets recorded at bootstrap. Guard
   fixes: `check-file-level-state` finds `lateinit` and annotated `var`s, mutable top-level `val`s and mutable `object`
   members in every source set; `check-contract-shape` reads same-line annotations *(released 2026-10-23)*
+- [x] **v6.3.0, now "Latest":** run and see: agents run a visible change and look at it before calling it done, or say
+  it was not run, on Android, desktop, iOS or browser. Template pins refreshed; Android Studio install note
+  *(released 2026-11-08)*
 - [x] **Cheap-model add-ons:** DeepSeek V4.1 Flash 32 → 38 and DeepSeek V4 Pro 29 → 34 of 39 with v6.1
   *(2026-10-05, [results](#add-ons-cheap-deepseek-models))*. MiniMax M3 was dropped; Kimi K3, GLM 5.3 and Qwen 3.8 Max are not planned
 - [ ] **Journey page** on the site: the full test history
