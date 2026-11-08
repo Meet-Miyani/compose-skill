@@ -3,7 +3,7 @@ name: compose-ui
 description: >-
   Writes and reviews composables for Compose and CMP: the Route/Screen/leaf split, state-read placement and stability, loading/empty/error UX states, LazyColumn lists and grids, animation choice, accessibility and semantics, design-system tokens, CMP Res resources, Coil images, and keyboard/focus. Use when touching @Composable code, recomposition, stability, LazyColumn, animation, shimmer or skeleton, accessibility, theme, colors, Res.string, Coil, focus, or keyboard. Do NOT use for MVI, error tiers, or module graph (compose-architecture), ViewModel or data work (compose-feature, compose-data), Gradle or module work (compose-project), or expect/actual splits (compose-platform).
 metadata:
-  last-reviewed: 2026-10-22
+  last-reviewed: 2026-11-08
 ---
 
 # Compose UI
@@ -106,6 +106,7 @@ These rules govern code you write. When you review or conform existing working c
 - [ ] Strings exist in every locale folder with identical keys (guard `check-locale-parity.sh`).
 - [ ] `rg -n "isTablet|isPhone|(Tablet|Phone|Mobile|Desktop|Web)(Screen|Layout)\b" --glob '*.kt' <feature-root>` is empty.
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
+- [ ] The changed screen was run and looked at on one available target, or the answer says it was not run and why (see `run-and-see.md`): yes or no.
 
 ## Reference lookup
 
@@ -113,6 +114,7 @@ Load only the references this task needs. One level deep.
 
 - Also read [review-mode.md](../compose-feature/references/review-mode.md) when reviewing a feature UI change.
 - Also read [ui-testing.md](../compose-feature/references/ui-testing.md) when changing UI behavior.
+- Also read [run-and-see.md](../compose-feature/references/run-and-see.md) before calling a visible change done.
 
 - [state-reads-and-stability.md](references/state-reads-and-stability.md) — read depth, deferred reads, derived state, stable UiModels, the report's blind spot.
 - [ux-states.md](references/ux-states.md) — skeleton vs keep-content vs spinner, validation, disabled vs hidden.
