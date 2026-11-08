@@ -25,6 +25,8 @@ fact MIT (techniques only, no content taken). Flagged for the moderator; no acti
 | JetBrains/kotlinconf-app | https://github.com/JetBrains/kotlinconf-app | Apache-2.0 |
 | Kotlin/KMP-App-Template | https://github.com/Kotlin/KMP-App-Template | Apache-2.0 |
 | JetBrains/compose-multiplatform (examples/) | https://github.com/JetBrains/compose-multiplatform | Apache-2.0 |
+| JetBrains/compose-hot-reload | https://github.com/JetBrains/compose-hot-reload | Apache-2.0 |
+| JetBrains/klibs-io | https://github.com/JetBrains/klibs-io | Apache-2.0 |
 | Kotlin/kotlin-agent-skills | https://github.com/Kotlin/kotlin-agent-skills | Apache-2.0 |
 | Android Developers documentation and androidx source | https://developer.android.com/ , https://android.googlesource.com/platform/frameworks/support | CC BY 2.5 (docs content), Apache-2.0 (code) |
 

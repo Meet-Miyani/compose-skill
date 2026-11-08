@@ -74,7 +74,7 @@ Contents:
 
 ## Styles API boundaries
 
-29. **Use the Styles API only when the project has already opted in; its mechanics live in the android/skills `styles` skill, if installed.** Clicks, gestures, and semantics stay in modifiers. Confirm the opt-in in current docs and `libs.versions.toml` before relying on it. *Prevents:* production code written against an experimental alpha API. (AND-55; AND-56; AND-65)
+29. **Use the Styles API only when the project has already opted in.** Clicks, gestures, and semantics stay in modifiers. Confirm the opt-in in current docs and `libs.versions.toml` before relying on it. *Prevents:* production code written against an experimental alpha API. (AND-55; AND-56; AND-65)
 
 ## Gotchas
 

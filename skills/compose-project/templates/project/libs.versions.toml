@@ -9,35 +9,38 @@
 [versions]
 # ---- Build ----
 # AGP 9 or newer: shared modules use the Android-KMP library plugin and a
-# separate androidApp shell; needs Gradle 9.1 or newer, pinned exactly in
-# gradle/wrapper/gradle-wrapper.properties.
-agp = "9.1.1"
-kotlin = "2.4.10"
-# Current stable per https://github.com/JetBrains/compose-multiplatform/releases
-# (1.12.1, 2026-09-22; bundles JetBrains lifecycle 2.11.0).
-compose-multiplatform = "1.12.1"
+# separate androidApp shell. AGP 9.5 needs Gradle 9.6 or newer, pinned exactly
+# in gradle/wrapper/gradle-wrapper.properties.
+agp = "9.5.1"
+# Newest Kotlin the Koin compiler plugin lists as verified; check its README
+# before moving past it (see koin-plugin below).
+kotlin = "2.4.20"
+# Stable per https://github.com/JetBrains/compose-multiplatform/releases
+# (1.12.2, 2026-10-15; bundles JetBrains lifecycle 2.11.0).
+compose-multiplatform = "1.12.2"
 # material3 does not publish in lockstep with the CMP umbrella version:
-# runtime/foundation/ui reach 1.12.1 but material3 tops out below it, so it
+# runtime/foundation/ui reach 1.12.2 but material3 tops out below it, so it
 # carries its own pin. Verify at
 # https://repo1.maven.org/maven2/org/jetbrains/compose/material3/material3/maven-metadata.xml
 compose-material3 = "1.9.0"
 # Koin compiler plugin needs Kotlin 2.3.20+; its plugin artifact is
-# versioned separately from koin-core. 1.2.1 is the first release verified
-# against Kotlin 2.4.10; 1.0.0 crashes on Kotlin 2.4.x. Verify at
+# versioned separately from koin-core. 1.2.3 lists Kotlin 2.3.20 to 2.4.20 as
+# verified; 1.2.0 fails on Kotlin 2.4.20. Verify at
+# https://github.com/InsertKoinIO/koin-compiler-plugin (Kotlin compatibility) and
 # https://plugins.gradle.org/m2/io/insert-koin/compiler/plugin/io.insert-koin.compiler.plugin.gradle.plugin/maven-metadata.xml
 koin = "4.2.2"
-koin-plugin = "1.2.1"
+koin-plugin = "1.2.3"
 
 # ---- AndroidX / JetBrains ----
 androidx-activity = "1.13.0"
-# Stable JetBrains lifecycle line per the CMP 1.12.1 release notes
+# Stable JetBrains lifecycle line per the CMP 1.12.2 release notes
 # (https://github.com/JetBrains/compose-multiplatform/releases):
 # org.jetbrains.androidx.lifecycle:lifecycle-*:2.11.0. No pre-release
 # default: AndroidX lifecycle 2.11.0 is stable, so the catalog pins stable.
 androidx-lifecycle = "2.11.0"
 
 # ---- Networking ----
-ktor = "3.5.1"
+ktor = "3.6.1"
 
 # ---- Coroutines ----
 kotlinx-coroutines = "1.11.0"
@@ -49,19 +52,19 @@ kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
 
 # ---- Navigation ----
-# CMP 1.12.1 pairs JetBrains navigation3 1.1.2 (stable; its 1.2.0 is only
-# beta01, so no pre-release pin). Verify at
-# https://github.com/JetBrains/compose-multiplatform/releases (1.12.1
-# components table: org.jetbrains.androidx.navigation3:navigation3-*:1.1.2).
+# CMP 1.12.2 bundles JetBrains navigation3 1.2.0-rc01; the fork's stable
+# 1.2.0 is pinned instead, so no pre-release pin. Verify at
+# https://github.com/JetBrains/compose-multiplatform/releases (1.12.2
+# components table: org.jetbrains.androidx.navigation3:navigation3-*).
 # Google's navigation3-runtime artifact is multiplatform, so runtime stays
 # on the Google group. Google's navigation3-ui artifact is Android and JVM
 # only, so CMP takes the UI from the JetBrains fork (same packages and
 # imports, iOS/desktop variants included). The fork's own module metadata
-# (navigation3-ui-1.1.2.module) builds against Google runtime 1.1.7, so
-# runtime pins 1.1.7, not 1.1.2. Verify the fork at
+# (navigation3-ui-1.2.0.module) builds against Google runtime 1.2.0, so
+# runtime pins 1.2.0 to match. Verify the fork at
 # https://repo1.maven.org/maven2/org/jetbrains/androidx/navigation3/navigation3-ui/maven-metadata.xml
-androidx-navigation3-runtime = "1.1.7"
-androidx-navigation3-ui = "1.1.2"
+androidx-navigation3-runtime = "1.2.0"
+androidx-navigation3-ui = "1.2.0"
 
 # Comment rule: compileSdk and the Compose, lifecycle, and navigation3
 # pins are checked together. Those artifacts declare an AGP consumer

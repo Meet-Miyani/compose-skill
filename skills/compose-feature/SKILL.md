@@ -2,7 +2,7 @@
 name: compose-feature
 description: Adds, changes, or reviews a screen, sheet, dialog, or destination slice (endpoint to repository to ViewModel to UI to navigation to DI to tests) in a Compose or CMP project. Use when adding a screen, building a new feature, adding a ViewModel or destination, wiring list/detail or a form screen, scaffolding a slice, or reviewing a feature change. Covers Contract.kt, launchGuarded wiring, SavedStateHandle drafts, the state matrix, and new-feature.sh. Do NOT use for routing or architecture (compose-architecture), pure refactors, Gradle work (compose-project), recomposition or styling (compose-ui), repository or persistence work (compose-data), or expect/actual splits (compose-platform).
 metadata:
-  last-reviewed: 2026-09-24
+  last-reviewed: 2026-11-08
 ---
 
 # Compose Feature
@@ -137,6 +137,7 @@ rg -n "SEAM" <module>
 - [ ] Strings exist in every locale folder with identical keys (see the `compose-ui` skill, rule 9).
 - [ ] ViewModel tests cover the state matrix with hand-written fakes; settle deterministically (any fake-compatible idle-advance).
 - [ ] Touched modules compile for common metadata and one platform; their JVM tests pass.
+- [ ] The changed screen was run and looked at on one available target, or the answer says it was not run and why (see [run-and-see.md](references/run-and-see.md)): yes or no.
 - [ ] `scripts/composekit/run-checks.sh` exits 0 when installed.
 - [ ] The diff removes nothing the task did not name: yes or no.
 - [ ] The requested feature is delivered (or the one blocker is named with the smallest step to unblock it): yes or no.
@@ -153,6 +154,7 @@ Load only the references this task needs. One level deep.
 
 - [testing.md](references/testing.md) — ViewModel test convention, fakes, the state matrix rows.
 - [ui-testing.md](references/ui-testing.md) — Compose UI test rules: finders, assertions, sync, lazy lists, restoration, KMP runners.
+- [run-and-see.md](references/run-and-see.md) — run a visible change on Android, desktop or iOS and look at it before calling it done.
 - [review-mode.md](references/review-mode.md) — reviewing someone else's feature change with these gates.
 - [examples.md](examples.md) — the 12 WRONG/RIGHT pairs; read only when a pattern is unclear.
 - [README.md](templates/feature/README.md) — placeholders, scaffold command, composition-root entry shape.
